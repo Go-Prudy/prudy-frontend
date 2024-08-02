@@ -7,14 +7,35 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-      },
-    },
-  },
+		extend: {
+			animation: {
+				scaleAndFadeIn: 'scale-and-fade-in 150ms cubic-bezier(.25, .75, .6, .98)',
+				scaleAndFadeOut: 'scale-and-fade-out 75ms ease-out',
+				slideUp: 'slide-up  300ms cubic-bezier(0.87, 0, 0.13, 1)',
+				slideDown: 'slide-down 300ms cubic-bezier(0.87, 0, 0.13, 1)',
+			},
+			colors: ({ colors }) => ({
+				base: {
+          gray: '#2D2D2D',
+					black: '#121212'
+				},
+				lemonGreen: {
+					500: '#8EF846',
+          600: '#90F24C',
+					700: '#66C227'
+				}
+			}),
+			transitionDuration: {
+				DEFAULT: '75ms',
+			},
+			boxShadow: {
+				md: '0 2px 4px rgba(0, 0, 0, 0.2)',
+			},
+			fontFamily: {
+				aeonik: ['var(--font-aeonik)'],
+			},
+		},
+	},
   plugins: [],
 };
 export default config;
