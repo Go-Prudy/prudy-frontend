@@ -16,11 +16,25 @@
   }
 }
 
-body {
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+progress::-webkit-progress-bar,
+progress::-webkit-progress-value {
+  border-radius: 4px;
+}
+
+progress::-webkit-progress-bar {
+  background: transparent;
+}
+
+progress[data-category='income']::-webkit-progress-value {
+  background-color: #01b0c5;
+}
+
+progress[data-category='expenses']::-webkit-progress-value {
+  background-color: #fb8417;
 }

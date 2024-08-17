@@ -20,6 +20,8 @@ const config: Config = {
         base: {
           gray: '#2D2D2D',
           black: '#121212',
+          blue: '#01B0C5',
+          orange: '#FB8417',
         },
         lemonGreen: {
           500: '#8EF846',
