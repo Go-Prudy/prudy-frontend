@@ -17,16 +17,33 @@ const config: Config = {
       colors: ({ colors }) => ({
         grayCaption: '#828282',
         graySubtitle: '#575757',
+        grayDefault: '#EFEFF0',
+        graySubtle: '#F7F7F9',
         base: {
           gray: '#2D2D2D',
           black: '#121212',
           blue: '#01B0C5',
-          orange: '#FB8417',
+          white: '#fafafa',
+        },
+        orange: {
+          default: '#FB8417',
+          50: '#FDF4EC',
+          100: '#FBE9DA',
+          600: '#E67731',
+        },
+        turquoise: {
+          50: '#EBFAFD',
+          100: '#D7F4FB',
+          500: '#11CDEF',
         },
         lemonGreen: {
           500: '#8EF846',
           600: '#90F24C',
           700: '#66C227',
+        },
+        purple: {
+          100: '#E6DFF5',
+          500: '#8A62D8',
         },
       }),
       transitionDuration: {
@@ -37,6 +54,9 @@ const config: Config = {
       },
       fontFamily: {
         aeonik: ['var(--font-aeonik)'],
+      },
+      lineHeight: {
+        '1.2': '1.2',
       },
     },
   },
