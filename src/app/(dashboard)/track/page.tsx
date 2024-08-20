@@ -5,7 +5,7 @@ import TrackFinances from './components/track-finances';
 
 export default function Page() {
   return (
-    <div className="bg-base-white">
+    <div className="bg-base-white h-full">
       <h1 className="py-[22px] font-medium text-lg text-center bg-base-white">
         Track expenses
       </h1>

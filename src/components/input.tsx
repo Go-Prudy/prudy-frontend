@@ -1,11 +1,8 @@
-import React from 'react';
-
-
 type InputProps = {
-    label: string;
-    inputName: string;
-    inputType: string;
-    placeholder: string;
+  label: string;
+  inputName: string;
+  inputType: string;
+  placeholder?: string;
 };
 const Input = ({ label, inputName, inputType, placeholder }: InputProps) => {
   return (

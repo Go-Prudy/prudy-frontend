@@ -8,7 +8,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${aeonik.variable} h-full`}>
-      <body className="font-aeonik">
+      <body className="font-aeonik bg-[#444]">
         <div className="max-w-[400px] mx-auto">
           <main className="flex min-h-screen">{children}</main>
         </div>

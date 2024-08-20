@@ -1,11 +1,18 @@
 import PlusIcon from '@/icons/plus';
 import BudgetHeader from './components/budget-header';
+import CreateBudgetForm from './components/create-budget-form';
+import CreateBudgetIncomeForm from './components/create-budget-income-form';
+import CreateBudgetExpensesForm from './components/create-budget-expenses-form';
 import NoBudgetHistory from './components/no-budget-history';
-import BudgetCardsList from './components/budget-cards-list';
+import CreateBudgetCategoryDetails from './components/create-budget-category-details';
+import CreateBudgetCategoryForm from './components/create-budget-category-form';
+import BudgetChart from './components/budget-chart';
 
 const mainBg = {
-  background: `linear-gradient(128.3deg, #2D2E32 1.62%, #000000 55.79%),
+  backgroundImage: `url(/grain.png), linear-gradient(128.3deg, #2D2E32 1.62%, #000000 55.79%),
   linear-gradient(291.65deg, #2D2E32 -11.65%, rgba(45, 46, 50, 0) 29.5%)`,
+  backgroundPosition: 'center',
+  backgroundSize: 'cover',
 };
 
 export default function Page() {
@@ -26,7 +33,12 @@ export default function Page() {
 
         <div className="w-full rounded-t-3xl bg-white grow">
           {/* <NoBudgetHistory /> */}
-          <BudgetCardsList />
+          {/* <BudgetCardsList /> */}
+          {/* <CreateBudgetIncomeForm /> */}
+          {/* <CreateBudgetExpensesForm /> */}
+          {/* <CreateBudgetCategoryDetails /> */}
+          {/* <CreateBudgetCategoryForm /> */}
+          <BudgetChart />
         </div>
       </div>
     </div>

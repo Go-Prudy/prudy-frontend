@@ -23,9 +23,11 @@ export default function LinkedAccounts() {
   return (
     <div className="flex flex-col gap-1">
       <div className="px-6 bg-white">
-        <select className="w-full py-2" name="" id="">
+        <select className="w-full py-2 text-xs" name="" id="">
           {monthsOfYear.map((month) => (
-            <option key={month}>{month.toUpperCase()}</option>
+            <option key={month} className="text-xs">
+              {`${month} budget`.toUpperCase()}
+            </option>
           ))}
         </select>
       </div>

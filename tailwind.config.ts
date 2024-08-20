@@ -24,6 +24,7 @@ const config: Config = {
           black: '#121212',
           blue: '#01B0C5',
           white: '#fafafa',
+          bodyDark: '#474747s',
         },
         orange: {
           default: '#FB8417',
@@ -57,6 +58,7 @@ const config: Config = {
       },
       lineHeight: {
         '1.2': '1.2',
+        '1.3': '1.33',
       },
     },
   },
