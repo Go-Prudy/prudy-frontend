@@ -16,11 +16,86 @@
   }
 }
 
-body {
-}
+body {}
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.scrolled-bg {
+  background-image:
+    linear-gradient(to top, #6ab935, rgba(0, 0, 0, 0.676)),
+    linear-gradient(to top right, #6ee81c, rgba(23, 23, 23, 0.365))
+    /* linear-gradient(to top right, #6ee81c, rgba(49, 49, 49, 0.954)), */
+}
+
+.otp-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.otp-title {
+  font-size: 1.5rem;
+  color: #2D2D2D;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.otp-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.otp-input {
+  width: 48px;
+  height: 48px;
+  text-align: center;
+  font-size: 1.5rem;
+  border: 2px solid #EFEFF0;
+  border-radius: 8px;
+  margin: 0 8px;
+}
+
+.otp-input:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+.otp-separator {
+  font-size: 1.5rem;
+  color: #2D2D2D;
+}
+
+.otp-submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.otp-submit-button:hover {
+  background-color: #333;
+}
+
+.otp-resend-button {
+  font-size: 1rem;
+  color: #4CAF50;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.otp-resend-button:hover {
+  text-decoration: underline;
 }

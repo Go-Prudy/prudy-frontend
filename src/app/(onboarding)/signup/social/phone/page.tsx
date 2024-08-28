@@ -1,0 +1,57 @@
+'use client'
+import Header from '@/components/header'
+import Input from '@/components/input'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+import { motion } from 'framer-motion';
+
+const page = () => {
+    const navigate = useRouter();
+    const [phoneNumber, setPhoneNumber] = useState<string | number | any>('')
+    const [error, setError] = useState<string>('');
+
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        // Validate password length
+        if (phoneNumber.length < 10) {
+            setError('PhoneNumber must be at least 10 characters long');
+            return;
+        }
+
+        setError(''); // Clear the error message
+        console.log({ phoneNumber });
+
+        // Navigate to the next step or page
+        navigate.push('/signup/verify');
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 90 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-[100vw]">
+            <Header link={'/signup/verify'} title="Create account" />
+            <div className="px-6 py-10">
+                <div className="w-full">
+                    <p className="mb-6 font-[500] text-[20px] leading-[28px] text-[#2D2D2D]">Enter your phone number</p>
+                </div>
+                <form onSubmit={handleSubmit}>
+                    <Input label="Phone number" inputName="phoneNumber" inputType="text" onChange={(value) => setPhoneNumber(value)} placeholder="0123456789" />
+                    {error && (
+                        <p className="text-red-500 text-sm mt-2">{error}</p>
+                    )}
+                    <div className=" m-0 mt-[38px] flex w-full items-center bg-white  rounded-t-3xl ">
+                        <button type='submit' className="h-12  text-white font-[500] bg-black rounded-3xl w-full">Proceed</button>
+                    </div>
+                </form>
+            </div>
+
+        </motion.div>
+    )
+}
+
+export default page

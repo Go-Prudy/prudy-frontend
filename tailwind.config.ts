@@ -1,12 +1,14 @@
 import type { Config } from "tailwindcss";
+const { nextui } = require("@nextui-org/react");
 
 const config: Config = {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
+	content: [
+		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+		"./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+	],
+	theme: {
 		extend: {
 			animation: {
 				scaleAndFadeIn: 'scale-and-fade-in 150ms cubic-bezier(.25, .75, .6, .98)',
@@ -16,12 +18,12 @@ const config: Config = {
 			},
 			colors: ({ colors }) => ({
 				base: {
-          gray: '#2D2D2D',
+					gray: '#2D2D2D',
 					black: '#121212'
 				},
 				lemonGreen: {
 					500: '#8EF846',
-          600: '#90F24C',
+					600: '#90F24C',
 					700: '#66C227'
 				}
 			}),
@@ -36,6 +38,6 @@ const config: Config = {
 			},
 		},
 	},
-  plugins: [],
+	plugins: []
 };
 export default config;

@@ -1,5 +1,7 @@
 import { aeonik } from '@/fonts';
+import { NextUIProvider } from "@nextui-org/system";
 import './globals.css';
+import Head from 'next/head';
 
 export default function RootLayout({
   children,
@@ -8,10 +10,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${aeonik.variable}`}>
+      <Head>
+        <link rel='icon' sizes='' href='/icon.ico?e17e014ad5625454' />
+      </Head>
       <body className="font-aeonik">
-        <div className="max-w-[400px] mx-auto">
-          <main className="flex min-h-screen">{children}</main>
-        </div>
+        {children}
       </body>
     </html>
   );
