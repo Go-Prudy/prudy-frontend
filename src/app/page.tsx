@@ -1,11 +1,9 @@
 import OnboardingSlides from '@/components/home/onboarding-slides';
-import LangingPage from '@/components/LandingPage/LangingPage';
-import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="">
-      <LangingPage />
+    <div className="w-full">
+      <OnboardingSlides />
     </div>
   );
 }
