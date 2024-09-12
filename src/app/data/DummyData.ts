@@ -251,6 +251,22 @@ export const Budgets = [
                         "amount": 50000
                     }
                 ]
+            },
+            {
+                "budgetCategory": "miscellaneous",
+                "amount": 75000,
+                "percentage": 25,
+                "color": "#00CED1",
+                "subAllocations": [
+                    {
+                        "subCategory": "holiday decorations",
+                        "amount": 25000
+                    },
+                    {
+                        "subCategory": "entertainment",
+                        "amount": 50000
+                    }
+                ]
             }
         ],
         "partners": [

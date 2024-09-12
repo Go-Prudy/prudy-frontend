@@ -53,7 +53,7 @@ const BudgetPage = () => {
         const additionalCount = partners.length - maxAvatarsToShow;
 
         return (
-            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-[18px]' : 'mt-[8px]'}`}>
+            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-[0px]' : 'mt-[8px]'}`}>
                 {/* Display avatars */}
                 {partners.slice(0, maxAvatarsToShow).map((partner, index) => (
                     <Image
@@ -62,14 +62,14 @@ const BudgetPage = () => {
                         height={1000}
                         src={partner.image}
                         alt={`Partner ${index}`}
-                        className={`relative inline-block h-12 w-12 rounded-full border-2 border-white object-cover object-center ${index > 0 ? '-ml-4' : ''}`}
+                        className={`relative inline-block size-[32px]  rounded-full border-2 border-white object-cover object-center ${index > 0 ? '-ml-[8px]' : ''}`}
                         style={{ zIndex: maxAvatarsToShow - index }}
                     />
                 ))}
 
                 {/* Display "+N" if there are more avatars than the limit */}
                 {additionalCount > 0 && (
-                    <div className={`relative ml-[-0.75rem] h-12 w-12 rounded-full border-2 border-white bg-gray-200 text-gray-800 text-sm font-medium flex items-center justify-center`}>
+                    <div className={`relative ml-[-0.35rem] size-[32px] rounded-full border-2 border-white bg-gray-200 text-gray-800 text-sm font-medium flex items-center justify-center`}>
                         +{additionalCount}
                     </div>
                 )}
@@ -168,7 +168,7 @@ const BudgetPage = () => {
                                                             width: `${incomeWidth}%`,
                                                             maxWidth: '100%',
                                                         }}
-                                                        className={`text-[#575757]  flex justify-end font-[500] text-[12px] ${incomeWidth > 25 ? 'hidden' : 'block'}`}>₦ {totalBudgetIncome.toLocaleString()}</h1>
+                                                        className={`text-[#575757]  flex justify-start font-[500] text-[12px] ${incomeWidth > 25 ? 'hidden' : 'block'}`}>₦ {totalBudgetIncome.toLocaleString()}</h1>
 
                                                 </div>
 
