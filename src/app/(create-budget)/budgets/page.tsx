@@ -10,12 +10,13 @@ import { motion } from 'framer-motion';
 import CreateBudget from '@/components/create-budget/CreateBudget';
 import { Budgets } from '@/app/data/DummyData';
 import { Avatar, AvatarGroup } from "@nextui-org/react";
+import { useRouter } from 'next/navigation';
 
 const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
     const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
     const [allBudgets, setAllBudgets] = useState(Budgets || []);
-
+    const navigation = useRouter()
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 300);
@@ -137,7 +138,7 @@ const BudgetPage = () => {
                                     const budgetStatus = totalBudgetIncome > totalBudgetExpenses ? 'Surplus' : totalBudgetIncome < totalBudgetExpenses ? 'Deficit' : 'Balanced';
 
                                     return (
-                                        <div key={index} className='bg-[#EFEFF0] rounded-[20px] flex flex-col border-[1px] border-[#E7E7EA] gap-[8px] p-[16px]'>
+                                        <div onClick={() => navigation.push(`/budget/${budget.id}`)} key={index} className='bg-[#EFEFF0] rounded-[20px] flex flex-col border-[1px] border-[#E7E7EA] gap-[8px] p-[16px]'>
                                             <div className='w-full justify-between items-center flex'>
                                                 <h1 className='text-[16px] font-[500] leading-[24px]'>{budget.name}</h1>
                                                 <div className='flex items-center text-[12px] gap-[12px] text-[#828282]'>
