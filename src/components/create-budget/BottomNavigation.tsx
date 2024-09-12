@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation'
 import Image from 'next/image';
 import home from "@/images/home.webp"
+import hambugger from "@/images/hambugger.png"
 import home1 from "@/images/home1.webp"
 import track from '@/images/note.webp'
 import track1 from '@/images/note1.webp'
@@ -24,8 +25,8 @@ const BottomNavigation = () => {
     }, [pathname]);
 
     return (
-        <div className='fixed w-full bg-white bottom-0'>
-            <ul className="flex justify-around p-[12px]">
+        <div className='fixed z-30   w-full bg-white bottom-0'>
+            {/* <ul className="flex justify-around p-[12px]">
                 <Link href={'/budgets'} className={` text-[12px] font-[500]  ${currentRoute === '/budgets' ? ' text-[#66C227]  ' : 'non-active text-[#828282]'}  flex justify-center items-center flex-col max-w-[56px] py-[7px]`}>
                     {currentRoute === '/budgets' ? <Image className=' size-[24px] ' alt='home' src={home1} width={1000} height={1000} /> : <Image className=' size-[24px] ' alt='home' src={home} width={1000} height={1000} />}
                     Home
@@ -46,7 +47,7 @@ const BottomNavigation = () => {
 
 
 
-            </ul>
+            </ul> */}
         </div>
     );
 };

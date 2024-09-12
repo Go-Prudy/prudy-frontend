@@ -1,76 +1,71 @@
-'use client'
-import React, { useRef, useState } from 'react';
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsArrowRight, BsPlus } from 'react-icons/bs';
-import { IIncome } from '@/app/Models';
 import moneyIcon from '@/images/money.png';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Income } from '@/app/Types';
+import { useBudgetStore } from '@/app/store/Store';
 
-const Page = () => {
-    const navigate = useRouter()
-    const prevIncomes: IIncome[] = [
-        { index: 1, incomeType: 'Salary', amount: 0 },
-    ];
+interface BudgetDetailsProps {
+    budgetId: string;
+}
 
-    const [allIncomes, setIncomes] = useState<IIncome[]>(prevIncomes || []);
-    const [anIncome, setIncome] = useState<IIncome>({
-        index: 0,
-        incomeType: '',
-        amount: 0
-    });
+const Page = ({ params }: { params: { id: string } }) => {
+    const navigate = useRouter();
+    const budgetId = params.id;
+
+    const budgets = useBudgetStore((state) => state.budgets);
+    const budget = budgets.find((b) => b.id === budgetId);
+
+    const [allIncomes, setIncomes] = useState<Income[]>([]);
+
+    useEffect(() => {
+        if (budget?.incomes?.length) {
+            setIncomes(budget.incomes);
+        } else {
+            setIncomes([{ name: '', amount: 0 }]);
+        }
+    }, [budget]);
+
     const spanRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const handleIncomeChange = (incomeIndex: number, field: 'amount' | 'incomeType', value: any) => {
-        const updatedIncomes = allIncomes.map((income) =>
-            income.index === incomeIndex ? { ...income, [field]: value } : income
-        );
+    const addIncomeToBudget = useBudgetStore((state) => state.addIncomeToBudget);
+
+    const handleAddIncome = () => {
+        setIncomes([...allIncomes, { name: '', amount: 0 }]);
+        setTimeout(() => {
+            const newIndex = allIncomes.length;
+            if (inputRefs.current[newIndex]) {
+                inputRefs.current[newIndex]?.focus();
+            }
+        }, 0);
+    };
+
+    const handleIncomeChange = (index: number, field: keyof Income, value: any) => {
+        const updatedIncomes = [...allIncomes];
+        updatedIncomes[index] = { ...updatedIncomes[index], [field]: value };
         setIncomes(updatedIncomes);
     };
 
-    const addIncome = () => {
-        try {
-            // Add a new income
-            setIncomes([...allIncomes, {
-                index: allIncomes.length + 1,
-                incomeType: '',
-                amount: 0
-            }]);
-
-            // Focus on the new input
-            setTimeout(() => {
-                const newIndex = allIncomes.length;
-                if (inputRefs.current[newIndex]) {
-                    inputRefs.current[newIndex]?.focus();
-                }
-            }, 0);
-        } catch (error) {
-            console.log(error);
-        }
+    const handleSubmit = () => {
+        addIncomeToBudget(budgetId, allIncomes);
+        navigate.push(`/budgets/new/expense/${budgetId}`);
     };
 
-    const formatNumber = (num: number) => {
-        return num.toLocaleString();
-    };
+    const formatNumber = (num: number) => num.toLocaleString();
 
-    const parseNumber = (value: string) => {
-        // Remove commas before parsing
-        return parseFloat(value.replace(/,/g, '')) || 0;
-    };
+    const parseNumber = (value: string) => parseFloat(value.replace(/,/g, '')) || 0;
 
     const getInputWidth = (index: number) => {
         if (spanRefs.current[index]) {
-            // Calculate width but cap it at 400px
-            return `${Math.min(spanRefs.current[index]!.offsetWidth + 30, 400)}px`;
+            return `${Math.min(spanRefs.current[index]!.offsetWidth + 30, 140)}px`;
         }
-        return '50px'; // Default minimum width
+        return '50px';
     };
-
-    const handleSubmit = () => {
-        navigate.push('/budgets/new/expense')
-    }
 
     return (
         <motion.div
@@ -89,44 +84,40 @@ const Page = () => {
                 <p className='my-[24px] font-[500] text-[20px]'>Set your income</p>
                 <div className='bg-[#F7F7F9] rounded-[20px] p-[16px]'>
                     <h1 className='text-[#575757] leading-[24px]'>Income</h1>
-                    <div
-                        className="flex hover:scale-105 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center justify-between w-full gap-[8px]"
-                    ></div>
+                    <div className="flex hover:scale-105 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center justify-between w-full gap-[8px]"></div>
+
                     {allIncomes.map((income, index) => (
-                        <button
-                            key={income.index}
-                            className="flex hover:scale-105 transition-all ease-in  mt-[8px] items-center justify-between w-full gap-[8px]"
+                        <form
+                            key={index}
+                            className="flex hover:scale-105 transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
                         >
                             <div className='flex gap-[4px] w-full'>
                                 <div className='grid place-content-center bg-[#01B0C5] rounded-[16px] text-white size-[28px]'>
                                     <Image src={moneyIcon} className='size-[12px]' alt={'icon'} width={1000} height={1000} />
                                 </div>
-                                <div className='text-[#514F6E] text-[14px] font-[500]'>
+                                <div className='text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block'>
                                     <input
-                                        className='bg-transparent'
+                                        className='bg-transparent px-2 w-full text-ellipsis overflow-hidden whitespace-nowrap'
                                         type="text"
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                            handleIncomeChange(income.index, 'incomeType', e.target.value)
-                                        }
+                                        placeholder='enter income'
+                                        onChange={(e) => handleIncomeChange(index, 'name', e.target.value)}
                                         ref={(el) => {
                                             inputRefs.current[index] = el;
                                         }}
-                                        value={income.incomeType}
+                                        value={income.name}
                                     />
                                 </div>
                             </div>
                             <div className='flex items-start'>
                                 <div className='bg-white rounded-[8px] py-[4px] px-[8px] flex items-start gap-[8px]'>
-                                    ₦
+                                    <h2>₦</h2>
                                     <div className="relative inline-block w-full">
                                         <input
                                             value={formatNumber(income.amount)}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                handleIncomeChange(income.index, 'amount', parseNumber(e.target.value))
-                                            }
+                                            onChange={(e) => handleIncomeChange(index, 'amount', parseNumber(e.target.value))}
                                             type="text"
-                                            className="  px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[150px] transition-all duration-200"
-                                            style={{ width: getInputWidth(index) }}
+                                            className="px-2 py-1 rounded focus:outline-none border-none focus:border-none transition-all duration-200"
+                                            style={{ width: getInputWidth(index), maxWidth: '140px' }}
                                         />
                                         <span
                                             ref={(el) => {
@@ -139,10 +130,11 @@ const Page = () => {
                                     </div>
                                 </div>
                             </div>
-                        </button>
+                        </form>
                     ))}
+
                     <button
-                        onClick={() => addIncome()}
+                        onClick={handleAddIncome}
                         className="flex hover:scale-110 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center gap-[8px]"
                     >
                         <div className='grid place-content-center bg-[#01B0C5] rounded-[16px] text-white size-[28px]'>
@@ -155,10 +147,11 @@ const Page = () => {
 
             <div className='p-[24px] fixed z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]'>
                 <div className="w-full">
-                    <button onClick={() => handleSubmit()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Proceed <BsArrowRight /></button>
+                    <button onClick={handleSubmit} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
+                        Proceed <BsArrowRight />
+                    </button>
                 </div>
             </div>
-
         </motion.div>
     );
 };

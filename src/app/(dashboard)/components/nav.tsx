@@ -15,7 +15,7 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="h-20 p-3 w-full bg-white" style={navStyle}>
+    <nav className="h-20 z-[100]  relative p-3 w-full bg-white" style={navStyle}>
       <ul className="list-none h-full font-medium text-xs flex items-center justify-center">
         <li className="grow">
           <Link href="/budget" className="flex flex-col items-center h-full gap-[2px]">

@@ -14,7 +14,9 @@ export default function RootLayout({
         <link rel='icon' sizes='' href='/icon.ico?e17e014ad5625454' />
       </Head>
       <body className="font-aeonik">
-        {children}
+        <NextUIProvider>
+          {children}
+        </NextUIProvider>
       </body>
     </html>
   );

@@ -27,7 +27,7 @@ const BottomDrawer: React.FC<IProps> = ({ label, link, back, close, children, fo
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
 
-            className="bottom-drawer  z-[30] absolute bottom-0 w-full bg-[rgb(255,255,255)] rounded-t-[24px]">
+            className="bottom-drawer  z-[60] absolute bottom-0 w-full bg-[rgb(255,255,255)] rounded-t-[24px]">
             <div className="header bg-[#F7F7F9] p-[16px] rounded-t-[24px] flex justify-between items-center">
                 <button
                     onClick={() => back && link && navigate.push(link)}
@@ -47,9 +47,10 @@ const BottomDrawer: React.FC<IProps> = ({ label, link, back, close, children, fo
             <div className="content py-[24px] px-[24px]">
                 {children}
             </div>
-            <div className="p-[24px] w-full border-t-[2px] border-t-[#EFF0F6]">
+
+            {footer && <div className={`p-[24px] w-full border-t-[2px] ${footer && 'border-t-[2px]  border-t-[#EFF0F6] '} `}>
                 {footer && <div className="w-full">{footer}</div>}
-            </div>
+            </div>}
         </motion.div>
     );
 };

@@ -1,23 +1,37 @@
-'use client'
+'use client';
+
 import ForwardArrow from '@/icons/forward-arrow';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   title: string;
-  link?: string | any;
-}
+  link?: string;
+  light?: boolean;
+};
 
-const Header = ({ title, link, ...props }: HeaderProps) => {
+const Header = ({ title, light = true, link = '/', ...props }: HeaderProps) => {
+  const navigate = useRouter();
+  const [isLight, setIsLight] = useState(light);
 
-  const navigate = useRouter()
+  useEffect(() => {
+    setIsLight(light);
+  }, [light]);
 
   return (
-    <div className="relative top-0 flex w-full items-center h-[70px] bg-[#F7F7F9] pl-6" {...props}>
-      <button onClick={() => navigate.push(link)} className=" absolute rounded-full bg-white w-10 h-10 inline-flex justify-center items-center">
+    <div
+      className={`relative top-0 flex w-full items-center h-[70px] ${isLight ? 'bg-[#F7F7F9] ' : 'bg-[#24020205] backdrop-blur-lg'
+        } pl-6`}
+      {...props}
+    >
+      <button
+        onClick={() => navigate.push(link)}
+        className={`absolute rounded-full ${isLight ? 'bg-white text-black' : 'text-white bg-[#FFFFFF0A]'}  w-10 h-10 inline-flex justify-center items-center`}
+      >
         <ForwardArrow className="rotate-180" />
       </button>
-      <p className="text-lg font-medium mx-auto">{title}</p>
+      <p className={`text-lg font-medium ${isLight ? 'text-black ' : 'text-white'
+        } mx-auto `}>{title}</p>
     </div>
   );
 };

@@ -7,21 +7,36 @@ import Input from '../input'; // Assuming this is your input component
 import { RadioGroup, useRadio, VisuallyHidden, cn } from "@nextui-org/react";
 import { BsArrowRight } from 'react-icons/bs';
 import { useRouter } from 'next/navigation';
+import { useBudgetStore } from '@/app/store/Store';
+import { Budget } from '@/app/Types';
+import { v4 as uuidv4 } from 'uuid';
 
 interface IProps {
     setShow: (i: boolean) => void;
     show: boolean
 }
 
+
 const CreateBudget = ({ setShow, show }: IProps) => {
     // State to manage form data
-    const [budgetData, setBudgetData] = useState({
-        nameofBudget: '',
-        purposeOfBudget: '',
+    const [budgetData, setBudgetData] = useState<Budget>({
+        id: uuidv4(),
+        name: '',
+        purpose: '',
         startDate: '',
         endDate: '',
-        budgetType: '', // To store the radio button selection
     });
+
+    const { addBudget, duplicateLastBudget } = useBudgetStore((state) => ({
+        addBudget: state.addBudget,
+        duplicateLastBudget: state.duplicateLastBudget,
+    }));
+
+
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
+    const [budgetType, setBudgetType] = useState<string>('Create new budget');
+
 
     const navigate = useRouter()
     // Handle form input changes
@@ -29,12 +44,39 @@ const CreateBudget = ({ setShow, show }: IProps) => {
         setBudgetData(prevData => ({ ...prevData, [key]: value }));
     };
 
+
+    const handleChangeDate = (field: 'startDate' | 'endDate', value: string) => {
+        setBudgetData(prevData => {
+            const newBudgetData = { ...prevData, [field]: value };
+
+            // If startDate is updated and it's after the current endDate, reset the endDate
+            if (field === 'startDate' && new Date(value) >= new Date(prevData.endDate)) {
+                newBudgetData.endDate = '';
+            }
+
+            return newBudgetData;
+        });
+    };
+
+
+
+    // Calculate the minimum selectable end date (the day after the start date)
+    const minEndDate = budgetData.startDate
+        ? new Date(new Date(budgetData.startDate).getTime() + 86400000).toISOString().split('T')[0]
+        : '';
+
+
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', budgetData);
-        navigate.push('/budgets/new/income')
-        // Here you can add logic to submit the form data to your API or backend
+        addBudget(budgetData)
+        if (budgetType === 'Create new budget') {
+            addBudget(budgetData);
+        } else if (budgetType === 'Duplicate last budget') {
+            duplicateLastBudget();
+        }
+        navigate.push(`/budgets/new/income/${budgetData.id}`);
+        setShow(false);
     };
 
     // Custom Radio button implementation
@@ -56,8 +98,8 @@ const CreateBudget = ({ setShow, show }: IProps) => {
             <Component
                 {...getBaseProps()}
                 className={cn(
-                    "group inline-flex items-center hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
-                    "max-w-[300px] cursor-pointer border-2 border-default rounded-[20px] gap-4 p-4",
+                    "group inline-flex flex-1 items-center hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
+                    "w-[164px] cursor-pointer flex-nowrap border-2 border-default rounded-[20px] gap-4 p-4",
                     "data-[selected=true]:border-[#66C227] data-[selected=true]:bg-[#F5FEED]",
                 )}
             >
@@ -70,7 +112,9 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                 <div {...getLabelWrapperProps()}>
                     {children && <span {...getLabelProps()}>{children}</span>}
                     {description && (
-                        <span className="text-[12px] w-[99px] font-[500] text-foreground opacity-70">{description}</span>
+                        <div className=' flex justify-between '>
+                            <span className="text-[12px] max-w-[99px] font-[500] text-foreground opacity-70">{description}</span>
+                        </div>
                     )}
                 </div>
             </Component>
@@ -95,25 +139,48 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                     onClose={() => setShow(false)}
                 >
                     <div className="budget-form mt-[8px]">
-                        <Input label="Name of budget" inputName="Nameofbudget" inputType="text" placeholder="January..." onChange={(value) => handleChange('nameofBudget', value)} />
-                        <Input label="Purpose of budget" inputName="Purposeofbudget" inputType="text" placeholder="Monthly expenses..." onChange={(value) => handleChange('purposeOfBudget', value)} />
+                        <Input label="Name of budget" inputName="Nameofbudget" inputType="text" placeholder="January..." onChange={(value) => handleChange('name', value)} />
+                        <Input label="Purpose of budget" inputName="Purposeofbudget" inputType="text" placeholder="Monthly expenses..." onChange={(value) => handleChange('purpose', value)} />
                         <div className="flex gap-[16px] justify-between">
-                            <Input label="Start date" inputName="Startdate" inputType="date" placeholder="Select date..." onChange={(value) => handleChange('startDate', value)} />
-                            <Input label="End date" inputName="Enddate" inputType="date" placeholder="Select date..." onChange={(value) => handleChange('endDate', value)} />
+                            <Input
+                                label="Start date"
+                                inputName="Startdate"
+                                inputType="date"
+                                placeholder="Select date..."
+                                onChange={(value) => handleChangeDate('startDate', value)}
+                                value={budgetData.startDate} // Bind the startDate state to the Input component
+                            />
+                            <Input
+                                label="End date"
+                                inputName="Enddate"
+                                inputType="date"
+                                placeholder="Select date..."
+                                onChange={(value) => handleChangeDate('endDate', value)}
+                                min={minEndDate} // Prevent selecting a date before the start date
+                                disabled={!budgetData.startDate} // Disable end date input until a start date is selected
+                                value={budgetData.endDate} // Bind the endDate state to the Input component
+                            />
                         </div>
+
 
 
                         <RadioGroup
                             orientation="horizontal"
-                            className=' flex gap-[16px]'
+                            className=' flex w-full  justify-between  gap-[16px]'
                             color='success'
                             onValueChange={(value) => handleChange('budgetType', value)}
 
                         >
-                            <CustomRadio description="Duplicate last budget" value="Duplicate last budgetd">
+                            <CustomRadio
+                                isSelected={budgetType === "Duplicate last budget"} onChange={() => setBudgetType("Duplicate last budget")}
+
+
+                                description="Duplicate last budget" value="Duplicate last budget">
                             </CustomRadio>
 
-                            <CustomRadio description="Create new budget" value="Create new budget">
+                            <CustomRadio isSelected={budgetType === "Create new budget"} onChange={() => setBudgetType("Create new budget")}
+
+                                description="Create new budget" value="Create new budget">
                             </CustomRadio>
 
                         </RadioGroup>

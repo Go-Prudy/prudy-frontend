@@ -18,14 +18,14 @@ const LoginPage = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Validate password length
-    if (passcode.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return;
-    }
+    // // Validate password length
+    // if (passcode.length < 6) {
+    //   setError('Password must be at least 6 characters long');
+    //   return;
+    // }
 
 
-    setError(''); // Clear the error message
+    // setError(''); // Clear the error message
     console.log({ passcode, email });
 
     // Navigate to the next step or page
@@ -40,7 +40,7 @@ const LoginPage = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="w-[100vw]">
-      <Header link='' title="Create account" />
+      <Header link='' title="Sign in" />
       <form onSubmit={handleSubmit}>
         <div className="px-6 py-[24px]">
           <div className="w-full mb-6">
