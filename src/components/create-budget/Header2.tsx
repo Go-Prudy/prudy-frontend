@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { BsBell, BsPerson } from 'react-icons/bs';
-import hambugger from "@/images/hambugger.png";
+import hambugger from "@/images/hambugger2.png";
 import premium from "@/images/premium.png";
 import close from "@/images/close.png";
 import Link from 'next/link';
@@ -20,7 +20,10 @@ import setting from '@/images/setting-3.png';
 import setting1 from '@/images/setting-3 2.png';
 import upgrade from '@/images/upgrade.png';
 
-const BudgetPageHeader = () => {
+interface Iprop {
+    title: string;
+}
+const Header2 = ({ title }: Iprop) => {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -53,22 +56,18 @@ const BudgetPageHeader = () => {
     };
 
     return (
-        <div className={`z-[20] fixed top-0 pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-white w-full items-center pb-[16px] transition-all duration-300 ${scrolled ? 'scrolled-bg' : 'bg-[#00000064]'}`}>
+        <div className={`z-[20] fixed top-0 bg-[#FAFAFA] pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-[#2D2D2D] w-full items-center pb-[16px] transition-all duration-300 `}>
             {/* Left Section: Profile */}
-            <div className='text-white flex gap-[8px] items-start'>
-                <div className='rounded-full p-1 border border-[white]'>
-                    <BsPerson className='text-white size-[38px]' />
-                </div>
+            <div className='text-[#2D2D2D] flex gap-[8px] items-start'>
                 <div>
-                    <h1 className='text-[12px] leading-[16px]'>Welcome 👋</h1>
-                    <h1 className='font-[500] leading-[24px]'>Ayomide</h1>
+                    <h1 className='font-[500] text-[18px] leading-[24px]'>{title}</h1>
                 </div>
             </div>
 
             {/* Middle Section: Hamburger Icon */}
 
-            {!menuOpen && <div className='size-[48px] flex items-center'>
-                <Image className='size-[48px] cursor-pointer' alt='hamburger' width={1000} height={1000} src={hambugger} onClick={toggleMenu} />
+            {!menuOpen && <div className='size-[48px]  flex items-center'>
+                <Image className='size-[48px]  cursor-pointer' alt='hamburger' width={1000} height={1000} src={hambugger} onClick={toggleMenu} />
             </div>}
 
             {/* Menu: Left Sliding */}
@@ -127,4 +126,4 @@ const BudgetPageHeader = () => {
     );
 };
 
-export default BudgetPageHeader;
+export default Header2;
