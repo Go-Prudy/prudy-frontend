@@ -3,6 +3,7 @@
 import ForwardArrow from '@/icons/forward-arrow';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { BsX } from 'react-icons/bs';
 
 type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   title: string;
@@ -32,6 +33,7 @@ const Header = ({ title, light = true, link = '/', ...props }: HeaderProps) => {
       </button>
       <p className={`text-lg font-medium ${isLight ? 'text-black ' : 'text-white'
         } mx-auto `}>{title}</p>
+
     </div>
   );
 };

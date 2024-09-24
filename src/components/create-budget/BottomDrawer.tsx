@@ -2,8 +2,10 @@ import { useRouter } from 'next/navigation';
 import React from 'react'
 import { BsChevronLeft, BsX } from 'react-icons/bs';
 import { motion } from 'framer-motion';
+
 interface IProps {
     label: string;
+    padding?: number;
     back: boolean;
     close: boolean;
     link?: string;
@@ -11,24 +13,23 @@ interface IProps {
     footer?: React.ReactNode;
     onClose: () => void;
     show: boolean;
+    removePadding?: boolean;
 }
 
-
-const BottomDrawer: React.FC<IProps> = ({ label, link, back, close, children, footer, onClose, show }) => {
+const BottomDrawer: React.FC<IProps> = ({ label, padding, link, back, close, children, footer, onClose, removePadding, show }) => {
     const navigate = useRouter();
 
     if (!show) return null; // Render nothing if 'show' is false
 
     return (
-
         <motion.div
             initial={{ opacity: 0, y: 90 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-
-            className="bottom-drawer  z-[60] absolute bottom-0 w-full bg-[rgb(255,255,255)] rounded-t-[24px]">
-            <div className="header bg-[#F7F7F9] p-[16px] rounded-t-[24px] flex justify-between items-center">
+            className="bottom-drawer z-[60] absolute bottom-0 w-full bg-white rounded-t-[24px]"
+        >
+            <div className={`header py-[16px] rounded-t-[24px] flex justify-between items-center`}>
                 <button
                     onClick={() => back && link && navigate.push(link)}
                     className={`grid place-content-center size-[36px] bg-white rounded-full text-[18px] text-[#828282] ${back ? 'opacity-100' : 'opacity-0'}`}
@@ -44,13 +45,15 @@ const BottomDrawer: React.FC<IProps> = ({ label, link, back, close, children, fo
                     </button>
                 )}
             </div>
-            <div className="content py-[24px] px-[24px]">
+            <div className={`content ${removePadding ? 'py-[24px]' : 'py-[0px]'} ${padding === 1 ? 'px-0' : 'px-[24px]'}`}>
                 {children}
             </div>
 
-            {footer && <div className={`p-[24px] w-full border-t-[2px] ${footer && 'border-t-[2px]  border-t-[#EFF0F6] '} `}>
-                {footer && <div className="w-full">{footer}</div>}
-            </div>}
+            {footer && (
+                <div className="p-[24px] w-full border-t-[2px] border-t-[#EFF0F6] bg-white">
+                    <div className="w-full">{footer}</div>
+                </div>
+            )}
         </motion.div>
     );
 };
