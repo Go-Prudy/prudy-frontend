@@ -359,7 +359,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                             close={true}
                             onClose={() => setShowNewBudgetCategory(false)}
                         >
-                            <div className="relative w-full mb-4">
+                            <div className="relative mt-[24px] w-full mb-4">
                                 <div className='flex w-[90%] absolute top-[16px] h-fit left-4 text-xs justify-between items-center'>
                                     <label htmlFor={'Name of category'} className="text-[#828282]">
                                         Name of category

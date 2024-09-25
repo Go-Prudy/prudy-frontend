@@ -29,7 +29,7 @@ const BottomDrawer: React.FC<IProps> = ({ label, padding, link, back, close, chi
             transition={{ duration: 0.3 }}
             className="bottom-drawer z-[60] absolute bottom-0 w-full bg-white rounded-t-[24px]"
         >
-            <div className={`header py-[16px] rounded-t-[24px] flex justify-between items-center`}>
+            <div className={`header bg-[#F7F7F9] px-[24px] py-[16px] rounded-t-[24px] flex justify-between items-center`}>
                 <button
                     onClick={() => back && link && navigate.push(link)}
                     className={`grid place-content-center size-[36px] bg-white rounded-full text-[18px] text-[#828282] ${back ? 'opacity-100' : 'opacity-0'}`}
