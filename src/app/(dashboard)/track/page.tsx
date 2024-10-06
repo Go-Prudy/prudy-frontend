@@ -590,7 +590,7 @@ export default function Page() {
         close={true}
         onClose={() => setAddManualModal(!AddManualModal)}
       >
-          <div className=" mb-[24px] flex flex-col gap-[16px] w-full">
+          <div className=" mb-[24px] pt-[24px] flex flex-col gap-[16px] w-full">
             <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
               Name of item
               <input
@@ -699,7 +699,7 @@ export default function Page() {
       >
 
           <div className=" flex    flex-col gap-[16px] ">
-            <div className=" px-[24px]">
+            <div className=" pt-[24px] px-[24px]">
               <div className="  bg-[#F7F7F9] w-full flex  gap-[16px] p-[8px] rounded-[20px] ">
                 {bankData.map((item) => (
                   <div key={item.name} onClick={() => setSyncBank(item)} className={` text-[14px] leading-[24px]  px-[16px] py-[8px] r ${syncBank.name === item.name ? ' text-[#575757] font-[500] ' : 'text-[#828282]'} `}>

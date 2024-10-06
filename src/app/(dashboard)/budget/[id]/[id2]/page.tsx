@@ -178,7 +178,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                             close={true}
                             onClose={() => setShowRecordModal(false)}
                         >
-                            <div className="flex flex-col gap-[16px] ">
+                            <div className="flex flex-col py-[24px] gap-[16px] ">
                                 <div className="bg-[#F7F7F9] rounded-[20px] border border-[#EFEFF0] p-[16px] flex justify-between w-full">
                                     <div className="flex gap-4">
                                         <Image src={manual} alt="Scan receipt" className="w-[44px] h-[44px]" />

@@ -104,8 +104,8 @@ const BudgetPageHeader = () => {
                                 {currentRoute === '/profile' ? <Image className='size-[24px]' alt='profile' src={profile1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={profile} width={1000} height={1000} />}
                                 Profile
                             </Link>
-                            <Link href='/settings' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/settings' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
-                                {currentRoute === '/settings' ? <Image className='size-[24px]' alt='profile' src={setting1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={setting} width={1000} height={1000} />}
+                            <Link href='/settings/passcode' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/settings/passcode' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
+                                {currentRoute === '/settings/passcode' ? <Image className='size-[24px]' alt='profile' src={setting1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={setting} width={1000} height={1000} />}
                                 Settings
                             </Link>
                         </ul>

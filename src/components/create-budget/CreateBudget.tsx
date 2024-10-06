@@ -138,7 +138,7 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                     close={true}
                     onClose={() => setShow(false)}
                 >
-                    <div className="budget-form mt-[8px]">
+                    <div className="budget-form pt-[24px] mt-[0px]">
                         <Input label="Name of budget" inputName="Nameofbudget" inputType="text" placeholder="January..." onChange={(value) => handleChange('name', value)} />
                         <Input label="Purpose of budget" inputName="Purposeofbudget" inputType="text" placeholder="Monthly expenses..." onChange={(value) => handleChange('purpose', value)} />
                         <div className="flex gap-[16px] justify-between">

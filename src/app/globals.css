@@ -133,3 +133,76 @@ canvas {
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
   cursor: not-allowed;
 }
+
+
+
+
+
+
+
+
+/* PhoneInput.css */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+
+  /* Adjust background color if needed */
+  padding: 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  /* Light border */
+  border-radius: 8px;
+  /* Rounded corners */
+  font-family: 'Arial', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.PhoneInput input {
+  outline: none;
+  border: none;
+  background: transparent;
+  flex: 1;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.PhoneInput input::placeholder {
+  color: #b0b0b0;
+}
+
+.PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+
+.PhoneInputCountryFlag {
+
+  margin-right: 8px;
+  border-radius: 2px;
+
+}
+
+.PhoneInputCountrySelect:focus {
+  outline: none;
+}
+
+/* Ensures that only the country code and flag are visible */
+.PhoneInputCountrySelect span {
+  display: flex;
+  align-items: center;
+}
+
+.PhoneInputCountrySelect>.PhoneInputCountrySelectArrow {
+  margin-left: 4px;
+}
+
+.PhoneInputCountrySelect .PhoneInputCountrySelectCode {
+  margin-left: 4px;
+}
+
+.PhoneInputCountrySelect span:not(.PhoneInputCountrySelectCode) {
+  display: none;
+}

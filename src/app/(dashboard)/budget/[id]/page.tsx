@@ -405,6 +405,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                     </div>
                                 </div>
 
+
                                 <div className='mt-[24px]  p-[16px] bg-[#F7F7F9] min-h-[100px] max-h-[200px] overflow-y-scroll border border-[#E7E7EA] rounded-[16px] w-full'>
                                     {subAllocations.map((eachSubAllocation: any, index: number) => (
                                         <button
