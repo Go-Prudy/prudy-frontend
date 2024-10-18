@@ -14,6 +14,10 @@ import passcodeIcon from "@/images/passcode.png";
 import currencyIcon from "@/images/currency.png";
 import { FaClipboardList, FaUsers, FaBell, FaDollarSign, FaChartPie, FaQuestionCircle, FaLock, FaGlobe } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { useAuthentication } from "@/app/store/AuthStore";
+import { AuthenticatedUser } from "@/app/Types";
+import { useEffect, useState } from "react";
 
 export default function Page() {
 
@@ -37,6 +41,48 @@ export default function Page() {
   ];
 
   const navigation = useRouter()
+
+  const { LogOut } = useAuthentication();
+
+  const logOutMutation = useMutation({
+    mutationFn: async () => LogOut(),
+    onSuccess: (data) => {
+      console.log('Logout successful', data);
+    },
+    onError: (error) => {
+      console.error('Error during logout:', error);
+    },
+  });
+
+  // Example of using the logout mutation in a component
+  const handleLogout = () => {
+    logOutMutation.mutate();
+  };
+
+  const { authenticatedUser } = useAuthentication();
+  const [userData, setUserData] = useState<AuthenticatedUser>({
+    token: '',
+    profile: {
+      createdAt: '',
+      updatedAt: '',
+      uid: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      registeredWith: '',
+      isVerified: false,
+      hasOnboarded: false,
+      accountProviderId: '',
+      profilePhoto: '',
+    }
+  });
+
+  useEffect(() => {
+    if (authenticatedUser) {
+      setUserData(authenticatedUser);
+    }
+  }, [authenticatedUser]);
   return (
     <div className="bg-[#FAFAFA] w-full h-screen">
       <Header2 title={'Profile'} />
@@ -49,7 +95,10 @@ export default function Page() {
               <BsPerson className='text-[#FFFFFF] size-[52px]' />
             </div>
             <div className='flex gap-[4px] flex-col'>
-              <h1 className='font-[500] text-[#FFFFFF] leading-[24px]'>Ayomide Asekun</h1>
+              <h1 className='font-[500] text-[#FFFFFF] leading-[24px]'>
+                {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
+
+              </h1>
               <Image className=' w-[74px] h-[24px]' alt='premium' width={1000} height={1000} src={premium} />
             </div>
           </div>
@@ -85,7 +134,7 @@ export default function Page() {
             ))}
 
 
-            <button className=" items-center mb-[24px] py-[12px] rounded-[12px] gap-[8px] text-center flex justify-center w-full bg-[#FBEDEF] text-[#D2303E] font-[500]"><Image src={logout} width={1000} className=" size-[24px]" height={1000} alt="logout" /> Logout </button>
+            <button onClick={() => handleLogout()} className=" items-center mb-[24px] py-[12px] rounded-[12px] gap-[8px] text-center flex justify-center w-full bg-[#FBEDEF] text-[#D2303E] font-[500]"><Image src={logout} width={1000} className=" size-[24px]" height={1000} alt="logout" /> Logout </button>
           </div>
         </div>
 

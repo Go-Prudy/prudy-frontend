@@ -4,21 +4,63 @@ import Input from '@/components/input';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useMutation } from '@tanstack/react-query';
+import { signupUser } from '@/app/services/AuthenticationService';
+import { toast } from 'react-hot-toast';
+import { SignupForm } from '@/app/Types';
+import { CircularProgress } from '@nextui-org/react';
 
 const Page = () => {
     const [password, setPassword] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const { signup, form } = useAuthentication();
     const navigate = useRouter();
+
+
+
+
+
+    const setPasscodeMutation = useMutation({
+        mutationFn: async (data: SignupForm) => {
+            setIsLoading(true);
+            const result = await signupUser(data);
+            setIsLoading(false);
+
+            const newData: any = { ...form, pin: password, confirmPin: confirmPassword }
+            signup(newData)
+
+            // Navigate to the next step or page
+
+            navigate.push('/login')
+            return result;
+        },
+        onSuccess: (data: any) => {
+            if (data?.success) {
+                console.log(data);
+            }
+        },
+        onError: (error: any) => {
+            setIsLoading(false);
+            console.error(error?.response.data.message);
+            toast.error(error?.response.data.message);
+        },
+    });
+
+
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-
         // Validate password length
-        if (password.length < 8 || confirmPassword.length < 8) {
-            setError('Password must be at least 8 characters long');
+        if (password.length < 6 || confirmPassword.length < 6) {
+            setError('Password must be at least 6 characters long');
             return;
         }
+        const newData: any = { ...form, pin: password, confirmPin: confirmPassword }
+
+        setPasscodeMutation.mutateAsync(newData)
 
         // Validate if passwords match
         if (password !== confirmPassword) {
@@ -27,10 +69,8 @@ const Page = () => {
         }
 
         setError(''); // Clear the error message
-        console.log({ password, confirmPassword });
 
-        // Navigate to the next step or page
-        navigate.push('/login')
+
     };
 
     return (
@@ -50,6 +90,7 @@ const Page = () => {
                         label="Passcode"
                         inputName="Passcode"
                         inputType="password"
+                        maxLength={6}
                         placeholder="Enter your passcode"
                         onChange={(value) => setPassword(value)}
                     />
@@ -57,6 +98,7 @@ const Page = () => {
                         label="Confirm passcode"
                         inputName="Confirm your passcode"
                         inputType="password"
+                        maxLength={6}
                         placeholder="Confirm your passcode"
                         onChange={(value) => setConfirmPassword(value)}
                     />
@@ -68,7 +110,10 @@ const Page = () => {
                             type="submit"
                             className={`h-12 text-white font-[500] bg-black rounded-3xl w-full `}
                         >
-                            Sign up
+
+                            {
+                                isLoading ? <CircularProgress color='default' className=' text-[#ae3d3d] flex mx-auto justify-center ' size='sm' /> : 'Sign Up'
+                            }
                         </button>
                     </div>
                 </form>

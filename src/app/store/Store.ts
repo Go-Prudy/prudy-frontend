@@ -32,6 +32,7 @@ interface BudgetState {
     clearBudgets: () => void;
     getLastBudget: () => Budget | undefined;
     duplicateLastBudget: () => void;
+
 }
 
 export const useBudgetStore = create<BudgetState>()(

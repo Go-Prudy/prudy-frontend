@@ -4,32 +4,62 @@ import GoogleLogo from '@/icons/google-logo';
 import Link from 'next/link';
 import Input from '@/components/input';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
+import { loginUser } from '@/app/services/AuthenticationService';
+import { Button, CircularProgress } from '@nextui-org/react';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 const LoginPage = () => {
 
   const [email, setEmail] = useState<string>('');
   const [passcode, setPasscode] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [loading, setIsLoading] = useState(false);
+  const { login, authenticatedUser } = useAuthentication();
   const navigate = useRouter();
 
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  // React Query mutation for sending OTP
+  const loginMutation = useMutation({
+    mutationFn: (data: any) => loginUser(data),
+    onSuccess: (data: any) => {
+      if (data?.success) {
+        setIsLoading(false);
+        console.log(data);
+        const { success, message, ...rest } = data
+        console.log(rest.data);
+        login(rest.data);
+        Cookies.set('token', rest.data.token, { expires: 7 });
+
+        console.log(authenticatedUser);
+
+        navigate.push('/budgets');
+      }
+    },
+    onError: (error: Error) => {
+      console.error('Error sending OTP:', error);
+      setIsLoading(false); // Ensure loading state is reset on error
+    },
+  });
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // // Validate password length
-    // if (passcode.length < 6) {
-    //   setError('Password must be at least 6 characters long');
-    //   return;
-    // }
-
-
-    // setError(''); // Clear the error message
-    console.log({ passcode, email });
-
-    // Navigate to the next step or page
-    navigate.push('/budgets')
+    try {
+      setIsLoading(true);
+      const loginData = {
+        pin: passcode,
+        loginWith: "form",
+        email,
+      };
+      await loginMutation.mutateAsync(loginData);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -54,7 +84,8 @@ const LoginPage = () => {
 
 
           <Input label="Email address" inputName="email" inputType="email" placeholder="example@email.com" onChange={(value) => setEmail(value)} />
-          <Input label="Passcode" inputName="passcode" inputType="number" placeholder="Enter your passcode" onChange={(value) => setPasscode(value)} />
+          <Input label="Passcode" maxLength={6} inputName="passcode" inputType="password" placeholder="Enter your passcode" onChange={(value) => setPasscode(value)} />
+
           {error && (
             <p className="text-red-500 text-sm mt-2">{error}</p>
           )}
@@ -67,7 +98,9 @@ const LoginPage = () => {
         </div>
 
         <div className=" m-0 mb-[24px] flex w-full items-center bg-white px-6  rounded-t-3xl ">
-          <button className="h-12 font-[500] text-white bg-black rounded-3xl w-full">Sign in</button>
+          <Button type='submit' className="h-12 font-[500] text-white flex justify-center items-center bg-black rounded-3xl w-full">
+            {loading ? <CircularProgress color='default' size='sm' /> : 'Sign in'}
+          </Button>
         </div>
       </form>
 

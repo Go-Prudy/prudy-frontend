@@ -19,6 +19,8 @@ import profile1 from '@/images/profile-circle 2.png';
 import setting from '@/images/setting-3.png';
 import setting1 from '@/images/setting-3 2.png';
 import upgrade from '@/images/upgrade.png';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { AuthenticatedUser } from '@/app/Types';
 
 interface Iprop {
     title: string;
@@ -55,6 +57,31 @@ const Header2 = ({ title }: Iprop) => {
         setMenuOpen(!menuOpen);
     };
 
+    const { authenticatedUser } = useAuthentication();
+    const [userData, setUserData] = useState<AuthenticatedUser>({
+        token: '',
+        profile: {
+            createdAt: '',
+            updatedAt: '',
+            uid: '',
+            firstName: '',
+            lastName: '',
+            email: '',
+            phoneNumber: '',
+            registeredWith: '',
+            isVerified: false,
+            hasOnboarded: false,
+            accountProviderId: '',
+            profilePhoto: '',
+        }
+    });
+
+    useEffect(() => {
+        if (authenticatedUser) {
+            setUserData(authenticatedUser);
+        }
+    }, [authenticatedUser]);
+
     return (
         <div className={`z-[20] fixed top-0 bg-[#FAFAFA] pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-[#2D2D2D] w-full items-center pb-[16px] transition-all duration-300 `}>
             {/* Left Section: Profile */}
@@ -80,7 +107,11 @@ const Header2 = ({ title }: Iprop) => {
                                 <BsPerson className='text-black size-[38px]' />
                             </div>
                             <div className='flex gap-[4px] flex-col'>
-                                <h1 className='font-[500] text-black leading-[24px]'>Ayomide Asekun</h1>
+                                <h1 className='font-[500] text-black leading-[24px]'>
+
+                                    {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
+
+                                </h1>
                                 <Image className='backdrop-blur-3xl w-[74px] h-[20px]' alt='premium' width={1000} height={1000} src={premium} />
                             </div>
                         </div>

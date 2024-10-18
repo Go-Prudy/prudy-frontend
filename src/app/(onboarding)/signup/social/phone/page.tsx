@@ -4,15 +4,19 @@ import Input from '@/components/input'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { motion } from 'framer-motion';
+import { useAuthentication } from '@/app/store/AuthStore'
+import { Button } from '@nextui-org/react'
 
 const page = () => {
     const navigate = useRouter();
     const [phoneNumber, setPhoneNumber] = useState<string | number | any>('')
     const [error, setError] = useState<string>('');
 
-
+    const { signup, form } = useAuthentication();
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        // const newData = { ...form, }
 
         // Validate password length
         if (phoneNumber.length < 10) {
@@ -45,7 +49,7 @@ const page = () => {
                         <p className="text-red-500 text-sm mt-2">{error}</p>
                     )}
                     <div className=" m-0 mt-[38px] flex w-full items-center bg-white  rounded-t-3xl ">
-                        <button type='submit' className="h-12  text-white font-[500] bg-black rounded-3xl w-full">Proceed</button>
+                        <Button type='submit' className="h-12  text-white font-[500] bg-black rounded-3xl w-full">Proceed</Button>
                     </div>
                 </form>
             </div>
