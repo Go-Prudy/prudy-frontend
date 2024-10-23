@@ -7,7 +7,7 @@ import { BsCheck } from 'react-icons/bs'
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { OtpResponse, verifyOtpResponse } from '@/app/Types';
+import { IOtpResponse, IVerifyOtpResponse } from '@/app/Types';
 import { sendOtp, verifyOtp } from '@/app/services/AuthenticationService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { CircularProgress } from '@nextui-org/react';
@@ -26,7 +26,7 @@ const VerifyOtpPage = () => {
   // React Query mutation for verifying OTP
   const verifyOtpMutation = useMutation({
     mutationFn: (otpFormData: any) => verifyOtp(otpFormData),
-    onSuccess: (data: verifyOtpResponse) => {
+    onSuccess: (data: IVerifyOtpResponse) => {
       if (data?.success) {
         console.log(data);
         setSuccess(true)
@@ -43,9 +43,9 @@ const VerifyOtpPage = () => {
   });
 
   // React Query mutation for sending OTP
-  const otpMutation = useMutation<OtpResponse, Error, { email: string; phoneNumber: string }>({
+  const otpMutation = useMutation<IOtpResponse, Error, { email: string; phoneNumber: string }>({
     mutationFn: (otpFormData) => sendOtp(otpFormData),
-    onSuccess: (data: OtpResponse) => {
+    onSuccess: (data: IOtpResponse) => {
       if (data?.success) {
 
         const newFormData = { ...form, otpReference: data?.data.reference }

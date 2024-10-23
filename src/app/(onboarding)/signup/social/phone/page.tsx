@@ -25,7 +25,7 @@ const page = () => {
         }
 
         setError(''); // Clear the error message
-        console.log({ phoneNumber });
+        // console.log({ phoneNumber });
 
         // Navigate to the next step or page
         navigate.push('/signup/verify');

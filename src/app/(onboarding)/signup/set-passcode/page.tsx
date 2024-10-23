@@ -8,7 +8,7 @@ import { useAuthentication } from '@/app/store/AuthStore';
 import { useMutation } from '@tanstack/react-query';
 import { signupUser } from '@/app/services/AuthenticationService';
 import { toast } from 'react-hot-toast';
-import { SignupForm } from '@/app/Types';
+import { ISignupForm } from '@/app/Types';
 import { CircularProgress } from '@nextui-org/react';
 
 const Page = () => {
@@ -24,7 +24,7 @@ const Page = () => {
 
 
     const setPasscodeMutation = useMutation({
-        mutationFn: async (data: SignupForm) => {
+        mutationFn: async (data: ISignupForm) => {
             setIsLoading(true);
             const result = await signupUser(data);
             setIsLoading(false);
@@ -39,7 +39,7 @@ const Page = () => {
         },
         onSuccess: (data: any) => {
             if (data?.success) {
-                console.log(data);
+                // console.log(data);
             }
         },
         onError: (error: any) => {

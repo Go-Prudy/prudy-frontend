@@ -7,8 +7,8 @@ import { BsCheck } from 'react-icons/bs'
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useMutation } from '@tanstack/react-query';
-import { ForgotPassword, sendOtp, verifyOtp } from '@/app/services/AuthenticationService';
-import { IForgotPassword, OtpResponse, verifyOtpResponse } from '@/app/Types';
+import { forgotPassword, sendOtp, verifyOtp } from '@/app/services/AuthenticationService';
+import { IForgotPassword, IOtpResponse, IVerifyOtpResponse } from '@/app/Types';
 import { useAuthentication } from '@/app/store/AuthStore';
 import Input from '@/components/input'
 import { Button, CircularProgress } from '@nextui-org/react';
@@ -32,16 +32,13 @@ const VerifyOtpPage = () => {
         onSuccess: (data: any) => {
             if (data?.success) {
                 setIsLoading(false);
-                console.log(data);
                 const { success, message, ...rest } = data
-                console.log(rest.data);
                 ForgotPassword({ ...ForgotPasswordForm, email: email, otpRef: rest.data.reference })
                 setIsLoading(false)
                 setStep(2)
             }
         },
         onError: (error: Error) => {
-            console.error('Error sending OTP:', error);
             setIsLoading(false); // Ensure loading state is reset on error
         },
     });
@@ -50,9 +47,8 @@ const VerifyOtpPage = () => {
     // React Query mutation for verifying OTP
     const verifyOtpMutation = useMutation({
         mutationFn: (otpFormData: any) => verifyOtp(otpFormData),
-        onSuccess: (data: verifyOtpResponse) => {
+        onSuccess: (data: IVerifyOtpResponse) => {
             if (data?.success) {
-                console.log(data);
                 setSuccess('Success');
                 setTimeout(() => {
                     navigate.push('/change-passcode');
@@ -107,7 +103,6 @@ const VerifyOtpPage = () => {
     const handleSendOtp = async () => {
         try {
             setIsLoading(true)
-            console.log(loading);
 
             const newData = {
                 channel: 'email',
@@ -127,7 +122,6 @@ const VerifyOtpPage = () => {
     const handleResendCode = async () => {
         try {
             if (canResend) {
-                console.log('Code resent successfully!');
                 startTimer();
                 handleSendOtp()
             }

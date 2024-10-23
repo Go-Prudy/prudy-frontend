@@ -8,10 +8,10 @@ import { useRouter } from 'next/navigation';
 import { BsArrowLeft, BsArrowRight } from 'react-icons/bs';
 import { motion } from 'framer-motion';
 import { useAuthentication } from '@/app/store/AuthStore';
-import api from '../../../../axiosInstance';
+import api from '../../../utils/axiosInstance';
 import { useMutation } from '@tanstack/react-query';
-import { sendOtp, signupUser, SignUpWithGoogle } from '@/app/services/AuthenticationService';
-import { OtpResponse } from '@/app/Types';
+import { sendOtp, signupUser, signUpWithGoogle } from '@/app/services/AuthenticationService';
+import { IOtpResponse } from '@/app/Types';
 
 const Page = () => {
   const [firstName, setFirstName] = useState<string>('');
@@ -30,9 +30,9 @@ const Page = () => {
   };
 
   // React Query mutation for sending OTP
-  const otpMutation = useMutation<OtpResponse, Error, { email: string; phoneNumber: string }>({
+  const otpMutation = useMutation<IOtpResponse, Error, { email: string; phoneNumber: string }>({
     mutationFn: (otpFormData) => sendOtp(otpFormData),
-    onSuccess: (data: OtpResponse) => {
+    onSuccess: (data: IOtpResponse) => {
       if (data?.success) {
         const reference = data.data.reference;
         const formDataWithReference = {
@@ -43,7 +43,7 @@ const Page = () => {
           registeredWith: reference,
         };
 
-        console.log(formDataWithReference);
+        // console.log(formDataWithReference);
       }
     },
     onError: (error: Error) => {
@@ -73,7 +73,7 @@ const Page = () => {
     try {
       setIsLoading(true)
       const otpResponse = await otpMutation.mutateAsync(otpFormData);
-      console.log(otpResponse);
+      // console.log(otpResponse);
       if (otpResponse?.success) {
         const reference = otpResponse.data.reference;
         const newFormData = { ...formData, registeredWith: 'form', otpReference: reference }
@@ -88,7 +88,7 @@ const Page = () => {
     } finally {
       setIsLoading(false);
     }
-    console.log({ firstName, lastName, email, phoneNumber, checked });
+    // console.log({ firstName, lastName, email, phoneNumber, checked });
     signup(formData);
   };
 
@@ -104,11 +104,11 @@ const Page = () => {
 
   // React Query mutation for handling google
   const handleGoogleMutation = useMutation({
-    mutationFn: () => SignUpWithGoogle(),
+    mutationFn: () => signUpWithGoogle(),
     onSuccess: (data: any) => {
       if (data?.success) {
         // const reference = data.data.reference;
-        console.log(data);
+        // console.log(data);
         navigate.push('/signup/social/phone')
         setIsLoading(false)
       }

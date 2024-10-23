@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
-import api from "../../../axiosInstance";
-import { IForgotPassword, loginForm, OtpResponse, SignupForm } from "../Types";
+import api from "../../utils/axiosInstance";
+import { IForgotPassword, ILoginForm, IOtpResponse, ISignupForm } from "../Types";
 
 
 // Function to send OTP with SIGNUP
@@ -38,7 +38,7 @@ export const verifyOtp = async (otpFormData: any) => {
 
 // Function to signup with OTP reference
 
-export const signupUser = async (formData: SignupForm) => {
+export const signupUser = async (formData: ISignupForm) => {
     try {
         const response = await api.post('/auth/signup', formData);
         toast.success(response.data.message);
@@ -52,7 +52,7 @@ export const signupUser = async (formData: SignupForm) => {
 
 
 
-export const loginUser = async (formData: loginForm) => {
+export const loginUser = async (formData: ILoginForm) => {
     try {
         const response = await api.post('/auth/login', formData);
         toast.success(response.data.message);
@@ -66,7 +66,7 @@ export const loginUser = async (formData: loginForm) => {
 };
 
 
-export const SignUpWithGoogle = async () => {
+export const signUpWithGoogle = async () => {
     try {
         const response = await api.get('/auth/google');
         toast.success(response.data.message);
@@ -81,7 +81,7 @@ export const SignUpWithGoogle = async () => {
 
 
 
-export const ForgotPassword = async (data: IForgotPassword) => {
+export const forgotPassword = async (data: IForgotPassword) => {
     try {
         console.log(data);
 

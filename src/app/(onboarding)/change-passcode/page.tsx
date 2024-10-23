@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
 import { IForgotPassword } from '@/app/Types';
-import { ForgotPassword as handleForgotPassword } from '@/app/services/AuthenticationService'
+import { forgotPassword as handleForgotPassword } from '@/app/services/AuthenticationService'
 import { CircularProgress } from '@nextui-org/react';
 const ChangePasscodePage = () => {
   const [passCode, setPasscode] = useState<string>('');
@@ -25,8 +25,6 @@ const ChangePasscodePage = () => {
   const ForgotPasswordMutation = useMutation({
     mutationFn: async (data: IForgotPassword) => {
       setIsLoading(true);
-      console.log(data);
-
       const result = await handleForgotPassword(data);
       setIsLoading(false);
       return result;
@@ -57,19 +55,12 @@ const ChangePasscodePage = () => {
       setError('Passcodes do not match.');
       return;
     }
-
     // Clear any previous errors
     setError('');
-
     try {
       await ForgotPassword({ ...ForgotPasswordForm, pin: passCode, confirmPin: confirmPassCode });
-      console.log(ForgotPasswordForm);
-
       ForgotPasswordMutation.mutateAsync({ ...ForgotPasswordForm, pin: passCode, confirmPin: confirmPassCode })
-
-
     } catch (error) {
-      console.log(error);
       setError('An error occurred. Please try again.');
     }
   };
