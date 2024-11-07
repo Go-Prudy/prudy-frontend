@@ -19,7 +19,7 @@ const page = () => {
                         <li>Analyzing spending habits.</li>
                         <li> Generating financial reports, budgets, and insights.</li>
                     </ul>
-                    The app will not use, share, or disclose personal or financial data for purposes unrelated to budgeting without the user's explicit consent.</div>
+                    The app will not use, share, or disclose personal or financial data for purposes unrelated to budgeting without the user&lsquo;s explicit consent.</div>
             </div>
 
             <div className=' px-[24px]'>
@@ -72,9 +72,9 @@ const page = () => {
                                     unauthorized third parties, including
                                     but not limited to hackers or external
                                     actors.</li>
-                                <li>The user's improper use of the app or
+                                <li>The user&lsquo;s improper use of the app or
                                     breach of the terms of service..</li>
-                                <li>Legal disputes arising from the user's
+                                <li>Legal disputes arising from the user&lsquo;s
                                     failure to comply with applicable laws
                                     when using the app (e.g., providing
                                     false information).</li>
@@ -87,7 +87,7 @@ const page = () => {
                             <ul>
                                 <li>
                                     Any unauthorized disclosure of their
-                                    data resulting from the app's
+                                    data resulting from the app&lsquo;s
                                     negligence or willful misconduct.
                                 </li>
                                 <li>
@@ -95,7 +95,7 @@ const page = () => {
                                     (e.g., GDPR, CCPA)
                                 </li>
                                 <li>
-                                    Any violations of the app's data
+                                    Any violations of the app&lsquo;s data
                                     protection promises made in this
                                     clause.
                                 </li>
@@ -151,7 +151,7 @@ const page = () => {
                         <li>  Data Deletion Requests: Users have the
                             right to request the deletion of their
                             personal and financial data. Upon such a
-                            request, [App Name] will delete the user's
+                            request, [App Name] will delete the user&lsquo;s
                             data from its servers and notify any third-
                             party service providers to do the same
                             within 30 days.
@@ -159,8 +159,8 @@ const page = () => {
                         <li> Revocation of Consent: Users may revoke
                             their consent for data sharing at any time.
                             Upon revocation, App Name will
-                            immediately cease sharing the user's data
-                            for purposes beyond the app's core
+                            immediately cease sharing the user&lsquo;s data
+                            for purposes beyond the app&lsquo;s core
                             functionality.</li>
 
 
@@ -215,7 +215,7 @@ const page = () => {
                         <li>  By using GoPrudy, users acknowledge and
                             agree to the terms outlined in this Data
                             Usage and Indemnification Clause. Users
-                            understand that the app's data collection
+                            understand that the app&lsquo;s data collection
                             and usage are limited to providing core
                             budgeting services, and that any broader
                             use of their data will require explicit

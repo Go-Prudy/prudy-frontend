@@ -26,7 +26,7 @@ const Header = ({ title, light = true, link = '/', ...props }: HeaderProps) => {
       {...props}
     >
       <button
-        onClick={() => navigate.push(link)}
+        onClick={() => navigate.back()}
         className={`absolute rounded-full ${isLight ? 'bg-white text-black' : 'text-white bg-[#FFFFFF0A]'}  w-10 h-10 inline-flex justify-center items-center`}
       >
         <ForwardArrow className="rotate-180" />

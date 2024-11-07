@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { useAuthentication } from '@/app/store/AuthStore'
 import { Button } from '@nextui-org/react'
 
-const page = () => {
+const Page = () => {
     const navigate = useRouter();
     const [phoneNumber, setPhoneNumber] = useState<string | number | any>('')
     const [error, setError] = useState<string>('');
@@ -58,4 +58,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page

@@ -20,7 +20,7 @@ import setting from '@/images/setting-3.png';
 import setting1 from '@/images/setting-3 2.png';
 import upgrade from '@/images/upgrade.png';
 import { useAuthentication } from '@/app/store/AuthStore';
-import { AuthenticatedUser } from '@/app/Types';
+import { IAuthenticatedUser } from '@/app/Types';
 
 interface Iprop {
     title: string;
@@ -58,7 +58,7 @@ const Header2 = ({ title }: Iprop) => {
     };
 
     const { authenticatedUser } = useAuthentication();
-    const [userData, setUserData] = useState<AuthenticatedUser>({
+    const [userData, setUserData] = useState<IAuthenticatedUser>({
         token: '',
         profile: {
             createdAt: '',

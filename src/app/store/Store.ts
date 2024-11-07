@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Budget, Income, Allocation, SubAllocation } from '../Types';
+import { IBudget, Income, IAllocation, ISubAllocation, ICreateCategory } from '../Types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Function to generate a random color
@@ -19,18 +19,20 @@ const getUniqueColor = (usedColors: Set<string>): string => {
 }
 
 interface BudgetState {
-    budgets: Budget[];
-    addBudget: (budget: Budget) => void;
+    budgets: IBudget[];
+    allCategories: ICreateCategory[];
+    addToCategory: (data: ICreateCategory, id: string) => void
+    addBudget: (budget: IBudget) => void;
+    createBudgetCategory: (index: string) => void
     createAllocation: (budgetId: string, budgetCategory: string, color: string) => void; // New function
-
     addIncomeToBudget: (budgetId: string, newIncomes: Income[]) => void;
     updateIncomeInBudget: (budgetId: string, income: Income) => void;
     deleteIncomeFromBudget: (budgetId: string, incomeName: string) => void;
-    addAllocationToBudget: (budgetId: string, allocation: Allocation) => void;
-    updateAllocationInBudget: (budgetId: string, allocation: Allocation) => void;
+    addAllocationToBudget: (budgetId: string, allocation: IAllocation) => void;
+    updateAllocationInBudget: (budgetId: string, allocation: IAllocation) => void;
     deleteAllocationFromBudget: (budgetId: string, category: string) => void;
     clearBudgets: () => void;
-    getLastBudget: () => Budget | undefined;
+    getLastBudget: () => IBudget | undefined;
     duplicateLastBudget: () => void;
 
 }
@@ -39,12 +41,62 @@ export const useBudgetStore = create<BudgetState>()(
     persist(
         (set, get) => ({
             budgets: [],
+            allCategories: [],
+            addToCategory: (data: ICreateCategory, id: string) =>
+                set((state) => {
+                    const existingCategory = state.allCategories.find(category => category.id === id);
+
+                    if (existingCategory) {
+                        // If category exists, update it
+                        return {
+                            allCategories: state.allCategories.map((category) => {
+                                if (category.id === id) {
+                                    return {
+                                        ...category, // Retain existing properties
+                                        ...data,     // Update with new data
+                                    };
+                                }
+                                return category; // Return unchanged category
+                            }),
+                        };
+                    } else {
+                        // If category does not exist, add it to the array
+                        return {
+                            allCategories: [
+                                ...state.allCategories,
+                                { ...data }, // Add the new category data
+                            ],
+                        };
+                    }
+                }),
+
+
+            createBudgetCategory: (budgetId: string) =>
+                set((state) => ({
+                    budgets: state.budgets.map((budget) => {
+                        // Match the budget by its id
+                        if (budget.id === budgetId) {
+                            return {
+                                ...budget,
+                                allocations: [
+                                    ...(budget.allocations || []), // Use existing allocations, or default to an empty array if undefined
+                                    {
+                                        budgetCategory: budgetId, // Add only the budget ID as the budgetCategory
+                                    },
+                                ],
+                            };
+                        }
+                        return budget; // Return unchanged budget if id doesn't match
+                    }),
+                })),
+
+
 
             createAllocation: (budgetId: string, budgetCategory: string, color: string) => {
-                const newAllocation: Allocation = {
+                const newAllocation: IAllocation = {
                     budgetCategory,
                     amount: 0, // Default amount
-                    color, // Use provided color
+                    color: '', // Use provided color
                     percentage: 0, // Default percentage
                     subAllocations: [] // Default empty subAllocations
                 };
@@ -57,7 +109,7 @@ export const useBudgetStore = create<BudgetState>()(
                 }));
             },
 
-            addBudget: (budget: Budget) =>
+            addBudget: (budget: IBudget) =>
                 set((state) => ({
                     budgets: [...state.budgets, budget],
                 })),
@@ -101,7 +153,7 @@ export const useBudgetStore = create<BudgetState>()(
                     ),
                 })),
 
-            addAllocationToBudget: (budgetId: string, newAllocation: Allocation) => {
+            addAllocationToBudget: (budgetId: string, newAllocation: IAllocation) => {
                 const usedColors = new Set<string>();
                 // Extract existing colors to avoid duplication
                 const existingColors = (newAllocation.subAllocations || []).map(() => newAllocation.color).filter(Boolean) as string[];
@@ -128,7 +180,7 @@ export const useBudgetStore = create<BudgetState>()(
                 }));
             },
 
-            updateAllocationInBudget: (budgetId: string, updatedAllocation: Allocation) =>
+            updateAllocationInBudget: (budgetId: string, updatedAllocation: IAllocation) =>
                 set((state) => ({
                     budgets: state.budgets.map((budget) =>
                         budget.id === budgetId
@@ -166,7 +218,7 @@ export const useBudgetStore = create<BudgetState>()(
             duplicateLastBudget: () => {
                 const lastBudget = get().getLastBudget();
                 if (lastBudget) {
-                    const newBudget: Budget = {
+                    const newBudget: IBudget = {
                         ...lastBudget,
                         id: uuidv4(),
                     };

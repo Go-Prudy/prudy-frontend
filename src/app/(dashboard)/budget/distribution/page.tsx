@@ -5,6 +5,9 @@ import Header from '@/components/header';
 import { BsChevronDown } from 'react-icons/bs';
 import BudgetChart from '@/app/(dashboard)/components/DoughnutChart';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useQuery } from '@tanstack/react-query';
+import { getBudgetDistributionApi } from '@/app/services/BudgetService';
 const Page = ({ params }: { params: { id: string } }) => {
 
     // Define the data array
@@ -63,6 +66,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     const [showCategories, setShowCategories] = useState<boolean>(false);
     const [showBudget, setShowBudget] = useState<boolean>(false);
+    const { authenticatedUser } = useAuthentication();
 
     const toggleCategory = (id: number) => {
         if (id === 1) { // If "All categories" is clicked  
@@ -84,10 +88,18 @@ const Page = ({ params }: { params: { id: string } }) => {
     const handleClose = () => {
         setShowCategories(false);
     };
+    const budgetId = 1
+
+    const { data: budgetDistributionData, status: distributionStatus } = useQuery({
+        queryKey: ['budgetDistribution', budgetId ? 1 : 1],
+        queryFn: () => getBudgetDistributionApi(authenticatedUser?.token ?? '', '11'),
+        enabled: !!authenticatedUser?.token && !!budgetId,
+        staleTime: 5 * 60 * 1000
+    });
 
 
 
-
+    console.log(budgetDistributionData);
 
     return (
         <div>
@@ -110,7 +122,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     </button>
                 </div>
                 <div className=' w-full mt-[31px]  flex justify-center'>
-                    <BudgetChart budgetCategories={budgetCategories} />
+                    {/* <BudgetChart budgetCategories={budgetCategories} /> */}
                 </div>
                 <div className="bg-white mt-[28px] p-4 flex flex-col gap-[16px]  w-full">
                     {budgetCategories.map((category, index) => (

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 
-const page = () => {
+const Page = () => {
 
     // Define the data array
     const budgetCategories = [
@@ -127,4 +127,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page

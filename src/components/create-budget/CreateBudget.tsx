@@ -8,7 +8,7 @@ import { RadioGroup, useRadio, VisuallyHidden, cn } from "@nextui-org/react";
 import { BsArrowRight } from 'react-icons/bs';
 import { useRouter } from 'next/navigation';
 import { useBudgetStore } from '@/app/store/Store';
-import { Budget } from '@/app/Types';
+import { IBudget } from '@/app/Types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface IProps {
@@ -19,7 +19,7 @@ interface IProps {
 
 const CreateBudget = ({ setShow, show }: IProps) => {
     // State to manage form data
-    const [budgetData, setBudgetData] = useState<Budget>({
+    const [budgetData, setBudgetData] = useState<IBudget>({
         id: uuidv4(),
         name: '',
         purpose: '',
@@ -69,7 +69,6 @@ const CreateBudget = ({ setShow, show }: IProps) => {
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        addBudget(budgetData)
         if (budgetType === 'Create new budget') {
             addBudget(budgetData);
         } else if (budgetType === 'Duplicate last budget') {

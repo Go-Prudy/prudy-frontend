@@ -18,13 +18,14 @@ const privateRoutes = [
 // Define the middleware function
 export async function middleware(request: NextRequest) {
     // Retrieve the token from cookies
-    const token: string | undefined = request.cookies.get('token')?.value;
+    const token = request.cookies.get('token')?.value; // Adjust 'token' to your actual cookie name
 
-    // Extract the requested URL
     const { pathname } = request.nextUrl;
-
+    // console.log(token); console.log(token);
     // If the token exists, the user is authenticated
     if (token) {
+
+
         // If the user is authenticated and tries to access a public route, redirect them to /budgets
         if (publicRoutes.includes(pathname)) {
             return NextResponse.redirect(new URL('/budgets', request.url));

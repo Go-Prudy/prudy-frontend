@@ -16,7 +16,7 @@ import { FaClipboardList, FaUsers, FaBell, FaDollarSign, FaChartPie, FaQuestionC
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useAuthentication } from "@/app/store/AuthStore";
-import { AuthenticatedUser } from "@/app/Types";
+import { IAuthenticatedUser } from "@/app/Types";
 import { useEffect, useState } from "react";
 
 export default function Page() {
@@ -60,7 +60,7 @@ export default function Page() {
   };
 
   const { authenticatedUser } = useAuthentication();
-  const [userData, setUserData] = useState<AuthenticatedUser>({
+  const [userData, setUserData] = useState<IAuthenticatedUser>({
     token: '',
     profile: {
       createdAt: '',

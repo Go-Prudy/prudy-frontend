@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import Cookies from "js-cookie";
 import { persist } from 'zustand/middleware';
-import { AuthenticatedUser, IForgotPassword, SignupForm, verifyOtpForm } from '../Types';
+import { IAuthenticatedUser, IForgotPassword, ISignupForm, IVerifyOtpForm } from '../Types';
 import { useRouter } from 'next/navigation';
 import { stat } from 'fs';
 
@@ -9,14 +9,14 @@ import { stat } from 'fs';
 
 
 interface AuthState {
-    form: SignupForm;
-    authenticatedUser: AuthenticatedUser | null;
+    form: ISignupForm;
+    authenticatedUser: IAuthenticatedUser | null;
     isAuthenticated: () => boolean;
     LogOut: () => void;
-    login: (data: AuthenticatedUser) => void;
-    verifyOtpForm: verifyOtpForm
-    signup: (form: SignupForm) => void;
-    verifyOtp: (form: verifyOtpForm) => void;
+    login: (data: IAuthenticatedUser) => void;
+    verifyOtpForm: IVerifyOtpForm
+    signup: (form: ISignupForm) => void;
+    verifyOtp: (form: IVerifyOtpForm) => void;
     ForgotPassword: (form: IForgotPassword) => void;
     ForgotPasswordForm: IForgotPassword
     canResend: boolean;
@@ -68,12 +68,12 @@ export const useAuthentication = create<AuthState>()(
                 phoneNumber: ''
             },
 
-            signup: (formData: SignupForm) =>
+            signup: (formData: ISignupForm) =>
                 set((state) => ({
                     form: { ...state.form, ...formData }, // Update form with the provided form data
                 })),
 
-            verifyOtp: (formData: verifyOtpForm) =>
+            verifyOtp: (formData: IVerifyOtpForm) =>
                 set((state) => ({
                     verifyOtpForm: { ...state.form, ...formData }, // Update form with the provided form data
                 })),
@@ -110,7 +110,7 @@ export const useAuthentication = create<AuthState>()(
             },
 
             // Login: Store authenticated user data
-            login: (userData: AuthenticatedUser) => {
+            login: (userData: IAuthenticatedUser) => {
                 set({ authenticatedUser: userData });
             },
 

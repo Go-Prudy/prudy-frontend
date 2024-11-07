@@ -4,12 +4,30 @@ export interface ISubAllocation {
     subCategory: string;
     amount: number;
 }
+interface ISubCategory {
+    name: string;
+}
+
+export interface IExpense {
+    amount: number;
+    budgetCategoryId: string;
+    narration: string;
+    date: string;
+}
+
+export interface ManualData {
+    name: string;
+    amount: number
+    category: string;
+    date: string;
+}
+
 
 export interface IAllocation {
     budgetCategory: string; // Category like Housing, Transportation
-    amount: number;         // Total amount for the category
-    color: string; // Add this field
-    percentage: number;     // Optional percentage representation
+    amount?: number;         // Total amount for the category
+    color?: string; // Add this field
+    percentage?: number;     // Optional percentage representation
     subAllocations?: ISubAllocation[]; // Expenses under each category
 }
 
@@ -24,6 +42,7 @@ export interface IBudget {
     name: string;
     purpose: string;
     startDate: string;
+    budgetType?: string;
     endDate: string;
     incomes?: Income[]; // Array of incomes
     allocations?: IAllocation[]; // Array of expense categories with expenses
@@ -109,4 +128,23 @@ export interface IForgotPassword {
     email: string;
     pin: string;
     confirmPin: string;
+}
+
+
+
+export interface ICreateCategory {
+    id: string
+    name: string;
+    subCategories?: ISubCategory[];
+}
+
+
+
+export interface SubCategory {
+    name: string;
+}
+
+export interface ICreateBudgetCategory {
+    name: string;
+    subCategories: SubCategory[];
 }

@@ -8,7 +8,7 @@ import cameraIcon from '@/images/camera.png'
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css'; // Import default styles
 
-const page = () => {
+const Page = () => {
     const [value, setValue] = useState<any | undefined>()
     return (
         <div className=' relative h-screen'
@@ -69,4 +69,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page

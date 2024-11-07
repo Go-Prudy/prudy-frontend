@@ -5,8 +5,6 @@ import Head from 'next/head';
 import 'react-toastify/dist/ReactToastify.css';
 import { Toaster } from 'react-hot-toast';
 import Providers from './ReactQueryProvider';
-import AuthenticationHandler from './utility/AuthenticationHandler';
-
 
 export default function RootLayout({
   children,
@@ -26,7 +24,6 @@ export default function RootLayout({
             reverseOrder={false}
           />
           <Providers>
-            {/* <AuthenticationHandler /> */}
             {children}
           </Providers>
         </NextUIProvider>

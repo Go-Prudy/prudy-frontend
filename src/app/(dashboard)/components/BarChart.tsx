@@ -79,10 +79,9 @@ const BarChart: React.FC<ChartProps> = ({
                         {labels.map((label, index) => (
                             <div key={index} className="text-center py-2">
                                 <div className="text-[#060221] font-[500] ">
-                                    {values[index] ? '₦ ' + values[index].toLocaleString() : 'N/A'}
+                                    {values[index] != null ? '₦ ' + values[index].toLocaleString() : 'N/A'}
                                 </div>
                                 <div className="text-[12px] text-[#A0A3BD]">{label}</div>
-
                             </div>
                         ))}
                     </div>
