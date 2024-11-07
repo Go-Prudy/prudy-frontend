@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import shake from '@/images/shake.gif'
 import Image from 'next/image';
 import { BsX } from 'react-icons/bs';
-import { useQuery } from '@tanstack/react-query';
-import { getPendingInvitesApi } from '@/app/services/InviteService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { acceptBudgetInviteApi, getPendingInvitesApi, rejectBudgetInviteApi } from '@/app/services/InviteService';
 import { useAuthentication } from '@/app/store/AuthStore';
 
 interface Budget {
@@ -47,14 +47,52 @@ const InviteModal = ({ show, setShow, getPendingInvitesApiData }: IProps) => {
     const inviterName = inviteData?.email || 'Unknown User';
     const budgetName = inviteData?.budget?.name || 'Unnamed Budget';
 
-    const handleDecline = async () => {
+
+
+
+
+
+    const acceptInviteMutation = useMutation({
+        mutationFn: () =>
+            acceptBudgetInviteApi(getPendingInvitesApiData[0]?.uid, getPendingInvitesApiData[0]?.budget?.uid, authenticatedUser?.token ?? ''),
+        onSuccess: () => {
+            console.log('Invite accepted successfully!');
+            // You can add any other success handling logic here, such as updating the UI
+        },
+        onError: (error: unknown) => {
+            console.error('Error accepting invite:', error);
+        },
+    });
+    const handleAcceptInvite = async () => {
         try {
-            // Decline invite logic here
+            await acceptInviteMutation.mutateAsync();
         } catch (error) {
-            // Handle error
+            console.error('Error in handleAcceptInvite:', error);
         }
     };
-    console.log(getPendingInvitesApiData);
+
+
+    // React Query mutation to reject a budget invite
+    const rejectInviteMutation = useMutation({
+        mutationFn: () =>
+            rejectBudgetInviteApi(getPendingInvitesApiData[0]?.uid, getPendingInvitesApiData[0]?.budget?.uid, authenticatedUser?.token ?? ''),
+        onSuccess: () => {
+            console.log('Invite rejected successfully!');
+            // Add any additional success handling logic here, such as updating the UI
+        },
+        onError: (error: unknown) => {
+            console.error('Error rejecting invite:', error);
+        },
+    });
+
+    // Handler to call the reject mutation
+    const handleRejectInvite = async () => {
+        try {
+            await rejectInviteMutation.mutateAsync();
+        } catch (error) {
+            console.error('Error in handleRejectInvite:', error);
+        }
+    };
 
     return (
         <motion.div
@@ -76,8 +114,13 @@ const InviteModal = ({ show, setShow, getPendingInvitesApiData }: IProps) => {
                 </p>
 
                 <div className='mt-[24px] flex items-center gap-[16px]'>
-                    <button onClick={handleDecline} className='font-[500] shadow-md bg-[#F7F7F9] rounded-[32px] w-[139px] h-[48px]'>Decline</button>
-                    <button className='text-white shadow-md font-[500] bg-[#040404] rounded-[32px] w-[139px] h-[48px]'>Accept invite</button>
+                    <button onClick={() => handleRejectInvite()} className='font-[500] shadow-md bg-[#F7F7F9] rounded-[32px] w-[139px] h-[48px]'>
+                        {rejectInviteMutation.isPending ? 'Declining...' : 'Decline'}
+                    </button>
+                    <button onClick={() => handleAcceptInvite()} className='text-white shadow-md font-[500] bg-[#040404] rounded-[32px] w-[139px] h-[48px]'>
+                        {acceptInviteMutation.isPending ?
+                            'Accepting....' : '  Accept invite'}
+                    </button>
                 </div>
             </div>
         </motion.div>

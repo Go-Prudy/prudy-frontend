@@ -12,18 +12,62 @@ export const getPendingInvitesApi = async (token: string) => {
         // toast.success(response.data.message);
         return response.data.data; // Return the budget distribution data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
     }
 };
 
-// // Example query using React Query
-// const { data: getPendingInvitesApiData, status: getPendingInvitesStatus } = useQuery({
-//     queryKey: ['getPendingInvites'],
-//     queryFn: () => getPendingInvitesApi(authenticatedUser?.token ?? ''),
-//     enabled: !!authenticatedUser?.token && !!budgetId,
-// });
 
 
-// ----------------------------------------------------------------
+export const acceptBudgetInviteApi = async (
+    inviteId: string,
+    budgetId: string,
+    token: string
+): Promise<any> => {
+    try {
+        const response = await api.post(
+            `invites/${inviteId}/budget/${budgetId}/accept`,
+            {}, // Assuming no body data is needed for this request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+                },
+            }
+        );
+        toast.success(response.data.message);
+        console.log(response);
+        return response.data.data;
+    } catch (error: any) {
+        toast.error(error?.response?.data?.message || "An error occurred");
+        console.log(error);
+        throw error; // Re-throw the error for further handling if needed
+    }
+};
 
+
+
+// Function to Reject Budget Invite
+export const rejectBudgetInviteApi = async (
+    inviteId: string,
+    budgetId: string,
+    token: string
+): Promise<any> => {
+    try {
+        const response = await api.post(
+            `invites/${inviteId}/budget/${budgetId}/reject`,
+            {}, // Assuming no body data is needed for this request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        toast.success(response.data.message);
+        console.log(response);
+        return response.data.data;
+    } catch (error: any) {
+        toast.error(error?.response?.data?.message || "An error occurred");
+        console.log(error);
+        throw error;
+    }
+};

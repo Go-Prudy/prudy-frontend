@@ -15,7 +15,7 @@ export const getAllBudgetCategories = async (token: string) => {
         console.log(response.data.data);
         return response.data.data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
 
     }
@@ -35,7 +35,7 @@ export const createBudgetCategoryApi = async (data: any, token: string) => {
         console.log(response);
         return response.data.data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
 
     }
@@ -51,7 +51,7 @@ export const RecordExpenseApi = async (budgetCategoryId: string, data: ManualDat
                 Authorization: `Bearer ${token}`, // Include the token in the Authorization header
             },
         });
-        toast.success(response.data.message);
+        toast.success(response.data.message || "An error occurred");
         console.log(response);
         return response.data.data
     } catch (error: any) {
@@ -75,7 +75,7 @@ export const GetAllBudgetsApi = async (token: string) => {
         console.log(response);
         return response.data.data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
 
     }
@@ -93,19 +93,10 @@ export const getSingleBudgetApi = async (token: string, budgetId: string) => {
         // toast.success(response.data.message);
         return response.data.data; // Return the budget data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
     }
 };
-
-// // Example query using React Query
-// const { data: singleBudgetData, status: singleBudgetStatus } = useQuery({
-//     queryKey: ['singleBudget', budgetId],
-//     queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', budgetId),
-//     enabled: !!authenticatedUser?.token && !!budgetId,
-// });
-
-
 
 
 
@@ -121,21 +112,10 @@ export const getActiveBudgetCategoriesApi = async (token: string, budgetId: stri
         // toast.success(response.data.message);
         return response.data.data; // Return the active categories
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
     }
 };
-
-// // Example query using React Query
-// const { data: activeCategoriesData, status: categoriesStatus } = useQuery({
-//     queryKey: ['activeBudgetCategories', budgetId],
-//     queryFn: () => getActiveBudgetCategoriesApi(authenticatedUser?.token ?? '', budgetId),
-//     enabled: !!authenticatedUser?.token && !!budgetId,
-// });
-
-
-// ----------------------------------------------------------------
-
 
 
 
@@ -150,20 +130,10 @@ export const getBudgetDistributionApi = async (token: string, budgetId: string) 
         toast.success(response.data.message);
         return response.data.data; // Return the budget distribution data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
     }
 };
-
-// // Example query using React Query
-// const { data: budgetDistributionData, status: distributionStatus } = useQuery({
-//     queryKey: ['budgetDistribution', budgetId],
-//     queryFn: () => getBudgetDistributionApi(authenticatedUser?.token ?? '', budgetId),
-//     enabled: !!authenticatedUser?.token && !!budgetId,
-// });
-
-
-// ----------------------------------------------------------------
 
 
 
@@ -192,7 +162,7 @@ export const createBudgetApi = async (data: any, token: string) => {
         console.log(response);
         return response.data.data
     } catch (error: any) {
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
 
     }

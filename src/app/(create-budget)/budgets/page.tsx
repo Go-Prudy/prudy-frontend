@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
 import pics from '@/images/frame.webp'; // Ensure the image is imported correctly
-import { BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
+import { BsPerson, BsPersonFill, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
+import { } from 'react-icons/fa';
 import BottomNavigation from '@/components/create-budget/BottomNavigation';
 import noBudgetImg from '@/images/List 2.webp'
 import Image from 'next/image';
@@ -59,7 +60,7 @@ const BudgetPage = () => {
             setShowInvites(true)
         }
         setShowInvites(false)
-    }, [showInvites])
+    }, [])
 
 
 
@@ -87,34 +88,38 @@ const BudgetPage = () => {
         expenseWidth: number;
     }
 
+
+    console.log(partners);
+
     const AvatarGroup: React.FC<AvatarGroupProps> = ({ partners, expenseWidth }) => {
-        const maxVisibleAvatars = 3; // Number of avatars to display before showing a count
         const maxAvatarsToShow = 3; // Maximum avatars to display
-        const additionalCount = partners.length - maxAvatarsToShow;
-
-
-
-
-
+        const additionalCount = partners?.length - maxAvatarsToShow;
 
         return (
-            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-[0px]' : 'mt-[8px]'}`}>
-                {/* Display avatars */}
-                {partners.slice(0, maxAvatarsToShow).map((partner, index) => (
-                    <Image
-                        key={partner?.uid} // Use the unique uid for the key
-                        width={1000}
-                        height={1000}
-                        src={partner.picture || '/path/to/default/image.png'} // Use a default image if no picture is provided
-                        alt={partner.name}
-                        className={`relative inline-block size-[32px] rounded-full border-2 border-white object-cover object-center ${index > 0 ? '-ml-[8px]' : ''}`}
-                        style={{ zIndex: maxAvatarsToShow - index }}
-                    />
+            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-0' : 'mt-2'}`}>
+                {partners?.slice(0, maxAvatarsToShow)?.map((partner, index) => (
+                    <>
+                        {partner.picture ?
+                            <Image
+                                key={partner.uid}
+                                width={32}
+                                height={32}
+                                src={partner.picture}
+                                alt={partner.name}
+                                className={`relative inline-block rounded-full border-2 border-white object-cover ${index > 0 ? '-ml-2' : ''}`}
+                                style={{ zIndex: maxAvatarsToShow - index }}
+                            />
+                            :
+                            <BsPersonFill key={partner.uid} className={`relative size-[32px] p-1 inline-block rounded-full border-2 border-white text-[#828282] object-cover ${index > 0 ? '-ml-2' : ''}`} />
+                        }
+
+                    </>
+
                 ))}
 
                 {/* Display "+N" if there are more avatars than the limit */}
                 {additionalCount > 0 && (
-                    <div className={`relative ml-[-0.35rem] size-[32px] rounded-full border-2 border-white bg-gray-200 text-gray-800 text-sm font-medium flex items-center justify-center`}>
+                    <div className="relative ml-[-0.35rem] w-8 h-8 rounded-full border-2 border-white bg-gray-200 text-gray-800 text-sm font-medium flex items-center justify-center">
                         +{additionalCount}
                     </div>
                 )}
@@ -246,9 +251,10 @@ const BudgetPage = () => {
 
                                                 </div>
                                                 <div className=' z-1 relative w-full'>
-                                                    {budget.collaborators.length === 0 ? null : (
-                                                        <AvatarGroup partners={budget.collaboarators} expenseWidth={3} />
+                                                    {budget?.collaborators.length === 0 ? null : (
+                                                        <AvatarGroup partners={budget?.collaborators} expenseWidth={3} />
                                                     )}
+
                                                 </div>
                                             </div>
                                         </div>
