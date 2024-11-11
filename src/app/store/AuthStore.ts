@@ -100,7 +100,7 @@ export const useAuthentication = create<AuthState>()(
                     isVerified: false,
                     hasOnboarded: false,
                     accountProviderId: '',
-                    profilePhoto: '',
+                    profilePhotoUrl: '',
                 }
             },
             // Check if user is authenticated

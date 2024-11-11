@@ -117,7 +117,7 @@ export interface IAuthenticatedUser {
         isVerified: boolean;
         hasOnboarded: boolean;
         accountProviderId: string | null;
-        profilePhoto: string | null;
+        profilePhotoUrl: string | null;
     };
 }
 
@@ -147,4 +147,19 @@ export interface SubCategory {
 export interface ICreateBudgetCategory {
     name: string;
     subCategories: SubCategory[];
+}
+
+
+export interface AccountParams {
+    sortBy?: string;
+    sortDir?: string;
+    limit?: number;
+    page?: number;
+}
+
+
+
+export interface AssignTransactionData {
+    budgetId: string;
+    categoryId: string;
 }

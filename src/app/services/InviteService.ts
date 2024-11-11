@@ -34,7 +34,7 @@ export const acceptBudgetInviteApi = async (
                 },
             }
         );
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
         console.log(response);
         return response.data.data;
     } catch (error: any) {
