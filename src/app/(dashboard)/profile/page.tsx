@@ -74,7 +74,7 @@ export default function Page() {
       isVerified: false,
       hasOnboarded: false,
       accountProviderId: '',
-      profilePhoto: '',
+      profilePhotoUrl: '',
     }
   });
 
@@ -86,13 +86,24 @@ export default function Page() {
   return (
     <div className="bg-[#FAFAFA] w-full h-screen">
       <Header2 title={'Profile'} />
-      <div onClick={() => navigation.push('/profile/user')} className=" pt-[90px] px-[24px] pb-[24px]">
+      <div onClick={() => navigation.push('/profile/user')} className=" cursor-pointer pt-[90px] px-[24px] pb-[24px]">
         <div className=" text-[hsl(0,0%,100%)] p-[24px] flex justify-between items-center w-full rounded-[20px]  " style={{
           background: 'linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)',
         }}>
           <div className='flex  items-center  gap-[8px]'>
-            <div className='flex items-center rounded-full p-1 border border-[#FFFFFF]'>
-              <BsPerson className='text-[#FFFFFF] size-[52px]' />
+            <div className={`flex items-center rounded-full   border-1 border-[#FFFFFF]   ${!userData.profile.profilePhotoUrl ? 'p-1' : 'p-0'} `}>
+              {userData.profile.profilePhotoUrl ?
+                <Image
+                  src={userData.profile.profilePhotoUrl}
+                  alt="profile"
+                  width={1000}
+                  height={1000}
+                  className=" size-[52px] rounded-full object-cover"
+                />
+                :
+                <BsPerson className='text-[#FFFFFF] size-[52px]' />
+              }
+
             </div>
             <div className='flex gap-[4px] flex-col'>
               <h1 className='font-[500] text-[#FFFFFF] leading-[24px]'>

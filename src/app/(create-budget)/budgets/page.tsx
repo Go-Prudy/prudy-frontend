@@ -89,7 +89,6 @@ const BudgetPage = () => {
     }
 
 
-    console.log(partners);
 
     const AvatarGroup: React.FC<AvatarGroupProps> = ({ partners, expenseWidth }) => {
         const maxAvatarsToShow = 3; // Maximum avatars to display
