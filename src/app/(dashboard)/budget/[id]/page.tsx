@@ -7,16 +7,19 @@ import pics from '@/images/frame.webp';
 import colab from '@/images/collab.png';
 import { BsPlus } from 'react-icons/bs';
 import { Budgets } from '@/app/data/DummyData';
-import { Allocation, Budget as IBudget } from '@/app/Types';
+import { IBudget as IBudget } from '@/app/Types';
 import Image from 'next/image';
 import noBudgetImg from '@/images/List 2.webp'
 import moneyIcon from '@/images/money.png';
 import add from '@/images/add.png'
-import { Progress } from '@nextui-org/react';
+import { CircularProgress, Progress } from '@nextui-org/react';
 import { GoChevronRight, GoPerson } from "react-icons/go";
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import DeleteSuccessModal from '../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { getSingleBudgetApi, inviteCollaboratorApi } from '@/app/services/BudgetService';
 
 
 interface Budget {
@@ -46,9 +49,13 @@ const Page = ({ params }: { params: { id: string } }) => {
     const [allBudgets, setAllBudgets] = useState<IBudget[]>(Budgets || [])
     const [showSelectedBudget, setShowSelectedBudget] = useState<boolean>(false)
     const [showRecordModal, setShowRecordModal] = useState<boolean>(false)
+    const [collaboratorEmail, setCollaboratorEmail] = useState('');
+    const [formError, setFormError] = useState<string | null>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null)
     // Define state for the selected budget
     const spanRefs = useRef<any>([]);
-
+    const { authenticatedUser } = useAuthentication();
     const [selectedBudget, setSelectedBudget] = useState<any>({
         amount: '',
         percentage: '',
@@ -153,6 +160,69 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
+    // Function to trigger form submission via button click
+    const handleButtonClick = () => {
+        if (formRef.current) {
+            formRef.current.requestSubmit(); // Triggers form submission, utilizing the native validation
+        }
+    };
+
+
+    const { data: singleBudgetData, isPending: singleBudgetStatus } = useQuery({
+        queryKey: ['singleBudget', params.id],
+        queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
+        enabled: !!authenticatedUser?.token && !!params.id,
+    });
+
+
+    console.log(singleBudgetData);
+
+    // React Query mutation to invite a collaborator
+    const inviteCollaboratorMutation = useMutation({
+        mutationFn: (email: string) =>
+            inviteCollaboratorApi(authenticatedUser?.token ?? '', singleBudgetData.uid, email),
+        onSuccess: () => {
+            console.log('Invitation sent successfully!');
+            setShowInvite(false); // Close drawer on success
+            setCollaboratorEmail(''); // Clear the input
+            setFormError(null);
+        },
+        onError: (error: unknown) => {
+            console.error('Error inviting collaborator:', error);
+        },
+    });
+
+
+    // Function to handle form submission for inviting a collaborator
+    const handleInviteCollaborator = async (event: any) => {
+        event.preventDefault();
+        setFormError(null); // Clear previous error
+
+        // Check if email includes "@"
+        if (!collaboratorEmail.includes('@')) {
+            setFormError('Please enter a valid email address containing "@"');
+            return;
+        }
+
+        await inviteCollaboratorMutation.mutateAsync(collaboratorEmail);
+    };
+
+
+    interface IAllocation {
+        budgetCategory: string;
+        color: string;
+        amount: number;
+    }
+
+    interface IBudgetCategory {
+        uid: string;
+        name: string;
+        color: string;
+        amountLeft: number;
+        percentageLeft: number;
+        allocations: IAllocation[];
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 90 }}
@@ -167,9 +237,14 @@ const Page = ({ params }: { params: { id: string } }) => {
             }}
         >
             <Header light={false} link="/budgets" title="Create new budget" />
-            <div className=' px-[24px] pt-[40px] pb-[40px] '>
-                <BarChart labels={['Income', 'Expenses', 'Amount left']}
-                    values={[1245679, 500009, 700009]}
+            <div className='px-[24px] pt-[40px] pb-[40px]'>
+                <BarChart
+                    labels={['Income', 'Expenses', 'Amount Left']}
+                    values={[
+                        singleBudgetData?.totalIncome,
+                        singleBudgetData?.totalExpenses,
+                        singleBudgetData?.totalAmountLeft
+                    ]}
                 />
             </div>
 
@@ -190,8 +265,11 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
                 {/* CATEGORIES  OR ALLOCATIONS */}
-                <div className={` bg-[#F7F7F9]  grid ${allBudgets.length == 0 ? 'grid-cols-1' : 'grid-cols-2'}  gap-[12px] overflow-y-scroll overflow-x-hidden h-[322px] py-[16px] px-[24px] mb-[24px] `}>
-                    {allBudgets.length == 0 ?
+                <div className={` bg-[#F7F7F9]  grid ${singleBudgetData?.budgetCategories == 0 || singleBudgetStatus ? 'grid-cols-1' : 'grid-cols-2'}  gap-[12px] overflow-y-scroll overflow-x-hidden h-[322px] py-[16px] px-[24px] w-full mb-[24px] `}>
+                    {singleBudgetStatus ?
+                        <CircularProgress className=' mx-auto w-full mt-[3rem]' size='md' color='default' /> : null}
+
+                    {singleBudgetData?.budgetCategories.length == 0 ?
                         <div className=' w-full'>
                             <div className='py-[25px] w-full text-center flex-col gap-[8px] flex justify-center items-center px-[51px]'>
                                 <Image src={noBudgetImg.src} width={1000} height={1000} className=' size-[124px] mb-[8px]' alt="" />
@@ -204,19 +282,19 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                         :
                         <>
-                            {allBudgets.map((budget: IBudget, budgetIndex: number) => (
-                                budget.allocations?.map((allocation: Allocation, allocationIndex: number) => (
-                                    <li
+                            {singleBudgetData?.budgetCategories.map((budget: IBudgetCategory, budgetIndex: number) => (
+                                budget.allocations.map((allocation: IAllocation, allocationIndex: number) => (
+                                    <div
                                         key={allocation.budgetCategory}
-                                        onClick={() => navigation.push(`/budget/${params.id}/${budgetIndex + 1}`)}  // Use budgetIndex + 1 to form the route
-                                        className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
+                                        onClick={() => navigation.push(`/budget/${budget.uid}/${budgetIndex + 1}`)} // Use budgetIndex + 1 to form the route
+                                        className="bg-white border border-[#EFEFF0] p-[12px] cursor-pointer rounded-[20px] flex flex-col gap-[8px]"
                                     >
                                         <div
                                             className="w-[20px] h-[20px] rounded-full"
                                             style={{ backgroundColor: allocation.color }}
                                         ></div>
                                         <h1 className="text-[12px]">{allocation.budgetCategory}</h1>
-                                        <h1 className="font-[500] text-[14px]">₦ {allocation.amount} <span className='font-[400] text-[10px] text-[#828282]'> left</span></h1>
+                                        <h1 className="font-[500] text-[14px]">₦ {allocation.amount.toLocaleString()} <span className='font-[400] text-[10px] text-[#828282]'>left</span></h1>
                                         <Progress
                                             style={{ height: '6px' }}
                                             size="md"
@@ -228,12 +306,11 @@ const Page = ({ params }: { params: { id: string } }) => {
                                                 label: "tracking-wider font-medium text-default-600",
                                                 value: "text-foreground/60",
                                             }}
-                                            value={65}
+                                            value={budget.percentageLeft}
                                         />
-                                    </li>
+                                    </div>
                                 ))
                             ))}
-
                         </>}
 
 
@@ -242,7 +319,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                 </div>
                 <div className='  border-none    px-[24px] w-full '>
-                    <div onClick={() => navigation.push("/budget/distribution")} className='bg-[#F7F7F9] rounded-[20px]  border border-[#EFEFF0] p-[16px] flex justify-between w-full'>
+                    <div onClick={() => navigation.push(`/budgets/${params.id}/distribution/`)} className='bg-[#F7F7F9] cursor-pointer rounded-[20px]  border border-[#EFEFF0] p-[16px] flex justify-between w-full'>
                         <div className=' flex  gap-[12px] items-start'>
                             <Image src={colab} alt='helo' className=' size-[44px] ' />
                             <div className=' '>
@@ -285,49 +362,60 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
-
-            {showInvite &&
-                <motion.div
-                    initial={{ opacity: 0, y: 90 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-                >
-                    <form onSubmit={handleSubmit}>
-                        <BottomDrawer
-                            footer={<button onClick={() => handleSendInvite()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Send invite</button>}
-                            label="Invite collaborator to budget"
-                            back={false}
-                            show={showInvite}
-                            close={true}
-                            onClose={() => {
-                                setShowInvite(false)
-                            }}
-                        >
-
-                            <div className="relative w-full mb-4">
-                                <div className='  z-[10]  flex w-[90%] absolute top-[30px]  left-4 text-xs justify-between items-center'>
-                                    <label htmlFor={'Name of category'} className=" relative h-fit w-fit  z-[10] text-[#828282]">
-                                        Email address
-                                    </label>
-
-                                </div>
-
-                                <input
-                                    type={'text'}
-                                    name={'Email address'}
-                                    id={'Email address'}
-                                    required={true}
-                                    placeholder={'Enter email address'}
-                                    className={`bg-[#F7F7F9]  mt-[20px] font-[500] border border-[#EFEFF0] placeholder:text-[#575757] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2 }`}
-                                />
-                            </div>
-                        </BottomDrawer>
-                    </form>
-                </motion.div>
-
-            }
+            <>
+                {showInvite && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 90 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    >
+                        <div>
+                            <BottomDrawer
+                                footer={
+                                    <button
+                                        ref={buttonRef}
+                                        type="button"
+                                        onClick={handleButtonClick}
+                                        className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+                                        disabled={inviteCollaboratorMutation.isPending}
+                                    >
+                                        {inviteCollaboratorMutation.isPending ? 'Inviting...' : 'Send invite'}
+                                    </button>
+                                }
+                                label="Invite collaborator to budget"
+                                back={false}
+                                show={showInvite}
+                                close={true}
+                                onClose={() => setShowInvite(false)}
+                            >
+                                <form onSubmit={handleInviteCollaborator} ref={formRef}>
+                                    <div className="relative w-full mb-4">
+                                        <div className="z-[10] flex w-[90%] absolute top-[30px] left-4 text-xs justify-between items-center">
+                                            <label htmlFor="Email address" className="relative h-fit w-fit z-[10] text-[#828282]">
+                                                Email address
+                                            </label>
+                                        </div>
+                                        <input
+                                            type="email"
+                                            name="Email address"
+                                            id="Email address"
+                                            required
+                                            placeholder="Enter email address"
+                                            value={collaboratorEmail}
+                                            onChange={(e) => setCollaboratorEmail(e.target.value)}
+                                            className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] placeholder:text-[#575757] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                        />
+                                        {/* Display form validation error */}
+                                        {formError && <p className="text-red-500 mt-2">{formError}</p>}
+                                    </div>
+                                </form>
+                            </BottomDrawer>
+                        </div>
+                    </motion.div>
+                )}
+            </>
 
             {
                 showSucces && <>
@@ -404,6 +492,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                         />
                                     </div>
                                 </div>
+
 
                                 <div className='mt-[24px]  p-[16px] bg-[#F7F7F9] min-h-[100px] max-h-[200px] overflow-y-scroll border border-[#E7E7EA] rounded-[16px] w-full'>
                                     {subAllocations.map((eachSubAllocation: any, index: number) => (

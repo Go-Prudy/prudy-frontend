@@ -109,7 +109,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                 </div>
                             </div>
                             <div className='flex items-start'>
-                                <div className='bg-white rounded-[8px] py-[4px] px-[8px] flex items-start gap-[8px]'>
+                                <div className='bg-white rounded-[8px] py-[4px] px-[8px] items-center flex  gap-[8px]'>
                                     <h2>₦</h2>
                                     <div className="relative inline-block w-full">
                                         <input
@@ -147,7 +147,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
             <div className='p-[24px] fixed z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]'>
                 <div className="w-full">
-                    <button onClick={handleSubmit} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
+                    <button onClick={() => handleSubmit()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
                         Proceed <BsArrowRight />
                     </button>
                 </div>

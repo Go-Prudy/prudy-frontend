@@ -8,6 +8,18 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
+                hostname: 'goprudybucket.s3.us-east-1.amazonaws.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'flagcdn.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'upload.wikimedia.org',
+            },
+            {
+                protocol: 'https',
                 hostname: 's.gravatar.com',
             },
             {

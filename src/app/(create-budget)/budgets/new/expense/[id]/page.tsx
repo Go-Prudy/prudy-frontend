@@ -12,43 +12,64 @@ import { useRouter } from 'next/navigation';
 import warninglogo from '@/images/warn.gif'
 import Successlogo from '@/images/success.gif'
 import { useBudgetStore } from '@/app/store/Store';
-import { Allocation, Budget, Budget as IBudget, SubAllocation } from '@/app/Types';
+import { IAllocation, IBudget, ICreateCategory, IExpense, ISubAllocation } from '@/app/Types';
 import { Budgets } from '@/app/data/DummyData';
 
 import DeleteSuccessModal from '@/app/(dashboard)/components/DeleteSuccessModal';
 import DeleteConfirmationModal from '@/app/(dashboard)/components/DeleteConfirmationModal';
+import { createBudgetApi, createBudgetCategoryApi, getAllBudgetCategories, RecordExpenseApi } from '@/app/services/BudgetService';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CircularProgress } from '@nextui-org/react';
 
-const Page = () => {
+const Page = ({ params }: { params: { id: string } }) => {
 
     const prevIncomes = [
         { index: 1, incomeType: 'Salary', amount: 0 },
     ];
+    const budgetId = params.id;
+    const all_Budgets = useBudgetStore((state) => state.budgets);
+    const currentBudget = all_Budgets.find((b) => b.id === budgetId);
+
 
     const [showSelectedBudget, setShowSelectedBudget] = useState<boolean>(false)
     const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState<boolean>(false)
     const [showNewBudgetCategory, setShowNewBudgetCategory] = useState<boolean>(false)
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
-    const [selectedBudget, setSelectedBudget] = useState<Budget | any>()
-    const [allBudgets, setAllBudgets] = useState<IBudget[]>(Budgets || [])
+    const [selectedBudget, setSelectedBudget] = useState<any>()
+    const [allBudgets, setAllBudgets] = useState<[]>([])
     const spanRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const inputRefsExpense = useRef<(HTMLInputElement | null)[]>([]);
-    const [allocations, setAllocations] = useState<Allocation[]>([])
+    const [allocations, setAllocations] = useState<IAllocation[]>([])
     const [updatedIndex, setUpdatedIndex] = React.useState<number | null>(null);
     const [updatedField, setUpdatedField] = React.useState<'subCategory' | 'amount' | null>(null);
     const [updatedValue, setUpdatedValue] = React.useState<string | null>(null);
-    const [previousSubAllocations, setPreviousSubAllocations] = useState<SubAllocation[]>([]);
+    const [previousSubAllocations, setPreviousSubAllocations] = useState<ISubAllocation[]>([]);
+    const { addAllocationToBudget, createBudgetCategory, createAllocation } = useBudgetStore();
+    const [lastBudget, setLastBudget] = useState<IBudget | null>(null);
+    const [categoryName, setCategoryName] = useState<string>('')
+    const [loading, setLoading] = useState(false)
+    const [isClient, setIsClient] = useState(false);
+    const [triggered, setTriggered] = useState(false);
+    const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+    const queryClient = useQueryClient();
 
 
     const navigate = useRouter();
-    const { getLastBudget } = useBudgetStore((state) => ({
+    const { authenticatedUser } = useAuthentication();
+
+    const { getLastBudget, budgets, addToCategory, allCategories } = useBudgetStore((state) => ({
         getLastBudget: state.getLastBudget,
+        budgets: state.budgets,
+        allCategories: state.allCategories,
+        addToCategory: state.addToCategory
     }))
+    // console.log(budgets);
 
-    const { addAllocationToBudget, createAllocation } = useBudgetStore();
 
-    const [lastBudget, setLastBudget] = useState<IBudget | null>(null);
+
 
 
     useEffect(() => {
@@ -80,16 +101,37 @@ const Page = () => {
     };
 
 
-    const handleSubmit = () => {
-        navigate.push('/budgets/new/expense');
+    const handleSubmit = async () => {
+        try {
+            setLoading(true)
+            const createCategoryData = {
+                name: categoryName,
+                subCategories: [],
+            };
+            console.log(createCategoryData);
+            await createCategoryMutation.mutateAsync(createCategoryData);
+            setCategoryName('')
+            setLoading(false)
+            setShowNewBudgetCategory(false)
+        } catch (error) {
+            console.log(error);
+            setLoading(false)
+        }
     };
 
+
+    // Calculate income, expense, and percentage of income used
     const income = lastBudget?.incomes?.reduce((total, income) => total + income.amount, 0) || 0;
     const expense = 0;
     const incomeLeft = income - expense;
-    const percentageIncomeLeft = (incomeLeft / income) * 100;
-    const percentageIncomeUsed = 100 - percentageIncomeLeft;
 
+    // Calculate percentage of income used, capped at 100%
+    const percentageIncomeUsed = income > 0 ? Math.min((expense / income) * 100, 100) : 0;
+    const percentageIncomeLeft = 100 - percentageIncomeUsed; // Calculate remaining percentage
+    console.log("Income:", income);
+    console.log("Expense:", expense);
+    console.log("Percentage of Income Used:", percentageIncomeUsed);
+    console.log("Percentage of Income Left:", percentageIncomeLeft);
 
     const handleClose = () => {
         setShowSelectedBudget(false);
@@ -99,21 +141,21 @@ const Page = () => {
 
     const createNewCategory = () => {
         try {
-            createAllocation(selectedBudget.category, selectedBudget.category, selectedBudget)
-            setShowNewBudgetCategory(false)
+            handleSaveCategory()
+            // createBudgetCategory(lastBudget?.id || '')
+            // addToCategory({ name: categoryName, id: lastBudget?.id || '' }, lastBudget?.id || '')
+            // setShowNewBudgetCategory(false)
         } catch (error) {
             console.log(error);
 
         }
     }
 
-    const handleSaveCategory = (id: string) => {
-        try {
-            setShowSelectedBudget(!showSelectedBudget)
-        } catch (error) {
-            console.log(error);
-        }
-    }
+
+
+
+
+
 
     const handleDeleteOfCategory = (id: string) => {
         try {
@@ -136,31 +178,48 @@ const Page = () => {
 
 
 
-    // Format number to 2 decimal places and add '%' symbol
-    // Ensure percentage is a number and format to 2 decimal places with '%' symbol
-    const formatPercentage = (percentage: number) => {
-        const percentageNumber = Number(percentage); // Ensure percentage is a number
-        return `${percentageNumber.toFixed(2)}%`;
-    };
 
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const amount = parseFloat(e.target.value) || 0;
-        const percentage = income > 0 ? (amount / income) * 100 : 0;
+        const enteredAmount = parseFloat(e.target.value.replace(/,/g, "")) || 0;  // Remove commas for parsing
+        const cappedAmount = Math.min(enteredAmount, income);  // Cap the amount to not exceed income
+        const percentage = income > 0 ? (cappedAmount / income) * 100 : 0;
 
-        if (amount > income) {
-            alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
-        } else {
-            setSelectedBudget((prev: any) => ({
-                ...prev,
-                amount: amount > income ? income : amount,
-                percentage: percentage > 100 ? 100 : percentage,
-            }));
+        if (enteredAmount > income) {
+            alert(`Your expense exceeds your total income for ${lastBudget?.name}`);
         }
 
-
-
+        // Update the selected budget's amount and percentage
+        setSelectedBudget((prev: any) => ({
+            ...prev,
+            amount: cappedAmount,
+            percentage: Math.min(percentage, 100), // Cap the percentage at 100
+        }));
     };
+    // Triggers when the user leaves the input field.
+    const handleBlur = (index: number) => {
+        const subAllocation = selectedBudget?.subAllocations[index];
+        const getCurrentDate = () => {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const day = String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        };
+        if (subAllocation?.subCategory && subAllocation?.amount) {
+            const data = {
+                amount: subAllocation.amount,
+                budgetCategoryId: selectedBudget?.uid,
+                narration: subAllocation?.subCategory,
+                date: getCurrentDate()
+
+            }
+
+        }
+        setFocusedIndex(null); // Reset focus tracking
+    };
+
 
     // Handle percentage change and update amount
     const handlePercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +236,7 @@ const Page = () => {
         if (!selectedBudget) return;
 
         // Create a new sub-allocation with default values
-        const newSubAllocation: SubAllocation = {
+        const newSubAllocation: ISubAllocation = {
             subCategory: '',
             amount: 0,
         };
@@ -200,8 +259,25 @@ const Page = () => {
         }
     }, [selectedBudget?.amount, income]);
 
+
+
+
     useEffect(() => {
-        console.log(selectedBudget);
+        if (selectedBudget && (!selectedBudget.subAllocations || selectedBudget.subAllocations.length === 0)) {
+            const defaultSubAllocation: ISubAllocation = {
+                subCategory: '',
+                amount: 0,
+            };
+
+            setSelectedBudget((prevBudget: any) => ({
+                ...prevBudget,
+                subAllocations: [defaultSubAllocation],
+            }));
+        }
+    }, [selectedBudget]);
+
+    useEffect(() => {
+        // console.log(selectedBudget);
 
         if (selectedBudget?.amount > income) {
             alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
@@ -218,62 +294,88 @@ const Page = () => {
     const handleAllocationChange = (index: number, field: 'subCategory' | 'amount', value: string) => {
         if (!selectedBudget) return;
 
+        if (selectedBudget?.amount?.toLocaleString() === '') {
+            alert('Assign amount/percentage of income for this category')
+        }
         let newValue: string | number;
 
         if (field === 'amount') {
-            // Allow empty input to be treated as 0, or parse the number if present
+            // Trim and check for empty value
             const trimmedValue = value.trim();
-            newValue = trimmedValue === '' ? 0 : parseFloat(trimmedValue);
+            newValue = trimmedValue === '' ? '' : parseFloat(trimmedValue); // Keep empty string if input is empty
 
             // Check if the parsed value is a valid number
-            if (isNaN(newValue)) return;
+            if (newValue !== '' && isNaN(newValue as number)) return; // Exit if not a valid number
         } else {
-            // For 'subCategory', we just use the value as-is
-            newValue = value;
+            newValue = value; // For 'subCategory', use the value as-is
         }
 
-        // Update sub-allocations with the new value
-        const updatedSubAllocations = selectedBudget.subAllocations.map((subAllocation: SubAllocation, i: number) => {
-            if (i + 1 === index) {
+
+
+        // Update sub-allocations
+        const updatedSubAllocations = selectedBudget.subAllocations.map((subAllocation: ISubAllocation, i: number) => {
+            if (i === index) {
                 return {
                     ...subAllocation,
-                    [field]: field === 'amount' ? (newValue as number) : (newValue as string)
+                    [field]: field === 'amount' ? (newValue as string) : (newValue as string)
                 };
             }
             return subAllocation;
         });
 
-        // Temporarily update the state with the new sub-allocations
-        setSelectedBudget((prevBudget: IBudget) => ({
-            ...prevBudget,
-            subAllocations: updatedSubAllocations
-        }));
+        if (newValue > selectedBudget?.amount) {
+            alert('its your expense is too high for your income')
+        } else {
+            setSelectedBudget((prevBudget: IBudget) => ({
+                ...prevBudget,
+                subAllocations: updatedSubAllocations
+            }));
+        }
+
+        // Update the state
+
     };
 
 
-    useEffect(() => {
-        if (!selectedBudget) return;
 
-        // Calculate the current total amount of all sub-allocations
-        const currentTotal = selectedBudget.subAllocations.reduce(
-            (acc: number, sub: SubAllocation) => acc + (sub.amount || 0), 0
-        );
+    const {
+        data: budgetCategoriesData = [],
+        status: fetchStatus,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ['allBudgetCategories'],
+        queryFn: () => getAllBudgetCategories(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token,
+    });
 
-        // Check if the new total exceeds the budget
-        if (currentTotal > selectedBudget.amount) {
-            alert(`Total expenses exceed the budget for ${selectedBudget.budgetCategory}. Please adjust your allocations.`);
+    const budgetCategoriesArray = Array.isArray(budgetCategoriesData) ? budgetCategoriesData : [];
 
-            // Revert the sub-allocations to the previous state
-            setSelectedBudget((prevBudget: IBudget) => ({
-                ...prevBudget,
-                subAllocations: previousSubAllocations
-            }));
-        } else {
-            // Update previousSubAllocations if the total is within budget
-            setPreviousSubAllocations(selectedBudget.subAllocations);
+    console.log(budgetCategoriesData);
+
+
+    const handleSaveCategory = async () => {
+        try {
+            // console.log(budgetCategoriesData)
+            console.log(selectedBudget);
+            // console.log(lastBudget);
+            // console.log(allCategories);
+            const data = {
+                name: lastBudget?.name,
+                purpose: lastBudget?.purpose,
+                startDate: lastBudget?.startDate,
+                endDate: lastBudget?.startDate,
+                incomes: lastBudget?.incomes,
+                allocations: [
+
+                ]
+            }
+
+        } catch (error) {
+            console.log(error);
+            setLoading(false)
         }
-
-    }, [selectedBudget]); // Dependency array ensures useEffect runs whenever selectedBudget changes
+    }
 
     // To initialize previousSubAllocations when component mounts or selectedBudget is first set
     useEffect(() => {
@@ -281,6 +383,79 @@ const Page = () => {
             setPreviousSubAllocations(selectedBudget.subAllocations);
         }
     }, [selectedBudget]);
+
+
+
+
+
+
+    // Mutations
+    const createCategoryMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (authenticatedUser) {
+                return createBudgetCategoryApi(data, authenticatedUser.token);
+            }
+            throw new Error("User is not authenticated");
+        },
+        onSuccess: (data: any) => {
+            if (data?.success) {
+                setLoading(false);
+                console.log(data);
+                const { success, message, ...rest } = data;
+                console.log(rest.data);
+            }
+        },
+        onError: (error: Error) => {
+            console.error('Error creating category:', error);
+            setLoading(false);
+        },
+    });
+
+
+
+
+    // Mutations
+    const CreateBudgetMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (authenticatedUser) {
+                return createBudgetApi(data, authenticatedUser.token);
+            }
+            throw new Error("User is not authenticated");
+        },
+        onSuccess: (data: any) => {
+            if (data?.success) {
+                setLoading(false);
+                console.log(data);
+                const { success, message, ...rest } = data;
+                console.log(rest.data);
+                navigate.push('/')
+            }
+        },
+        onError: (error: Error) => {
+            console.error('Error creating category:', error);
+            setLoading(false);
+        },
+    });
+
+
+
+    const handleCreateBudget = async () => {
+        try {
+            console.log(currentBudget);
+            // navigate.push('/')
+            const { id, budgetType, ...rest } = currentBudget || {};
+            const newData = { ...rest, allocations: [] }
+            console.log(newData);
+            CreateBudgetMutation.mutateAsync(newData)
+            navigate.push('/budgets')
+
+        } catch (error) {
+            console.log(error);
+
+        }
+    }
+
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 90 }}
@@ -301,16 +476,17 @@ const Page = () => {
                         <span className=' text-[#575757] text-[12px] font-[400] leading-[16px] mx-[8px]'>left of income</span>
                     </h1>
 
-                    <div className="w-full bg-white rounded-[10px] mt-[8px] h-[8px]">
+                    <div className="w-full bg-white rounded-[10px] mt-[8px] h-[8px] relative overflow-hidden">
                         {/* Progress Bar Background (remaining part) */}
                         <div
-                            className="bg-[#FB8417] rounded-[10px] h-[8px]"
-                            style={{ width: `${percentageIncomeUsed}%` }}
+                            className="bg-white rounded-[10px] h-[8px] absolute top-0 left-0"
+                            style={{ width: `${percentageIncomeUsed}%` }} // Remaining part
                         ></div>
+
                         {/* Progress Bar Foreground (filled part) */}
                         <div
-                            className="bg-white rounded-[10px] h-[8px] absolute top-0 left-0"
-                            style={{ width: `${percentageIncomeLeft}%` }}
+                            className="bg-[#FB8417] rounded-[10px] h-[8px] relative"
+                            style={{ width: `${percentageIncomeLeft}%` }} // Used part
                         ></div>
                     </div>
                 </div>
@@ -327,43 +503,56 @@ const Page = () => {
 
 
             {/* CATEGORIES  OR ALLOCATIONS */}
-            <div className={` bg-[#F7F7F9]  grid ${allBudgets.length == 0 ? 'grid-cols-1' : 'grid-cols-2'}  gap-[12px] overflow-y-scroll overflow-x-hidden h-[322px] py-[16px] px-[24px] mb-[100px] `}>
-                {allBudgets.length == 0 ?
-                    <div className=' w-full'>
-                        <div className='py-[25px] w-full text-center flex-col gap-[8px] flex justify-center items-center px-[51px]'>
-                            <Image src={noBudgetImg.src} width={1000} height={1000} className=' size-[124px] mb-[8px]' alt="" />
-                            <h1 className=' font-[500] leading-[24px] '>You do not have any budget history yet.</h1>
-                            <h1 className=' text-[14px] text-[#828282] leading-[16.8px]'>Click the create button above to <br /> get started.</h1>
+            <div className={` bg-[#F7F7F9]  grid ${budgetCategoriesData?.length == 0 ? 'grid-cols-1' : 'grid-cols-1'}  gap-[12px] overflow-y-scroll overflow-x-hidden min-h-[322px] py-[16px] px-[24px] mb-[100px] `}>
 
+
+
+                <div className={`grid ${fetchStatus === 'pending' || budgetCategoriesArray.length === 0 ? 'grid-cols-1' : 'grid-cols-2'} gap-[16px]`}>
+                    {fetchStatus === 'pending' ? (
+                        // Loading State
+                        <div key="loading" className="flex justify-center items-center py-[25px]">
+                            <CircularProgress size="md" color="default" />
                         </div>
+                    ) : (
+                        <>
+                            {budgetCategoriesArray.length === 0 ? (
+                                // No Data State
+                                <div className="w-full">
+                                    <div className="py-[25px] w-full text-center flex flex-col gap-[8px] justify-center items-center px-[51px]">
+                                        <Image src={noBudgetImg.src} width={1000} height={1000} className="size-[124px] mb-[8px]" alt="No Budget" />
+                                        <h1 className="font-[500] leading-[24px]">You do not have any budget history yet.</h1>
+                                        <h1 className="text-[14px] text-[#828282] leading-[16.8px]">Click the create button above to <br /> get started.</h1>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Data Display
+                                <>
+                                    {budgetCategoriesArray.map((budget: any) => (
+                                        <ul key={budget.id} className="budget-list grid grid-cols-1 gap-[16px] w-full">
+                                            <li
+                                                onClick={() => {
+                                                    setShowSelectedBudget(!showSelectedBudget);
+                                                    setSelectedBudget(budget);
+                                                    console.log(budget);
+                                                }}
+                                                className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
+                                            >
+                                                <div
+                                                    className="w-[20px] h-[20px] rounded-full"
+                                                    style={{ backgroundColor: budget.color }}
+                                                ></div>
+                                                <h1 className="text-[12px]">{budget.name}</h1>
+                                            </li>
+                                        </ul>
+                                    ))}
+                                </>
+                            )}
+                        </>
+                    )}
+                </div>
 
-                    </div>
 
-                    :
-                    <>
-                        {allBudgets.map((budget: IBudget) => (
-                            budget.allocations?.map((allocation: Allocation) => (
-                                <li
-                                    key={allocation.budgetCategory}
-                                    onClick={() => {
-                                        setShowSelectedBudget(!showSelectedBudget)
-                                        setSelectedBudget(allocation)
 
-                                    }}
-                                    className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
-                                >
-                                    <div
-                                        className="w-[20px] h-[20px] rounded-full"
-                                        style={{ backgroundColor: allocation.color }}
-                                    ></div>
-                                    <h1 className="text-[12px]">{allocation.budgetCategory}</h1>
-                                    <h1 className="font-[500] text-[14px]">₦ {allocation.amount}</h1>
-                                </li>
-                            ))
-
-                        ))}
-
-                    </>}
             </div>
 
 
@@ -378,11 +567,11 @@ const Page = () => {
                     className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 > <BottomDrawer
                     footer={<div className="w-full grid gap-y-[16px]">
-                        <button onClick={() => handleSaveCategory('111')} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">save </button>
+                        <button onClick={() => handleSaveCategory()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">save </button>
 
                         <button onClick={() => handleDeleteOfCategory('111')} className="btn w-full text-[#F5365C] rounded-[32px] px-[28px] py-[14px] bg-[#FBEDEF] flex items-center justify-center gap-[8px] font-[500]">Delete category</button>
                     </div>}
-                    label={`${selectedBudget?.budgetCategory}`}
+                    label={`${selectedBudget?.name}`}
                     back={false}
                     show={showSelectedBudget}
                     close={true}
@@ -396,87 +585,83 @@ const Page = () => {
                                 <div className='py-[12px]'>
                                     <h1 className=' text-[#828282] text-[12px] leading-[14.4px] '>Amount</h1>
                                     <input
-                                        value={selectedBudget?.amount || ''}
+                                        value={selectedBudget?.amount?.toLocaleString()}
                                         className=' bg-transparent mt-[4px]'
                                         type="text"
                                         name="amount"
+                                        placeholder='enter amount'
                                         onChange={handleAmountChange}
                                     />
                                 </div>
                                 <div className='py-[12px] w-[90%] border-l px-[16px] border-l-[#E7E7EA]'>
                                     <h1 className=' text-[#828282] text-[12px] leading-[14.4px] '>Percentage</h1>
                                     <input
-                                        value={formatPercentage(selectedBudget?.percentage || 0)}
-                                        className=' bg-transparent mt-[4px]'
+                                        className='bg-transparent mt-[4px]'
                                         type="text"
                                         name="percentage"
-                                        onChange={handlePercentageChange}
+                                        value={
+                                            selectedBudget && incomeLeft
+                                                ? isNaN((selectedBudget.amount / incomeLeft) * 100)
+                                                    ? '0'
+                                                    : ((selectedBudget.amount / incomeLeft) * 100).toFixed(2)
+                                                : '0'
+                                        }
+                                        readOnly
                                     />
                                 </div>
                             </div>
 
-                            <div className=' mt-[24px] h-[30vh] overflow-y-scroll p-[16px] bg-[#F7F7F9]  border border-[#E7E7EA]  rounded-[16px]  w-full '>
-                                <>
-                                    {selectedBudget?.subAllocations?.map((eachSubAllocation: any, index: number) => (
-                                        <button
-                                            type='button'
-                                            key={index + 1}
-                                            className="flex hover:scale-105 transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
-                                        >
-                                            <div className='flex gap-[4px] w-full'>
-                                                <div
-                                                    style={{ backgroundColor: selectedBudget?.color }}
-                                                    className='grid place-content-center rounded-[16px] text-white size-[28px]'
-                                                >
-                                                    <Image src={moneyIcon} className="size-[12px]" alt={'icon'} width={1000} height={1000} />
-                                                </div>
-                                                <div className='text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block'>
+
+                            <div className='mt-[24px] h-[30vh] overflow-y-scroll p-[16px] bg-[#F7F7F9] border border-[#E7E7EA] rounded-[16px] w-full'>
+                                {selectedBudget?.subAllocations?.map((eachSubAllocation: any, index: number) => (
+                                    <button
+                                        type='button'
+                                        key={index} // Unique key for each item
+                                        className="flex hover:shadow-sm hover:p-[8px] hover:rounded-md hover:font-semibold hover:bg-[#0a0a0a09] transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
+                                    >
+                                        <div className='flex gap-[4px] w-full'>
+                                            <div
+                                                style={{ backgroundColor: selectedBudget?.color }}
+                                                className='grid place-content-center rounded-[16px] text-white size-[28px]'
+                                            >
+                                                <Image src={moneyIcon} className="size-[12px]" alt={'icon'} width={1000} height={1000} />
+                                            </div>
+                                            <div className='text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block'>
+                                                <input
+                                                    value={eachSubAllocation.subCategory || ''}
+                                                    onChange={(e) => handleAllocationChange(index, 'subCategory', e.target.value)}
+                                                    placeholder="Category"
+                                                    className='bg-transparent w-full text-ellipsis overflow-hidden whitespace-nowrap'
+                                                    onBlur={() => handleBlur(index)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start">
+                                            <div className='bg-white rounded-[8px] py-[4px] px-[8px] flex items-start gap-[8px]'>
+                                                ₦
+                                                <div className="relative inline-block w-full">
                                                     <input
-                                                        value={eachSubAllocation.subCategory || ''}
-                                                        onChange={(e) => handleAllocationChange(index + 1, 'subCategory', e.target.value)}
-                                                        placeholder="Category"
-                                                        className='bg-transparent w-full text-ellipsis overflow-hidden whitespace-nowrap'
+                                                        value={eachSubAllocation.amount ? eachSubAllocation.amount.toLocaleString('en-US') : ''}
+                                                        onBlur={() => handleBlur(index)}
+                                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                            const value = e.target.value;
+                                                            const numericValue = value.replace(/[^0-9.]/g, ''); // Keep only numbers and decimal point
+                                                            const cleanedValue = numericValue.replace(/(\..*)\..*/g, '$1'); // Allow only one decimal point
+                                                            const finalValue = cleanedValue === '' ? '' : parseFloat(cleanedValue).toString();
+                                                            handleAllocationChange(index, 'amount', finalValue);
+                                                        }}
+                                                        type="text" // Change to text to allow formatted input
+                                                        inputMode="decimal"
+                                                        pattern="[0-9]*[.,]?[0-9]*"
+                                                        onWheel={(e) => e.currentTarget.blur()}
+                                                        className="px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                                                        style={{ width: '140px', maxWidth: '140px' }}
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="flex items-start">
-                                                <div className='bg-white rounded-[8px] py-[4px] px-[8px] flex items-start gap-[8px]'>
-                                                    ₦
-                                                    <div className="relative inline-block w-full">
-                                                        <input
-                                                            value={isNaN(eachSubAllocation.amount) ? '' : formatNumber(eachSubAllocation.amount)}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                const value = e.target.value;
-                                                                const numericValue = value.replace(/[^0-9.]/g, ''); // Keep only numbers and decimal point
-                                                                const cleanedValue = numericValue.replace(/(\..*)\..*/g, '$1'); // Allow only one decimal point
-
-                                                                // Ensure the value is a valid number or empty string
-                                                                const finalValue = cleanedValue === '' ? '' : parseFloat(cleanedValue).toString();
-
-                                                                handleAllocationChange(index + 1, 'amount', finalValue);
-                                                            }}
-                                                            type="text"
-                                                            inputMode="decimal"
-                                                            pattern="[0-9]*[.,]?[0-9]*"
-                                                            onWheel={(e) => e.currentTarget.blur()}
-                                                            className="px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                                                            style={{ width: '140px', maxWidth: '140px' }}
-                                                        />
-                                                        <span
-                                                            ref={(el) => {
-                                                                spanRefs.current[index] = el;
-                                                            }}
-                                                            className="absolute invisible whitespace-pre"
-                                                        >
-                                                            {formatNumber(eachSubAllocation.amount)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-
-                                </>
+                                        </div>
+                                    </button>
+                                ))}
 
 
                                 <button
@@ -535,10 +720,21 @@ const Page = () => {
                     transition={{ duration: 0.3 }}
                     className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 >
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={(e) => {
+                        e.preventDefault()
+                        handleSubmit()
+                    }}
+                    >
 
                         <BottomDrawer
-                            footer={<button onClick={() => createNewCategory()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Save</button>}
+                            footer={<button type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
+
+                                {loading ?
+                                    <div className=' flex gap-2 items-center justify-center mx-auto w-full'>
+                                        <CircularProgress color='default' size='sm' />
+
+                                    </div> : 'Save'}
+                            </button>}
                             label="Create budget category"
                             back={false}
                             show={showNewBudgetCategory}
@@ -562,6 +758,8 @@ const Page = () => {
                                     name={'Name of category'}
                                     id={'Name of category'}
                                     required={true}
+                                    value={categoryName}
+                                    onChange={(e) => setCategoryName(e.target.value)}
                                     placeholder={'Enter name'}
                                     className={`bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2 }`}
                                 />
@@ -573,7 +771,18 @@ const Page = () => {
             }
             <div className='p-[24px] fixed z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]'>
                 <div className="w-full">
-                    <button className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Proceed <BsArrowRight /></button>
+                    <button onClick={() => handleCreateBudget()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
+                        {CreateBudgetMutation.isPending
+                            ?
+
+                            'creating budget...'
+                            :
+                            <>
+                                Proceed
+                                <BsArrowRight />
+                            </>
+                        }
+                    </button>
                 </div>
             </div>
 

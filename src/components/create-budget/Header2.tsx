@@ -19,6 +19,8 @@ import profile1 from '@/images/profile-circle 2.png';
 import setting from '@/images/setting-3.png';
 import setting1 from '@/images/setting-3 2.png';
 import upgrade from '@/images/upgrade.png';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { IAuthenticatedUser } from '@/app/Types';
 
 interface Iprop {
     title: string;
@@ -55,6 +57,31 @@ const Header2 = ({ title }: Iprop) => {
         setMenuOpen(!menuOpen);
     };
 
+    const { authenticatedUser } = useAuthentication();
+    const [userData, setUserData] = useState<IAuthenticatedUser>({
+        token: '',
+        profile: {
+            createdAt: '',
+            updatedAt: '',
+            uid: '',
+            firstName: '',
+            lastName: '',
+            email: '',
+            phoneNumber: '',
+            registeredWith: '',
+            isVerified: false,
+            hasOnboarded: false,
+            accountProviderId: '',
+            profilePhotoUrl: '',
+        }
+    });
+
+    useEffect(() => {
+        if (authenticatedUser) {
+            setUserData(authenticatedUser);
+        }
+    }, [authenticatedUser]);
+
     return (
         <div className={`z-[20] fixed top-0 bg-[#FAFAFA] pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-[#2D2D2D] w-full items-center pb-[16px] transition-all duration-300 `}>
             {/* Left Section: Profile */}
@@ -76,11 +103,25 @@ const Header2 = ({ title }: Iprop) => {
                 <div className='relative w-full'>
                     <div className='bg-white w-[295px] h-[100vh] overflow-y-scroll z-10 relative py-[48px] px-[24px] transition-transform duration-300' style={{ transform: menuOpen ? 'translateX(0)' : 'translateX(-100%)' }}>
                         <div className='flex items-start gap-[8px]'>
-                            <div className='flex items-center rounded-full p-1 border border-[#101010]'>
-                                <BsPerson className='text-black size-[38px]' />
+                            <div className={`flex items-center rounded-full     {userData.profile.profilePhotoUrl ? ' p-0 ' :'p-1 border border-[#101010]'} `}>
+                                {userData.profile.profilePhotoUrl ?
+                                    <Image
+                                        src={userData.profile.profilePhotoUrl}
+                                        alt="profile"
+                                        width={1000}
+                                        height={1000}
+                                        className=" size-[52px] rounded-full object-cover"
+                                    />
+                                    :
+                                    <BsPerson className='text-black size-[38px]' />
+                                }
                             </div>
                             <div className='flex gap-[4px] flex-col'>
-                                <h1 className='font-[500] text-black leading-[24px]'>Ayomide Asekun</h1>
+                                <h1 className='font-[500] text-black leading-[24px]'>
+
+                                    {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
+
+                                </h1>
                                 <Image className='backdrop-blur-3xl w-[74px] h-[20px]' alt='premium' width={1000} height={1000} src={premium} />
                             </div>
                         </div>
@@ -103,8 +144,8 @@ const Header2 = ({ title }: Iprop) => {
                                 {currentRoute === '/profile' ? <Image className='size-[24px]' alt='profile' src={profile1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={profile} width={1000} height={1000} />}
                                 Profile
                             </Link>
-                            <Link href='/settings' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/settings' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
-                                {currentRoute === '/settings' ? <Image className='size-[24px]' alt='profile' src={setting1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={setting} width={1000} height={1000} />}
+                            <Link href='/settings/passcode' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/settings/passcode' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
+                                {currentRoute === '/settings/passcode' ? <Image className='size-[24px]' alt='profile' src={setting1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={setting} width={1000} height={1000} />}
                                 Settings
                             </Link>
                         </ul>

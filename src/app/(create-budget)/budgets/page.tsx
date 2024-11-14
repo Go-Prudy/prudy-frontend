@@ -2,18 +2,25 @@
 import React, { useEffect, useState } from 'react';
 import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
 import pics from '@/images/frame.webp'; // Ensure the image is imported correctly
-import { BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
+import { BsPerson, BsPersonFill, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
+import { } from 'react-icons/fa';
 import BottomNavigation from '@/components/create-budget/BottomNavigation';
 import noBudgetImg from '@/images/List 2.webp'
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import CreateBudget from '@/components/create-budget/CreateBudget';
 import { Budgets } from '@/app/data/DummyData';
-import { Avatar, AvatarGroup } from "@nextui-org/react";
+import { Avatar, AvatarGroup, CircularProgress } from "@nextui-org/react";
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { GetAllBudgetsApi } from '@/app/services/BudgetService';
+import { useAuthentication } from '@/app/store/AuthStore';
+import InviteModal from '@/app/(dashboard)/components/InviteModal';
+import { getPendingInvitesApi } from '@/app/services/InviteService';
 
 const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
+    const [showInvites, setShowInvites] = useState(false);
     const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
     const [allBudgets, setAllBudgets] = useState(Budgets || []);
     const navigation = useRouter()
@@ -28,6 +35,36 @@ const BudgetPage = () => {
         };
     }, []);
 
+
+    const { authenticatedUser } = useAuthentication();
+
+    const { data: budgets = [], isLoading, isPending, error } = useQuery({
+        queryKey: ['allBudgetCategories'],
+        queryFn: () => GetAllBudgetsApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token,
+        staleTime: 5 * 60 * 1000
+    });
+
+    // console.log(budgets);
+
+    // Example query using React Query
+    const { data: getPendingInvitesApiData = [], status: getPendingInvitesStatus } = useQuery({
+        queryKey: ['getPendingInvites'],
+        queryFn: () => getPendingInvitesApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token
+    });
+
+
+    useEffect(() => {
+        if (getPendingInvitesApiData.length > 0) {
+            setShowInvites(true)
+        }
+        setShowInvites(false)
+    }, [])
+
+
+
+
     // Calculate total income and allocations
     const totalIncome = allBudgets.reduce((total, budget) =>
         total + (budget.incomes?.reduce((sum, income) => sum + income.amount, 0) || 0), 0
@@ -41,6 +78,9 @@ const BudgetPage = () => {
     const partners = allBudgets.length > 0 ? allBudgets[0].partners : [];
     interface Partner {
         image: string;
+        uid: string;
+        name: string;
+        picture: string;
     }
 
     interface AvatarGroupProps {
@@ -48,34 +88,41 @@ const BudgetPage = () => {
         expenseWidth: number;
     }
 
+
+
     const AvatarGroup: React.FC<AvatarGroupProps> = ({ partners, expenseWidth }) => {
-        const maxVisibleAvatars = 3; // Number of avatars to display before showing a count
         const maxAvatarsToShow = 3; // Maximum avatars to display
-        const additionalCount = partners.length - maxAvatarsToShow;
+        const additionalCount = partners?.length - maxAvatarsToShow;
 
         return (
-            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-[0px]' : 'mt-[8px]'}`}>
-                {/* Display avatars */}
-                {partners.slice(0, maxAvatarsToShow).map((partner, index) => (
-                    <Image
-                        key={index}
-                        width={1000}
-                        height={1000}
-                        src={partner.image}
-                        alt={`Partner ${index}`}
-                        className={`relative inline-block size-[32px]  rounded-full border-2 border-white object-cover object-center ${index > 0 ? '-ml-[8px]' : ''}`}
-                        style={{ zIndex: maxAvatarsToShow - index }}
-                    />
+            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-0' : 'mt-2'}`}>
+                {partners?.slice(0, maxAvatarsToShow)?.map((partner, index) => (
+                    <>
+                        {partner.picture ?
+                            <Image
+                                key={partner.uid}
+                                width={32}
+                                height={32}
+                                src={partner.picture}
+                                alt={partner.name}
+                                className={`relative inline-block rounded-full border-2 border-white object-cover ${index > 0 ? '-ml-2' : ''}`}
+                                style={{ zIndex: maxAvatarsToShow - index }}
+                            />
+                            :
+                            <BsPersonFill key={partner.uid} className={`relative size-[32px] p-1 inline-block rounded-full border-2 border-white text-[#828282] object-cover ${index > 0 ? '-ml-2' : ''}`} />
+                        }
+
+                    </>
+
                 ))}
 
                 {/* Display "+N" if there are more avatars than the limit */}
                 {additionalCount > 0 && (
-                    <div className={`relative ml-[-0.35rem] size-[32px] rounded-full border-2 border-white bg-gray-200 text-gray-800 text-sm font-medium flex items-center justify-center`}>
+                    <div className="relative ml-[-0.35rem] w-8 h-8 rounded-full border-2 border-white bg-gray-200 text-gray-800 text-sm font-medium flex items-center justify-center">
                         +{additionalCount}
                     </div>
                 )}
             </div>
-
         );
     };
 
@@ -114,7 +161,8 @@ const BudgetPage = () => {
                         }
                     </div>
                     <div className='bg-[#F7F7F9] mb-[17px] mt-[40px] min-h-[389px] w-full rounded-t-[24px]'>
-                        {allBudgets.length === 0 ?
+
+                        {budgets?.docs?.length === 0 ?
                             <div className='py-[65px] text-center flex-col gap-[8px] flex justify-center items-center px-[51px]'>
                                 <Image src={noBudgetImg.src} width={1000} height={1000} className='size-[124px] mb-[8px]' alt="" />
                                 <h1 className='font-[500] leading-[24px]'>You do not have any budget history yet.</h1>
@@ -122,10 +170,14 @@ const BudgetPage = () => {
                             </div>
                             :
                             <div className='flex flex-col mb-[90px] gap-[24px] p-[24px]'>
-
-                                {allBudgets.map((budget, index) => {
-                                    const totalBudgetIncome = budget.incomes?.reduce((sum, income) => sum + income.amount, 0) || 0;
-                                    const totalBudgetExpenses = budget.allocations?.reduce((sum, allocation) => sum + allocation.amount, 0) || 0;
+                                {isPending ?
+                                    <div className=' w-full mx-auto  my-auto mt-[10rem] flex justify-center items-center'>
+                                        <CircularProgress size='md' color='default' />
+                                    </div>
+                                    : null}
+                                {budgets?.docs?.map((budget: any, index: any) => {
+                                    const totalBudgetIncome = budget.totalIncome
+                                    const totalBudgetExpenses = budget.totalExpenses
 
                                     // Determine the max value to set a relative length for both bars
                                     const maxBudgetValue = Math.max(totalBudgetIncome, totalBudgetExpenses);
@@ -134,15 +186,14 @@ const BudgetPage = () => {
                                     const incomeWidth = totalBudgetIncome / maxBudgetValue * 100;
                                     const expenseWidth = totalBudgetExpenses / maxBudgetValue * 100;
 
-                                    // Determine budget status
-                                    const budgetStatus = totalBudgetIncome > totalBudgetExpenses ? 'Surplus' : totalBudgetIncome < totalBudgetExpenses ? 'Deficit' : 'Balanced';
+
 
                                     return (
-                                        <div onClick={() => navigation.push(`/budget/${budget.id}`)} key={index} className='bg-[#EFEFF0] rounded-[20px] flex flex-col border-[1px] border-[#E7E7EA] gap-[8px] p-[16px]'>
+                                        <div onClick={() => navigation.push(`/budget/${budget.uid}`)} key={index} className='bg-[#EFEFF0] rounded-[20px] flex flex-col border-[1px] border-[#E7E7EA] gap-[8px] p-[16px]'>
                                             <div className='w-full justify-between items-center flex'>
                                                 <h1 className='text-[16px] font-[500] leading-[24px]'>{budget.name}</h1>
                                                 <div className='flex items-center text-[12px] gap-[12px] text-[#828282]'>
-                                                    <button className='bg-[#FFFFFF] rounded-[10px] px-[8px] py-[2px]'>{budgetStatus}</button>
+                                                    <button className='bg-[#FFFFFF] rounded-[10px] px-[8px] py-[2px]'>{budget.type}</button>
                                                     <button className='bg-[#FFFFFF] rounded-[10px] px-[8px] py-[2px]'>
                                                         <BsThreeDotsVertical />
                                                     </button>
@@ -199,9 +250,10 @@ const BudgetPage = () => {
 
                                                 </div>
                                                 <div className=' z-1 relative w-full'>
-                                                    {budget.partners.length === 0 ? null : (
-                                                        <AvatarGroup partners={budget.partners} expenseWidth={3} />
+                                                    {budget?.collaborators.length === 0 ? null : (
+                                                        <AvatarGroup partners={budget?.collaborators} expenseWidth={3} />
                                                     )}
+
                                                 </div>
                                             </div>
                                         </div>
@@ -216,6 +268,8 @@ const BudgetPage = () => {
 
                 </div>
                 {createBudgetComponent && <CreateBudget show={createBudgetComponent} setShow={setCreateBudgetComponent} />}
+
+                {showInvites || getPendingInvitesApiData.length > 0 && <InviteModal getPendingInvitesApiData={getPendingInvitesApiData} show={showInvites} setShow={setShowInvites} />}
             </div>
         </motion.div>
     );

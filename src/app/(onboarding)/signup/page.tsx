@@ -7,6 +7,11 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { BsArrowLeft, BsArrowRight } from 'react-icons/bs';
 import { motion } from 'framer-motion';
+import { useAuthentication } from '@/app/store/AuthStore';
+import api from '../../../utils/axiosInstance';
+import { useMutation } from '@tanstack/react-query';
+import { sendOtp, signupUser, signUpWithGoogle } from '@/app/services/AuthenticationService';
+import { IOtpResponse } from '@/app/Types';
 
 const Page = () => {
   const [firstName, setFirstName] = useState<string>('');
@@ -14,6 +19,8 @@ const Page = () => {
   const [email, setEmail] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [checked, setChecked] = useState<boolean>(false);
+  const { signup } = useAuthentication();
+  const [loading, setIsLoading] = useState(false);
   const navigate = useRouter()
   // Create a ref for the form
   const formRef = useRef<HTMLFormElement>(null);
@@ -22,19 +29,108 @@ const Page = () => {
     setChecked(!checked);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  // React Query mutation for sending OTP
+  const otpMutation = useMutation<IOtpResponse, Error, { email: string; phoneNumber: string }>({
+    mutationFn: (otpFormData) => sendOtp(otpFormData),
+    onSuccess: (data: IOtpResponse) => {
+      if (data?.success) {
+        const reference = data.data.reference;
+        const formDataWithReference = {
+          firstName,
+          lastName,
+          email,
+          phoneNumber,
+          registeredWith: reference,
+        };
+
+        // console.log(formDataWithReference);
+      }
+    },
+    onError: (error: Error) => {
+      console.error('Error sending OTP:', error);
+    },
+  });
+
+
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Handle form submission logic
+    const otpFormData = {
+      email,
+      phoneNumber,
+      type: "signup",
+      channel: "email",
+    };
 
-    console.log({ firstName, lastName, email, phoneNumber, checked });
-    navigate.push('/signup/verify')
+    const formData = {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+    };
+
+    try {
+      setIsLoading(true)
+      const otpResponse = await otpMutation.mutateAsync(otpFormData);
+      // console.log(otpResponse);
+      if (otpResponse?.success) {
+        const reference = otpResponse.data.reference;
+        const newFormData = { ...formData, registeredWith: 'form', otpReference: reference }
+        // Store form data using Zustand store
+        signup(newFormData);
+        navigate.push('/signup/verify')
+      }
+
+    } catch (error) {
+      setIsLoading(false)
+      console.error('Error during sign-up:', error);
+    } finally {
+      setIsLoading(false);
+    }
+    // console.log({ firstName, lastName, email, phoneNumber, checked });
+    signup(formData);
   };
+
+
 
   const handleProceedClick = () => {
     if (formRef.current) {
       formRef.current.requestSubmit(); // Trigger form submission
     }
   };
+
+
+
+  // React Query mutation for handling google
+  const handleGoogleMutation = useMutation({
+    mutationFn: () => signUpWithGoogle(),
+    onSuccess: (data: any) => {
+      if (data?.success) {
+        // const reference = data.data.reference;
+        // console.log(data);
+        navigate.push('/signup/social/phone')
+        setIsLoading(false)
+      }
+    },
+    onError: (error: Error) => {
+      setIsLoading(false)
+      console.error(error);
+    },
+  });
+
+
+
+
+  const handleGoogle = async () => {
+    try {
+      setIsLoading(true)
+      handleGoogleMutation.mutateAsync()
+    } catch (error) {
+      setIsLoading(false)
+      console.log(error);
+    }
+  }
 
   return (
     <motion.div
@@ -47,7 +143,7 @@ const Page = () => {
       <div className="px-6 py-10">
         <div className="w-full">
           <p className="mb-6 font-[500] text-[20px] leading-[28px] text-[#2D2D2D]">Sign up with...</p>
-          <button onClick={() => navigate.push('/signup/social/phone')} className="w-full py-[16px] gap-[8px] rounded-[20px] text-[#575757] justify-center inline-flex flex-col items-center bg-[#F7F7F9] border border-[#EFEFF0]">
+          <button onClick={() => handleGoogle()} className="w-full py-[16px] gap-[8px] rounded-[20px] text-[#575757] justify-center inline-flex flex-col items-center bg-[#F7F7F9] border border-[#EFEFF0]">
             <GoogleLogo scale={24} />
             <p className='text-[12px] leading-[14.4px]'>Google</p>
           </button>
@@ -116,8 +212,14 @@ const Page = () => {
       </div>
       <div className="sticky bottom-0 flex w-full items-center bg-white px-6 py-6 rounded-t-3xl" style={{ boxShadow: '0px -4px 4px 0px #EFF0F680' }}>
         <button type='button' className="h-12 flex font-[500] gap-[8px] items-center justify-center  text-white bg-black rounded-3xl w-full" onClick={handleProceedClick}>
-          Proceed
-          <BsArrowRight className='size-[20px] ' />
+          {loading ? <div className='h-12 flex font-[500] gap-[8px] items-center justify-center  text-white bg-black rounded-3xl w-full '>
+            Proceeding...
+
+          </div> :
+            'Proceed'
+
+          }
+          {!loading && <BsArrowRight className='size-[20px] ' />}
         </button>
       </div>
     </motion.div>

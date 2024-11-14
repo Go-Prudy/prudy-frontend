@@ -30,7 +30,6 @@ const Page = () => {
         }
 
         setError(''); // Clear the error message
-        console.log({ password, confirmPassword });
         setShowModal(true)
 
         // Navigate to the next step or page

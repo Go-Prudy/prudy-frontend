@@ -19,6 +19,10 @@ import { motion } from 'framer-motion';
 import BottomDrawer from "@/components/create-budget/BottomDrawer";
 import { useRouter } from "next/navigation";
 import Tesseract from 'tesseract.js';
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAuthentication } from "@/app/store/AuthStore";
+import { GetAllBudgetsApi } from "@/app/services/BudgetService";
+import { fetchAccountInfoApi, fetchAccountTransactionsApi, getAllAccountsApi, initLinkAccountApi, syncAccountTransactionsApi } from "@/app/services/AccountService";
 interface Bank {
   name: string;
   balance: number;
@@ -203,7 +207,7 @@ export default function Page() {
 
 
 
-  const [bankData, setBankData] = useState<Bank[]>(bank_data)
+  const [bankData, setBankData] = useState<Bank[]>([])
   const [showBalance, setShowBalance] = useState(true);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSyncDataModal, setShowSyncDataModal] = useState(false);
@@ -397,21 +401,148 @@ export default function Page() {
   };
 
 
+  const { authenticatedUser } = useAuthentication();
+
+  const { data: budgets = [], isLoading, isPending, error } = useQuery({
+    queryKey: ['allBudgetCategories'],
+    queryFn: () => GetAllBudgetsApi(authenticatedUser?.token ?? ''),
+    enabled: !!authenticatedUser?.token,
+    staleTime: 5 * 60 * 1000
+  });
+
+
+  const params = {
+    sortBy: 'accountName',
+    sortDir: 'ASC',
+    limit: 2,
+    page: 2,
+  };
+
+  // React Query hook
+  const { data: accounts = [], isPending: isGetAllAccountPending, isError } = useQuery({
+    queryKey: ['accounts', params],
+    queryFn: () => getAllAccountsApi(authenticatedUser?.token ?? '', params),
+    enabled: !!authenticatedUser?.token, // Only fetch if token exists
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+  });
+
+
+  console.log(accounts);
+
+
+  // React Query mutation to link an account
+  const linkAccountMutation = useMutation({
+    mutationFn: () => initLinkAccountApi(authenticatedUser?.token ?? ''),
+    onSuccess: (data) => {
+
+      console.log('Account linked successfully!', data);
+      // Any other success handling logic such as redirecting or updating UI
+    },
+    onError: (error: unknown) => {
+      console.error('Error linking account:', error);
+      // Handle additional error states if necessary
+    },
+  });
+
+
+
+  useEffect(() => {
+    if (linkAccountMutation.isPending) {
+      setShowSyncModal(true)
+      console.log(linkAccountMutation.isPending);
+    }
+  }, [linkAccountMutation])
+
+  // Handler to call the mutation
+  const handleLinkAccount = async () => {
+    try {
+      await linkAccountMutation.mutateAsync();
+    } catch (error) {
+      console.error('Error in handleLinkAccount:', error);
+    }
+  };
+
+
+
+
+  const accountId = authenticatedUser?.profile.uid || ''; // Replace with actual account ID
+  const { data: accountInfo = [], isPending: fetchAccountInfoIspending } = useQuery({
+    queryKey: ['accountInfo', accountId],
+    queryFn: () => fetchAccountInfoApi(authenticatedUser?.token ?? '', accountId),
+    enabled: !!authenticatedUser?.token && !!accountId, // Only fetch if token and id are available
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+  });
+
+
+
+
+
+
+
+
+
+
+  const limit = 12; // Number of transactions per page
+  const page = 1; // Current page
+
+  const { data: fetchAccountTransactionsData = [], isPending: fetchAccountTransactionsDataisPending } = useQuery({
+    queryKey: ['accountTransactions', accountId, limit, page],
+    queryFn: () => fetchAccountTransactionsApi(authenticatedUser?.token ?? '', accountId, limit, page),
+    enabled: !!authenticatedUser?.token && !!accountId, // Only fetch if token and id are available
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+  });
+
+
+  console.log(fetchAccountTransactionsData);
+
+
+
+
+
+
+  const { data: syncedTransactions, isPending: syncedTransactionsIsPending } = useQuery({
+    queryKey: ['syncAccountTransactions', accountId],
+    queryFn: () => syncAccountTransactionsApi(authenticatedUser?.token ?? '', accountId),
+    enabled: !!authenticatedUser?.token && !!accountId, // Only fetch if token and account ID are available
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+  });
+
+
+
+
+
   return (
     <div className="bg-base-white w-full h-full">
       <Header2 title={'Track expenses'} />
 
-      <div className={` mt-[90px]  py-[24px] w-full   ${bankData ? 'mb-0' : 'mb-[16px]'} `}>
-        <div className=" flex px-[24px] justify-between">
+
+
+      <div className={` mt-[66px]  border-t-[4px] border-t-[#F7F7F9]  py-[24px] w-full   ${bankData ? 'mb-0' : 'mb-[16px]'} `}>
+        <div className=" border-b-[4px] px-[24px] py-[16px]  border-b-[#F7F7F9]">
+          <select
+            name=""
+            className="bg-[#F7F7F9] rounded-[8px] px-[12px] py-[8px] border-[#EFEFF0] border-[0.4px] w-full"
+            id=""
+          >
+            {budgets?.docs?.map((budget: any) => (
+              <option key={budget.id} value={budget.name || ''}>
+                {budget.name}
+              </option>
+            ))}
+          </select>
+
+        </div>
+
+        <div className=" flex px-[24px] mt-[27px] justify-between">
           <h1 className=" text-[18px] font-[500] leading-[21.6px]">Linked Accounts</h1>
 
           {bankData && <button className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "><BsPlus size={20} /> Add new</button>}
         </div>
 
-        <div className={` w-full  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#fafafa] w-full  border-b-[0px]'}`}>
+        <div className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}>
           <div className=" w-full px-[24px] ">
 
-            {bankData ?
+            {bankData.length > 0 ?
               <>
                 <div className="  border-[#EFEFF0] w-full  mt-[19px]   rounded-t-[24px] gap-[24px] flex flex-col  p-[16px] bg-[#F7F7F9] border-[1px] ">
                   {bankData.map((bank, index) => (
@@ -446,16 +577,25 @@ export default function Page() {
                 </div>
 
               </>
-              : <div className="  border-[#EFEFF0] mb-[24px] mt-[19px] justify-center items-center  rounded-[24px] flex flex-col  p-[24px] bg-[#F7F7F9] border-[1px] ">
-                <Image src={linkIcon} className=" w-[94.42px] object-contain h-[84px] " width={1000} height={1000} alt="goprudy" />
-                <h1 className=" font-[500] text-center text-[#2D2D2D] leading-[19.2px]">Link your bank accounts to track your transactions easily</h1>
-                <button className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center">
-                  Link now <BsChevronRight />
-                </button>
+              :
 
-              </div>
+              <>
+                <div className="  border-[#EFEFF0] mb-[24px] mt-[19px] justify-center items-center  rounded-[24px] flex flex-col  p-[24px] bg-[#F7F7F9] border-[1px] ">
+                  <Image src={linkIcon} className=" w-[94.42px] object-contain h-[84px] " width={1000} height={1000} alt="goprudy" />
+                  <h1 className=" font-[500] text-center text-[#2D2D2D] leading-[19.2px]">Link your bank accounts to track your transactions easily</h1>
+                  <button onClick={() => handleLinkAccount()} className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center">
+                    {!linkAccountMutation.isPending ?
+                      <> Link now <BsChevronRight />
+                      </>
+                      :
+                      'Linking...'
+                    }
+
+                  </button>
+                </div>
+                <p className=" text-[14px] leading-[16.8px]"> By continuing you agree to our <span className=" text-[#66C227] font-[500] ">Privacy Policy and Terms of Service .</span></p>
+              </>
             }
-
 
 
           </div>
@@ -463,8 +603,8 @@ export default function Page() {
 
         {bankData ?
 
-          <div className="  pt-[24px] px-[24px] ">
-            <h1 className=" font-[500]   text-[#2D2D2D] mt-[28px] text-[18px]">Track your finances</h1>
+          <div className="  border-t-[4px] border-t-[#F7F7F9]  pt-[24px] px-[24px] ">
+            <h1 className=" font-[500]   text-[#2D2D2D] mt-[0px] text-[18px]">Track your finances</h1>
 
             <div className=" flex mt-[24px] gap-[16px]">
               <Image onClick={() => setShowSyncModal(!showSyncModal)} width={1000} height={1000} src={sync} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
@@ -590,7 +730,7 @@ export default function Page() {
         close={true}
         onClose={() => setAddManualModal(!AddManualModal)}
       >
-          <div className=" mb-[24px] flex flex-col gap-[16px] w-full">
+          <div className=" mb-[24px] pt-[24px] flex flex-col gap-[16px] w-full">
             <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
               Name of item
               <input
@@ -699,7 +839,7 @@ export default function Page() {
       >
 
           <div className=" flex    flex-col gap-[16px] ">
-            <div className=" px-[24px]">
+            <div className=" pt-[24px] px-[24px]">
               <div className="  bg-[#F7F7F9] w-full flex  gap-[16px] p-[8px] rounded-[20px] ">
                 {bankData.map((item) => (
                   <div key={item.name} onClick={() => setSyncBank(item)} className={` text-[14px] leading-[24px]  px-[16px] py-[8px] r ${syncBank.name === item.name ? ' text-[#575757] font-[500] ' : 'text-[#828282]'} `}>

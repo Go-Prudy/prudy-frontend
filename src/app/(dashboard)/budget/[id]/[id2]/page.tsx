@@ -1,6 +1,6 @@
 'use client';
 import Header from '@/components/header';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from '@nextui-org/react';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
@@ -8,6 +8,10 @@ import Image from 'next/image';
 import manual from '@/images/manual.png'
 import photo from '@/images/camera.png'
 import { GoChevronRight } from 'react-icons/go';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { getActiveBudgetCategoriesApi, RecordExpenseApi } from '@/app/services/BudgetService';
+import { ManualData } from '@/app/Types';
 
 // Utility function to format date
 const formatDate = (dateString: string): string => {
@@ -37,12 +41,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
         time: string; // Time in format "hh:mm AM/PM"
         amount: number; // The actual amount of the expense
     };
-    interface ManualData {
-        name: string;
-        amount: number;
-        category: string;
-        date: string;
-    }
+
 
     const expenses: Expense[] = [
         { name: "Groceries", date: "2024-09-01", time: "10:30 AM", amount: 15000 },
@@ -56,6 +55,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
         { name: "Travel", date: "2024-09-08", time: "6:00 AM", amount: 30000 },
         { name: "Miscellaneous", date: "2024-09-09", time: "4:00 PM", amount: 2500 },
     ];
+    const { authenticatedUser } = useAuthentication();
 
     const [showRecordModal, setShowRecordModal] = useState(false)
     const [showAddManual, setShowAddManual] = useState(false)
@@ -79,9 +79,55 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
         }));
     };
 
+
+
+    // Mutation for recording expense
+    const recordExpenseMutation = useMutation({
+        mutationFn: (manualData: ManualData) =>
+            RecordExpenseApi(
+                '1d', manualData,
+                authenticatedUser?.token ?? '',
+            ),
+        onSuccess: (data) => {
+            setManualData({ category: '', name: '', amount: 0, date: '' }); // Reset the form
+            setShowAddManual(false); // Close the modal
+
+        },
+        onError: (error) => {
+            console.log(error);
+
+        },
+    });
+
     const handleAddManually = () => {
-        setShowAddManual(!showAddManual)
+        // setShowAddManual(!showAddManual)
+        recordExpenseMutation.mutate(manualData);
     }
+
+    const { data: activeCategoriesData, status: categoriesStatus } = useQuery({
+        queryKey: ['activeBudgetCategories', '1'],
+        queryFn: () => getActiveBudgetCategoriesApi(authenticatedUser?.token ?? '', '1'),
+        enabled: !!authenticatedUser?.token && !!'1',
+        staleTime: 5 * 60 * 1000
+    });
+
+
+
+    const [errors, setErrors] = useState<any>({});
+    const buttonRef = useRef(null);
+
+    // Validation function to check inputs
+    const validateInputs = () => {
+        const newErrors: any = {};
+        if (!manualData.category.trim()) newErrors.category = "Category is required.";
+        if (!manualData.name.trim()) newErrors.name = "Name is required.";
+        if (!manualData.amount || Number(manualData.amount) <= 0) newErrors.amount = "Amount must be greater than zero.";
+        if (!manualData.date) newErrors.date = "Date is required.";
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+
 
     return (
         <div className=' relative'
@@ -178,7 +224,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                             close={true}
                             onClose={() => setShowRecordModal(false)}
                         >
-                            <div className="flex flex-col gap-[16px] ">
+                            <div className="flex flex-col py-[24px] gap-[16px] ">
                                 <div className="bg-[#F7F7F9] rounded-[20px] border border-[#EFEFF0] p-[16px] flex justify-between w-full">
                                     <div className="flex gap-4">
                                         <Image src={manual} alt="Scan receipt" className="w-[44px] h-[44px]" />
@@ -213,110 +259,110 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
             )}
 
 
-            {showAddManual && (
-                <motion.div
-                    initial={{ opacity: 0, y: 90 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed h-[100vh] top-0 w-full z-[40] bg-[#1c1c1c73]"
-                >
-                    <div className=' '>
-                        <BottomDrawer
-                            footer={<button onClick={() => handleAddManually()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Save</button>}
-                            label="Add manually"
-                            back={false}
-                            show={showAddManual}
-                            close={true}
-                            onClose={() => setShowAddManual(false)}
-                        >
-                            <div className="flex flex-col gap-[16px] ">
-                                {/* Name of Category Input */}
-                                <div className="relative w-full ">
-                                    <div className="z-[10] flex w-[90%] absolute top-[30px] left-4 text-xs justify-between items-center">
-                                        <label htmlFor="category" className="text-[#828282]">
+            <>
+                {showAddManual && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 90 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed h-[100vh] top-0 w-full z-[40] bg-[#1c1c1c73]"
+                    >
+                        <div>
+                            <BottomDrawer
+                                footer={
+                                    <button
+                                        ref={buttonRef}
+                                        onClick={() => handleAddManually()}
+                                        type="submit"
+                                        className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+                                    >
+                                        Save
+                                    </button>
+                                }
+                                label="Add manually"
+                                back={false}
+                                show={showAddManual}
+                                close={true}
+                                onClose={() => setShowAddManual(false)}
+                            >
+                                <div className="flex flex-col gap-[16px]">
+                                    {/* Category Input */}
+                                    <div className="relative w-full">
+                                        <label htmlFor="category" className="text-[#828282] absolute top-[30px] left-4 text-xs">
                                             Name of category
                                         </label>
-
+                                        <input
+                                            type="text"
+                                            name="category"
+                                            id="category"
+                                            required
+                                            value={manualData.category}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter category name"
+                                            className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                        />
+                                        {errors.category && <span className="text-red-500 text-sm">{errors.category}</span>}
                                     </div>
 
-                                    <input
-                                        type="text"
-                                        name="category"
-                                        id="category"
-                                        required
-                                        value={manualData.category}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter category name"
-                                        className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
-                                    />
-                                </div>
-
-                                {/* Name Input */}
-                                <div className="relative w-full ">
-                                    <div className="z-[10] flex w-[90%] absolute top-[30px] left-4 text-xs justify-between items-center">
-                                        <label htmlFor="name" className="text-[#828282]">
+                                    {/* Name Input */}
+                                    <div className="relative w-full">
+                                        <label htmlFor="name" className="text-[#828282] absolute top-[30px] left-4 text-xs">
                                             Name
                                         </label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            id="name"
+                                            required
+                                            value={manualData.name}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter name"
+                                            className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                        />
+                                        {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                                     </div>
 
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        id="name"
-                                        required
-                                        value={manualData.name}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter name"
-                                        className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
-                                    />
-                                </div>
-
-                                {/* Amount Input */}
-                                <div className="relative w-full ">
-                                    <div className="z-[10] flex w-[90%] absolute top-[30px] left-4 text-xs justify-between items-center">
-                                        <label htmlFor="amount" className="text-[#828282]">
+                                    {/* Amount Input */}
+                                    <div className="relative w-full">
+                                        <label htmlFor="amount" className="text-[#828282] absolute top-[30px] left-4 text-xs">
                                             Amount
                                         </label>
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            id="amount"
+                                            required
+                                            value={manualData.amount}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter amount"
+                                            className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                        />
+                                        {errors.amount && <span className="text-red-500 text-sm">{errors.amount}</span>}
                                     </div>
 
-                                    <input
-                                        type="number"
-                                        name="amount"
-                                        id="amount"
-                                        required
-                                        value={manualData.amount}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter amount"
-                                        className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
-                                    />
-                                </div>
-
-                                {/* Date Input */}
-                                <div className="relative w-full ">
-                                    <div className="z-[10] flex w-[90%] absolute top-[30px] left-4 text-xs justify-between items-center">
-                                        <label htmlFor="date" className="text-[#828282]">
+                                    {/* Date Input */}
+                                    <div className="relative w-full">
+                                        <label htmlFor="date" className="text-[#828282] absolute top-[30px] left-4 text-xs">
                                             Date
                                         </label>
+                                        <input
+                                            type="date"
+                                            name="date"
+                                            id="date"
+                                            required
+                                            value={manualData.date}
+                                            onChange={handleInputChange}
+                                            className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                        />
+                                        {errors.date && <span className="text-red-500 text-sm">{errors.date}</span>}
                                     </div>
-
-                                    <input
-                                        type="date"
-                                        name="date"
-                                        id="date"
-                                        required
-                                        value={manualData.date}
-                                        onChange={handleInputChange}
-                                        className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
-                                    />
                                 </div>
-
-                            </div>
-                        </BottomDrawer>
-                    </div>
-
-                </motion.div>
-            )}
+                            </BottomDrawer>
+                        </div>
+                    </motion.div>
+                )}
+            </>
 
         </div>
     );
