@@ -8,10 +8,6 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'nigerianbanks.xyz',
-            },
-            {
-                protocol: 'https',
                 hostname: 'goprudybucket.s3.us-east-1.amazonaws.com',
             },
             {
