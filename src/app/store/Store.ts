@@ -3,38 +3,16 @@ import { persist } from 'zustand/middleware';
 import { IBudget, Income, IAllocation, ISubAllocation, ICreateCategory } from '../Types';
 import { v4 as uuidv4 } from 'uuid';
 
-// Function to generate a random color
-const generateRandomColor = (): string => {
-    return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}`;
-}
-
-// Function to get a unique color
-const getUniqueColor = (usedColors: Set<string>): string => {
-    let color: string;
-    do {
-        color = generateRandomColor();
-    } while (usedColors.has(color));
-    usedColors.add(color);
-    return color;
-}
-
 interface BudgetState {
     budgets: IBudget[];
     allCategories: ICreateCategory[];
-    addToCategory: (data: ICreateCategory, id: string) => void
     addBudget: (budget: IBudget) => void;
-    createBudgetCategory: (index: string) => void
-    createAllocation: (budgetId: string, budgetCategory: string, color: string) => void; // New function
+    createBudgetCategory: (index: string) => void;
     addIncomeToBudget: (budgetId: string, newIncomes: Income[]) => void;
-    updateIncomeInBudget: (budgetId: string, income: Income) => void;
-    deleteIncomeFromBudget: (budgetId: string, incomeName: string) => void;
-    addAllocationToBudget: (budgetId: string, allocation: IAllocation) => void;
-    updateAllocationInBudget: (budgetId: string, allocation: IAllocation) => void;
-    deleteAllocationFromBudget: (budgetId: string, category: string) => void;
+    addAllocationToBudget: (budgetId: string, allocation: IAllocation[]) => void;
     clearBudgets: () => void;
     getLastBudget: () => IBudget | undefined;
     duplicateLastBudget: () => void;
-
 }
 
 export const useBudgetStore = create<BudgetState>()(
@@ -42,33 +20,6 @@ export const useBudgetStore = create<BudgetState>()(
         (set, get) => ({
             budgets: [],
             allCategories: [],
-            addToCategory: (data: ICreateCategory, id: string) =>
-                set((state) => {
-                    const existingCategory = state.allCategories.find(category => category.id === id);
-
-                    if (existingCategory) {
-                        // If category exists, update it
-                        return {
-                            allCategories: state.allCategories.map((category) => {
-                                if (category.id === id) {
-                                    return {
-                                        ...category, // Retain existing properties
-                                        ...data,     // Update with new data
-                                    };
-                                }
-                                return category; // Return unchanged category
-                            }),
-                        };
-                    } else {
-                        // If category does not exist, add it to the array
-                        return {
-                            allCategories: [
-                                ...state.allCategories,
-                                { ...data }, // Add the new category data
-                            ],
-                        };
-                    }
-                }),
 
 
             createBudgetCategory: (budgetId: string) =>
@@ -90,25 +41,6 @@ export const useBudgetStore = create<BudgetState>()(
                     }),
                 })),
 
-
-
-            createAllocation: (budgetId: string, budgetCategory: string, color: string) => {
-                const newAllocation: IAllocation = {
-                    budgetCategory,
-                    amount: 0, // Default amount
-                    color: '', // Use provided color
-                    percentage: 0, // Default percentage
-                    subAllocations: [] // Default empty subAllocations
-                };
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? { ...budget, allocations: [...(budget.allocations || []), newAllocation] }
-                            : budget
-                    ),
-                }));
-            },
-
             addBudget: (budget: IBudget) =>
                 set((state) => ({
                     budgets: [...state.budgets, budget],
@@ -127,86 +59,77 @@ export const useBudgetStore = create<BudgetState>()(
                 }));
             },
 
-            updateIncomeInBudget: (budgetId: string, updatedIncome: Income) =>
+
+            addAllocationToBudget: (budgetId: string, newAllocations: IAllocation[]) => {
+                console.log('New Allocations:', newAllocations);
+                console.log('Budget ID:', budgetId);
+
+                // Process each new allocation
+                const updatedAllocations = newAllocations.map((newAllocation) => {
+                    // Handle subAllocations: if not provided, default to empty array
+                    let updatedSubAllocations = newAllocation.subAllocations || [];
+
+                    // If an empty array is provided for subAllocations, replace previous subAllocations with an empty array
+                    if (Array.isArray(updatedSubAllocations) && updatedSubAllocations.length === 0) {
+                        updatedSubAllocations = [];
+                    }
+
+                    // Ensure subAllocations are updated if passed, else retain defaults
+                    const updatedAllocation = {
+                        ...newAllocation,
+                        subAllocations: updatedSubAllocations, // Handle missing subAllocations by setting to empty array
+                    };
+
+                    return updatedAllocation;
+                });
+
+                // Update the budget with all new allocations, ensuring no duplicates based on budgetCategory
                 set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? {
+                    budgets: state.budgets.map((budget) => {
+                        // Find the budget that matches the budgetId
+                        if (budget.id === budgetId) {
+                            console.log('Updating budget with id:', budgetId);
+
+                            // Update or replace allocations: Check if any allocations have the same budgetCategory
+                            const updatedAllocationsForBudget = budget.allocations?.map((existingAllocation) => {
+                                const updatedAllocation = updatedAllocations.find(
+                                    (newAlloc) => newAlloc.budgetCategory === existingAllocation.budgetCategory
+                                );
+
+                                if (updatedAllocation) {
+                                    // If matching, replace the existing allocation with the updated one
+                                    return updatedAllocation;
+                                }
+
+                                return existingAllocation; // No update needed if budgetCategory doesn't match
+                            });
+
+                            // Find new allocations that need to be added (not already in the current budget)
+                            const addedAllocations = updatedAllocations.filter((newAlloc) =>
+                                !budget.allocations?.some(
+                                    (existingAlloc) => existingAlloc.budgetCategory === newAlloc.budgetCategory
+                                )
+                            );
+
+                            // Combine the updated allocations with newly added ones
+                            const finalAllocations = [
+                                ...(updatedAllocationsForBudget || []),
+                                ...addedAllocations,
+                            ];
+
+                            // Return the updated budget with the final allocations
+                            return {
                                 ...budget,
-                                incomes: budget.incomes?.map((income) =>
-                                    income.name === updatedIncome.name ? updatedIncome : income
-                                ) || [],
-                            }
-                            : budget
-                    ),
-                })),
+                                allocations: finalAllocations,
+                            };
+                        }
 
-            deleteIncomeFromBudget: (budgetId: string, incomeName: string) =>
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? {
-                                ...budget,
-                                incomes: budget.incomes?.filter((income) => income.name !== incomeName) || [],
-                            }
-                            : budget
-                    ),
-                })),
-
-            addAllocationToBudget: (budgetId: string, newAllocation: IAllocation) => {
-                const usedColors = new Set<string>();
-                // Extract existing colors to avoid duplication
-                const existingColors = (newAllocation.subAllocations || []).map(() => newAllocation.color).filter(Boolean) as string[];
-                existingColors.forEach(color => usedColors.add(color));
-
-                // Assign unique colors to new subAllocations
-                const updatedSubAllocations = (newAllocation.subAllocations || []).map(sub => ({
-                    ...sub
-                }));
-
-                // Only set color for the allocation itself
-                const updatedAllocation = {
-                    ...newAllocation,
-                    color: newAllocation.color || getUniqueColor(usedColors),
-                    subAllocations: updatedSubAllocations
-                };
-
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? { ...budget, allocations: [...(budget.allocations || []), updatedAllocation] }
-                            : budget
-                    ),
+                        return budget; // Return unchanged budget if id doesn't match
+                    }),
                 }));
             },
 
-            updateAllocationInBudget: (budgetId: string, updatedAllocation: IAllocation) =>
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? {
-                                ...budget,
-                                allocations: budget.allocations?.map((allocation) =>
-                                    allocation.budgetCategory === updatedAllocation.budgetCategory ? { ...updatedAllocation } : allocation
-                                ) || [],
-                            }
-                            : budget
-                    ),
-                })),
 
-            deleteAllocationFromBudget: (budgetId: string, category: string) =>
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? {
-                                ...budget,
-                                allocations: budget.allocations?.filter(
-                                    (allocation) => allocation.budgetCategory !== category
-                                ) || [],
-                            }
-                            : budget
-                    ),
-                })),
 
             clearBudgets: () => set({ budgets: [] }),
 

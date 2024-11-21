@@ -17,56 +17,72 @@ import { Budgets } from '@/app/data/DummyData';
 
 import DeleteSuccessModal from '@/app/(dashboard)/components/DeleteSuccessModal';
 import DeleteConfirmationModal from '@/app/(dashboard)/components/DeleteConfirmationModal';
-import { createBudgetApi, createBudgetCategoryApi, getAllBudgetCategories, RecordExpenseApi } from '@/app/services/BudgetService';
+import { createBudgetApi, createBudgetCategoryApi, CreateSubCategoryApi, getAllBudgetCategories, RecordExpenseApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircularProgress } from '@nextui-org/react';
+import toast from 'react-hot-toast';
 
 const Page = ({ params }: { params: { id: string } }) => {
+    const hasRunForCurrentBudget = useRef<string | null>(null);
 
     const prevIncomes = [
         { index: 1, incomeType: 'Salary', amount: 0 },
     ];
     const budgetId = params.id;
     const all_Budgets = useBudgetStore((state) => state.budgets);
-    const currentBudget = all_Budgets.find((b) => b.id === budgetId);
+    const currentBudget = all_Budgets?.find((b) => b.id === budgetId);
+
+    interface BudgetAllocation {
+        uid: string;  // UUID as a string
+        amount: number;          // Amount allocated
+        percentage: number;      // Percentage allocation (could be 0-1 range, i.e., 19% = 0.19)
+        subAllocations: SubAllocation[];  // Array of sub-allocations, if any
+    }
+
+    interface SubAllocation {
+        subCategory: string;    // Sub-category identifier (e.g., UUID)
+        amount: number;         // Amount for this sub-category
+    }
+
+    type SubAllocation2 = {
+        subCategory: string;
+        name: string;
+        amount: number;
+    };
 
 
+
+
+    const hasSelectedBudget = useRef(false); // This ref will track if the budget has already been selected
     const [showSelectedBudget, setShowSelectedBudget] = useState<boolean>(false)
     const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState<boolean>(false)
     const [showNewBudgetCategory, setShowNewBudgetCategory] = useState<boolean>(false)
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
     const [selectedBudget, setSelectedBudget] = useState<any>()
-    const [allBudgets, setAllBudgets] = useState<[]>([])
     const spanRefs = useRef<(HTMLSpanElement | null)[]>([]);
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const inputRefsExpense = useRef<(HTMLInputElement | null)[]>([]);
     const [allocations, setAllocations] = useState<IAllocation[]>([])
-    const [updatedIndex, setUpdatedIndex] = React.useState<number | null>(null);
-    const [updatedField, setUpdatedField] = React.useState<'subCategory' | 'amount' | null>(null);
-    const [updatedValue, setUpdatedValue] = React.useState<string | null>(null);
     const [previousSubAllocations, setPreviousSubAllocations] = useState<ISubAllocation[]>([]);
-    const { addAllocationToBudget, createBudgetCategory, createAllocation } = useBudgetStore();
+    const { addAllocationToBudget, createBudgetCategory } = useBudgetStore();
     const [lastBudget, setLastBudget] = useState<IBudget | null>(null);
     const [categoryName, setCategoryName] = useState<string>('')
+    const [allDisplayedBudgets, setAllDisplayedBudgets] = useState<BudgetAllocation[]>([])
     const [loading, setLoading] = useState(false)
-    const [isClient, setIsClient] = useState(false);
-    const [triggered, setTriggered] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
-    const queryClient = useQueryClient();
-
-
+    const [singleBudget, setSingleBudget] = useState<any>()
+    const [bluredData, setBluredData] = useState<SubAllocation2[]>([])
     const navigate = useRouter();
     const { authenticatedUser } = useAuthentication();
 
-    const { getLastBudget, budgets, addToCategory, allCategories } = useBudgetStore((state) => ({
+    const { getLastBudget, budgets, allCategories } = useBudgetStore((state) => ({
         getLastBudget: state.getLastBudget,
         budgets: state.budgets,
         allCategories: state.allCategories,
-        addToCategory: state.addToCategory
+
     }))
-    // console.log(budgets);
+
+    const queryClient = useQueryClient();
 
 
 
@@ -76,11 +92,54 @@ const Page = ({ params }: { params: { id: string } }) => {
         const fetchedLastBudget = getLastBudget();
         if (fetchedLastBudget) {
             setLastBudget(fetchedLastBudget);
+
         } else {
             setLastBudget(null);
         }
         console.log(fetchedLastBudget);
-    }, [getLastBudget]);
+    }, [getLastBudget, bluredData]);
+
+    const calculateIncomeExpenseStats = (lastBudget: any) => {
+        // Calculate total income
+        const income = lastBudget?.incomes?.reduce((total: number, income: any) => total + income.amount, 0) || 0;
+
+        // Calculate total expense
+        const expense = lastBudget?.allocations?.reduce((total: number, allocation: any) => total + allocation.amount, 0) || 0;
+
+        // Calculate income left
+        const incomeLeft = income - expense;
+
+        // Calculate percentage of income used
+        const percentageIncomeUsed = income > 0 ? Math.min((expense / income) * 100, 100) : 0;
+
+        // Calculate percentage of income left
+        const percentageIncomeLeft = 100 - percentageIncomeUsed;
+
+        // Debugging logs
+        console.log("Last Budget:", lastBudget);
+        console.log("Income:", income);
+        console.log("Expense:", expense);
+        console.log("Income Left:", incomeLeft);
+        console.log("Percentage of Income Used:", percentageIncomeUsed);
+        console.log("Percentage of Income Left:", percentageIncomeLeft);
+
+        return { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft };
+    };
+
+    const { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft } =
+        calculateIncomeExpenseStats(lastBudget);
+
+    useEffect(() => {
+        const newData = {
+            uid: selectedBudget?.uid,
+            amount: selectedBudget?.amount,
+            percentage: selectedBudget?.amount / incomeLeft * 100,
+            subAllocations: []
+        }
+
+        console.log(selectedBudget);
+
+    }, [selectedBudget]);
 
 
     const formatNumber = (num: number) => {
@@ -120,38 +179,14 @@ const Page = ({ params }: { params: { id: string } }) => {
     };
 
 
-    // Calculate income, expense, and percentage of income used
-    const income = lastBudget?.incomes?.reduce((total, income) => total + income.amount, 0) || 0;
-    const expense = 0;
-    const incomeLeft = income - expense;
 
-    // Calculate percentage of income used, capped at 100%
-    const percentageIncomeUsed = income > 0 ? Math.min((expense / income) * 100, 100) : 0;
-    const percentageIncomeLeft = 100 - percentageIncomeUsed; // Calculate remaining percentage
-    console.log("Income:", income);
-    console.log("Expense:", expense);
-    console.log("Percentage of Income Used:", percentageIncomeUsed);
-    console.log("Percentage of Income Left:", percentageIncomeLeft);
+
+
+
 
     const handleClose = () => {
         setShowSelectedBudget(false);
     };
-
-
-
-    const createNewCategory = () => {
-        try {
-            handleSaveCategory()
-            // createBudgetCategory(lastBudget?.id || '')
-            // addToCategory({ name: categoryName, id: lastBudget?.id || '' }, lastBudget?.id || '')
-            // setShowNewBudgetCategory(false)
-        } catch (error) {
-            console.log(error);
-
-        }
-    }
-
-
 
 
 
@@ -182,8 +217,8 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const enteredAmount = parseFloat(e.target.value.replace(/,/g, "")) || 0;  // Remove commas for parsing
-        const cappedAmount = Math.min(enteredAmount, income);  // Cap the amount to not exceed income
-        const percentage = income > 0 ? (cappedAmount / income) * 100 : 0;
+        const cappedAmount = Math.min(enteredAmount, incomeLeft);  // Cap the amount to not exceed income
+        const percentage = incomeLeft > 0 ? (cappedAmount / incomeLeft) * 100 : 0;
 
         if (enteredAmount > income) {
             alert(`Your expense exceeds your total income for ${lastBudget?.name}`);
@@ -195,42 +230,185 @@ const Page = ({ params }: { params: { id: string } }) => {
             amount: cappedAmount,
             percentage: Math.min(percentage, 100), // Cap the percentage at 100
         }));
+        setSingleBudget((prev: any) => ({
+            ...prev,
+            amount: cappedAmount,
+            percentage: Math.min(percentage, 100), // Cap the percentage at 100
+        }));
     };
-    // Triggers when the user leaves the input field.
-    const handleBlur = (index: number) => {
+
+    const handleBlur = async (index: number) => {
         const subAllocation = selectedBudget?.subAllocations[index];
+
         const getCurrentDate = () => {
             const date = new Date();
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-            const day = String(date.getDate()).padStart(2, '0');
-
-            return `${year}-${month}-${day}`;
+            return date.toISOString().split("T")[0]; // Format YYYY-MM-DD
         };
-        if (subAllocation?.subCategory && subAllocation?.amount) {
+
+        // Check if subAllocation exists and is valid
+        if (
+            subAllocation?.subCategory &&
+            subAllocation.amount !== undefined &&
+            subAllocation.subCategory.trim().length > 0 &&
+            subAllocation.amount > 0
+        ) {
             const data = {
                 amount: subAllocation.amount,
                 budgetCategoryId: selectedBudget?.uid,
-                narration: subAllocation?.subCategory,
-                date: getCurrentDate()
+                name: subAllocation.subCategory, // Pass the subCategory name to create it
+                date: getCurrentDate(),
+            };
 
+            // Calculate the total subAllocation amount safely
+            const totalSubAllocationAmount = Array.isArray(selectedBudget?.subAllocations)
+                ? selectedBudget.subAllocations.reduce(
+                    (sum: any, allocation: any) => sum + allocation.amount,
+                    0
+                )
+                : 0;
+
+            if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
+                alert("Your expense is greater than your current budget");
+            } else {
+                if (createSubCategoryMutation.isPending) {
+                    alert('saving....')
+                } else {
+
+
+                    if (selectedBudget?.amount > 0) {
+                        try {
+                            const res = await createSubCategoryMutation.mutateAsync(data);
+                            console.log("SubCategory Response:", res.data);
+
+                            let updatedSubAllocations: any[] = [];
+
+                            // Create a new subAllocation
+                            const newSubAllocation = {
+                                subCategory: res.data.uid,
+                                name: subAllocation.subCategory,
+                                amount: subAllocation.amount,
+                            };
+
+                            // Check if the subCategory already exists
+                            const existingSubAllocation = updatedSubAllocations.find(
+                                (sub) => sub.subCategory === res.data.uid
+                            );
+
+                            if (existingSubAllocation) {
+                                console.log("Updating existing allocation");
+
+                                updatedSubAllocations = updatedSubAllocations.map((sub) =>
+                                    sub.subCategory === res.data.uid ? newSubAllocation : sub
+                                );
+                            } else {
+                                console.log("Adding new allocation");
+
+                                updatedSubAllocations.push(newSubAllocation);
+
+                                // Find the existing allocations and subAllocations
+                                const foundBudget = lastBudget
+                                console.log(foundBudget);
+
+
+                                const existingSubAllocations =
+                                    foundBudget?.allocations?.find(
+                                        (b) => b.budgetCategory === selectedBudget.uid
+                                    )?.subAllocations || [];
+
+                                // Check if the entry already exists in bluredData
+                                const entryExists = bluredData.some(
+                                    (entry: any) =>
+                                        entry.subCategory === res.data.uid &&
+                                        entry.amount === subAllocation.amount
+                                );
+
+                                if (!entryExists) {
+                                    console.log(existingSubAllocations);
+
+                                    setBluredData((prevData: any[]) => {
+                                        const lastIndex = prevData.length - 1;
+
+                                        // Check the last item first
+                                        if (prevData[lastIndex]?.name === newSubAllocation.name) {
+                                            const updatedData = [...prevData];
+                                            updatedData[lastIndex] = newSubAllocation; // Replace last item
+                                            return updatedData;
+                                        }
+
+                                        // If not the last item, check the entire array
+                                        const existingIndex = prevData.findIndex(
+                                            (item) => item.name === newSubAllocation.name
+                                        );
+
+                                        if (existingIndex !== -1) {
+                                            // Replace the existing item
+                                            const updatedData = [...prevData];
+                                            updatedData[existingIndex] = newSubAllocation;
+                                            return updatedData;
+                                        }
+
+                                        // If not found, append the new sub-allocation
+                                        return [...prevData, ...existingSubAllocations, newSubAllocation];
+                                    });
+                                }
+                            }
+
+                            // Remove invalid allocations
+                            updatedSubAllocations = updatedSubAllocations.filter(
+                                (sub) => sub.subCategory && sub.amount > 0
+                            );
+
+                            const percentage = Math.round(
+                                (selectedBudget.amount / incomeLeft) * 100 * 100
+                            ) / 100;
+
+                            const newAllocation = {
+                                budgetCategory: selectedBudget.uid,
+                                amount: selectedBudget.amount,
+                                percentage,
+                                subAllocations: updatedSubAllocations,
+                            };
+
+                            setSingleBudget(newAllocation);
+                            setAllocations((prevAllocations) => [
+                                ...prevAllocations.filter(
+                                    (alloc) =>
+                                        alloc.budgetCategory !== newAllocation.budgetCategory
+                                ),
+                                newAllocation,
+                            ]);
+
+                            console.log("Updated SubAllocations:", updatedSubAllocations);
+                        } catch (error) {
+                            console.error("Error creating subcategory:", error);
+                        }
+                    } else {
+                        alert("Please enter a valid amount for this category");
+                    }
+                }
             }
-
+        } else {
+            console.log("Both category and amount are required before blurring.");
         }
+
         setFocusedIndex(null); // Reset focus tracking
     };
 
 
-    // Handle percentage change and update amount
-    const handlePercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const percentage = parseFloat(e.target.value.replace('%', '')) || 0;
-        const amount = income > 0 ? (percentage / 100) * income : 0;
-        setSelectedBudget((prev: any) => ({
-            ...prev,
-            percentage: percentage > 100 ? 100 : percentage,
-            amount: amount > income ? income : amount,
-        }));
-    };
+    const createSubCategoryMutation = useMutation({
+        mutationFn: (data: any) => CreateSubCategoryApi(data.token, data.budgetCategoryId, data.name),
+        onSuccess: (data: any) => {
+            if (data?.success) {
+                console.log(data)
+                return data
+            }
+        },
+        onError: (error: Error) => {
+            console.error('Error sending OTP:', error);
+        },
+    });
+
+
 
     const addSubAllocation = () => {
         if (!selectedBudget) return;
@@ -246,6 +424,10 @@ const Page = ({ params }: { params: { id: string } }) => {
             ...selectedBudget,
             subAllocations: [...(selectedBudget.subAllocations || []), newSubAllocation],
         });
+        setSingleBudget({
+            ...selectedBudget,
+            subAllocations: [...(selectedBudget.subAllocations || []), newSubAllocation],
+        });
     };
 
     // Validate amount to ensure it does not exceed total income
@@ -253,6 +435,10 @@ const Page = ({ params }: { params: { id: string } }) => {
         if (selectedBudget?.amount > income) {
             alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
             setSelectedBudget((prev: any) => ({
+                ...prev,
+                amount: income,
+            }));
+            setSingleBudget((prev: any) => ({
                 ...prev,
                 amount: income,
             }));
@@ -273,6 +459,10 @@ const Page = ({ params }: { params: { id: string } }) => {
                 ...prevBudget,
                 subAllocations: [defaultSubAllocation],
             }));
+            setSingleBudget((prevBudget: any) => ({
+                ...prevBudget,
+                subAllocations: [defaultSubAllocation],
+            }));
         }
     }, [selectedBudget]);
 
@@ -282,6 +472,10 @@ const Page = ({ params }: { params: { id: string } }) => {
         if (selectedBudget?.amount > income) {
             alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
             setSelectedBudget((prev: any) => ({
+                ...prev,
+                amount: income,
+            }));
+            setSingleBudget((prev: any) => ({
                 ...prev,
                 amount: income,
             }));
@@ -330,11 +524,61 @@ const Page = ({ params }: { params: { id: string } }) => {
                 ...prevBudget,
                 subAllocations: updatedSubAllocations
             }));
+            setSingleBudget((prevBudget: IBudget) => ({
+                ...prevBudget,
+                subAllocations: updatedSubAllocations
+            }));
         }
 
         // Update the state
 
     };
+
+
+    useEffect(() => {
+        if (selectedBudget && !hasSelectedBudget.current) {
+            console.log(selectedBudget);
+            console.log(allDisplayedBudgets);
+
+            if (allDisplayedBudgets.length > 0) {
+                // Find the matching budget in allDisplayedBudgets
+                const matchingBudget = allDisplayedBudgets.find(
+                    (budget) => budget.uid === selectedBudget.uid
+                );
+
+                if (matchingBudget) {
+                    // Replace subAllocations of selectedBudget with the matching budget's subAllocations
+                    setSelectedBudget((prev: any) => ({
+                        ...prev,
+                        amount: matchingBudget.amount,
+                        subAllocations: matchingBudget.subAllocations,
+                    }));
+                    setSingleBudget((prev: any) => ({
+                        ...prev,
+                        amount: matchingBudget.amount,
+                        subAllocations: matchingBudget.subAllocations,
+                    }));
+                }
+            }
+
+            // Mark that the budget has been selected to prevent further updates
+            hasSelectedBudget.current = true;
+        }
+    }, [selectedBudget]);
+
+    const handleBudgetClick = (budget: any) => {
+        if (incomeLeft > 0) {
+            setShowSelectedBudget(!showSelectedBudget);
+            setSelectedBudget(budget);
+            setSingleBudget(budget);
+            hasSelectedBudget.current = false; // Reset the ref each time a new budget is selected 
+        } else {
+            alert('You have no income left')
+        }
+
+    };
+
+
 
 
 
@@ -347,35 +591,112 @@ const Page = ({ params }: { params: { id: string } }) => {
         queryKey: ['allBudgetCategories'],
         queryFn: () => getAllBudgetCategories(authenticatedUser?.token ?? ''),
         enabled: !!authenticatedUser?.token,
+        refetchOnWindowFocus: true,
     });
 
     const budgetCategoriesArray = Array.isArray(budgetCategoriesData) ? budgetCategoriesData : [];
+
 
     console.log(budgetCategoriesData);
 
 
     const handleSaveCategory = async () => {
-        try {
-            // console.log(budgetCategoriesData)
-            console.log(selectedBudget);
-            // console.log(lastBudget);
-            // console.log(allCategories);
-            const data = {
-                name: lastBudget?.name,
-                purpose: lastBudget?.purpose,
-                startDate: lastBudget?.startDate,
-                endDate: lastBudget?.startDate,
-                incomes: lastBudget?.incomes,
-                allocations: [
 
-                ]
-            }
+        const totalSubAllocationAmount = Array.isArray(selectedBudget?.subAllocations)
+            ? selectedBudget.subAllocations.reduce(
+                (sum: any, allocation: any) => sum + allocation.amount,
+                0
+            )
+            : 0;
+        console.log(selectedBudget?.amount > totalSubAllocationAmount);
 
-        } catch (error) {
-            console.log(error);
-            setLoading(false)
+        if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
+            alert("Your expense is greater than your current budget");
         }
-    }
+
+
+        else if (selectedBudget?.amount > totalSubAllocationAmount) {
+            alert("your budgets are less than your assinged amount for this category");
+        }
+        else if (createSubCategoryMutation.isPending) {
+            alert("savinng expense ....");
+        }
+        else {
+
+
+
+            const newData: BudgetAllocation = {
+                uid: selectedBudget?.uid,
+                amount: selectedBudget?.amount,
+                percentage: (selectedBudget?.amount / incomeLeft) * 100,
+                subAllocations: selectedBudget.subAllocations
+            };
+
+            const updatedBudgets = allDisplayedBudgets.some(budget => budget.uid === newData.uid)
+                ? allDisplayedBudgets.map(budget =>
+                    budget.uid === newData.uid ? newData : budget
+                )
+                : [...allDisplayedBudgets, newData];
+
+            setAllDisplayedBudgets(updatedBudgets);
+
+            try {
+                if (selectedBudget?.amount === undefined || selectedBudget.amount <= 0) {
+                    alert("Please add a valid amount");
+                    return;
+                }
+
+                // Filter out invalid subAllocations
+                const validSubAllocations = selectedBudget.subAllocations?.filter(
+                    (sub: any) => sub.subCategory && sub.amount > 0
+                ) || [];
+
+                console.log(singleBudget.subAllocations);
+
+                const SingleValidSubAllocations = singleBudget.subAllocations?.filter(
+                    (sub: any) => sub.subCategory && sub.amount > 0
+                ) || [];
+
+                const percentage = Math.round(
+                    (selectedBudget.amount / incomeLeft) * 100 * 100
+                ) / 100;
+
+
+                const updatedSubAllocations = bluredData.map(({ name, ...rest }) => rest);
+
+                const newAllocation = {
+                    budgetCategory: selectedBudget.uid,
+                    amount: selectedBudget.amount,
+                    percentage,
+                    subAllocations: bluredData,
+                };
+
+
+                console.log("Validated Allocation:", bluredData);
+
+                const fetchedLastBudget = getLastBudget();
+                if (fetchedLastBudget) {
+                    setLastBudget(fetchedLastBudget);
+
+                } else {
+                    setLastBudget(lastBudget);
+                }
+                // Add the new allocation to the budget using your function
+                console.log(newAllocation);
+
+                addAllocationToBudget(budgetId, [newAllocation]);
+
+                // Clear local allocations after successful save
+                calculateIncomeExpenseStats(lastBudget)
+                setBluredData([])
+                setAllocations([]);
+                handleClose()
+            } catch (error) {
+                console.error("Error saving category:", error);
+            }
+        }
+    };
+
 
     // To initialize previousSubAllocations when component mounts or selectedBudget is first set
     useEffect(() => {
@@ -383,6 +704,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             setPreviousSubAllocations(selectedBudget.subAllocations);
         }
     }, [selectedBudget]);
+
 
 
 
@@ -414,6 +736,8 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
+
+
     // Mutations
     const CreateBudgetMutation = useMutation({
         mutationFn: (data: any) => {
@@ -428,7 +752,8 @@ const Page = ({ params }: { params: { id: string } }) => {
                 console.log(data);
                 const { success, message, ...rest } = data;
                 console.log(rest.data);
-                navigate.push('/')
+                queryClient.invalidateQueries({ queryKey: ['allBudgetCategories'] });
+                navigate.push('/budgets')
             }
         },
         onError: (error: Error) => {
@@ -439,15 +764,36 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
+
+
     const handleCreateBudget = async () => {
         try {
             console.log(currentBudget);
-            // navigate.push('/')
             const { id, budgetType, ...rest } = currentBudget || {};
-            const newData = { ...rest, allocations: [] }
+            const newData: any = { ...rest, allocations: lastBudget?.allocations || [] }
             console.log(newData);
-            CreateBudgetMutation.mutateAsync(newData)
-            navigate.push('/budgets')
+
+            const FilteredData = {
+                ...newData, // Copy over the non-allocations data
+                allocations: newData.allocations.map((allocation: any) => ({
+                    ...allocation,
+                    subAllocations: allocation.subAllocations
+                        .map(({ subCategory, amount }: any) => ({ subCategory, amount })) // Map to only include subCategory and amount
+                        .filter((sub: any) => sub.subCategory && sub.amount) // Ensure we only keep valid subAllocations
+                }))
+            };
+
+            console.log(FilteredData);
+
+
+            const res = await CreateBudgetMutation.mutateAsync(FilteredData)
+            console.log(res);
+            setBluredData([])
+            if (res) {
+                navigate.push('/budgets')
+            }
+
+
 
         } catch (error) {
             console.log(error);
@@ -530,11 +876,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                     {budgetCategoriesArray.map((budget: any) => (
                                         <ul key={budget.id} className="budget-list grid grid-cols-1 gap-[16px] w-full">
                                             <li
-                                                onClick={() => {
-                                                    setShowSelectedBudget(!showSelectedBudget);
-                                                    setSelectedBudget(budget);
-                                                    console.log(budget);
-                                                }}
+                                                onClick={() => handleBudgetClick(budget)}
                                                 className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
                                             >
                                                 <div
@@ -565,22 +907,27 @@ const Page = ({ params }: { params: { id: string } }) => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-                > <BottomDrawer
-                    footer={<div className="w-full grid gap-y-[16px]">
-                        <button onClick={() => handleSaveCategory()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">save </button>
-
-                        <button onClick={() => handleDeleteOfCategory('111')} className="btn w-full text-[#F5365C] rounded-[32px] px-[28px] py-[14px] bg-[#FBEDEF] flex items-center justify-center gap-[8px] font-[500]">Delete category</button>
-                    </div>}
-                    label={`${selectedBudget?.name}`}
-                    back={false}
-                    show={showSelectedBudget}
-                    close={true}
-                    onClose={handleClose}
                 >
+                    <BottomDrawer
+                        footer={<div className="w-full grid gap-y-[16px]">
+                            <button disabled={createSubCategoryMutation.isPending} onClick={() => handleSaveCategory()} className={` btn w-full rounded-[32px] px-[28px] py-[14px]  ${createSubCategoryMutation.isPending ? 'bg-[#434343]' : ' bg-black '} text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500] `} > {createSubCategoryMutation.isPending ? 'Saving...' : 'Save'}
+                            </button>
+
+                            <button onClick={() => handleDeleteOfCategory('111')} className="btn w-full text-[#F5365C] rounded-[32px] px-[28px] py-[14px] bg-[#FBEDEF] flex items-center justify-center gap-[8px] font-[500]">Delete category</button>
+                        </div>}
+                        label={`${selectedBudget?.name}`}
+                        back={false}
+                        show={showSelectedBudget}
+                        close={true}
+                        onClose={handleClose}
+                    >
+
+
                         <form action="" className='w-full  ' method="post">
                             <h1 className=' font-[500] leading-[20px]'>
                                 Assign amount/percentage of income for this category
                             </h1>
+
                             <div className='px-[16px] bg-[#F7F7F9] mt-[8px] border border-[#E7E7EA] rounded-[16px] grid grid-cols-2 w-full'>
                                 <div className='py-[12px]'>
                                     <h1 className=' text-[#828282] text-[12px] leading-[14.4px] '>Amount</h1>
@@ -727,9 +1074,9 @@ const Page = ({ params }: { params: { id: string } }) => {
                     >
 
                         <BottomDrawer
-                            footer={<button type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
+                            footer={<button disabled={createCategoryMutation.isPending} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
 
-                                {loading ?
+                                {createCategoryMutation.isPending ?
                                     <div className=' flex gap-2 items-center justify-center mx-auto w-full'>
                                         <CircularProgress color='default' size='sm' />
 

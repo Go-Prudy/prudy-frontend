@@ -85,7 +85,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     const recordExpenseMutation = useMutation({
         mutationFn: (manualData: ManualData) =>
             RecordExpenseApi(
-                '1d', manualData,
+                'id', manualData,
                 authenticatedUser?.token ?? '',
             ),
         onSuccess: (data) => {

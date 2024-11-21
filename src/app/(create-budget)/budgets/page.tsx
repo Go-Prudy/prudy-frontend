@@ -38,11 +38,11 @@ const BudgetPage = () => {
 
     const { authenticatedUser } = useAuthentication();
 
-    const { data: budgets = [], isLoading, isPending, error } = useQuery({
+    const { data: budgets = [], isLoading, error, isPending } = useQuery({
         queryKey: ['allBudgetCategories'],
         queryFn: () => GetAllBudgetsApi(authenticatedUser?.token ?? ''),
         enabled: !!authenticatedUser?.token,
-        staleTime: 5 * 60 * 1000
+        refetchOnWindowFocus: true, // This should be directly in the options object.
     });
 
     // console.log(budgets);
@@ -51,7 +51,8 @@ const BudgetPage = () => {
     const { data: getPendingInvitesApiData = [], status: getPendingInvitesStatus } = useQuery({
         queryKey: ['getPendingInvites'],
         queryFn: () => getPendingInvitesApi(authenticatedUser?.token ?? ''),
-        enabled: !!authenticatedUser?.token
+        enabled: !!authenticatedUser?.token,
+        refetchOnWindowFocus: true, // This should be directly in the options object.
     });
 
 

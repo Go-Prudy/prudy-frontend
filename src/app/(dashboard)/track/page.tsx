@@ -13,7 +13,7 @@ import scan from '@/images/scan.png'
 import lunch from '@/images/Launch.png'
 import mono1 from '@/images/mono1.png'
 import addManual from '@/images/addManually.png'
-import { BsCheck, BsChevronRight, BsPlus } from "react-icons/bs";
+import { BsCheck, BsChevronRight, BsPlus, BsThreeDotsVertical, BsX } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { motion } from 'framer-motion';
 import BottomDrawer from "@/components/create-budget/BottomDrawer";
@@ -23,18 +23,26 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthentication } from "@/app/store/AuthStore";
 import { GetAllBudgetsApi } from "@/app/services/BudgetService";
 import { fetchAccountInfoApi, fetchAccountTransactionsApi, getAllAccountsApi, initLinkAccountApi, syncAccountTransactionsApi } from "@/app/services/AccountService";
+import { RadioGroup, useRadio, VisuallyHidden, cn, CircularProgress } from "@nextui-org/react";
+import { useInfiniteQuery } from '@tanstack/react-query';
+import toast from "react-hot-toast";
+import { format, parseISO } from 'date-fns';
+
+
 interface Bank {
   name: string;
   balance: number;
   logo: any;
+  user: string,
+  number: string
 }
 
 
 // Example bank data array
 const bank_data: Bank[] = [
-  { name: 'Wema Bank', balance: 450000, logo: wema },
-  { name: 'Kuda Bank', balance: 450000, logo: kuda },
-  { name: 'GT Bank', balance: 450000, logo: gt },
+  // { name: 'Wema Bank', user: 'Ayomide Asekun', number: '0248356709', balance: 450000, logo: wema },
+  // { name: 'Kuda Bank', balance: 450000, logo: kuda, user: 'Ayomide Asekun', number: '0248356709' },
+  // { name: 'GT Bank', balance: 450000, logo: gt, user: 'Ayomide Asekun', number: '0248356709' },
 ];
 
 
@@ -52,6 +60,24 @@ export default function Page() {
   }
 
 
+  interface Transaction {
+    uid: string;
+    narration: string;
+    date: string;
+    amount: number;
+  }
+
+  interface TransactionsPage {
+    docs: Transaction[]; // List of transactions
+    next?: { page: number }; // Information about the next page
+  }
+
+  interface FetchAccountTransactionsApiResponse {
+    token: string;
+    accountId: string;
+    limit: number;
+    page: number;
+  }
 
   // Create the array of card items
   const cardItems: CardItem[] = [
@@ -94,58 +120,25 @@ export default function Page() {
     currency: string;
   }
 
-  const transactions: Transaction[] = [
-    {
-      id: 1,
-      name: 'Electricity Bill Payment',
-      date: 'June 12th',
-      time: '02:48pm',
-      amount: 23450,
-      currency: '₦',
-    },
-    {
-      id: 2,
-      name: 'Water Bill Payment',
-      date: 'June 12th',
-      time: '02:48pm',
-      amount: 23450,
-      currency: '₦',
-    },
-    {
-      id: 3,
-      name: 'Internet Subscription',
-      date: 'June 12th',
-      time: '02:48pm',
-      amount: 23450,
-      currency: '₦',
-    },
-    {
-      id: 1,
-      name: 'Electricity Bill Payment',
-      date: 'June 12th',
-      time: '02:48pm',
-      amount: 23450,
-      currency: '₦',
-    },
-    {
-      id: 2,
-      name: 'Water Bill Payment',
-      date: 'June 12th',
-      time: '02:48pm',
-      amount: 23450,
-      currency: '₦',
-    },
-    {
-      id: 3,
-      name: 'Internet Subscription',
-      date: 'June 12th',
-      time: '02:48pm',
-      amount: 23450,
-      currency: '₦',
-    },
+  interface IAccount {
+    createdAt: string; // ISO string representation of the creation date
+    updatedAt: string; // ISO string representation of the last update date
+    deletedAt: string | null; // Nullable field for deletion timestamp
+    id: number; // Unique identifier for the account
+    uid: string; // Universally unique identifier
+    providerAccountId: string; // Provider-specific account ID
+    accountName: string; // Name of the account holder
+    accountNumber: string; // Account number
+    accountType: 'SAVINGS_ACCOUNT' | 'CURRENT_ACCOUNT' | 'OTHER'; // Account type
+    accountBalance: number; // Account balance
+    accountBvn: string; // Bank Verification Number (optional)
+    accountStatus: 'AVAILABLE' | 'FROZEN' | 'CLOSED'; // Status of the account
+    institutionName: string; // Name of the financial institution
+    institutionCode: string; // Institution code (e.g., bank code)
+    institutionType: 'PERSONAL_BANKING' | 'CORPORATE_BANKING' | 'OTHER'; // Type of institution
+  }
 
-    // Add more transaction objects here
-  ];
+
 
   interface Category {
     id: number;
@@ -207,13 +200,32 @@ export default function Page() {
 
 
 
-  const [bankData, setBankData] = useState<Bank[]>([])
-  const [showBalance, setShowBalance] = useState(true);
+  const [bankData, setBankData] = useState<Bank[]>(bank_data)
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSyncDataModal, setShowSyncDataModal] = useState(false);
+  const [selectedBankAccount, setSelectedBankAccount] = useState<IAccount>({
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null,
+    id: 0,
+    uid: '',
+    providerAccountId: '',
+    accountName: '',
+    accountNumber: '',
+    accountType: 'SAVINGS_ACCOUNT',
+    accountBalance: 0,
+    accountBvn: '',
+    accountStatus: 'AVAILABLE',
+    institutionName: '',
+    institutionCode: '',
+    institutionType: 'PERSONAL_BANKING',
+  });
   const [showCategories, setShowCategories] = useState(false);
   const [syncBank, setSyncBank] = useState<any>(bankData[0]);
-
+  const [showSyncTransactionFirstModal, setShowSyncTransactionFirstModal] = useState<any>(bankData[0]);
+  const [selectBankDetail, setSelectBankdetail] = useState<any>('');
+  const [currentView, setCurrentView] = useState('syncedData'); // default, loading, syncedData
+  const [isSyncing, setIsSyncing] = useState(false);
   // ADD MANUAL STATE
   const [AddManualModal, setAddManualModal] = useState<boolean>(false);
   const [manualData, setManualData] = useState<ManualData>({
@@ -222,6 +234,7 @@ export default function Page() {
     category: initialCategories[0].name, // Default category
     date: '',
   });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   // SCAN RECEIPT 
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
@@ -229,13 +242,21 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [page, setPage] = useState(1); // Current page
+  const [isFetchingMore, setIsFetchingMore] = useState(false); // Loading state for more data
+
+  const limit = 12; // Items per page
 
 
-  const [currentView, setCurrentView] = useState('syncedData'); // Initial view is 'syncedData'
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
+  const [showBalance, setShowBalance] = useState(true); // Track balance visibility
 
+  // Toggle balance visibility
+  const toggleBalanceVisibility = () => {
+    setShowBalance(prevState => !prevState);
+  };
 
   // FUNCTION TO SCAN RECEIPT DATA
   const startCamera = async () => {
@@ -352,16 +373,22 @@ export default function Page() {
     setShowBalance(!showBalance);
   };
 
-  const handleSyncTransaction = () => {
+  const handleSyncTransaction = async () => {
+    // Set loading state when sync starts
+    setCurrentView('loading');
+
     try {
-      setTimeout(() => {
-        setShowSyncModal(!showSyncModal)
-        setShowSyncDataModal(true)
-      }, 3000);
+      // Make the API call to sync transactions
+      await syncAccountTransactionsApi(authenticatedUser?.token ?? '', accountId);
+
+      // On successful sync, show synced data
+      setCurrentView('syncedData');
     } catch (error) {
-      console.log(error);
+      // Handle error (Optional: you can show an error state)
+      console.error('Error syncing transactions:', error);
+      setCurrentView('idle');
     }
-  }
+  };
 
   useEffect(() => {
     showSyncModal && handleSyncTransaction()
@@ -389,16 +416,28 @@ export default function Page() {
 
 
 
-  const handleSyncTransactions = () => {
+
+  const handleSyncTransactions = async () => {
     // Show loader when syncing starts
     setCurrentView('loading');
+    setIsSyncing(true); // Indicate syncing state
 
-    // Simulate data syncing with a 3-second delay
-    setTimeout(() => {
-      // After syncing, show synced data
-      setCurrentView('syncedData');
-    }, 3000);
+    try {
+      // Manually trigger the fetch (queryFn)
+      await refetch();
+
+      // Simulate a 2-second delay after fetching
+      setTimeout(() => {
+        setCurrentView('syncedData'); // Show the synced data after the delay
+        setIsSyncing(false); // Stop syncing
+      }, 2000); // 2-second delay after sync
+    } catch (error) {
+      console.error('Sync failed', error);
+      setCurrentView('default'); // Reset view if there's an error
+      setIsSyncing(false); // Stop syncing in case of error
+    }
   };
+
 
 
   const { authenticatedUser } = useAuthentication();
@@ -407,15 +446,15 @@ export default function Page() {
     queryKey: ['allBudgetCategories'],
     queryFn: () => GetAllBudgetsApi(authenticatedUser?.token ?? ''),
     enabled: !!authenticatedUser?.token,
-    staleTime: 5 * 60 * 1000
+    refetchOnWindowFocus: true,
   });
 
 
   const params = {
     sortBy: 'accountName',
     sortDir: 'ASC',
-    limit: 2,
-    page: 2,
+    limit: 12,
+    page: 12,
   };
 
   // React Query hook
@@ -423,7 +462,7 @@ export default function Page() {
     queryKey: ['accounts', params],
     queryFn: () => getAllAccountsApi(authenticatedUser?.token ?? '', params),
     enabled: !!authenticatedUser?.token, // Only fetch if token exists
-    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    refetchOnWindowFocus: true,
   });
 
 
@@ -463,40 +502,93 @@ export default function Page() {
   };
 
 
+  function formatDateTime(dateTime: string): string {
+    let dateObject: Date;
+
+    // Check if the input contains a time component (denoted by 'T')
+    const hasTime = dateTime.includes('T');
+
+    if (hasTime) {
+      // Parse ISO date-time string
+      dateObject = new Date(dateTime);
+    } else {
+      // Parse only the date
+      dateObject = parseISO(dateTime);
+    }
+
+    // Format based on the presence of time
+    if (hasTime) {
+      return format(dateObject, 'MMMM do | hh:mma'); // Include both date and time
+    } else {
+      return format(dateObject, 'MMMM do'); // Include only the date
+    }
+  }
 
 
-  const accountId = authenticatedUser?.profile.uid || ''; // Replace with actual account ID
+
+  const accountId = selectedBankAccount.uid || ''; // Replace with actual account ID
   const { data: accountInfo = [], isPending: fetchAccountInfoIspending } = useQuery({
     queryKey: ['accountInfo', accountId],
     queryFn: () => fetchAccountInfoApi(authenticatedUser?.token ?? '', accountId),
     enabled: !!authenticatedUser?.token && !!accountId, // Only fetch if token and id are available
-    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    refetchOnWindowFocus: true, // This should be directly in the options object.
   });
 
 
-
-
-
-
-
-
-
-
-  const limit = 12; // Number of transactions per page
-  const page = 1; // Current page
-
-  const { data: fetchAccountTransactionsData = [], isPending: fetchAccountTransactionsDataisPending } = useQuery({
-    queryKey: ['accountTransactions', accountId, limit, page],
-    queryFn: () => fetchAccountTransactionsApi(authenticatedUser?.token ?? '', accountId, limit, page),
-    enabled: !!authenticatedUser?.token && !!accountId, // Only fetch if token and id are available
-    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+  const { data: syncAccountTransactions = [], isLoading: syncAccountTransactionsisLoading, isError: syncAccountTransactionsisError, refetch } = useQuery({
+    queryKey: ['accountInfo', accountId],
+    queryFn: () => syncAccountTransactionsApi(authenticatedUser?.token ?? '', accountId),
+    enabled: false, // Disables automatic fetching
+    refetchOnWindowFocus: false, // Optionally disable this
   });
 
-
-  console.log(fetchAccountTransactionsData);
-
+  console.log(syncAccountTransactions);
 
 
+
+
+
+
+
+
+
+
+  // Fetch transactions API
+
+  const {
+    data,
+    isLoading: isLoadingfetchAccountTransactions,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<TransactionsPage, Error>({
+    queryKey: ['accountTransactions', accountId],
+    queryFn: async ({ pageParam = 1 }: any) =>
+      await fetchAccountTransactionsApi(authenticatedUser?.token ?? '', accountId, limit, pageParam),
+    getNextPageParam: (lastPage) => lastPage.next?.page ?? undefined,
+    enabled: !!authenticatedUser?.token && !!accountId,
+    initialPageParam: 1, // Define the initial page number
+  });
+
+  console.log(data);
+
+
+  // // Flatten all transaction pages into a single array
+  // const transactions: Transaction[] = data?.pages.flatMap((page: any) => page.docs) || [];
+
+  useEffect(() => {
+    if (data?.pages && data.pages.length > 0) {
+      setTransactions(data.pages.flatMap((page: TransactionsPage) => page.docs) || []);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (syncAccountTransactions && syncAccountTransactions.length > 0) {
+      console.log(syncAccountTransactions);
+
+      setTransactions(syncAccountTransactions || []);
+    }
+  }, [syncAccountTransactions]);
 
 
 
@@ -504,12 +596,67 @@ export default function Page() {
     queryKey: ['syncAccountTransactions', accountId],
     queryFn: () => syncAccountTransactionsApi(authenticatedUser?.token ?? '', accountId),
     enabled: !!authenticatedUser?.token && !!accountId, // Only fetch if token and account ID are available
-    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    refetchOnWindowFocus: true, // This should be directly in the options object.
   });
 
 
 
+  // Handle form input changes
+  const [selectedBankIndex, setSelectedBankIndex] = useState(-1); // -1 indicates no selection initially
 
+  const handleBankSelect = (index: any) => {
+    setSelectedBankIndex(index);
+    setSelectedBankAccount(accounts[index])
+    console.log(selectedBankAccount);
+
+  };
+
+
+
+  // Custom Radio button implementation
+  const CustomRadio = (props: any) => {
+    const {
+      Component,
+      children,
+      isSelected,
+      description,
+      getBaseProps,
+      getWrapperProps,
+      getInputProps,
+      getLabelProps,
+      getLabelWrapperProps,
+      getControlProps,
+
+    } = useRadio(props);
+
+
+
+    return (
+      <Component
+        {...getBaseProps()}
+        className={cn(
+          "group mb-[24px] inline-flex flex-1 hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
+          "w-full cursor-pointer border-1 border-default rounded-[20px] gap-4 p-4",
+          "data-[selected=true]:border-[#66C227] bg-[#F7F7F9]  data-[selected=true]:bg-[#F5FEED]",
+        )}
+      >
+        <VisuallyHidden>
+          <input {...getInputProps()} />
+        </VisuallyHidden>
+        <span {...getWrapperProps()}>
+          <span {...getControlProps()} />
+        </span>
+        <div {...getLabelWrapperProps()}>
+
+          {children && (
+            <span className="text-[12px] max-w-[229px] font-[500] text-foreground opacity-70">{children}</span>
+
+
+          )}
+        </div>
+      </Component>
+    );
+  };
 
   return (
     <div className="bg-base-white w-full h-full">
@@ -536,78 +683,92 @@ export default function Page() {
         <div className=" flex px-[24px] mt-[27px] justify-between">
           <h1 className=" text-[18px] font-[500] leading-[21.6px]">Linked Accounts</h1>
 
-          {bankData && <button className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "><BsPlus size={20} /> Add new</button>}
+          {accounts.length > 0 && <button onClick={() => handleLinkAccount()} className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "><BsPlus size={20} /> Add new</button>}
         </div>
 
         <div className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}>
           <div className=" w-full px-[24px] ">
 
-            {bankData.length > 0 ?
-              <>
-                <div className="  border-[#EFEFF0] w-full  mt-[19px]   rounded-t-[24px] gap-[24px] flex flex-col  p-[16px] bg-[#F7F7F9] border-[1px] ">
-                  {bankData.map((bank, index) => (
-                    <div key={index} className="flex w-full justify-between ">
-                      <div className="flex items-center">
-                        <Image width={1000} height={1000} src={bank.logo} alt={bank.name} className=" size-[24px] mr-[8px]" />
-                        <span className="text-[14px] ">{bank.name}</span>
-                      </div>
-                      <span className="text-[14px] font-[500] ">₦ {bank.balance.toLocaleString()}</span>
-                    </div>
-                  ))}
+            {isGetAllAccountPending ?
 
-                </div>
-                {/* Combined Balance Section */}
-                <div style={{
-                  background: 'linear-gradient(267.76deg, #66C227 0.21%, #2A860A 123.87%)',
-                }}
-                  className=" rounded-b-[24px] py-[12px] px-[16px]  flex justify-between items-center">
-                  <div>
-                    <p className="text-[12px] text-[#FAFAFA] ">Combined balance</p>
-                    {showBalance ? <h1 className=" font-[500] text-[#FAFAFA] mt-[8px] leading-[24px]">₦ {totalBalance.toLocaleString()}</h1>
-                      :
-                      <h1 className=" font-[500] flex items-center text-[#FAFAFA] mt-[8px] leading-[24px]">₦ ******</h1>
-                    }
-                  </div>
-                  <button
-                    onClick={toggleBalance}
-                    className="bg-[#4A9F11] text-[10px] text-white px-[8px] py-[4px] rounded-[12px] "
-                  >
-                    {showBalance ? "Hide balance" : "Show balance"}
-                  </button>
-                </div>
+              <div className=' flex gap-2 items-center justify-center mx-auto w-full'>
+                <CircularProgress color='default' size='sm' />
 
-              </>
+              </div>
               :
-
               <>
-                <div className="  border-[#EFEFF0] mb-[24px] mt-[19px] justify-center items-center  rounded-[24px] flex flex-col  p-[24px] bg-[#F7F7F9] border-[1px] ">
-                  <Image src={linkIcon} className=" w-[94.42px] object-contain h-[84px] " width={1000} height={1000} alt="goprudy" />
-                  <h1 className=" font-[500] text-center text-[#2D2D2D] leading-[19.2px]">Link your bank accounts to track your transactions easily</h1>
-                  <button onClick={() => handleLinkAccount()} className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center">
-                    {!linkAccountMutation.isPending ?
-                      <> Link now <BsChevronRight />
-                      </>
-                      :
-                      'Linking...'
-                    }
+                {accounts.length > 0 ?
+                  <>
+                    <div className="   w-full  mt-[19px]   rounded-t-[24px] gap-[24px] grid grid-cols-2  ">
+                      {/* Show loading state */}
 
-                  </button>
-                </div>
-                <p className=" text-[14px] leading-[16.8px]"> By continuing you agree to our <span className=" text-[#66C227] font-[500] ">Privacy Policy and Terms of Service .</span></p>
-              </>
-            }
+
+                      {/* Show error state */}
+                      {isError && <div>Failed to load accounts. Please try again later.</div>}
+
+                      {/* Render account details */}
+                      {!isGetAllAccountPending && !isError && accounts.length > 0 && (
+                        accounts.map((account: any, index: any) => (
+                          <div
+                            onClick={() => {
+                              setShowSyncDataModal(true)
+                              setSelectedBankAccount(account)
+                            }}
+                            key={account.id}
+                            className="flex px-[16px] border-[1px] py-[12px] rounded-[16px] border-[#EFEFF0] bg-[#F7F7F9] w-full justify-between">
+                            <div className="flex gap-[14px] flex-col items-start">
+                              {/* Placeholder for bank logo */}
+                              <Image
+                                width={10000}
+                                height={1000}
+                                src={account.institutionLogo}
+                                alt={account.institutionName}
+                                className=" size-[24px] rounded-[12px]  mr-[8px]"
+                              />
+                              <span className="text-[14px]">{account.institutionName}</span>
+                              <span className="text-[14px]">{account.accountName}</span>
+                              <span className="text-[14px]">{account.accountNumber}</span>
+                            </div>
+                            <span
+                              className="text-[14px] font-[500] size-[32px] grid place-content-center bg-white rounded-[8px] p-[16px]">
+                              <BsThreeDotsVertical />
+                            </span>
+                          </div>))
+                      )}
+                    </div>
+                  </>
+                  :
+
+                  <>
+                    <div className="  border-[#EFEFF0] mb-[24px] mt-[19px] justify-center items-center  rounded-[24px] flex flex-col  p-[24px] bg-[#F7F7F9] border-[1px] ">
+                      <Image src={linkIcon} className=" w-[94.42px] object-contain h-[84px] " width={1000} height={1000} alt="goprudy" />
+                      <h1 className=" font-[500] text-center text-[#2D2D2D] leading-[19.2px]">Link your bank accounts to track your transactions easily</h1>
+                      <button onClick={() => handleLinkAccount()} className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center">
+                        {!linkAccountMutation.isPending ?
+                          <> Link now <BsChevronRight />
+                          </>
+                          :
+                          'Linking...'
+                        }
+
+                      </button>
+                    </div>
+                    <p className=" text-[14px] leading-[16.8px]"> By continuing you agree to our <span className=" text-[#66C227] font-[500] ">Privacy Policy and Terms of Service .</span></p>
+                  </>
+                }
+              </>}
 
 
           </div>
         </div>
 
-        {bankData ?
+        {accounts ?
 
-          <div className="  border-t-[4px] border-t-[#F7F7F9]  pt-[24px] px-[24px] ">
+          <div className="  pb-[106px] border-t-[4px] border-t-[#F7F7F9]  pt-[24px] px-[24px] ">
             <h1 className=" font-[500]   text-[#2D2D2D] mt-[0px] text-[18px]">Track your finances</h1>
 
             <div className=" flex mt-[24px] gap-[16px]">
-              <Image onClick={() => setShowSyncModal(!showSyncModal)} width={1000} height={1000} src={sync} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
+              <Image onClick={() => setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal)} width={1000} height={1000} src={sync} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
 
               {videoStream ?
                 <div className=" text-center h-full w-full grid  place-content-center gap-3 ">
@@ -709,7 +870,7 @@ export default function Page() {
 
 
       </div>
-      <div className=" bg-[#FAFAFA] pb-[106px] w-full " />
+      <div className=" bg-[#FAFAFA]  w-full " />
 
 
       {AddManualModal && <motion.div
@@ -820,6 +981,77 @@ export default function Page() {
 
 
 
+      {showSyncTransactionFirstModal && <motion.div
+        initial={{ opacity: 0, y: 90 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="h-[100vh] w-full flex justify-center items-center p-[24px] z-[40]  bottom-0 fixed bg-[#1c1c1c73]"
+      > <div
+        className=" bg-white p-[24px] w-full rounded-[40px] "
+      >
+          <div className=" w-full flex justify-between">
+            <div></div>
+            <div className=" text-[20px] font-[500]">Sync Transactions</div>
+            <div className=" cursor-pointer "><BsX size={28} onClick={() => setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal)} className=" bg-[#F7F7F9] rounded-[8px]" /></div>
+          </div>
+          <h1 className=" mb-[24px] font-[400] mt-[8px] leading-[24px] text-center ">Kindly select the bank account you <br /> would like to sync with</h1>
+          <RadioGroup
+            orientation="vertical"
+            className=' flex flex-col w-full  '
+            color='success'
+            onValueChange={(value) => handleBankSelect(value)}
+
+          >
+            {/* Show loading state */}
+            {isGetAllAccountPending && <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>}
+
+            {/* Show error state */}
+            {isError && <div>Failed to load accounts. Please try again later.</div>}
+
+            {/* Render account details */}
+            {!isGetAllAccountPending && !isError && accounts.length > 0 && (
+              accounts.map((account: any, index: any) => (
+                <CustomRadio
+                  key={index} // Key is important for performance optimization
+                  isSelected={selectedBankIndex === index}
+                  onChange={() => handleBankSelect(index)}
+                  className="flex w-full justify-between"
+                  value={index}
+                >
+                  <div className="w-full">
+                    {/* Display Bank Name */}
+                    <h1 className="text-[#2f1a1a] text-[14px]">{account.institutionName}</h1>
+
+                    {/* Display Account Details */}
+                    <div className="w-full flex">
+                      <h1 className="text-[14px] flex w-full text-base-black">
+                        {account.accountName} |
+                        <span className="font-[500]"> {account.accountNumber}</span>
+                      </h1>
+                    </div>
+                  </div>
+                </CustomRadio>
+              ))
+            )}
+
+            {/* Fallback for no accounts */}
+            {!isGetAllAccountPending && !isError && accounts.length === 0 && (
+              <div>No accounts available for selection.</div>
+            )}
+
+
+          </RadioGroup>
+          <button disabled={isGetAllAccountPending} onClick={() => {
+            selectedBankAccount.accountName ?
+              setShowSyncDataModal(true)
+              :
+              alert("Select a bank account")
+          }
+
+          } type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Proceed </button>
+        </div>
+      </motion.div>}
 
 
       {showSyncDataModal && <motion.div
@@ -828,28 +1060,38 @@ export default function Page() {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
         className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-      > <BottomDrawer
-
-        label={`Sync transactions`}
-        back={false}
-        show={showSyncDataModal}
-        close={true}
-        padding={1}
-        onClose={() => setShowSyncDataModal(!showSyncDataModal)}
       >
 
-          <div className=" flex    flex-col gap-[16px] ">
-            <div className=" pt-[24px] px-[24px]">
-              <div className="  bg-[#F7F7F9] w-full flex  gap-[16px] p-[8px] rounded-[20px] ">
-                {bankData.map((item) => (
-                  <div key={item.name} onClick={() => setSyncBank(item)} className={` text-[14px] leading-[24px]  px-[16px] py-[8px] r ${syncBank.name === item.name ? ' text-[#575757] font-[500] ' : 'text-[#828282]'} `}>
-                    {item.name}
-                  </div>
-                ))}
-              </div>
+        <div className=" text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
+          <div className=" pt-[72px] px-[24px]">
+            <button onClick={() => setShowSyncDataModal(!showSyncDataModal)} className=" grid place-content-center top-[24px] bg-[#7CD741] absolute right-[24px] size-[36px] rounded-full  ">
+              <BsX size={'24px'} />
+            </button>
+            <div className="  w-full   gap-[16px] p-[8px] rounded-[20px] ">
 
+
+              <h1 className="  uppercase mb-[12px] text-[12px] font-[400] ">{selectedBankAccount.institutionName}</h1>
+              <div className=" flex justify-between">
+                <h1>{selectedBankAccount.accountName}</h1>
+                <h1>{selectedBankAccount.accountNumber}</h1>
+              </div>
+              <div className=" border-[#5EB325] border rounded-[8px] mt-[12px] bg-[#4A9F11] p-[8px] ">
+                <h1 className=" text-[12px] ">Available balance</h1>
+                <div className=" flex justify-between w-full">
+                  <h1 className="font-[700] aeonik mt-[8px] ">
+                    {showBalance ? <> ₦ {selectedBankAccount.accountBalance}</> : '  ₦ *******'}
+
+                  </h1>
+                  <button onClick={toggleBalanceVisibility} className=" bg-[#368B00] text-[10px] py-[4px] px-[8px] rounded-[12px] ">
+                    {showBalance ? 'Hide balance' : 'Show balance'}
+                  </button>
+                </div>
+              </div>
             </div>
-            <h1 className=" px-[24px] text-[#828282] text-[13px] leading-[20px]">Click on the transaction to assign it to the right category</h1>
+
+          </div>
+          <div className=" bg-white  w-full">
+            <h1 className=" px-[24px] my-[16px] text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">Click on the transaction to assign it to the right category</h1>
 
 
 
@@ -857,9 +1099,15 @@ export default function Page() {
 
               <div className=" flex px-[24px] w-full items-center justify-between">
                 <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">Latest transactions</h1>
-                <button onClick={() => handleSyncTransactions()} className=" bg-[#EFEFF0] font-[500] text-[12px] py-[4px] px-[8px] rounded-[32px] ">Sync latest</button>
+                <button
+                  onClick={handleSyncTransactions}
+                  className="bg-[#EFEFF0] font-[500] text-[12px] text-[#2D2D2D] py-[4px] px-[8px] rounded-[32px]"
+                  disabled={isSyncing} // Disable button while syncing
+                >
+                  {isSyncing ? 'Syncing...' : 'Sync Latest'}
+                </button>
               </div>
-              <div className="py-[16px] bg-[#F7F7F9] mt-[16px] w-full">
+              <div className="py-[16px] bg-[#F7F7F9] min- h-[534px]  mt-[16px] w-full">
 
                 {/* Conditional Rendering based on currentView state */}
                 {currentView === 'loading' && (
@@ -888,31 +1136,46 @@ export default function Page() {
                   <div className="px-[24px] max-h-[50vh] overflow-y-scroll space-y-4 mt-[16px]">
                     {transactions.map((transaction, index) => (
                       <div
-                        key={transaction.id}
+                        key={transaction.uid}
                         onClick={AssignExpense}
-                        className={`flex justify-between items-center ${index !== transactions.length - 1 ? 'border-b border-b-[#E7E7EA]' : ''} pb-2`}
+                        className={`flex justify-between items-center ${index !== transactions.length - 1 ? 'border-b border-b-[#E7E7EA]' : ''
+                          } pb-2`}
                       >
-                        {/* Transaction Details */}
                         <div>
-                          <p className="font-[500] text-[14px] text-[#2d2d2d]">{transaction.name}</p>
-                          <p className="text-[#575757] text-[12px]">{`${transaction.date}, ${transaction.time}`}</p>
+                          <p className="font-[500] text-[14px] text-[#2d2d2d]">{transaction.narration}</p>
+                          <p className="text-[#575757] flex gap-3  text-[12px]">{formatDateTime(transaction.date)}
+                          </p>
                         </div>
-
-                        {/* Transaction Amount */}
                         <div className="font-[500] text-[14px] text-[#2d2d2d]">
-                          {transaction.currency} {transaction.amount.toLocaleString()}
+                          ₦ {transaction.amount.toLocaleString()}
                         </div>
                       </div>
                     ))}
+
+                    {isFetchingNextPage && <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>}
+
+                    <button
+                      onClick={() => fetchNextPage()}
+                      disabled={!hasNextPage || isFetchingNextPage}
+                      className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
+                    >
+                      {isLoadingfetchAccountTransactions
+                        ? 'Loading...'
+                        : isFetchingNextPage
+                          ? 'Loading...'
+                          : hasNextPage
+                            ? 'Load More'
+                            : 'No More Data'}
+                    </button>
                   </div>
                 )}
 
               </div>
             </div>
           </div>
+        </div>
 
 
-        </BottomDrawer>
       </motion.div>
       }
 
