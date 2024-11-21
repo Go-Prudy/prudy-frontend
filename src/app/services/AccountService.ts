@@ -120,6 +120,9 @@ export const syncAccountTransactionsApi = async (
                 Authorization: `Bearer ${token}`, // Include the token in the Authorization header
             },
         });
+        console.log(response.data);
+
+        toast.success(response.data?.message)
         return response.data.data; // Assuming the synced transaction data is in `data`
     } catch (error: any) {
         console.error("Error syncing account transactions:", error);
@@ -158,28 +161,3 @@ export const assignAccountTransactionApi = async (
     }
 };
 
-// const assignTransactionMutation = useMutation({
-//     mutationFn: (data: AssignTransactionData) =>
-//         assignAccountTransactionApi(
-//             authenticatedUser?.token ?? '',
-//             '26f90072-be73-4f75-8a2b-3cdb3ff1ff23', // Replace with actual account ID
-//             'de75672d-2e33-4bd3-9acc-396b16f218af', // Replace with actual transaction ID
-//             data
-//         ),
-//     onSuccess: () => {
-//         console.log("Transaction assigned successfully!");
-//         // Add any additional success handling here
-//     },
-//     onError: (error: unknown) => {
-//         console.error("Error assigning transaction:", error);
-//     },
-// });
-
-// const handleAssignTransaction = () => {
-//     const data: AssignTransactionData = {
-//         budgetId: "14066cce-a0fb-4502-853b-cb2361dd2ae6",
-//         categoryId: "5ea16909-2ebe-4987-a85e-574a5b399126",
-//     };
-
-//     assignTransactionMutation.mutate(data);
-// };
