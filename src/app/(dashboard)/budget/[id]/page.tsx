@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import BarChart from '../../components/BarChart';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
@@ -19,7 +19,7 @@ import DeleteSuccessModal from '../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
-import { getAllBudgetCategories, getSingleBudgetApi, inviteCollaboratorApi } from '@/app/services/BudgetService';
+import { getSingleBudgetApi, inviteCollaboratorApi } from '@/app/services/BudgetService';
 
 
 interface Budget {
@@ -169,36 +169,10 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
     const { data: singleBudgetData, isPending: singleBudgetStatus } = useQuery({
-        queryKey: ['singleBudgetData' + params.id],
+        queryKey: ['singleBudget', params.id],
         queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
         enabled: !!authenticatedUser?.token && !!params.id,
-        refetchOnWindowFocus: true, // This should be directly in the options object.
     });
-
-    useEffect(() => {
-        const getData = async () => {
-            if (authenticatedUser?.token) {
-                const res = await getSingleBudgetApi(authenticatedUser?.token, params.id)
-                console.log(res);
-
-            }
-        }
-
-
-        getData()
-    }, [params.id])
-
-
-
-    const { data: listofCategories = [], isPending: listofCategoriesisPending } = useQuery({
-        queryKey: ['listofCategories'],
-        queryFn: () => getAllBudgetCategories(authenticatedUser?.token ?? ''),
-        enabled: !!authenticatedUser?.token,
-        refetchOnWindowFocus: true,
-    });
-
-    console.log(listofCategories);
-
 
 
     console.log(singleBudgetData);
