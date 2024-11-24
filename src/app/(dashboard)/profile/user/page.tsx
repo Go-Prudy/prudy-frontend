@@ -89,7 +89,7 @@ const Page = () => {
                 <div className="relative">
                     <Header link={`/profile`} title="Profile" />
                     <div className="flex w-full justify-center">
-                        <div className={`bg-white border mt-[30px] ${!authenticatedUser?.profile?.profilePhotoUrl ? 'p-0' : 'p-2'} rounded-full relative w-[100px] h-[100px] flex items-center justify-center`}>
+                        <div className={`bg-white border mt-[30px] ${!authenticatedUser?.profile?.profilePhotoUrl ? 'p-2' : 'p-0'} rounded-full relative w-[100px] h-[100px] flex items-center justify-center`}>
                             {updateProfilePictureMutation.isPending ? (
                                 <div className="loader w-[50px] h-[50px] border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
 
@@ -110,7 +110,7 @@ const Page = () => {
                                     className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (
-                                <BsPerson className="text-[#040404] p-2 w-[100px] h-[100px]" />
+                                <BsPerson className="text-[#040404] w-[100px] h-[100px]" />
                             )}
                             <label className="absolute top-[73%] right-0 h-[32px] w-[32px] rounded-full shadow-md cursor-pointer">
                                 <Image
@@ -136,10 +136,9 @@ const Page = () => {
                             <input
                                 id="firstName"
                                 value={firstName}
-                                disabled
                                 onChange={(e) => setFirstName(e.target.value)}
                                 placeholder="Enter First Name"
-                                className="bg-transparent  outline-none font-[500] leading-[24px]"
+                                className="bg-transparent outline-none font-[500] leading-[24px]"
                                 type="text"
                             />
                         </label>
@@ -148,7 +147,6 @@ const Page = () => {
                             <input
                                 id="lastName"
                                 value={lastName}
-                                disabled
                                 onChange={(e) => setLastName(e.target.value)}
                                 placeholder="Enter Last Name"
                                 className="bg-transparent outline-none font-[500] leading-[24px]"
@@ -160,7 +158,6 @@ const Page = () => {
                             <input
                                 id="email"
                                 value={email}
-                                disabled
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter email"
                                 className="bg-transparent outline-none font-[500] leading-[24px]"
@@ -172,7 +169,6 @@ const Page = () => {
                             <PhoneInput
                                 country={'ng'}
                                 value={value}
-                                disabled
                                 onChange={setValue}
                                 inputProps={{
                                     name: 'phone',

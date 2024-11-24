@@ -22,20 +22,20 @@ const textCenterPlugin = (totalBudget: number): Plugin<'doughnut'> => ({
         ctx.font = '400 13.46px Aeonik';
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#575757'; // Use grey color for the main text
+        ctx.fillStyle = '#575757'; // Use black as default color
         const text = 'Total budget';
 
         // Draw the main text at the center
-        ctx.fillText(text, centerX, centerY - 15); // Adjust vertical position to center it
+        ctx.fillText(text, centerX, centerY - 10);
 
-        // Apply styles for the subtext (total budget amount)
+        // Apply styles for the subtext
         ctx.font = '700 18.85px Aeonik';
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#2D2D2D'; // Apply darker color for the subtext
-        const subtext = `₦ ${totalBudget.toLocaleString()}`;
+        ctx.fillStyle = '#2D2D2D'; // Apply Greyscale-Text-Subtitle color
+        const subtext = `₦ ${totalBudget.toLocaleString()}`; // Use totalBudget dynamically
 
-        // Draw the subtext slightly below the main text, with better spacing
-        ctx.fillText(subtext, centerX, centerY + 15); // Adjust vertical position for better alignment
+        // Draw the subtext below the main text, with some vertical spacing
+        ctx.fillText(subtext, centerX, centerY + 20);
 
         ctx.restore();
     },
@@ -78,29 +78,15 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ budgetCategories, totalBudget
             color: generateRandomColor(), // Assign random colors dynamically
         }));
 
-    console.log(budgetCategories.map(category => category.name));
-    console.log(budgetCategories.map(category => category.percentage));
-
     const data = {
-        labels: budgetCategories.map(category => category.name),
+        labels: updatedCategories.map(category => category.name),
         datasets: [
             {
-                data: budgetCategories.map(category => category.percentage),
-                backgroundColor: budgetCategories.map(category => category.color),
+                data: updatedCategories.map(category => category.percentage),
+                backgroundColor: updatedCategories.map(category => category.color),
                 borderColor: '#fff',
                 borderWidth: 5,
-                hoverOffset: 4,
-                cutout: '80%',
-                elements: {
-                    arc: {
-                        angle: 160,
-                        circular: true, // Ensure arcs are curved
-                        borderAlign: 'round', // Align the border to the center of each arc
-                        borderWidth: 30, // Border width of the arcs
-                        borderJoinStyle: 'miter',
-
-                    },
-                },
+                cutout: '80%', // This creates the hole in the middle
             },
         ],
     };
@@ -108,7 +94,14 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ budgetCategories, totalBudget
     const options: ChartOptions<'doughnut'> = {
         responsive: true,
         maintainAspectRatio: true,
-
+        plugins: {
+            tooltip: {
+                enabled: false, // Disable tooltips
+            },
+            legend: {
+                display: false, // Hide the legend
+            },
+        },
     };
 
     return (
