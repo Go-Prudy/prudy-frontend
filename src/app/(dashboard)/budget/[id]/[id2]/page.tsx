@@ -8,9 +8,9 @@ import Image from 'next/image';
 import manual from '@/images/manual.png'
 import photo from '@/images/camera.png'
 import { GoChevronRight } from 'react-icons/go';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
-import { getActiveBudgetCategoriesApi, RecordExpenseApi } from '@/app/services/BudgetService';
+import { getActiveBudgetCategoriesApi, getAllBudgetCategoriesApi, getCategoryExpenses, getSingleBudgetApi, RecordExpenseApi } from '@/app/services/BudgetService';
 import { ManualData } from '@/app/Types';
 
 // Utility function to format date
@@ -35,6 +35,10 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     // Calculate the progress percentage
     const progressPercentage = (amountSpent / amountTotal) * 100;
 
+
+
+
+
     type Expense = {
         name: string;
         date: string; // Original format e.g., "2024-09-01"
@@ -43,26 +47,17 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     };
 
 
-    const expenses: Expense[] = [
-        { name: "Groceries", date: "2024-09-01", time: "10:30 AM", amount: 15000 },
-        { name: "Rent", date: "2024-09-01", time: "12:00 PM", amount: 120000 },
-        { name: "Utilities", date: "2024-09-02", time: "3:00 PM", amount: 10000 },
-        { name: "Transportation", date: "2024-09-03", time: "8:15 AM", amount: 6000 },
-        { name: "Dining Out", date: "2024-09-04", time: "7:45 PM", amount: 4500 },
-        { name: "Entertainment", date: "2024-09-05", time: "9:00 PM", amount: 8000 },
-        { name: "Health", date: "2024-09-06", time: "2:30 PM", amount: 200.00 },
-        { name: "Education", date: "2024-09-07", time: "11:00 AM", amount: 15000 },
-        { name: "Travel", date: "2024-09-08", time: "6:00 AM", amount: 30000 },
-        { name: "Miscellaneous", date: "2024-09-09", time: "4:00 PM", amount: 2500 },
-    ];
+
+    const queryClient = useQueryClient();
+
     const { authenticatedUser } = useAuthentication();
 
     const [showRecordModal, setShowRecordModal] = useState(false)
     const [showAddManual, setShowAddManual] = useState(false)
     const [manualData, setManualData] = useState<ManualData>({
-        name: '',
+        budgetCategoryId: params.id,
         amount: 0,
-        category: '',
+        narration: '',
         date: ''
     });
 
@@ -73,43 +68,20 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     };
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+
         setManualData((prevData) => ({
             ...prevData,
-            [name]: name === 'amount' ? parseFloat(value) : value,
+            [name]: name === 'amount' ? parseFloat(value.replace(/,/g, '')) || 0 : value, // Parse numeric value for `amount`
         }));
     };
 
 
 
-    // Mutation for recording expense
-    const recordExpenseMutation = useMutation({
-        mutationFn: (manualData: ManualData) =>
-            RecordExpenseApi(
-                'id', manualData,
-                authenticatedUser?.token ?? '',
-            ),
-        onSuccess: (data) => {
-            setManualData({ category: '', name: '', amount: 0, date: '' }); // Reset the form
-            setShowAddManual(false); // Close the modal
 
-        },
-        onError: (error) => {
-            console.log(error);
 
-        },
-    });
 
-    const handleAddManually = () => {
-        // setShowAddManual(!showAddManual)
-        recordExpenseMutation.mutate(manualData);
-    }
 
-    const { data: activeCategoriesData, status: categoriesStatus } = useQuery({
-        queryKey: ['activeBudgetCategories', '1'],
-        queryFn: () => getActiveBudgetCategoriesApi(authenticatedUser?.token ?? '', '1'),
-        enabled: !!authenticatedUser?.token && !!'1',
-        staleTime: 5 * 60 * 1000
-    });
+
 
 
 
@@ -119,13 +91,117 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     // Validation function to check inputs
     const validateInputs = () => {
         const newErrors: any = {};
-        if (!manualData.category.trim()) newErrors.category = "Category is required.";
-        if (!manualData.name.trim()) newErrors.name = "Name is required.";
+
+        // Narration validation (Make sure the narration field is not empty)
+        if (!manualData.narration.trim()) newErrors.narration = "Narration is required.";
+
+        // Amount validation (Ensure it's a number greater than 0)
         if (!manualData.amount || Number(manualData.amount) <= 0) newErrors.amount = "Amount must be greater than zero.";
+
+        // Date validation (Ensure a date is provided)
         if (!manualData.date) newErrors.date = "Date is required.";
+
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return Object.keys(newErrors).length === 0; // If no errors, return true
     };
+
+    const {
+        data: singleBudgetData = [],
+        isPending: singleBudgetStatus,
+        refetch: refetchBudget,
+    } = useQuery({
+        queryKey: ['singleBudgetData' + params.id],
+        queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
+        enabled: !!authenticatedUser?.token && !!params.id,
+        refetchOnWindowFocus: true,
+    });
+    console.log(singleBudgetData);
+
+    const currentBudget = singleBudgetData?.budgetCategories?.filter((category: any) => category.uid === params.id2) || []
+
+    console.log(currentBudget);
+
+    const {
+        data: expenses = [],
+        isLoading,
+        error,
+        refetch: refetchExpenses,
+    } = useQuery({
+        queryKey: ['categoryExpenses', params.id, params.id2],
+        queryFn: () => getCategoryExpenses(params.id, params.id2, authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token && !!params.id && !!params.id2,
+        refetchOnWindowFocus: true,
+    });
+
+    const {
+        data: AllBudgetCategories = [],
+        isLoading: isAllBudegetLoading,
+        error: AllBudgetCategoriesError,
+    } = useQuery({
+        queryKey: ['getAllBudgetCategoriesApi'],
+        queryFn: () => getAllBudgetCategoriesApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token && !!params.id2 && !!params.id2, // Only fetch if all values are provided
+        refetchOnWindowFocus: true,
+    });
+
+    console.log(AllBudgetCategories);
+
+
+    console.log(expenses);
+
+
+    const RecordExpenseMutation = useMutation({
+        mutationFn: (expenseData) => RecordExpenseApi(params.id, params.id2, expenseData, authenticatedUser?.token ?? '',),
+        onSuccess: (data) => {
+            setManualData({ narration: '', budgetCategoryId: params.id, amount: 0, date: '' }); // Reset the form
+            setShowAddManual(false); // Close the modal
+            setErrors({});
+
+            // Revalidate and force fetch
+            queryClient.invalidateQueries({
+                queryKey: ['categoryExpenses', params.id, params.id2],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['singleBudgetData' + params.id],
+            });
+
+            // Explicit refetch
+            refetchExpenses();
+            refetchBudget();
+        },
+        onError: (error) => {
+            console.log(error);
+        },
+    });
+
+    const handleAddManually = async () => {
+        // First, validate inputs before proceeding
+        const isValid = validateInputs();
+
+        if (!isValid) {
+            // Optionally, you can show an alert or handle errors in the UI
+            console.log("Form validation failed:", errors);
+            return; // Stop execution if validation fails
+        }
+
+        try {
+            // Prepare the data for submission
+            const expenseData: any = {
+                amount: manualData.amount,
+                narration: manualData.narration,
+                date: new Date().toISOString(),
+            };
+
+            console.log(expenseData);
+
+            // Proceed with mutation only if validation is successful
+            await RecordExpenseMutation.mutateAsync(expenseData);
+
+        } catch (error) {
+            console.log("Error submitting expense:", error);
+        }
+    };
+
 
 
 
@@ -142,13 +218,13 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
 
                     className=' relative'
                 >
-                    <Header link={`/budget/${params.id}`} title="Food Budget" />
+                    <Header link={`/budget/${params.id}`} title={`${currentBudget[0]?.name || 'budget name'}`} />
                     <div className='p-[24px] w-full'>
                         <div className='p-[16px] bg-[#EFEFF0] rounded-[20px] border border-[#E7E7EA]'>
                             <Progress
                                 aria-label="Progress showing amount spent and left"
-                                value={amountLeft}
-                                maxValue={amountTotal}
+                                value={singleBudgetData?.totalAmountLeft}
+                                maxValue={singleBudgetData?.totalIncome}
                                 size="md"
                                 color="warning"
                                 radius="md"
@@ -162,12 +238,12 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                                 showValueLabel={true}
                                 valueLabel={<div className='gap-[8px] flex flex-col'>
                                     <div className='text-[#6F6C8F] text-[12px]'>Amount Spent</div>
-                                    <div className='text-[#514F6E] text-right text-[12px]'>₦ {amountSpent.toLocaleString()}</div>
+                                    <div className='text-[#514F6E] text-right text-[12px]'>₦ {singleBudgetData?.totalExpenses?.toLocaleString()}</div>
                                 </div>}
                                 label={
                                     <div className='flex flex-col'>
                                         <div className='text-[#6F6C8F] my-[8px] text-[12px]'>Amount Left</div>
-                                        <div className='font-[500]'>₦ {amountLeft.toLocaleString()}</div>
+                                        <div className='font-[500]'>₦ {singleBudgetData?.totalAmountLeft?.toLocaleString()}</div>
                                     </div>
                                 }
                             />
@@ -177,15 +253,15 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
 
                         <div className='w-full'>
                             <div className='flex mb-[16px] justify-between items-center w-full'>
-                                <h1 className='text-[18px] font-[500] text-[#252340]'>Food Expenses</h1>
+                                <h1 className='text-[18px] font-[500] capitalize text-[#252340]'>{currentBudget[0]?.name || 'budget name'} Expenses</h1>
                                 <button className='font-[500] text-[12px] text-[#514F6E]' onClick={handleSeeAll}>See All</button>
                             </div>
 
                             <ul className='flex flex-col gap-[16px] w-full'>
-                                {expenses.map((expense, index) => (
-                                    <li key={expense.name} className={`pb-[16px] ${index === expenses.length - 1 ? '' : 'border-b-2'} flex justify-between w-full`}>
+                                {expenses?.data?.docs?.map((expense: any, index: number) => (
+                                    <li key={expense.uid} className={`pb-[16px] ${index === expenses.length - 1 ? '' : 'border-b-2'} flex justify-between w-full`}>
                                         <div className='flex flex-col gap-[8px]'>
-                                            <h1 className='text-[#2D2D2D] text-[14px] font-[500]'>{expense.name}</h1>
+                                            <h1 className='text-[#2D2D2D] text-[14px] font-[500]'>{expense.narration}</h1>
                                             <div className='flex text-[12px] text-[#575757] justify-around items-center'>
                                                 <h1>{formatDate(expense.date)}</h1>
                                                 <span className='h-[16px] bg-[#EFEFF0] w-[1px] mx-[8px]' />
@@ -277,7 +353,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                                         type="submit"
                                         className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
                                     >
-                                        Save
+                                        {RecordExpenseMutation.isPending ? 'Saving...' : 'Save'}
                                     </button>
                                 }
                                 label="Add manually"
@@ -290,38 +366,21 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                                     {/* Category Input */}
                                     <div className="relative w-full">
                                         <label htmlFor="category" className="text-[#828282] absolute top-[30px] left-4 text-xs">
-                                            Name of category
+                                            Name of item/description
                                         </label>
                                         <input
                                             type="text"
-                                            name="category"
-                                            id="category"
+                                            name="narration"
+                                            id="naration"
                                             required
-                                            value={manualData.category}
+                                            value={manualData.narration}
                                             onChange={handleInputChange}
                                             placeholder="Enter category name"
                                             className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
                                         />
-                                        {errors.category && <span className="text-red-500 text-sm">{errors.category}</span>}
+                                        {errors.narration && <span className="text-red-500 text-sm">{errors.narration}</span>}
                                     </div>
 
-                                    {/* Name Input */}
-                                    <div className="relative w-full">
-                                        <label htmlFor="name" className="text-[#828282] absolute top-[30px] left-4 text-xs">
-                                            Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            id="name"
-                                            required
-                                            value={manualData.name}
-                                            onChange={handleInputChange}
-                                            placeholder="Enter name"
-                                            className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
-                                        />
-                                        {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
-                                    </div>
 
                                     {/* Amount Input */}
                                     <div className="relative w-full">
@@ -329,17 +388,54 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                                             Amount
                                         </label>
                                         <input
-                                            type="number"
+                                            type="text" // Use `text` for formatting flexibility
                                             name="amount"
                                             id="amount"
                                             required
-                                            value={manualData.amount}
-                                            onChange={handleInputChange}
+                                            value={manualData.amount ? Number(manualData.amount).toLocaleString() : ''} // Display formatted value
+                                            onChange={(e) => {
+                                                // Only allow numeric values and update state
+                                                const numericValue = e.target.value.replace(/,/g, '').replace(/[^\d]/g, '');
+                                                setManualData((prevData) => ({
+                                                    ...prevData,
+                                                    amount: numericValue ? parseFloat(numericValue) : 0,
+                                                }));
+                                            }}
+                                            onFocus={(e) => {
+                                                // Remove formatting for editing
+                                                e.target.value = manualData.amount ? manualData.amount.toString() : '';
+                                            }}
+                                            onBlur={(e) => {
+                                                // Format back to locale string on blur
+                                                const formattedAmount = Number(manualData.amount).toLocaleString();
+                                                e.target.value = formattedAmount;
+                                            }}
                                             placeholder="Enter amount"
                                             className="bg-[#F7F7F9] mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                            onKeyPress={(e) => {
+                                                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') {
+                                                    e.preventDefault();
+                                                }
+                                            }}
                                         />
+
+
                                         {errors.amount && <span className="text-red-500 text-sm">{errors.amount}</span>}
                                     </div>
+                                    <div className="relative w-full">
+                                        <label htmlFor="amount" className="text-[#828282] absolute top-[30px] left-4 text-xs">
+                                            Category
+                                        </label>
+                                        <input type="text"
+                                            value={`${currentBudget[0]?.name || 'budget name'}`}
+                                            name=""
+                                            required
+                                            id=""
+                                            disabled
+                                            className="bg-[#F7F7F9] cursor-not-allowed mt-[20px] font-[500] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2"
+                                        />
+                                    </div>
+
 
                                     {/* Date Input */}
                                     <div className="relative w-full">

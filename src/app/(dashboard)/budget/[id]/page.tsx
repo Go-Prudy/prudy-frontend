@@ -19,7 +19,7 @@ import DeleteSuccessModal from '../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
-import { getAllBudgetCategories, getSingleBudgetApi, inviteCollaboratorApi } from '@/app/services/BudgetService';
+import { getAllBudgetCategoriesApi, getSingleBudgetApi, inviteCollaboratorApi } from '@/app/services/BudgetService';
 
 
 interface Budget {
@@ -168,31 +168,19 @@ const Page = ({ params }: { params: { id: string } }) => {
     };
 
 
-    const { data: singleBudgetData, isPending: singleBudgetStatus } = useQuery({
+    const { data: singleBudgetData = [], isPending: singleBudgetStatus } = useQuery({
         queryKey: ['singleBudgetData' + params.id],
         queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
         enabled: !!authenticatedUser?.token && !!params.id,
         refetchOnWindowFocus: true, // This should be directly in the options object.
     });
 
-    useEffect(() => {
-        const getData = async () => {
-            if (authenticatedUser?.token) {
-                const res = await getSingleBudgetApi(authenticatedUser?.token, params.id)
-                console.log(res);
-
-            }
-        }
-
-
-        getData()
-    }, [params.id])
 
 
 
     const { data: listofCategories = [], isPending: listofCategoriesisPending } = useQuery({
         queryKey: ['listofCategories'],
-        queryFn: () => getAllBudgetCategories(authenticatedUser?.token ?? ''),
+        queryFn: () => getAllBudgetCategoriesApi(authenticatedUser?.token ?? ''),
         enabled: !!authenticatedUser?.token,
         refetchOnWindowFocus: true,
     });
@@ -291,14 +279,14 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
                 {/* CATEGORIES  OR ALLOCATIONS */}
-                <div className={` bg-[#F7F7F9]  grid ${singleBudgetData?.budgetCategories == 0 || singleBudgetStatus ? 'grid-cols-1' : 'grid-cols-2'}  gap-[12px] overflow-y-scroll overflow-x-hidden h-[322px] py-[16px] px-[24px] w-full mb-[24px] `}>
+                <div className={` bg-[#F7F7F9]  grid ${singleBudgetData?.budgetCategories?.length < 2 || singleBudgetStatus ? 'grid-cols-1' : 'grid-cols-2'}  gap-[12px] overflow-y-scroll overflow-x-hidden max-h-[322px] py-[16px] px-[24px] w-full mb-[24px] `}>
                     {singleBudgetStatus ?
                         <CircularProgress className=' mx-auto w-full mt-[3rem]' size='md' color='default' /> : null}
 
-                    {singleBudgetData?.budgetCategories.length == 0 ?
+                    {singleBudgetData?.budgetCategories?.length == 0 ?
                         <div className=' w-full'>
                             <div className='py-[25px] w-full text-center flex-col gap-[8px] flex justify-center items-center px-[51px]'>
-                                <Image src={noBudgetImg.src} width={1000} height={1000} className=' size-[124px] mb-[8px]' alt="" />
+                                <Image src={noBudgetImg?.src} width={1000} height={1000} className=' size-[124px] mb-[8px]' alt="" />
                                 <h1 className=' font-[500] leading-[24px] '>You do not have any budget history yet.</h1>
                                 <h1 className=' text-[14px] text-[#828282] leading-[16.8px]'>Click the create button above to <br /> get started.</h1>
 
@@ -308,34 +296,38 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                         :
                         <>
-                            {singleBudgetData?.budgetCategories.map((budget: IBudgetCategory, budgetIndex: number) => (
-                                budget.allocations.map((allocation: IAllocation, allocationIndex: number) => (
+                            {singleBudgetData?.budgetCategories?.map((budget: any, budgetIndex: number) => (
+
+                                <div
+                                    key={budget.uid}
+                                    onClick={() => navigation.push(`/budget/${params.id}/${budget.uid}`)} // Use budgetIndex + 1 to form the route
+                                    className="bg-white border border-[#EFEFF0] p-[12px] cursor-pointer rounded-[20px] flex flex-col gap-[8px]"
+                                >
                                     <div
-                                        key={allocation.budgetCategory}
-                                        onClick={() => navigation.push(`/budget/${budget.uid}/${budgetIndex + 1}`)} // Use budgetIndex + 1 to form the route
-                                        className="bg-white border border-[#EFEFF0] p-[12px] cursor-pointer rounded-[20px] flex flex-col gap-[8px]"
-                                    >
-                                        <div
-                                            className="w-[20px] h-[20px] rounded-full"
-                                            style={{ backgroundColor: allocation.color }}
-                                        ></div>
-                                        <h1 className="text-[12px]">{allocation.budgetCategory}</h1>
-                                        <h1 className="font-[500] text-[14px]">₦ {allocation.amount.toLocaleString()} <span className='font-[400] text-[10px] text-[#828282]'>left</span></h1>
-                                        <Progress
-                                            style={{ height: '6px' }}
-                                            size="md"
-                                            radius="lg"
-                                            classNames={{
-                                                base: "max-w-md",
-                                                track: "drop-shadow-none bg-[#EFEFF0] border border-[#EFEFF0]",
-                                                indicator: "bg-[#575757]",
-                                                label: "tracking-wider font-medium text-default-600",
-                                                value: "text-foreground/60",
-                                            }}
-                                            value={budget.percentageLeft}
-                                        />
-                                    </div>
-                                ))
+                                        className="w-[20px] h-[20px] rounded-full"
+                                        style={{ backgroundColor: budget.color }}
+                                    ></div>
+                                    <h1 className="text-[12px]">{budget.name}</h1>
+                                    <h1 className="font-[500] text-[14px]">₦ {budget.amountLeft.toLocaleString()} <span className='font-[400] text-[10px] text-[#828282]'>left</span></h1>
+                                    <Progress
+                                        aria-label="Progress showing amount spent and left"
+                                        value={budget?.amountLeft}
+                                        maxValue={budget?.amountAllocated}
+                                        size="md"
+                                        color="warning"
+                                        radius="md"
+                                        classNames={{
+                                            base: "max-w-md",
+                                            track: "bg-[#EFEFF0] ",
+                                            indicator: "bg-[#575757]",
+                                            label: "tracking-wider font-medium text-default-600",
+                                            value: "text-foreground/60",
+                                        }}
+                                        showValueLabel={false}
+
+
+                                    />
+                                </div>
                             ))}
                         </>}
 
@@ -359,22 +351,59 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
                     </div>
+                    <div className=' flex justify-between w-full'>
+                        <h1 className=' text-[#474747] my-[24px] text-[18px] font-[500] '>Collaborators</h1>
+                        <button className=' text-[#474747] my-[24px] flex  justify-center  text-[12px] font-[500] rounded-[32px] w-[130px] bg-[#ECFDDC]   gap-[.4px] items-center '><BsPlus size={20} /> <span className=' font-[500] '>Invite collaborator</span></button>
 
-                    <h1 className=' text-[#474747] my-[24px] text-[18px] font-[500] '>Collaborators</h1>
+                    </div>
+
+
                     <div className=' w-full pb-[36px]  flex gap-[16px]'>
-                        {collaborators.map((item) => (
-                            <div key={item.name} className='bg-[#F7F7F9]  rounded-[20px] items-center border border-[#EFEFF0] p-[16px] flex flex-col justify-center w-full'>
-                                <GoPerson className=' size-[30px]' />
-                                <h1 className=' text-[#2D2D2D] '>{item.name}</h1>
-                            </div>
-                        ))}
 
-                        <div onClick={() => setShowInvite(!showInvite)} className='rounded-[20px] bg-[#F5FEED] items-center border-dashed border-[#66C227] border-2 p-[16px] flex flex-col justify-center w-full'>
-                            <Image src={add} alt='hello' className='size-[24px]' />
-                            <h1 className='text-[#2D2D2D] leading-[16px] text-center'>
-                                Invite a <br /> collaborator
-                            </h1>
+
+                        <div className={` w-full grid ${singleBudgetData?.collaborators?.length <= 1 ? 'grid-cols-1' : 'grid-cols-2'} `}>
+
+                            {singleBudgetStatus ? (
+                                <CircularProgress className="mx-auto w-full mt-[3rem]" size="md" color="default" />
+                            ) : (
+                                <>
+                                    {singleBudgetData?.collaborators?.length > 0 ? (
+                                        singleBudgetData.collaborators.map((item: any) => (
+                                            <div
+                                                key={item?.uid}
+                                                className="bg-[#F7F7F9] rounded-[20px] items-center border border-[#EFEFF0] p-[16px] flex flex-col justify-center w-full"
+                                            >
+                                                {item?.picture ? (
+                                                    <img
+                                                        src={item.picture}
+                                                        alt={item.name}
+                                                        className="w-[30px] h-[30px] rounded-full"
+                                                    />
+                                                ) : (
+                                                    <GoPerson className="text-[30px] text-[#A3A3A3]" />
+                                                )}
+                                                <h1 className="text-[#2D2D2D] text-lg font-medium">{item.name}</h1>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-center text-[#A3A3A3] mt-4">No collaborators found.</p>
+                                    )}
+                                </>
+                            )}
+
+
                         </div>
+
+
+                        {singleBudgetData?.collaborators?.length <= 1 &&
+                            <div onClick={() => setShowInvite(!showInvite)} className='rounded-[20px] bg-[#F5FEED] items-center border-dashed border-[#66C227] border-2 p-[16px] flex flex-col justify-center w-full'>
+                                <Image src={add} alt='hello' className='size-[24px]' />
+                                <h1 className='text-[#2D2D2D] leading-[16px] text-center'>
+                                    Invite a <br /> collaborator
+                                </h1>
+                            </div>
+                        }
+
 
 
                     </div>

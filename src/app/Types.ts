@@ -16,9 +16,9 @@ export interface IExpense {
 }
 
 export interface ManualData {
-    name: string;
-    amount: number
-    category: string;
+    amount: number;
+    budgetCategoryId: string;
+    narration: string;
     date: string;
 }
 

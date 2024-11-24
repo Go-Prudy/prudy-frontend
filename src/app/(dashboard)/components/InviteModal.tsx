@@ -57,6 +57,7 @@ const InviteModal = ({ show, setShow, getPendingInvitesApiData }: IProps) => {
             acceptBudgetInviteApi(getPendingInvitesApiData[0]?.uid, getPendingInvitesApiData[0]?.budget?.uid, authenticatedUser?.token ?? ''),
         onSuccess: () => {
             console.log('Invite accepted successfully!');
+            setShow(!show)
             // You can add any other success handling logic here, such as updating the UI
         },
         onError: (error: unknown) => {
@@ -78,6 +79,7 @@ const InviteModal = ({ show, setShow, getPendingInvitesApiData }: IProps) => {
             rejectBudgetInviteApi(getPendingInvitesApiData[0]?.uid, getPendingInvitesApiData[0]?.budget?.uid, authenticatedUser?.token ?? ''),
         onSuccess: () => {
             console.log('Invite rejected successfully!');
+            setShow(!show)
             // Add any additional success handling logic here, such as updating the UI
         },
         onError: (error: unknown) => {
