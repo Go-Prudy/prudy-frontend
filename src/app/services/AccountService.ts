@@ -29,7 +29,7 @@ export const initLinkAccountApi = async (
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
-        throw error; // Re-throw the error for further handling if needed
+
     }
 };
 
@@ -55,7 +55,7 @@ export const getAllAccountsApi = async (token: string, params: AccountParams): P
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred while fetching accounts");
         console.log(error);
-        throw error;
+
     }
 };
 
@@ -76,7 +76,7 @@ export const fetchAccountInfoApi = async (
     } catch (error: any) {
         toast.error(error.response.data?.message || "An error occurred while fetching");
         console.error("Error fetching account information:", error);
-        throw error; // Re-throw the error for further handling if needed
+
     }
 };
 
@@ -103,7 +103,7 @@ export const fetchAccountTransactionsApi = async (
         return response.data.data; // Assuming transaction data is in `data`
     } catch (error: any) {
         console.error("Error fetching account transactions:", error);
-        throw error; // Re-throw the error for further handling if needed
+
     }
 };
 
@@ -126,7 +126,7 @@ export const syncAccountTransactionsApi = async (
         return response.data.data; // Assuming the synced transaction data is in `data`
     } catch (error: any) {
         console.error("Error syncing account transactions:", error);
-        throw error; // Re-throw the error for further handling if needed
+
     }
 };
 
@@ -157,7 +157,6 @@ export const assignAccountTransactionApi = async (
         return response.data.data; // Assuming the response data is in `data`
     } catch (error: any) {
         console.error("Error assigning account transaction:", error);
-        throw error; // Re-throw the error for further handling if needed
     }
 };
 

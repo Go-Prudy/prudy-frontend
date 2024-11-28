@@ -27,6 +27,7 @@ import { RadioGroup, useRadio, VisuallyHidden, cn, CircularProgress } from "@nex
 import { useInfiniteQuery } from '@tanstack/react-query';
 import toast from "react-hot-toast";
 import { format, parseISO } from 'date-fns';
+import Scanner from "../components/scanFeature";
 
 
 interface Bank {
@@ -236,15 +237,21 @@ export default function Page() {
   });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+
   // SCAN RECEIPT 
-  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const uploadEndpoint = "https://prudy-api.onrender.com/api/v1/media/upload";
+  const scanEndpoint = "https://prudy-api.onrender.com/api/v1/transactions/scan";
+
+
+  const [videoStream, setVideoStream] = useState<any>(null);
   const [text, setText] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [page, setPage] = useState(1); // Current page
   const [isFetchingMore, setIsFetchingMore] = useState(false); // Loading state for more data
-
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [scanState, setScanState] = useState<boolean>(false);
   const limit = 12; // Items per page
 
 
@@ -258,68 +265,8 @@ export default function Page() {
     setShowBalance(prevState => !prevState);
   };
 
-  // FUNCTION TO SCAN RECEIPT DATA
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      setVideoStream(stream);
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-    }
-  };
 
-  useEffect(() => {
-    if (videoRef.current && videoStream) {
-      videoRef.current.srcObject = videoStream;
-    }
 
-    return () => {
-      // Clean up video stream
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [videoStream]);
-
-  const captureImage = () => {
-    if (canvasRef.current && videoRef.current) {
-      const context = canvasRef.current.getContext('2d');
-      if (context) {
-        canvasRef.current.width = videoRef.current.videoWidth;
-        canvasRef.current.height = videoRef.current.videoHeight;
-
-        context.drawImage(videoRef.current, 0, 0);
-        scanReceipt();
-      }
-    }
-  };
-
-  const scanReceipt = () => {
-    if (canvasRef.current) {
-      const imageData = canvasRef.current.toDataURL('image/png');
-      setLoading(true);
-      Tesseract.recognize(
-        imageData,
-        'eng',
-        {
-          logger: (m) => console.log(m), // Log progress
-        }
-      )
-        .then(({ data: { text } }) => {
-          setText(text);
-          setLoading(false);
-          // Stop video stream after capturing
-          if (videoStream) {
-            videoStream.getTracks().forEach(track => track.stop());
-            setVideoStream(null);
-          }
-        })
-        .catch((error) => {
-          console.error('Error scanning receipt:', error);
-          setLoading(false);
-        });
-    }
-  };
 
 
   // FUNCTION TO ADD MANUALLY
@@ -613,6 +560,19 @@ export default function Page() {
 
 
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+
+
+
+
+
+
+
   // Custom Radio button implementation
   const CustomRadio = (props: any) => {
     const {
@@ -671,7 +631,7 @@ export default function Page() {
             className="bg-[#F7F7F9] rounded-[8px] px-[12px] py-[8px] border-[#EFEFF0] border-[0.4px] w-full"
             id=""
           >
-            {budgets?.docs?.map((budget: any) => (
+            {budgets?.map((budget: any) => (
               <option key={budget.id} value={budget.name || ''}>
                 {budget.name}
               </option>
@@ -770,48 +730,21 @@ export default function Page() {
             <div className=" flex mt-[24px] gap-[16px]">
               <Image onClick={() => setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal)} width={1000} height={1000} src={sync} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
 
-              {videoStream ?
-                <div className=" text-center h-full w-full grid  place-content-center gap-3 ">
-                  <h1>please wait ....</h1>
-                  <h1>or</h1>
-                  <button onClick={() => {
-                    setVideoStream(null)
-                    setText('')
-                  }} className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#000000] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center">
-                    cancel</button>
-                </div>
 
-                :
-                <button
-                  onClick={startCamera}
-                  className=""
-                >
-                  <Image width={1000} height={1000} src={scan} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
-                </button>
-              }
+              <button
+                onClick={() => setScanState(true)}
+                className=""
+              >
+                <Image width={1000} height={1000} src={scan} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
+              </button>
+
 
 
 
               <Image onClick={() => setAddManualModal(!AddManualModal)} width={1000} height={1000} src={addManual} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
 
             </div>
-            {/* SHOWING THE CAMERA TO SCAN THE RECEIPT */}
-            {videoStream && <div className=" mt-4">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                style={{ width: '100%', height: 'auto' }}
-              />
-              <button className=" mx-auto text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center"
-                onClick={captureImage}
-              >
-                Capture Receipt
-              </button>
 
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
-            </div>
-            }
 
 
 
@@ -1264,6 +1197,50 @@ export default function Page() {
             </motion.div>
           </div>
         )
+      }
+
+
+      {scanState &&
+        <div className=" text-center h-full w-full grid  place-content-center gap-3 ">
+
+          <div className="h-[100vh] w-full z-[40] fixed bottom-0">
+            {/* Dark background */}
+            <div
+              className="h-full w-full bg-[#1c1c1c73] fixed"
+              onClick={() => setScanState(!scanState)} // Close on background click
+            ></div>
+
+            {/* Bottom drawer */}
+            <motion.div
+              initial={{ opacity: 0, y: 90 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed bottom-0  w-full z-[50]"
+            >
+              <BottomDrawer
+
+                label={`Scanner`}
+                back={false}
+                show={scanState}
+                close={true}
+                padding={1}
+                removePadding={false}
+                onClose={() => setScanState(!scanState)}
+              >
+
+
+                <div className="bg-white  pt-4 pb-[32px] px-4 w-full  rounded-t-lg shadow-lg">
+
+                  <Scanner />
+                </div>
+              </BottomDrawer>
+            </motion.div>
+          </div>
+
+        </div>
+
+
       }
 
 

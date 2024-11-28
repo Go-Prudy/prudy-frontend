@@ -6,7 +6,12 @@ import React, { useState } from 'react'
 import launch from '@/images/Launch.png'
 import { motion } from 'framer-motion';
 import SuccessModal from '../../components/SuccessModal'
+import { useMutation } from '@tanstack/react-query'
+import { useAuthentication } from '@/app/store/AuthStore'
+import { CircularProgress } from '@nextui-org/react'
+import { changePasswordApi } from '@/app/services/SettingService'
 const Page = () => {
+    const { authenticatedUser, login } = useAuthentication();
     // State for passcodes
     const [oldPasscode, setOldPasscode] = useState('');
     const [passCodeSuccess, setPassCodeSuccess] = useState(false);
@@ -18,9 +23,37 @@ const Page = () => {
         console.log('Old Passcode:', oldPasscode);
         console.log('New Passcode:', newPasscode);
         console.log('Confirm Passcode:', confirmPasscode);
-        setPassCodeSuccess(!passCodeSuccess)
-        // Add any additional logic here, such as validation or API calls
+
+
+        const data = {
+            oldCode: oldPasscode,
+            newCode: newPasscode,
+            confirmCode: confirmPasscode
+        }
+        if (newPasscode !== confirmPasscode) {
+            alert('Your New Passcode is not the same with your confirm Passcode')
+        } else {
+            ChangePasswordMutation.mutateAsync(data)
+        }
     }
+
+    const ChangePasswordMutation = useMutation({
+        mutationFn: (data: any) =>
+            changePasswordApi(authenticatedUser?.token ?? '', data),
+        onSuccess: (result) => {
+            console.log(result)
+            setPassCodeSuccess(!passCodeSuccess)
+
+        },
+        onError: (error) => console.error("Error updating password", error),
+    });
+
+
+
+
+
+
+
 
     return (
         <div className="bg-[#FAFAFA] w-full h-screen">
@@ -37,6 +70,7 @@ const Page = () => {
                             placeholder="Enter current passcode"
                             className="bg-[#ff000000] outline-none font-[500] leading-[24px]"
                             type="password"
+                            maxLength={6}
                             value={oldPasscode}
                             onChange={(e) => setOldPasscode(e.target.value)}
                             id="oldPasscode"
@@ -54,6 +88,7 @@ const Page = () => {
                             placeholder="Enter new passcode"
                             className="bg-[#ff000000] outline-none font-[500] leading-[24px]"
                             type="password"
+                            maxLength={6}
                             value={newPasscode}
                             onChange={(e) => setNewPasscode(e.target.value)}
                             id="newPasscode"
@@ -67,6 +102,7 @@ const Page = () => {
                             placeholder="Confirm new passcode"
                             className="bg-[#ff000000] outline-none font-[500] leading-[24px]"
                             type="password"
+                            maxLength={6}
                             value={confirmPasscode}
                             onChange={(e) => setConfirmPasscode(e.target.value)}
                             id="confirmPasscode"
@@ -79,7 +115,7 @@ const Page = () => {
                     onClick={handleChangePasscode}
                     className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center mt-[24px] justify-center gap-[8px] font-[500]"
                 >
-                    Change passcode
+                    {ChangePasswordMutation.isPending ? <CircularProgress color='default' size='sm' /> : ' Change passcode'}
                 </button>
             </div>
 
@@ -98,7 +134,7 @@ const Page = () => {
                         showModal={passCodeSuccess}
                         setShowModal={setPassCodeSuccess}
                         handleClose={() => console.log('Modal closed')}
-                        text='Removed successfully'
+                        text='Passcode Changed successfully'
                     />
 
                 </motion.div>

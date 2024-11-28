@@ -23,7 +23,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     const { authenticatedUser } = useAuthentication();
 
 
-    const { data: budgets, isLoading, isPending: isBudgetsPending, error } = useQuery({
+    const { data: budgets = [], isLoading, isPending: isBudgetsPending, error } = useQuery({
         queryKey: ['allBudgetCategories'],
         queryFn: () => GetAllBudgetsApi(authenticatedUser?.token ?? ''),
         enabled: !!authenticatedUser?.token,
@@ -40,14 +40,14 @@ const Page = ({ params }: { params: { id: string } }) => {
     console.log(singlebudget);
 
 
-    const monthlyBudget = budgets?.docs?.length > 0
-        ? budgets.docs
+    const monthlyBudget = budgets?.length > 0
+        ? budgets
         : [{ name: 'No Budget', percentage: 8, color: '#FF6384' }]; // Default fallback
 
 
     // Set the initial selected month as the first budget item (or fallback if no data)
     const [selectedCategories, setSelectedCategories] = useState<number[]>([1]);
-    const [selectedMonth, setSelectedMonth] = useState(budgets?.docs?.length > 0 ? budgets?.docs[0] : { name: 'No Budget', percentage: 8, color: '#FF6384' });
+    const [selectedMonth, setSelectedMonth] = useState(budgets.length > 0 ? budgets[0] : { name: 'No Budget', percentage: 8, color: '#FF6384' });
     const [selectedUid, setSelectedUid] = useState<string>(params.id)
 
     const [showCategories, setShowCategories] = useState<boolean>(false);
@@ -86,7 +86,9 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
     useEffect(() => {
-        setSelectedMonth(budgets?.docs[0] || [])
+        if (budgets?.length > 0) {
+            setSelectedMonth(budgets[0] || [])
+        }
 
     }, [isBudgetsPending])
 

@@ -50,6 +50,8 @@ export const getCategoryExpenses = async (budgetId: string, categoryId: string, 
                 Authorization: `Bearer ${token}`,
             },
         });
+        console.log(response.data);
+
         return response.data;
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
@@ -78,24 +80,51 @@ export const RecordExpenseApi = async (budgetId: string, budgetCategoryId: strin
 };
 
 
-// Function to get all budget  
 export const GetAllBudgetsApi = async (token: string) => {
-
     try {
-        const response = await api.get(`budgets/`, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Include the token in the Authorization header
-            },
-        });
-        // toast.success(response.data.message);
-        console.log(response);
-        return response.data.data
+        let allBudgets: any[] = [];
+        let currentPage = 1;
+        const limit = 10; // Default limit, can be adjusted based on the API
+
+        while (true) {
+            console.log(`Fetching page ${currentPage}`);
+
+            const response = await api.get(`budgets/?page=${currentPage}&limit=${limit}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            // Log the response to see the actual structure
+            console.log(response.data);
+
+            const { docs, next } = response.data.data; // Adjust if the response structure is different
+            if (!docs) {
+                console.error('No docs found on this page.');
+                break;
+            }
+
+            // Merge the current page's docs with the previous ones
+            allBudgets = [...allBudgets, ...docs];
+
+            if (!next || !next.page) {
+                console.log('No more pages to fetch.');
+                break; // Exit if there's no next page
+            }
+
+            currentPage = next.page;
+        }
+
+        console.log('All budgets fetched:', allBudgets);
+
+        return allBudgets;
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
-        console.log(error);
-
+        console.error(error);
+        return [];
     }
 };
+
 
 
 // Function to get a single budget by ID

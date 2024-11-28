@@ -9,68 +9,132 @@ import Image from 'next/image';
 import warninglogo from '@/images/warn.gif';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import axios from 'axios';
+import { getAllCurrenciesApi } from '@/app/services/MISC';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { ICurrencyData } from '@/app/Types';
+import { GetSettingsApi, SetCurrencyApi } from '@/app/services/SettingService';
 
 const Page = () => {
     const [currentState, setCurrentState] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showAfreshModal, setShowAfresh] = useState(false);
     const [showAllCurrency, setShowAllCurrency] = useState(false);
-
+    const { authenticatedUser } = useAuthentication();
+    const [selectedCurrecy, setSelectedCurrency] = useState<any>({});
     const handleDelete = () => {
         console.log(` deleted successfully.`);
         // Implement your delete logic here (e.g., API call to delete category)
         setShowDeleteModal(false); // Close the modal after deletion
     };
 
-    // Example API endpoint for currencies (you can use an API like Open Exchange Rates or a custom one)
-    const currencyApiUrl = 'https://openexchangerates.org/api/currencies.json';
+    // // Example API endpoint for currencies (you can use an API like Open Exchange Rates or a custom one)
+    // const currencyApiUrl = 'https://openexchangerates.org/api/currencies.json';
 
-    // REST Countries API to get flags
-    const restCountriesApiUrl = 'https://restcountries.com/v3.1/all';
-    const [currencies, setCurrencies] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // // REST Countries API to get flags
+    // const restCountriesApiUrl = 'https://restcountries.com/v3.1/all';
+    // const [currencies, setCurrencies] = useState([]);
+    // const [loading, setLoading] = useState(true);
+
+
+    // useEffect(() => {
+    //     const fetchCurrenciesAndFlags = async () => {
+    //         try {
+    //             // Fetch currencies from the currency API
+    //             const currencyResponse = await axios.get(currencyApiUrl);
+    //             const currencyData = currencyResponse.data;
+    //             console.log(currencyResponse);
+
+    //             // Fetch country information to get flags
+    //             const countryResponse = await axios.get(restCountriesApiUrl);
+    //             const countryData = countryResponse.data;
+
+    //             // Map currency data with country flags
+    //             const currencyList: any = Object.keys(currencyData).map((code) => {
+    //                 // Find the matching country data
+    //                 const country = countryData.find((country: any) =>
+    //                     country.currencies && Object.keys(country.currencies).includes(code)
+    //                 );
+
+    //                 return {
+    //                     code,
+    //                     name: currencyData[code],
+    //                     country: country ? country.cca2 : null, // Country code (ISO alpha-2)
+    //                     flag: country ? country.flags.png : null, // URL of the flag
+    //                 };
+    //             });
+
+    //             setCurrencies(currencyList);
+    //             setLoading(false);
+    //         } catch (error) {
+    //             console.error('Error fetching currencies or flags:', error);
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchCurrenciesAndFlags();
+    // }, []);
+
+
+
+    const { data: getAllCurrenciesData = [], status: getAllCurrenciesStatus, isPending: getAllCurrenciesIsPending } = useQuery({
+        queryKey: ['getAllCurrencies'],
+        queryFn: () => getAllCurrenciesApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token,
+        staleTime: 5 * 60 * 1000
+    });
+    console.log(getAllCurrenciesData);
+
+
+
+    const { data: getSettingsData = {}, isPending: getSettingsDataisPending } = useQuery({
+        queryKey: ['getSettings'],
+        queryFn: () => GetSettingsApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token,
+        staleTime: 5 * 60 * 1000
+    });
+
+    console.log(getSettingsData)
+
+
+
+    // React Query mutation to invite a collaborator
+    const SetCurrencyApiMutation = useMutation({
+        mutationFn: (data: any) =>
+            SetCurrencyApi(authenticatedUser?.token ?? '', data),
+        onSuccess: (data) => {
+            console.log(data);
+        },
+        onError: (error: unknown) => {
+            console.error('Error inviting collaborator:', error);
+        },
+    });
+
+
+    // Function to handle form submission for inviting a collaborator
+    const handleChangeCurrency = async (countryCode: any) => {
+        try {
+            await SetCurrencyApiMutation.mutateAsync(countryCode);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
 
     useEffect(() => {
-        const fetchCurrenciesAndFlags = async () => {
-            try {
-                // Fetch currencies from the currency API
-                const currencyResponse = await axios.get(currencyApiUrl);
-                const currencyData = currencyResponse.data;
-
-                // Fetch country information to get flags
-                const countryResponse = await axios.get(restCountriesApiUrl);
-                const countryData = countryResponse.data;
-
-                // Map currency data with country flags
-                const currencyList: any = Object.keys(currencyData).map((code) => {
-                    // Find the matching country data
-                    const country = countryData.find((country: any) =>
-                        country.currencies && Object.keys(country.currencies).includes(code)
-                    );
-
-                    return {
-                        code,
-                        name: currencyData[code],
-                        country: country ? country.cca2 : null, // Country code (ISO alpha-2)
-                        flag: country ? country.flags.png : null, // URL of the flag
-                    };
-                });
-
-                setCurrencies(currencyList);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching currencies or flags:', error);
-                setLoading(false);
+        if (selectedCurrecy) {
+            const data: any = {
+                countryCode: selectedCurrecy.abbreviation
             }
-        };
+            handleChangeCurrency(data)
+        }
+    }, [selectedCurrecy])
 
-        fetchCurrenciesAndFlags();
-    }, []);
+
 
     return (
         <div>
-            <Header link={`/profile`} title="Passcode Settings" />
+            <Header link={`/profile`} title="Currency Settings" />
             <div className=' px-[24px]'>
                 <div className=' bg-[#F7F7F9] mt-[16px]  p-[8px] rounded-[12px]  border flex gap-[8px] border-[#EFEFF0] '>
                     <button onClick={() => setCurrentState(false)} className={`${!currentState ? 'bg-white' : 'bg-none'} text-center w-full py-[8px] rounded-[8px] `}>Currency</button>
@@ -86,8 +150,11 @@ const Page = () => {
                             <button onClick={() => setShowAllCurrency(true)} className=' bg-white rounded-[10px] text-[#828282] px-[8px] text-[12px] py-[4px]  '>change</button>
                         </div>
                         <div className='flex items-center gap-2'>
-                            <Flag code="NG" alt="Nigerian Flag" className='w-[24px] h-[24px]' /> {/* Add flag icon */}
-                            <h1 className=' font-[500] text-[14px] '>NGN</h1>
+                            <div className=' w-[24px] rounded-full  h-[24px] '>
+                                <Image src={getSettingsData?.countryFlag || ''} width={1000} height={1000} className=' size-[24px] mb-[8px]' alt="" />
+
+                            </div>
+                            <h1 className=' font-[500] text-[14px] '>{getSettingsData?.currency || 'NGN'}</h1>
                         </div>
                     </div>
                 </>}
@@ -139,15 +206,8 @@ const Page = () => {
                                 See our  <Link className=' text-[#66C227]' href={'/terms&condition'}>
                                     Privacy Policy and Terms of Service  </Link>  for more information.
                             </span>
-
-
                         </h1>
                     </div>
-
-
-
-
-
                 </>
                 }
 
@@ -292,13 +352,14 @@ const Page = () => {
                             <div className=" w-full my-[24px] ">
                                 <div className="flex w-full flex-wrap">
                                     <ul className=' h-[30vh] w-full overflow-y-scroll overflow-x-hidden'>
-                                        {!loading ?
+                                        {!getAllCurrenciesIsPending ?
                                             <>
-                                                {currencies.map((currency: any, index: number) => (
+                                                {getAllCurrenciesData?.map((currency: ICurrencyData, index: number) => (
                                                     <li
-                                                        key={currency?.code}
-                                                        className={`flex w-full items-center text-[14px] text-[#575757] leading-[28px] mb-4 ${index !== currencies.length - 1 ? 'border-b border-b-[#F7F7F9]' : ''
+                                                        key={currency?.countryCode}
+                                                        className={`flex w-full items-center text-[14px] text-[#575757] leading-[28px] mb-4 ${index !== getAllCurrenciesData?.length - 1 ? 'border-b border-b-[#F7F7F9]' : ''
                                                             }`}
+                                                        onClick={() => setSelectedCurrency(currency)}
                                                     >
                                                         {/* Conditional rendering for the Image */}
                                                         {currency?.flag ? (
@@ -313,7 +374,7 @@ const Page = () => {
                                                         ) : (
                                                             <span className="mr-2">🏳️</span>
                                                         )}
-                                                        {currency?.code}
+                                                        {currency?.abbreviation}
                                                     </li>
                                                 ))}
                                             </>

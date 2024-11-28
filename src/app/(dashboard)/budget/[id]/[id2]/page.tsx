@@ -25,15 +25,7 @@ const formatDate = (dateString: string): string => {
 };
 
 const Page = ({ params }: { params: { id: string, id2: string } }) => {
-    // Example values
-    const amountSpent = 600000; // Current amount spent
-    const amountTotal = 1000000; // Total amount
 
-    // Calculate the amount left
-    const amountLeft = amountTotal - amountSpent;
-
-    // Calculate the progress percentage
-    const progressPercentage = (amountSpent / amountTotal) * 100;
 
 
 
@@ -117,9 +109,6 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     });
     console.log(singleBudgetData);
 
-    const currentBudget = singleBudgetData?.budgetCategories?.filter((category: any) => category.uid === params.id2) || []
-
-    console.log(currentBudget);
 
     const {
         data: expenses = [],
@@ -202,6 +191,14 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
         }
     };
 
+    const currentBudget =
+        singleBudgetData?.budgetCategories?.filter(
+            (category: any) => category.uid === params.id2
+        ) || [];
+
+    // Safely destructure values with defaults
+    const { amountLeft = 0, amountAllocated = 0, amountSpent = 0 } =
+        currentBudget[0] || {};
 
 
 
@@ -221,10 +218,11 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                     <Header link={`/budget/${params.id}`} title={`${currentBudget[0]?.name || 'budget name'}`} />
                     <div className='p-[24px] w-full'>
                         <div className='p-[16px] bg-[#EFEFF0] rounded-[20px] border border-[#E7E7EA]'>
+
                             <Progress
                                 aria-label="Progress showing amount spent and left"
-                                value={singleBudgetData?.totalAmountLeft}
-                                maxValue={singleBudgetData?.totalIncome}
+                                value={amountLeft}
+                                maxValue={amountAllocated}
                                 size="md"
                                 color="warning"
                                 radius="md"
@@ -236,14 +234,20 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                                     value: "text-foreground/60",
                                 }}
                                 showValueLabel={true}
-                                valueLabel={<div className='gap-[8px] flex flex-col'>
-                                    <div className='text-[#6F6C8F] text-[12px]'>Amount Spent</div>
-                                    <div className='text-[#514F6E] text-right text-[12px]'>₦ {singleBudgetData?.totalExpenses?.toLocaleString()}</div>
-                                </div>}
+                                valueLabel={
+                                    <div className="gap-[8px] flex flex-col">
+                                        <div className="text-[#6F6C8F] text-[12px]">Amount Spent</div>
+                                        <div className="text-[#514F6E] text-right text-[12px]">
+                                            ₦ {amountSpent?.toLocaleString()}
+                                        </div>
+                                    </div>
+                                }
                                 label={
-                                    <div className='flex flex-col'>
-                                        <div className='text-[#6F6C8F] my-[8px] text-[12px]'>Amount Left</div>
-                                        <div className='font-[500]'>₦ {singleBudgetData?.totalAmountLeft?.toLocaleString()}</div>
+                                    <div className="flex flex-col">
+                                        <div className="text-[#6F6C8F] my-[8px] text-[12px]">Amount Left</div>
+                                        <div className="font-[500]">
+                                            ₦ {amountLeft?.toLocaleString()}
+                                        </div>
                                     </div>
                                 }
                             />
@@ -272,6 +276,10 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                                     </li>
                                 ))}
                             </ul>
+
+                            {expenses?.data?.docs.length === 0 && <>
+                                <h1 className='flex text-[12px] mt-[5rem] text-[#575757] justify-around items-center '>No Expense on recorded</h1>
+                            </>}
                         </div>
                     </div>
 
