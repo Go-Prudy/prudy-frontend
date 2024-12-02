@@ -17,7 +17,7 @@ import { Budgets } from '@/app/data/DummyData';
 
 import DeleteSuccessModal from '@/app/(dashboard)/components/DeleteSuccessModal';
 import DeleteConfirmationModal from '@/app/(dashboard)/components/DeleteConfirmationModal';
-import { createBudgetApi, createBudgetCategoryApi, CreateSubCategoryApi, getAllBudgetCategories, RecordExpenseApi } from '@/app/services/BudgetService';
+import { createBudgetApi, createBudgetCategoryApi, CreateSubCategoryApi, getAllBudgetCategoriesApi, RecordExpenseApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircularProgress } from '@nextui-org/react';
@@ -588,8 +588,8 @@ const Page = ({ params }: { params: { id: string } }) => {
         isError,
         error,
     } = useQuery({
-        queryKey: ['allBudgetCategories'],
-        queryFn: () => getAllBudgetCategories(authenticatedUser?.token ?? ''),
+        queryKey: ['allBudgetCategoriesData'],
+        queryFn: () => getAllBudgetCategoriesApi(authenticatedUser?.token ?? ''),
         enabled: !!authenticatedUser?.token,
         refetchOnWindowFocus: true,
     });
@@ -742,6 +742,8 @@ const Page = ({ params }: { params: { id: string } }) => {
     const CreateBudgetMutation = useMutation({
         mutationFn: (data: any) => {
             if (authenticatedUser) {
+                console.log(data);
+
                 return createBudgetApi(data, authenticatedUser.token);
             }
             throw new Error("User is not authenticated");
@@ -910,7 +912,12 @@ const Page = ({ params }: { params: { id: string } }) => {
                 >
                     <BottomDrawer
                         footer={<div className="w-full grid gap-y-[16px]">
-                            <button disabled={createSubCategoryMutation.isPending} onClick={() => handleSaveCategory()} className={` btn w-full rounded-[32px] px-[28px] py-[14px]  ${createSubCategoryMutation.isPending ? 'bg-[#434343]' : ' bg-black '} text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500] `} > {createSubCategoryMutation.isPending ? 'Saving...' : 'Save'}
+                            <button disabled={createSubCategoryMutation.isPending} onClick={() => {
+                                if (!createSubCategoryMutation.isPending) {
+                                    handleSaveCategory()
+                                }
+                            }
+                            } className={` btn w-full rounded-[32px] px-[28px] py-[14px]  ${createSubCategoryMutation.isPending ? 'bg-[#434343]' : ' bg-black '} text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500] `} > {createSubCategoryMutation.isPending ? 'Saving...' : 'Save'}
                             </button>
 
                             <button onClick={() => handleDeleteOfCategory('111')} className="btn w-full text-[#F5365C] rounded-[32px] px-[28px] py-[14px] bg-[#FBEDEF] flex items-center justify-center gap-[8px] font-[500]">Delete category</button>
