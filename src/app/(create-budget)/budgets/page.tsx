@@ -23,6 +23,7 @@ const BudgetPage = () => {
     const [showInvites, setShowInvites] = useState(false);
     const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
     const [allBudgets, setAllBudgets] = useState(Budgets || []);
+    const [treshold, setTreshold] = useState(0);
     const navigation = useRouter()
     useEffect(() => {
         const handleScroll = () => {
@@ -62,6 +63,25 @@ const BudgetPage = () => {
         setShowInvites(false)
     }, [])
 
+    useEffect(() => {
+        if (budgets?.docs) {
+            const budget = budgets.docs[0]; // For example, working with the first budget
+            const totalBudgetIncome = budget.totalIncome;
+            const totalBudgetExpenses = budget.totalExpenses;
+
+            // Determine the max value to set a relative length for both bars
+            const maxBudgetValue = Math.max(totalBudgetIncome, totalBudgetExpenses) || 0;
+
+            // Calculate width ratios for bars
+            const incomeWidth = maxBudgetValue > 0 ? (totalBudgetIncome / maxBudgetValue) * 100 : 0;
+            const expenseWidth = maxBudgetValue > 0 ? (totalBudgetExpenses / maxBudgetValue) * 100 : 0;
+
+            // Calculate dynamic threshold
+            const dynamicThreshold = (totalBudgetIncome / maxBudgetValue) * 100 || 15;
+            setTreshold(dynamicThreshold);
+            console.log(maxBudgetValue, incomeWidth, expenseWidth, (totalBudgetIncome / maxBudgetValue) * 100);
+        }
+    }, [budgets]); // Depend on the budgets prop to re-run the effect
 
 
 
@@ -95,7 +115,7 @@ const BudgetPage = () => {
         const additionalCount = partners?.length - maxAvatarsToShow;
 
         return (
-            <div className={`relative flex items-center ${expenseWidth <= 15 ? 'mt-0' : 'mt-2'}`}>
+            <div className={`relative flex items-center ${expenseWidth <= treshold ? 'mt-0' : 'mt-2'}`}>
                 {partners?.slice(0, maxAvatarsToShow)?.map((partner, index) => (
                     <>
                         {partner.picture ?
@@ -180,11 +200,14 @@ const BudgetPage = () => {
                                     const totalBudgetExpenses = budget.totalExpenses
 
                                     // Determine the max value to set a relative length for both bars
-                                    const maxBudgetValue = Math.max(totalBudgetIncome, totalBudgetExpenses);
+                                    const maxBudgetValue = Math.max(totalBudgetIncome, totalBudgetExpenses) || 0;
 
                                     // Calculate width ratios for bars
-                                    const incomeWidth = totalBudgetIncome / maxBudgetValue * 100;
-                                    const expenseWidth = totalBudgetExpenses / maxBudgetValue * 100;
+                                    const incomeWidth = maxBudgetValue > 0 ? (totalBudgetIncome / maxBudgetValue) * 100 : 0;
+                                    const expenseWidth = maxBudgetValue > 0 ? (totalBudgetExpenses / maxBudgetValue) * 100 : 0;
+
+                                    const dynamicThreshold = (totalBudgetIncome / maxBudgetValue) * 100 || 15;
+                                    console.log(maxBudgetValue, incomeWidth, expenseWidth, dynamicThreshold);
 
 
 
@@ -231,7 +254,7 @@ const BudgetPage = () => {
                                                 }} className='flex flex-col relative  gap-[4px]'>
                                                     <h1 className='flex justify-between w-full'>
                                                         <span className='text-[#575757] text-[10px]'>Expenses</span>
-                                                        <span className={` ${expenseWidth <= 15 ? 'hidden' : 'block'} text-[#575757] font-[500] text-[12px]`}>₦ {totalBudgetExpenses.toLocaleString()}</span>
+                                                        <span className={` ${expenseWidth <= dynamicThreshold ? 'hidden' : 'block'} text-[#575757] font-[500] text-[12px]`}>₦ {totalBudgetExpenses.toLocaleString()}</span>
                                                     </h1>
                                                     <div className='relative w-full bg-[#EFEFF0] rounded-[4px]'>
                                                         <div
@@ -242,7 +265,7 @@ const BudgetPage = () => {
                                                         />
                                                     </div>
                                                     <div
-                                                        className={` flex  ${expenseWidth <= 15 ? 'block' : 'hidden'}   text-[#575757] font-[500] text-[12px]`}
+                                                        className={` flex  ${expenseWidth <= dynamicThreshold ? 'block' : 'hidden'}   text-[#575757] font-[500] text-[12px]`}
                                                     >
                                                         ₦{totalBudgetExpenses.toLocaleString()}
                                                     </div>
