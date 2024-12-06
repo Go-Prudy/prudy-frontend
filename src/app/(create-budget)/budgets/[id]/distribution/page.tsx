@@ -7,7 +7,7 @@ import BudgetChart from '@/app/(dashboard)/components/DoughnutChart';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
-import { GetAllBudgetsApi, getBudgetDistributionApi, getSingleBudgetApi } from '@/app/services/BudgetService';
+import { GetAllBudgetsApi, getBudgetDistributionApi } from '@/app/services/BudgetService';
 import { CircularProgress } from '@nextui-org/react';
 import Image from 'next/image';
 import noBudgetImg from '@/images/List 2.webp'
@@ -29,15 +29,6 @@ const Page = ({ params }: { params: { id: string } }) => {
         enabled: !!authenticatedUser?.token,
         staleTime: 5 * 60 * 1000
     });
-
-    const { data: singlebudget, status: singleBudgetStatus, isPending: isSingleBudgetsPending } = useQuery({
-        queryKey: ['allBudgetCategories'],
-        queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
-        enabled: !!authenticatedUser?.token,
-        staleTime: 5 * 60 * 1000
-    });
-
-    console.log(singlebudget);
 
 
     const monthlyBudget = budgets?.length > 0
@@ -74,16 +65,12 @@ const Page = ({ params }: { params: { id: string } }) => {
             distributions: Distribution[];
         };
     }
-
     const { data: budgetDistributionData, status: distributionStatus, isPending } = useQuery({
         queryKey: ['budgetDistribution', selectedUid ? selectedUid : 0],
         queryFn: () => getBudgetDistributionApi(authenticatedUser?.token ?? '', selectedUid),
         enabled: !!authenticatedUser?.token && !!selectedUid,
         staleTime: 5 * 60 * 1000
     });
-
-    console.log(budgetDistributionData);
-
 
     useEffect(() => {
         if (budgets?.length > 0) {
@@ -112,8 +99,6 @@ const Page = ({ params }: { params: { id: string } }) => {
         ...item,
         color: colors[index],
     })) || [];
-
-    console.log(budgetCategories);
 
 
     const categories: Category[] = [
@@ -185,16 +170,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     </button>
                 </div>
                 <div className=' w-full mt-[31px]  flex justify-center'>
-                    {distributionStatus === "pending" && <p>Loading budget data...</p>}
-                    {distributionStatus === 'error' && <p>Failed to load budget data. Please try again.</p>}
-                    {distributionStatus === 'success' && (
-                        <div className="w-full mt-[31px] flex justify-center">
-                            <BudgetChart
-                                totalBudget={budgetDistributionData?.totalBudget ?? 0}
-                                budgetCategories={budgetCategories}
-                            />
-                        </div>
-                    )}
+                    <BudgetChart totalBudget={budgetDistributionData?.totalBudget || 0} budgetCategories={budgetCategories} />
                 </div>
                 <div className="bg-white mt-[28px] p-4 flex flex-col gap-[16px]  w-full">
                     {isPending && <div key="loading" className="flex justify-center items-center py-[25px]">
@@ -211,38 +187,24 @@ const Page = ({ params }: { params: { id: string } }) => {
                             </div>
                         </div>}
 
-                    {singleBudgetStatus == 'success' &&
-                        <>
+                    {filteredCategories.filter(({ uid }: { uid: number }) => uid !== 1).map((category: Distribution, index: number) => (
+                        <div
+                            key={index}
+                            className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
+                        >
+                            {/* Category Name */}
+                            <div className="flex gap-[8px] items-center">
+                                <span
+                                    className="inline-block size-[12px] rounded-full"
+                                    style={{ backgroundColor: "#CCCCCC" }} // Set a placeholder color, adjust if actual color data is provided
+                                ></span>
+                                <span className="text-[#474747] text-[14px] font-medium">{category?.name}</span>
+                            </div>
 
-
-                            {
-                                // Check if there are budget categories available
-                                singlebudget?.data?.budgetCategories && singlebudget?.data?.budgetCategories?.length > 0 ? (
-                                    singlebudget?.data?.budgetCategories?.map((category: any, index: number) => (
-                                        <div
-                                            key={category.uid}
-                                            className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
-                                        >
-                                            {/* Category Name */}
-                                            <div className="flex gap-[8px] items-center">
-                                                <span
-                                                    className="inline-block size-[12px] rounded-full"
-                                                    style={{ backgroundColor: category.color }} // Dynamically set color for each category
-                                                ></span>
-                                                <span className="text-[#474747] text-[14px] font-medium">{category.name}</span>
-                                            </div>
-
-                                            {/* Percentage */}
-                                            <span className="text-[#474747] text-[14px]">{category.percentageLeft?.toFixed(2)}%</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center text-[#474747] text-[14px] font-medium">
-                                        No data available
-                                    </div>
-                                )
-                            }
-                        </>}
+                            {/* Percentage */}
+                            <span className="text-[#474747] text-[14px]">{category?.percentage?.toFixed(2)}%</span>
+                        </div>
+                    ))}
                 </div>
             </motion.div>
 
