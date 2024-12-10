@@ -2,15 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
 import pics from '@/images/frame.webp'; // Ensure the image is imported correctly
-import { BsPerson, BsPersonFill, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
-import { } from 'react-icons/fa';
-import BottomNavigation from '@/components/create-budget/BottomNavigation';
+import { BsPersonFill, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
 import noBudgetImg from '@/images/List 2.webp'
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import CreateBudget from '@/components/create-budget/CreateBudget';
-import { Budgets } from '@/app/data/DummyData';
-import { Avatar, AvatarGroup, CircularProgress } from "@nextui-org/react";
+import { CircularProgress } from "@nextui-org/react";
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { GetAllBudgetsApi } from '@/app/services/BudgetService';
@@ -22,7 +19,6 @@ const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
     const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
-    const [allBudgets, setAllBudgets] = useState(Budgets || []);
     const [treshold, setTreshold] = useState(0);
     const navigation = useRouter()
     useEffect(() => {
@@ -63,39 +59,7 @@ const BudgetPage = () => {
         setShowInvites(false)
     }, [])
 
-    useEffect(() => {
-        if (budgets?.docs) {
-            const budget = budgets.docs[0]; // For example, working with the first budget
-            const totalBudgetIncome = budget.totalIncome;
-            const totalBudgetExpenses = budget.totalExpenses;
 
-            // Determine the max value to set a relative length for both bars
-            const maxBudgetValue = Math.max(totalBudgetIncome, totalBudgetExpenses) || 0;
-
-            // Calculate width ratios for bars
-            const incomeWidth = maxBudgetValue > 0 ? (totalBudgetIncome / maxBudgetValue) * 100 : 0;
-            const expenseWidth = maxBudgetValue > 0 ? (totalBudgetExpenses / maxBudgetValue) * 100 : 0;
-
-            // Calculate dynamic threshold
-            const dynamicThreshold = (totalBudgetIncome / maxBudgetValue) * 100 || 15;
-            setTreshold(dynamicThreshold);
-            console.log(maxBudgetValue, incomeWidth, expenseWidth, (totalBudgetIncome / maxBudgetValue) * 100);
-        }
-    }, [budgets]); // Depend on the budgets prop to re-run the effect
-
-
-
-    // Calculate total income and allocations
-    const totalIncome = allBudgets.reduce((total, budget) =>
-        total + (budget.incomes?.reduce((sum, income) => sum + income.amount, 0) || 0), 0
-    );
-
-    const totalAllocations = allBudgets.reduce((total, budget) =>
-        total + (budget.allocations?.reduce((sum, allocation) => sum + allocation.amount, 0) || 0), 0
-    );
-
-    // Extract partners from the first budget (if applicable)
-    const partners = allBudgets.length > 0 ? allBudgets[0].partners : [];
     interface Partner {
         image: string;
         uid: string;
@@ -182,7 +146,7 @@ const BudgetPage = () => {
                     </div>
                     <div className='bg-[#F7F7F9] mb-[17px] mt-[40px] min-h-[389px] w-full rounded-t-[24px]'>
 
-                        {budgets?.docs?.length === 0 ?
+                        {budgets?.length === 0 ?
                             <div className='py-[65px] text-center flex-col gap-[8px] flex justify-center items-center px-[51px]'>
                                 <Image src={noBudgetImg.src} width={1000} height={1000} className='size-[124px] mb-[8px]' alt="" />
                                 <h1 className='font-[500] leading-[24px]'>You do not have any budget history yet.</h1>
@@ -195,7 +159,7 @@ const BudgetPage = () => {
                                         <CircularProgress size='md' color='default' />
                                     </div>
                                     : null}
-                                {budgets?.docs?.map((budget: any, index: any) => {
+                                {budgets?.map((budget: any, index: any) => {
                                     const totalBudgetIncome = budget.totalIncome
                                     const totalBudgetExpenses = budget.totalExpenses
 

@@ -163,3 +163,15 @@ export interface AssignTransactionData {
     budgetId: string;
     categoryId: string;
 }
+
+
+
+
+export interface ICurrencyData {
+    country: string,
+    countryCode: string,
+    flag: string,
+    abbreviation: string,
+    name: string,
+    symbol: string,
+}

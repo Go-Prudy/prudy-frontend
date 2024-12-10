@@ -169,7 +169,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
     const { data: singleBudgetData = [], isPending: singleBudgetStatus } = useQuery({
-        queryKey: ['singleBudgetData' + params.id],
+        queryKey: ['singleBudgetData', params.id],
         queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
         enabled: !!authenticatedUser?.token && !!params.id,
         refetchOnWindowFocus: true, // This should be directly in the options object.
@@ -185,11 +185,6 @@ const Page = ({ params }: { params: { id: string } }) => {
         refetchOnWindowFocus: true,
     });
 
-    console.log(listofCategories);
-
-
-
-    console.log(singleBudgetData);
 
     // React Query mutation to invite a collaborator
     const inviteCollaboratorMutation = useMutation({
@@ -353,7 +348,8 @@ const Page = ({ params }: { params: { id: string } }) => {
                     </div>
                     <div className=' flex justify-between w-full'>
                         <h1 className=' text-[#474747] my-[24px] text-[18px] font-[500] '>Collaborators</h1>
-                        <button className=' text-[#474747] my-[24px] flex  justify-center  text-[12px] font-[500] rounded-[32px] w-[130px] bg-[#ECFDDC]   gap-[.4px] items-center '><BsPlus size={20} /> <span className=' font-[500] '>Invite collaborator</span></button>
+
+                        {singleBudgetData?.collaborators?.length >= 2 && <button className=' text-[#474747] my-[24px] flex  justify-center  text-[12px] font-[500] rounded-[32px] w-[130px] bg-[#ECFDDC]   gap-[.4px] items-center '><BsPlus size={20} /> <span className=' font-[500] '>Invite collaborator</span></button>}
 
                     </div>
 

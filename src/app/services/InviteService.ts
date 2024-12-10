@@ -40,7 +40,6 @@ export const acceptBudgetInviteApi = async (
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
-        throw error; // Re-throw the error for further handling if needed
     }
 };
 
@@ -68,6 +67,5 @@ export const rejectBudgetInviteApi = async (
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
         console.log(error);
-        throw error;
     }
 };
