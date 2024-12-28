@@ -52,13 +52,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     };
 
     const handleSubmit = () => {
-        // Filter incomes to exclude those with an empty name and amount of 0
-        const filteredIncomes = allIncomes.filter(income => income.name.trim() !== '' || income.amount !== 0);
-
-        console.log(filteredIncomes);
-
-        // Pass the filtered incomes to addIncomeToBudget
-        addIncomeToBudget(budgetId, filteredIncomes);
+        addIncomeToBudget(budgetId, allIncomes);
         navigate.push(`/budgets/new/expense/${budgetId}`);
     };
 

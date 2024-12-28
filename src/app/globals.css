@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Manrope:wght@200..800&display=swap');
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -23,17 +22,12 @@ html, body {
   }
 }
 
+body {}
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
-}
-
-.aeonik{
-  font-family: "Cabin", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
 }
 
 
