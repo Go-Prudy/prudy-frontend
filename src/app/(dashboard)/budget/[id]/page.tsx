@@ -159,7 +159,6 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
-
     // Function to trigger form submission via button click
     const handleButtonClick = () => {
         if (formRef.current) {
@@ -169,11 +168,15 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
     const { data: singleBudgetData = [], isPending: singleBudgetStatus } = useQuery({
-        queryKey: ['singleBudgetData', params.id],
+        queryKey: ['singleBudgetData' + params.id],
         queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
         enabled: !!authenticatedUser?.token && !!params.id,
         refetchOnWindowFocus: true, // This should be directly in the options object.
     });
+    console.log(params.id);
+
+
+    console.log(singleBudgetData);
 
 
 
@@ -238,14 +241,14 @@ const Page = ({ params }: { params: { id: string } }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-[100vw] "
+            className="max-w-[500px] "
             style={{
                 backgroundImage: `url(${pics.src})`, // Access the 'src' property for the image URL
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }}
         >
-            <Header light={false} link="/budgets" title="Create new budget" />
+            <Header light={false} link="/budgets" title={singleBudgetData?.name || 'untitled'} />
             <div className='px-[24px] pt-[40px] pb-[40px]'>
                 <BarChart
                     labels={['Income', 'Expenses', 'Amount Left']}
@@ -263,12 +266,11 @@ const Page = ({ params }: { params: { id: string } }) => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-[100vw] bg-[#FFFFFF] rounded-t-[24px] "
+                className="max-w-[500px] bg-[#FFFFFF] rounded-t-[24px] "
             >
                 <div className='  py-[16px]  px-[24px]   w-full'>
                     <div className=' w-full flex justify-between'>
                         <h1 className=' font-[500] leading-[28px]'>Budget Categories</h1>
-                        <button onClick={() => setShowNewBudgetCategory(true)} className=' bg-[#EFEFF0] font-[500] text-[12px] rounded-[32px] py-[4px] px-[8px] flex gap-[4px] items-center '> <BsPlus size={20} /> Create new</button>
                     </div>
                 </div>
 
@@ -364,21 +366,24 @@ const Page = ({ params }: { params: { id: string } }) => {
                             ) : (
                                 <>
                                     {singleBudgetData?.collaborators?.length > 0 ? (
-                                        singleBudgetData.collaborators.map((item: any) => (
+                                        singleBudgetData?.collaborators?.map((item: any) => (
                                             <div
                                                 key={item?.uid}
                                                 className="bg-[#F7F7F9] rounded-[20px] items-center border border-[#EFEFF0] p-[16px] flex flex-col justify-center w-full"
                                             >
                                                 {item?.picture ? (
-                                                    <img
+                                                    <Image
                                                         src={item.picture}
                                                         alt={item.name}
-                                                        className="w-[30px] h-[30px] rounded-full"
+                                                        width={1000}
+                                                        height={1000}
+                                                        className="w-[52px] h-[52px] object-cover object-center  rounded-[12px] "
                                                     />
                                                 ) : (
                                                     <GoPerson className="text-[30px] text-[#A3A3A3]" />
                                                 )}
                                                 <h1 className="text-[#2D2D2D] text-lg font-medium">{item.name}</h1>
+                                                <h1 className="text-[#828282] rounded-[10px] bg-white text-lg px-[8px]  py-[2px] font-medium">GUEST</h1>
                                             </div>
                                         ))
                                     ) : (
@@ -392,8 +397,9 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
                         {singleBudgetData?.collaborators?.length <= 1 &&
-                            <div onClick={() => setShowInvite(!showInvite)} className='rounded-[20px] bg-[#F5FEED] items-center border-dashed border-[#66C227] border-2 p-[16px] flex flex-col justify-center w-full'>
-                                <Image src={add} alt='hello' className='size-[24px]' />
+                            <div onClick={() => setShowInvite(!showInvite)} className='rounded-[20px] h-[172px] bg-[#F5FEED] items-center border-dashed border-[#66C227] border-2 p-[16px] flex flex-col justify-center w-full'>
+                                <Image src={add} width={1000}
+                                    height={1000} alt='hello' className='w-[52px] h-[52px] rounded-[12px]' />
                                 <h1 className='text-[#2D2D2D] leading-[16px] text-center'>
                                     Invite a <br /> collaborator
                                 </h1>
@@ -546,7 +552,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
                                 <div className='mt-[24px]  p-[16px] bg-[#F7F7F9] min-h-[100px] max-h-[200px] overflow-y-scroll border border-[#E7E7EA] rounded-[16px] w-full'>
-                                    {subAllocations.map((eachSubAllocation: any, index: number) => (
+                                    {subAllocations?.map((eachSubAllocation: any, index: number) => (
                                         <button
                                             type='button'
                                             key={index + 1}

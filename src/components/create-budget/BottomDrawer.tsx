@@ -27,7 +27,7 @@ const BottomDrawer: React.FC<IProps> = ({ label, padding, link, back, close, chi
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="bottom-drawer z-[60] absolute bottom-0 w-full bg-white rounded-t-[24px]"
+            className="bottom-drawer w-[100vw] max-w-[500px] z-[60] absolute bottom-0 w-full bg-white rounded-t-[24px]"
         >
             <div className={`header bg-[#F7F7F9] px-[24px] py-[16px] rounded-t-[24px] flex justify-between items-center`}>
                 <button

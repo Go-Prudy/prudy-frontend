@@ -38,7 +38,7 @@ const Slide3: React.FC<Slide3Props> = ({ slide, handlePrev, handleNext }) => {
     }, [slide]);
     return (
         <div
-            className="w-[100vw] min-h-[944px] bg-no-repeat bg-black relative bg-contain bg-top transition-all duration-300 ease-out"
+            className="max-w-[500px] min-h-[944px] bg-no-repeat bg-black relative bg-contain bg-top transition-all duration-300 ease-out"
             style={{ backgroundImage: `url(${backgroundImage})` }}
         >
 

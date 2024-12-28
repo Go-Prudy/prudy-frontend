@@ -79,7 +79,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-[100vw]"
+            className=" w-[100vw] relative min-h-[100vh] max-w-[500px] bg-white"
         >
             <Header link='/budgets' title="Create new budget" />
             <div className='mt-[39.5px] mb-[140px] px-[24px] w-full'>
@@ -88,60 +88,62 @@ const Page = ({ params }: { params: { id: string } }) => {
                     <div className='bg-[#EFEFF0] rounded-[10px] h-[8px] w-full'></div>
                 </div>
                 <p className='my-[24px] font-[500] text-[20px]'>Set your income</p>
-                <div className='bg-[#F7F7F9] rounded-[20px] p-[16px]'>
+                <div className='bg-[#F7F7F9]  rounded-[20px] p-[16px]'>
                     <h1 className='text-[#575757] leading-[24px]'>Income</h1>
                     <div className="flex hover:scale-105 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center justify-between w-full gap-[8px]"></div>
-
-                    {allIncomes.map((income, index) => (
-                        <form
-                            key={index}
-                            className="flex hover:scale-105 transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
-                        >
-                            <div className='flex gap-[4px] w-full'>
-                                <div className='grid place-content-center bg-[#01B0C5] rounded-[16px] text-white size-[28px]'>
-                                    <Image src={moneyIcon} className='size-[12px]' alt={'icon'} width={1000} height={1000} />
-                                </div>
-                                <div className='text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block'>
-                                    <input
-                                        className='bg-transparent px-2 w-full text-ellipsis overflow-hidden whitespace-nowrap'
-                                        type="text"
-                                        placeholder='enter income'
-                                        onChange={(e) => handleIncomeChange(index, 'name', e.target.value)}
-                                        ref={(el) => {
-                                            inputRefs.current[index] = el;
-                                        }}
-                                        value={income.name}
-                                    />
-                                </div>
-                            </div>
-                            <div className='flex items-start'>
-                                <div className='bg-white rounded-[8px] py-[4px] px-[8px] items-center flex  gap-[8px]'>
-                                    <h2>₦</h2>
-                                    <div className="relative inline-block w-full">
+                    <div className=' overflow-y-auto overflow-x-hidden  max-h-[calc(65vh-140px)] '>
+                        {allIncomes.map((income, index) => (
+                            <form
+                                key={index}
+                                className="flex z-[100] relative hover:scale-105  transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
+                            >
+                                <div className='flex  gap-[4px] w-full'>
+                                    <div className='grid z-10 relative place-content-center bg-[#01B0C5] rounded-[16px] text-white size-[28px]'>
+                                        <Image src={moneyIcon} className='size-[12px]' alt={'icon'} width={1000} height={1000} />
+                                    </div>
+                                    <div className='text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block'>
                                         <input
-                                            value={formatNumber(income.amount)}
-                                            onChange={(e) => handleIncomeChange(index, 'amount', parseNumber(e.target.value))}
+                                            className='bg-transparent px-2 w-full text-ellipsis overflow-hidden whitespace-nowrap'
                                             type="text"
-                                            className="px-2 py-1 rounded focus:outline-none border-none focus:border-none transition-all duration-200"
-                                            style={{ width: getInputWidth(index), maxWidth: '140px' }}
-                                        />
-                                        <span
+                                            placeholder='enter income'
+                                            onChange={(e) => handleIncomeChange(index, 'name', e.target.value)}
                                             ref={(el) => {
-                                                spanRefs.current[index] = el;
+                                                inputRefs.current[index] = el;
                                             }}
-                                            className="absolute invisible whitespace-pre"
-                                        >
-                                            {formatNumber(income.amount)}
-                                        </span>
+                                            value={income.name}
+                                        />
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                    ))}
+                                <div className='flex items-start'>
+                                    <div className='bg-white rounded-[8px] py-[4px] px-[8px] items-center flex  gap-[0px]'>
+                                        <h2>₦</h2>
+                                        <div className="relative inline-block w-full">
+                                            <input
+                                                value={formatNumber(income.amount)}
+                                                onChange={(e) => handleIncomeChange(index, 'amount', parseNumber(e.target.value))}
+                                                type="text"
+                                                className="px-2 py-1 rounded focus:outline-none border-none focus:border-none transition-all duration-200"
+                                                style={{ width: getInputWidth(index), maxWidth: '140px' }}
+                                            />
+                                            <span
+                                                ref={(el) => {
+                                                    spanRefs.current[index] = el;
+                                                }}
+                                                className="absolute invisible whitespace-pre"
+                                            >
+                                                {formatNumber(income.amount)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        ))}
+                    </div>
+
 
                     <button
                         onClick={handleAddIncome}
-                        className="flex hover:scale-110 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center gap-[8px]"
+                        className="flex  hover:scale-110 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center gap-[8px]"
                     >
                         <div className='grid place-content-center bg-[#01B0C5] rounded-[16px] text-white size-[28px]'>
                             <BsPlus />
@@ -151,7 +153,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 </div>
             </div>
 
-            <div className='p-[24px] fixed z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]'>
+            <div className='p-[24px] max-w-[500px] mt-[12rem] fixed  z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-[100%] border-t-[2px] border-t-[#EFF0F6]'>
                 <div className="w-full">
                     <button onClick={() => handleSubmit()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
                         Proceed <BsArrowRight />

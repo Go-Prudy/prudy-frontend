@@ -50,18 +50,18 @@ export default function Nav() {
           </Link>
         </li>
         <li className="grow">
-          <Link href="/analysis" className="flex flex-col items-center h-full gap-[2px]">
+          <Link href="/analytics" className="flex flex-col items-center h-full gap-[2px]">
             <ChartIcon
               className={
-                pathname === '/analysis' ? 'fill-lemonGreen-700' : 'fill-grayCaption'
+                pathname === '/analytics' ? 'fill-lemonGreen-700' : 'fill-grayCaption'
               }
             />
             <span
               className={
-                pathname === '/analysis' ? 'text-lemonGreen-700' : 'text-grayCaption'
+                pathname === '/analytics' ? 'text-lemonGreen-700' : 'text-grayCaption'
               }
             >
-              Analysis
+              analytics
             </span>
           </Link>
         </li>

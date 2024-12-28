@@ -301,11 +301,11 @@ const Manage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 >
                     <div
                         onClick={() => setShowCancelSubscription(false)}
-                        className="fixed bg-[#00000095] px-[24px] grid place-content-center h-[100vh] w-full z-[50] top-0"
+                        className="fixed bg-[#00000095] px-[24px] grid place-content-center h-[100vh] max-w-[500px] w-full z-[50] top-0"
                     >
                         <div className="bg-white flex flex-col rounded-[40px] items-center text-center w-full p-8">
                             <Image src={warninglogo} alt="Warning" className="size-[90px]" width={90} height={90} />

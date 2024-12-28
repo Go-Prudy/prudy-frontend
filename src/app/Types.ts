@@ -175,3 +175,34 @@ export interface ICurrencyData {
     name: string,
     symbol: string,
 }
+
+export interface Expense {
+    uid: string;
+    narration: string;
+    amount: number;
+    date: string;
+    time: string;
+}
+
+export interface BudgetCategory {
+    uid: string;
+    name: string;
+    amountLeft: number;
+    amountAllocated: number;
+    amountSpent: number;
+}
+
+export interface Budget {
+    budgetCategories: BudgetCategory[];
+    // ... other budget properties
+}
+
+export interface ExpenseResponse {
+    data: {
+        docs: Expense[];
+        totalDocs: number;
+        limit: number;
+        page: number;
+        totalPages: number;
+    };
+}

@@ -23,3 +23,35 @@ export const scanReceiptApi = async (token: string, url: any): Promise<any> => {
 };
 
 
+
+export const AssignCategoryToTransactionApi = async (
+    accountId: string,
+    transactionId: string,
+    budgetId: string,
+    categoryId: string,
+    token: string
+) => {
+    try {
+        const response = await api.post(
+            `accounts/${accountId}/transactions/${transactionId}/assign`,
+            {
+                budgetId,
+                categoryId,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+                },
+            }
+        );
+        toast.success(response.data.message || "Category assigned successfully!");
+        return response.data.data;
+    } catch (error: any) {
+        toast.error(error?.response?.data?.message || "An error occurred");
+        console.error(error);
+        throw error;
+    }
+};
+
+
+

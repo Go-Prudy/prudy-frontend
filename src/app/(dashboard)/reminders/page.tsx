@@ -102,10 +102,10 @@ const Page: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-[100vw]"
+                className=" w-[100vw] min-h-[100vh] max-w-[500px]"
             >
                 <Header link="/profile" title="Notifications & Reminders" />
-                <div className="flex flex-col gap-[16px] p-[24px]">
+                <div className="flex   w-[100vw] max-w-[500px] flex-col gap-[16px] p-[24px]">
                     <div className="border rounded-[12px] border-[#EFEFF0] bg-[#F7F7F9] p-[16px]">
                         <h1 className="leading-[28px] font-[500]">Daily reminders</h1>
                         {isSettingsLoading ? (

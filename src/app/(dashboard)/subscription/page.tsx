@@ -244,13 +244,13 @@ const Page = () => {
     }
 
     return (
-        <div className=' relative  h-[844px] overflow-x-hidden' style={{
+        <div className=' relative  w-[100vw] max-w-[500px]   h-[844px] overflow-x-hidden' style={{
             background: 'linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)',
         }}>
 
-            <div className=' w-full py-[22px] px-[24px]'
+            <div className='  relative py-[22px] px-[24px]'
             >
-                <div className=' fixed top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
+                <div className='  fixed lg:absolute top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
                     <Image
                         src={subtract1}
                         className=" w-full h-full  "
@@ -258,7 +258,7 @@ const Page = () => {
                         alt="payment icon"
                     />
                 </div>
-                <div className=' fixed bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
+                <div className=' fixed lg:absolute bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
                     <Image src={subtract2} className="h-full z-[-1] w-full " height={1000} width={1000} alt="payment icon" />
                 </div>
 

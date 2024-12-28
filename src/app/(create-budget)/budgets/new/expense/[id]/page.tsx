@@ -24,11 +24,7 @@ import { CircularProgress } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 
 const Page = ({ params }: { params: { id: string } }) => {
-    const hasRunForCurrentBudget = useRef<string | null>(null);
 
-    const prevIncomes = [
-        { index: 1, incomeType: 'Salary', amount: 0 },
-    ];
     const budgetId = params.id;
     const all_Budgets = useBudgetStore((state) => state.budgets);
     const currentBudget = all_Budgets?.find((b) => b.id === budgetId);
@@ -615,9 +611,9 @@ const Page = ({ params }: { params: { id: string } }) => {
         }
 
 
-        else if (selectedBudget?.amount > totalSubAllocationAmount) {
-            alert("your budgets are less than your assinged amount for this category");
-        }
+        // else if (selectedBudget?.amount > totalSubAllocationAmount) {
+        //     alert("your budgets are less than your assinged amount for this category");
+        // }
         else if (createSubCategoryMutation.isPending) {
             alert("savinng expense ....");
         }
@@ -792,7 +788,8 @@ const Page = ({ params }: { params: { id: string } }) => {
             console.log(res);
             setBluredData([])
             if (res) {
-                navigate.push('/budgets')
+                console.log(res);
+                navigate.push('/budget/' + res.uid)
             }
 
 
@@ -810,7 +807,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-[100vw]"
+            className=" w-[100vw] max-w-[500px]"
         >
             <Header link={`/budgets/new/income/${lastBudget?.id}`} title="Create new budget" />
             <div className='mt-[39.5px]  px-[24px] w-full'>
@@ -954,10 +951,10 @@ const Page = ({ params }: { params: { id: string } }) => {
                                         type="text"
                                         name="percentage"
                                         value={
-                                            selectedBudget && incomeLeft
-                                                ? isNaN((selectedBudget.amount / incomeLeft) * 100)
+                                            selectedBudget && income
+                                                ? isNaN((selectedBudget.amount / income) * 100)
                                                     ? '0'
-                                                    : ((selectedBudget.amount / incomeLeft) * 100).toFixed(2)
+                                                    : ((selectedBudget.amount / income) * 100).toFixed(2)
                                                 : '0'
                                         }
                                         readOnly
@@ -991,7 +988,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                             </div>
                                         </div>
                                         <div className="flex items-start">
-                                            <div className='bg-white rounded-[8px] py-[4px] px-[8px] flex items-start gap-[8px]'>
+                                            <div className='bg-white rounded-[8px] py-[4px] px-[8px] flex justify-center items-center gap-[0px]'>
                                                 ₦
                                                 <div className="relative inline-block w-full">
                                                     <input
@@ -1008,7 +1005,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                                         inputMode="decimal"
                                                         pattern="[0-9]*[.,]?[0-9]*"
                                                         onWheel={(e) => e.currentTarget.blur()}
-                                                        className="px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                                                        className="px-1 py-1 outline-none rounded focus:outline-none transition-all duration-200"
                                                         style={{ width: '140px', maxWidth: '140px' }}
                                                     />
                                                 </div>
@@ -1123,7 +1120,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 </motion.div>
 
             }
-            <div className='p-[24px] fixed z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]'>
+            <div className='p-[24px] fixed max-w-[500px] z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]'>
                 <div className="w-full">
                     <button onClick={() => handleCreateBudget()} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
                         {CreateBudgetMutation.isPending

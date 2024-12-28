@@ -62,7 +62,7 @@ export const getCategoryExpenses = async (budgetId: string, categoryId: string, 
 
 // Function to record expense 
 export const RecordExpenseApi = async (budgetId: string, budgetCategoryId: string, data: any, token: string) => {
-
+    console.log(budgetCategoryId);
     try {
         const response = await api.post(`budgets/${budgetId}/categories/${budgetCategoryId}/expenses`, data, {
             headers: {
@@ -83,40 +83,31 @@ export const RecordExpenseApi = async (budgetId: string, budgetCategoryId: strin
 export const GetAllBudgetsApi = async (token: string) => {
     try {
         let allBudgets: any[] = [];
-        let currentPage = 1;
-        const limit = 10; // Default limit, can be adjusted based on the API
+        const limit = 10;
+        const totalPages = 5;
 
-        while (true) {
-            console.log(`Fetching page ${currentPage}`);
-
-            const response = await api.get(`budgets/?page=${currentPage}&limit=${limit}`, {
+        // Create an array of promises for fetching multiple pages
+        const fetchPromises = Array.from({ length: totalPages }, (_, index) => {
+            const page = index + 1;
+            return api.get(`budgets/?page=${page}&limit=${limit}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+        });
 
-            // Log the response to see the actual structure
-            console.log(response.data);
+        // Fetch all pages in parallel
+        const responses = await Promise.all(fetchPromises);
 
-            const { docs, next } = response.data.data; // Adjust if the response structure is different
-            if (!docs) {
-                console.error('No docs found on this page.');
-                break;
+        // Process each response
+        responses.forEach(response => {
+            const { docs } = response.data.data; // Adjust if the response structure is different
+            if (docs) {
+                allBudgets = [...allBudgets, ...docs];
             }
-
-            // Merge the current page's docs with the previous ones
-            allBudgets = [...allBudgets, ...docs];
-
-            if (!next || !next.page) {
-                console.log('No more pages to fetch.');
-                break; // Exit if there's no next page
-            }
-
-            currentPage = next.page;
-        }
+        });
 
         console.log('All budgets fetched:', allBudgets);
-
         return allBudgets;
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
@@ -130,6 +121,8 @@ export const GetAllBudgetsApi = async (token: string) => {
 // Function to get a single budget by ID
 export const getSingleBudgetApi = async (token: string, budgetId: string) => {
     try {
+        console.log(budgetId);
+
         const response = await api.get(`budgets/${budgetId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -148,6 +141,7 @@ export const getSingleBudgetApi = async (token: string, budgetId: string) => {
 
 
 
+
 // ----------------------------------------------------------------
 // Function to get active budget categories by budget ID
 export const getActiveBudgetCategoriesApi = async (token: string, budgetId: string) => {
@@ -157,6 +151,8 @@ export const getActiveBudgetCategoriesApi = async (token: string, budgetId: stri
                 Authorization: `Bearer ${token}`,
             },
         });
+        console.log(response.data);
+
         // toast.success(response.data.message);
         return response.data.data; // Return the active categories
     } catch (error: any) {
@@ -170,13 +166,15 @@ export const getActiveBudgetCategoriesApi = async (token: string, budgetId: stri
 // Function to get budget distribution by budget ID
 export const getBudgetDistributionApi = async (token: string, budgetId: string) => {
     try {
+        console.log(budgetId);
+
         const response = await api.get(`budgets/${budgetId}/distribution`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
         console.log(response.data);
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
         return response.data.data; // Return the budget distribution data
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");

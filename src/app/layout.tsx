@@ -17,14 +17,13 @@ export default function RootLayout({
       <Head>
         <link rel='icon' sizes='' href='/icon.ico?e17e014ad5625454' />
       </Head>
-      <body className="font-aeonik">
+      <body className="font-aeonik bg-white  flex  justify-center min-h-screen   ">
         <NextUIProvider>
-          <Toaster
-            position="top-right"
-            reverseOrder={false}
-          />
+          <Toaster position="top-right" reverseOrder={false} />
           <Providers>
-            {children}
+            <div className=" w-[100vw] max-w-[500px] bg-white  ">
+              {children}
+            </div>
           </Providers>
         </NextUIProvider>
 

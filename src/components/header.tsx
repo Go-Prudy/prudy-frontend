@@ -11,7 +11,7 @@ type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   light?: boolean;
 };
 
-const Header = ({ title, light = true, link = '/', ...props }: HeaderProps) => {
+const Header = ({ title, light = true, link, ...props }: HeaderProps) => {
   const navigate = useRouter();
   const [isLight, setIsLight] = useState(light);
 

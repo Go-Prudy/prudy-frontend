@@ -100,6 +100,8 @@ export const fetchAccountTransactionsApi = async (
                 page,
             },
         });
+        console.log(response.data);
+
         return response.data.data; // Assuming transaction data is in `data`
     } catch (error: any) {
         console.error("Error fetching account transactions:", error);
@@ -122,7 +124,7 @@ export const syncAccountTransactionsApi = async (
         });
         console.log(response.data);
 
-        toast.success(response.data?.message)
+        // toast.success(response.data?.message)
         return response.data.data; // Assuming the synced transaction data is in `data`
     } catch (error: any) {
         console.error("Error syncing account transactions:", error);

@@ -108,7 +108,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-[100vw]  "
+                className="max-w-[500px]  "
             >
                 <Header link={`/profile`} title="Create new budget" />
                 <div className=' px-[24px] gap-[16px] w-full border-b-1 border-b-[#F7F7F9] py-[8.5px]  flex justify-center'>

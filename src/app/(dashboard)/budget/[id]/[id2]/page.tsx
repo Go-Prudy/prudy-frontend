@@ -11,7 +11,7 @@ import { GoChevronRight } from 'react-icons/go';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { getActiveBudgetCategoriesApi, getAllBudgetCategoriesApi, getCategoryExpenses, getSingleBudgetApi, RecordExpenseApi } from '@/app/services/BudgetService';
-import { ManualData } from '@/app/Types';
+import { Expense, BudgetCategory, ExpenseResponse, ManualData } from '@/app/Types';
 
 // Utility function to format date
 const formatDate = (dateString: string): string => {
@@ -24,61 +24,156 @@ const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('en-US', options).replace(/(\d{1,2})(st|nd|rd|th)/, '$1');
 };
 
-const Page = ({ params }: { params: { id: string, id2: string } }) => {
-
-
-
-
-
-
-    type Expense = {
-        name: string;
-        date: string; // Original format e.g., "2024-09-01"
-        time: string; // Time in format "hh:mm AM/PM"
-        amount: number; // The actual amount of the expense
-    };
-
-
-
+const Page = ({ params }: { params: { id: string; id2: string } }) => {
     const queryClient = useQueryClient();
-
     const { authenticatedUser } = useAuthentication();
 
-    const [showRecordModal, setShowRecordModal] = useState(false)
-    const [showAddManual, setShowAddManual] = useState(false)
+    // State management
+    const [showRecordModal, setShowRecordModal] = useState(false);
+    const [showAddManual, setShowAddManual] = useState(false);
     const [manualData, setManualData] = useState<ManualData>({
         budgetCategoryId: params.id,
         amount: 0,
         narration: '',
-        date: ''
+        date: new Date().toISOString().split('T')[0] // Default to today's date
     });
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-    // Handle "See All" button click
-    const handleSeeAll = () => {
-        // Redirect to a page showing all expenses or open a modal, etc.
-        alert("See all expenses clicked");
-    };
+    // Add after state declarations
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-
-        setManualData((prevData) => ({
-            ...prevData,
-            [name]: name === 'amount' ? parseFloat(value.replace(/,/g, '')) || 0 : value, // Parse numeric value for `amount`
+        setManualData(prev => ({
+            ...prev,
+            [name]: name === 'amount' ? parseFloat(value.replace(/,/g, '')) || 0 : value,
         }));
     };
 
+    // Queries
+    const {
+        data: singleBudgetData,
+        isPending: singleBudgetStatus,
+    } = useQuery({
+        queryKey: ['singleBudgetData', params.id],
+        queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
+        enabled: !!authenticatedUser?.token && !!params.id,
+    });
 
+    const {
+        data: expenses,
+    } = useQuery<ExpenseResponse>({
+        queryKey: ['categoryExpenses', params.id, params.id2],
+        queryFn: () => getCategoryExpenses(params.id, params.id2, authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token && !!params.id && !!params.id2,
+    });
 
+    // Optimistic update mutation
+    const RecordExpenseMutation = useMutation({
+        mutationFn: (expenseData: Partial<Expense>) =>
+            RecordExpenseApi(params.id, params.id2, expenseData, authenticatedUser?.token ?? ''),
+        onMutate: async (newExpense) => {
+            // Close modal immediately
+            setShowAddManual(false);
+            setShowRecordModal(false);
 
+            // Cancel outgoing refetches to prevent race conditions
+            await queryClient.cancelQueries({ queryKey: ['categoryExpenses', params.id, params.id2] });
+            await queryClient.cancelQueries({ queryKey: ['singleBudgetData', params.id] });
 
+            // Snapshot previous values
+            const previousExpenses = queryClient.getQueryData<ExpenseResponse>(
+                ['categoryExpenses', params.id, params.id2]
+            );
+            const previousBudget = queryClient.getQueryData<any>(['singleBudgetData', params.id]);
 
+            // Optimistically update expenses
+            const optimisticExpense: Expense = {
+                uid: 'temp-' + Date.now(),
+                narration: newExpense.narration || '',
+                amount: newExpense.amount || 0,
+                date: manualData.date + 'T00:00:00.000Z',
+                time: new Date().toLocaleTimeString(),
+            };
 
+            // Update cache with optimistic data
+            queryClient.setQueryData<ExpenseResponse>(
+                ['categoryExpenses', params.id, params.id2],
+                (old) => ({
+                    ...old!,
+                    data: {
+                        ...old!.data,
+                        docs: [optimisticExpense, ...(old?.data.docs || [])].filter(
+                            // Prevent duplicates by checking narration and amount
+                            (expense, index, self) =>
+                                index === self.findIndex(e =>
+                                    e.narration === expense.narration &&
+                                    e.amount === expense.amount
+                                )
+                        ),
+                    },
+                })
+            );
 
+            // Optimistically update budget amounts
+            queryClient.setQueryData(['singleBudgetData', params.id], (old: any) => {
+                const updatedCategories = old.budgetCategories.map((cat: BudgetCategory) => {
+                    if (cat.uid === params.id2) {
+                        const newAmountSpent = cat.amountSpent + (newExpense.amount || 0);
+                        const newAmountLeft = cat.amountAllocated - newAmountSpent;
+                        return {
+                            ...cat,
+                            amountSpent: newAmountSpent,
+                            amountLeft: newAmountLeft,
+                        };
+                    }
+                    return cat;
+                });
+                return { ...old, budgetCategories: updatedCategories };
+            });
 
+            return { previousExpenses, previousBudget };
+        },
+        onError: (err, newExpense, context) => {
+            // Revert optimistic updates on error
+            if (context?.previousExpenses) {
+                queryClient.setQueryData(
+                    ['categoryExpenses', params.id, params.id2],
+                    context.previousExpenses
+                );
+            }
+            if (context?.previousBudget) {
+                queryClient.setQueryData(['singleBudgetData', params.id], context.previousBudget);
+            }
+        },
+        onSettled: () => {
+            // Refetch to ensure server state
+            queryClient.invalidateQueries({ queryKey: ['categoryExpenses', params.id, params.id2] });
+            queryClient.invalidateQueries({ queryKey: ['singleBudgetData', params.id] });
+        },
+    });
 
+    const handleAddManually = async () => {
+        if (!validateInputs()) return;
 
-    const [errors, setErrors] = useState<any>({});
-    const buttonRef = useRef(null);
+        const expenseData = {
+            amount: manualData.amount,
+            narration: manualData.narration,
+            date: manualData.date,
+        };
+
+        try {
+            await RecordExpenseMutation.mutateAsync(expenseData);
+            setManualData({
+                budgetCategoryId: params.id,
+                amount: 0,
+                narration: '',
+                date: new Date().toISOString().split('T')[0]
+            });
+            setShowAddManual(false);
+            setErrors({});
+        } catch (error) {
+            console.error("Error submitting expense:", error);
+        }
+    };
 
     // Validation function to check inputs
     const validateInputs = () => {
@@ -98,31 +193,6 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     };
 
     const {
-        data: singleBudgetData = [],
-        isPending: singleBudgetStatus,
-        refetch: refetchBudget,
-    } = useQuery({
-        queryKey: ['singleBudgetData' + params.id],
-        queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', params.id),
-        enabled: !!authenticatedUser?.token && !!params.id,
-        refetchOnWindowFocus: true,
-    });
-    console.log(singleBudgetData);
-
-
-    const {
-        data: expenses = [],
-        isLoading,
-        error,
-        refetch: refetchExpenses,
-    } = useQuery({
-        queryKey: ['categoryExpenses', params.id, params.id2],
-        queryFn: () => getCategoryExpenses(params.id, params.id2, authenticatedUser?.token ?? ''),
-        enabled: !!authenticatedUser?.token && !!params.id && !!params.id2,
-        refetchOnWindowFocus: true,
-    });
-
-    const {
         data: AllBudgetCategories = [],
         isLoading: isAllBudegetLoading,
         error: AllBudgetCategoriesError,
@@ -135,61 +205,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
 
     console.log(AllBudgetCategories);
 
-
     console.log(expenses);
-
-
-    const RecordExpenseMutation = useMutation({
-        mutationFn: (expenseData) => RecordExpenseApi(params.id, params.id2, expenseData, authenticatedUser?.token ?? '',),
-        onSuccess: (data) => {
-            setManualData({ narration: '', budgetCategoryId: params.id, amount: 0, date: '' }); // Reset the form
-            setShowAddManual(false); // Close the modal
-            setErrors({});
-
-            // Revalidate and force fetch
-            queryClient.invalidateQueries({
-                queryKey: ['categoryExpenses', params.id, params.id2],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ['singleBudgetData' + params.id],
-            });
-
-            // Explicit refetch
-            refetchExpenses();
-            refetchBudget();
-        },
-        onError: (error) => {
-            console.log(error);
-        },
-    });
-
-    const handleAddManually = async () => {
-        // First, validate inputs before proceeding
-        const isValid = validateInputs();
-
-        if (!isValid) {
-            // Optionally, you can show an alert or handle errors in the UI
-            console.log("Form validation failed:", errors);
-            return; // Stop execution if validation fails
-        }
-
-        try {
-            // Prepare the data for submission
-            const expenseData: any = {
-                amount: manualData.amount,
-                narration: manualData.narration,
-                date: new Date().toISOString(),
-            };
-
-            console.log(expenseData);
-
-            // Proceed with mutation only if validation is successful
-            await RecordExpenseMutation.mutateAsync(expenseData);
-
-        } catch (error) {
-            console.log("Error submitting expense:", error);
-        }
-    };
 
     const currentBudget =
         singleBudgetData?.budgetCategories?.filter(
@@ -200,7 +216,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
     const { amountLeft = 0, amountAllocated = 0, amountSpent = 0 } =
         currentBudget[0] || {};
 
-
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
     return (
         <div className=' relative'
@@ -210,6 +226,7 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                 animate={{ x: 0 }}      // Move to the normal position
                 exit={{ x: '-100%' }}   // Optionally, move out to the left when unmounted
                 transition={{ type: 'tween', stiffness: 600 }}  // Customize the animation
+                className=' min-h-[100vh] '
             >
                 <div
 
@@ -258,18 +275,22 @@ const Page = ({ params }: { params: { id: string, id2: string } }) => {
                         <div className='w-full'>
                             <div className='flex mb-[16px] justify-between items-center w-full'>
                                 <h1 className='text-[18px] font-[500] capitalize text-[#252340]'>{currentBudget[0]?.name || 'budget name'} Expenses</h1>
-                                <button className='font-[500] text-[12px] text-[#514F6E]' onClick={handleSeeAll}>See All</button>
+
                             </div>
 
                             <ul className='flex flex-col gap-[16px] w-full'>
                                 {expenses?.data?.docs?.map((expense: any, index: number) => (
-                                    <li key={expense.uid} className={`pb-[16px] ${index === expenses.length - 1 ? '' : 'border-b-2'} flex justify-between w-full`}>
+                                    <li key={expense.uid} className={`pb-[16px] ${index === expenses?.data?.docs?.length - 1 ? '' : 'border-b-2'} flex justify-between w-full`}>
                                         <div className='flex flex-col gap-[8px]'>
                                             <h1 className='text-[#2D2D2D] text-[14px] font-[500]'>{expense.narration}</h1>
                                             <div className='flex text-[12px] text-[#575757] justify-around items-center'>
                                                 <h1>{formatDate(expense.date)}</h1>
                                                 <span className='h-[16px] bg-[#EFEFF0] w-[1px] mx-[8px]' />
-                                                <h1>{expense.time}</h1>
+                                                <h1>{new Date(expense.date).toLocaleTimeString('en-US', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    hour12: true
+                                                })}</h1>
                                             </div>
                                         </div>
                                         <h1 className='text-[#2D2D2D] text-[14px] font-[500]'>₦ {expense.amount.toLocaleString()}</h1>

@@ -42,7 +42,7 @@ const Page = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-[100vw]">
+            className="max-w-[500px] h-[100vh] ">
             <Header link={'/signup/verify'} title="Remember passcode" />
             <div className="px-6 py-10">
                 <div className="w-full">
@@ -81,7 +81,7 @@ const Page = () => {
 
             {/* MODAL */}
 
-            {showModal && <div className=' fixed top-0 h-[100vh] w-[100vw]  bg-[#2b2b2b54] backdrop-blur-sm justify-center flex flex-col items-center '>
+            {showModal && <div className=' fixed top-0 h-[100vh] max-w-[500px]  bg-[#2b2b2b54] backdrop-blur-sm justify-center flex flex-col items-center '>
                 <div className=' text-center bg-white rounded-[40px] p-[40px] h-[341px] flex flex-col justify-center items-center gap-[19px] w-[90%]'>
 
                     <Image src={succes} alt={'success'} className=' size-[80px] ' width="1000" height="1000" />

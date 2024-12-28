@@ -8,7 +8,7 @@ import Logo2 from '@/images/logo2.webp';
 const Slide1 = () => {
     return (
         <div className=' relative  '>
-            <div className='  bg-gradient-to-b fixed h-[100vh] flex justify-center items-center w-[100vw] top-0 to-[#66C227]  from-[#2A860A] '>
+            <div className='  bg-gradient-to-b fixed w-[100vw] h-[100vh] flex justify-center items-center max-w-[500px] top-0 to-[#66C227]  from-[#2A860A] '>
                 <motion.div
                     initial={{ opacity: 1, }}
                     animate={{ opacity: 0 }}
@@ -19,7 +19,7 @@ const Slide1 = () => {
             </div>
             <div
 
-                className=" m-auto fixed top-0 left-0 h-[100vh] w-[100vw] grid place-content-center  rounded-full   "
+                className=" m-auto fixed top-0 left-0  w-[100vw] h-[100vh] grid place-content-center  rounded-full   "
             >
                 <motion.div
                     initial={{ opacity: 0, height: '20rem', width: '20rem', borderRadius: '200rem' }}

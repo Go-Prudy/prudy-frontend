@@ -56,7 +56,7 @@ const Page = () => {
 
 
     return (
-        <div className="bg-[#FAFAFA] w-full h-screen">
+        <div className="bg-[#FAFAFA]  w-[100vw] max-w-[500px] h-screen">
             <Header link={`/profile`} title="Passcode Settings" />
 
             <div className="mt-[24px] flex text-[#2D2D2D] flex-col w-full px-[24px]">
