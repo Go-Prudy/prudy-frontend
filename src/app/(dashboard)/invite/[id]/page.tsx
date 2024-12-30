@@ -3,7 +3,7 @@ import Slide1 from '@/components/home/slides/Slide1'
 import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
 
-const page = () => {
+const Page = () => {
     const navigate = useRouter()
 
     useEffect(() => {
@@ -17,4 +17,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page

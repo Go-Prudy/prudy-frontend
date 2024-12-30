@@ -3,6 +3,9 @@ import Header from '@/components/header'
 import React, { useState } from 'react'
 import { motion } from 'framer-motion';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import { getAllBudgetCategoriesApi } from '@/app/services/BudgetService';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useQuery } from '@tanstack/react-query';
 
 const Page = () => {
 
@@ -22,9 +25,35 @@ const Page = () => {
         { name: 'Health', percentage: 10, color: '#9575CD' },    // Purple
     ];
 
-
+    const { authenticatedUser } = useAuthentication();
     const [showEditCategory, setShowEditCategory] = useState<boolean>(false)
     const [EditCategory, setEditCategory] = useState<any>({})
+
+    const { data: listofCategories = [], isPending: listofCategoriesisPending } = useQuery({
+        queryKey: ['listofCategories'],
+        queryFn: () => getAllBudgetCategoriesApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token,
+        refetchOnWindowFocus: true,
+    });
+
+    console.log(listofCategories);
+
+    // Loading Skeleton Component
+    const LoadingSkeleton = () => (
+        <div className="flex flex-col gap-[24px]  w-full justify-center">
+            {Array.from({ length: 5 }).map((_, index) => (
+                <div
+                    key={index}
+                    className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0] animate-pulse"
+                >
+                    <div className="flex gap-[8px] items-center">
+                        <div className="inline-block w-[18px] h-[12px] rounded-full bg-gray-300"></div>
+                        <div className="h-[14px] w-[100px] bg-gray-300 rounded"></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     const handleSaveCategory = () => {
         setShowEditCategory(!showEditCategory)
@@ -32,7 +61,7 @@ const Page = () => {
 
     }
     return (
-        <div className=' relative h-screen'
+        <div className='  w-[100vw] max-w-[500px] relative h-screen'
         >
             <motion.div
                 initial={{ x: '100%' }}
@@ -43,29 +72,31 @@ const Page = () => {
                 <motion.div className=' relative'
                 >
                     <Header link={`/profile`} title="Budget Categories" />
+                    <h1 className=' mt-[18px] mb-[14px] ml-[24px] text-[16px] font-[500]'>All Categories</h1>
                     <div className='flex flex-col gap-[24px] p-[24px] w-full justify-center'>
-                        {budgetCategories.map((category, index) => (
-                            <div
-                                key={index}
-                                onClick={() => {
-                                    setEditCategory(category)
-                                    setShowEditCategory(!showEditCategory)
-                                }}
-                                className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px]  border-[1px] border-[#EFEFF0] "
-                            >
-                                {/* Category Name */}
-                                <div className="flex gap-[8px] items-center">
-                                    <span
-                                        className="inline-block size-[12px] rounded-full "
-                                        style={{ backgroundColor: category.color }}
-                                    ></span>
-                                    <span className="text-[#474747] text-[14px] font-medium">{category.name}</span>
+                        {listofCategoriesisPending ? (
+                            <LoadingSkeleton />
+                        ) : (
+                            listofCategories.map((category: any, index: any) => (
+                                <div
+                                    key={category.uid || index}
+                                    onClick={() => {
+                                        setEditCategory(category);
+                                        setShowEditCategory(!showEditCategory);
+                                    }}
+                                    className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
+                                >
+                                    {/* Category Name */}
+                                    <div className="flex gap-[8px] items-center">
+                                        <span
+                                            className="inline-block w-[12px] h-[12px] rounded-full"
+                                            style={{ backgroundColor: category.color }}
+                                        ></span>
+                                        <span className="text-[#474747] text-[14px] font-medium">{category.name}</span>
+                                    </div>
                                 </div>
-
-                                {/* Percentage */}
-                                <span className="text-[#474747] text-[14px]">{category.percentage}%</span>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </motion.div>
             </motion.div>

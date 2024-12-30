@@ -15,6 +15,7 @@ import track1 from '@/images/note1.webp';
 import status from '@/images/status.webp';
 import status1 from '@/images/status1.png';
 import profile from '@/images/profile-circle.png';
+import closeicon from '@/images/closeicon.png';
 import profile1 from '@/images/profile-circle 2.png';
 import setting from '@/images/setting-3.png';
 import setting1 from '@/images/setting-3 2.png';
@@ -82,7 +83,7 @@ const BudgetPageHeader = () => {
     };
 
     return (
-        <div className={`z-[20] fixed top-0 pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-white w-full items-center pb-[16px] transition-all duration-300 ${scrolled ? 'scrolled-bg' : 'bg-[#00000064]'}`}>
+        <div className={`z-[30] w-[100vw] max-w-[500px] fixed top-0 pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-white items-center pb-[16px] transition-all duration-300 ${scrolled ? 'scrolled-bg' : 'bg-[#00000064]'}`}>
             {/* Left Section: Profile */}
             <div className='text-white flex gap-[8px] items-start'>
                 <div className={`rounded-full ${!userData.profile.profilePhotoUrl ? 'p-1 border border-[white]' : 'p-0'} `}>
@@ -116,7 +117,7 @@ const BudgetPageHeader = () => {
 
             <div className={` fixed w-full ${!menuOpen ? 'left-[-500rem]' : 'left-0'} duration-100 transition-all ease-in  top-0 h-[100vh] z-50 `}>
                 <div className='relative w-full'>
-                    <div className='bg-white w-[295px] h-[100vh] overflow-y-scroll z-10 relative py-[48px] px-[24px] transition-transform duration-300' style={{ transform: menuOpen ? 'translateX(0)' : 'translateX(-100%)' }}>
+                    <div className='bg-white w-[295px] h-[100vh] overflow-y-scroll z-[150] relative py-[48px] px-[24px] transition-transform duration-300' style={{ transform: menuOpen ? 'translateX(0)' : 'translateX(-100%)' }}>
                         <div className='flex items-start gap-[8px]'>
                             <div className={`flex items-center rounded-full ${!userData.profile.profilePhotoUrl ? 'p-1 border border-[#101010]' : 'p-0'}  `}>
                                 {userData.profile.profilePhotoUrl ?
@@ -150,9 +151,9 @@ const BudgetPageHeader = () => {
                                 {currentRoute === '/track' ? <Image className='size-[24px]' alt='track' src={track1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='track' src={track} width={1000} height={1000} />}
                                 Track
                             </Link>
-                            <Link href='/analysis' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/analysis' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
-                                {currentRoute === '/analysis' ? <Image className='size-[24px]' alt='analysis' src={status1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='analysis' src={status} width={1000} height={1000} />}
-                                Analysis
+                            <Link href='/analytics' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/analytics' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
+                                {currentRoute === '/analytics' ? <Image className='size-[24px]' alt='analytics' src={status1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='analytics' src={status} width={1000} height={1000} />}
+                                Analytics
                             </Link>
                             <Link href='/profile' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/profile' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
                                 {currentRoute === '/profile' ? <Image className='size-[24px]' alt='profile' src={profile1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={profile} width={1000} height={1000} />}
@@ -172,8 +173,12 @@ const BudgetPageHeader = () => {
                             </button>
                         </div>
                     </div>
-                    <div className='absolute top-0 left-0 h-[100vh] bg-[#6262628d] backdrop-blur-3xl w-[100vw]' onClick={toggleMenu} />
-                    <Image className=' size-[48px] top-[24px] absolute right-[24px] cursor-pointer' alt='close' width={1000} height={1000} src={close} onClick={toggleMenu} />
+                    <div className=' absolute z-[24] top-0 left-0 h-[100vh] bg-[#2828286e] backdrop-blur-3xl w-[500px] ' onClick={toggleMenu} />
+                    {
+                        !toggleMenu ?
+                            <Image className=' size-[48px] top-[24px] z-[50] absolute right-[24px] cursor-pointer' alt='close' width={1000} height={1000} src={close} onClick={toggleMenu} /> :
+                            <Image className=' size-[48px] top-[24px] z-[50] absolute right-[24px] cursor-pointer' alt='close' width={1000} height={1000} src={closeicon} onClick={toggleMenu} />
+                    }
                 </div>
             </div>
 

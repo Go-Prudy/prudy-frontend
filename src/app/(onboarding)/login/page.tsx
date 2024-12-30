@@ -69,7 +69,7 @@ const LoginPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-[100vw]">
+      className="max-w-[500px] h-[100vh] ">
       <Header link='' title="Sign in" />
       <form onSubmit={handleSubmit}>
         <div className="px-6 py-[24px]">

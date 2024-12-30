@@ -122,18 +122,25 @@ const Page = () => {
 
 
     useEffect(() => {
-        if (selectedCurrecy) {
-            const data: any = {
-                countryCode: selectedCurrecy.abbreviation
-            }
-            handleChangeCurrency(data)
+        if (getAllCurrenciesData?.length > 0 && !selectedCurrecy) {
+            const data = { countryCode: getAllCurrenciesData[0]?.abbreviation };
+            console.log("Default Currency Change:", data);
+            handleChangeCurrency(data);
         }
-    }, [selectedCurrecy])
+    }, [getAllCurrenciesData]);
+
+    useEffect(() => {
+        if (selectedCurrecy?.currency) {
+            const data = { countryCode: selectedCurrecy?.currency };
+            console.log("Selected Currency Change:", data);
+            handleChangeCurrency(data);
+        }
+    }, [selectedCurrecy]);
 
 
 
     return (
-        <div>
+        <div className='  w-[100vw] max-w-[500px]'>
             <Header link={`/profile`} title="Currency Settings" />
             <div className=' px-[24px]'>
                 <div className=' bg-[#F7F7F9] mt-[16px]  p-[8px] rounded-[12px]  border flex gap-[8px] border-[#EFEFF0] '>

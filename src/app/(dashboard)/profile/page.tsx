@@ -18,6 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuthentication } from "@/app/store/AuthStore";
 import { IAuthenticatedUser } from "@/app/Types";
 import { useEffect, useState } from "react";
+import Link from 'next/link';
 
 export default function Page() {
 
@@ -31,7 +32,6 @@ export default function Page() {
 
   const toolItems: ToolItem[] = [
     { title: 'Budget Categories', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={budgetIcon} />, category: 'TOOLS', link: '/budgets/categories' },
-    { title: 'Collaborators', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={collaborationIcon} />, category: 'TOOLS', link: '/collaborators' },
     { title: 'Reminders', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={reminderIcon} />, category: 'TOOLS', link: '/reminders' },
     { title: 'Subscription', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={subscriptionIcon} />, category: 'TOOLS', link: '/subscription' },
     { title: 'Reports', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={reportIcon} />, category: 'TOOLS', link: '/reports' },
@@ -84,37 +84,37 @@ export default function Page() {
     }
   }, [authenticatedUser]);
   return (
-    <div className="bg-[#FAFAFA] w-full h-screen">
+    <div className="bg-[#FAFAFA]  w-[100vw] max-w-[500px]  h-screen">
       <Header2 title={'Profile'} />
-      <div onClick={() => navigation.push('/profile/user')} className=" cursor-pointer pt-[90px] px-[24px] pb-[24px]">
-        <div className=" text-[hsl(0,0%,100%)] p-[24px] flex justify-between items-center w-full rounded-[20px]  " style={{
-          background: 'linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)',
-        }}>
-          <div className='flex  items-center  gap-[8px]'>
-            <div className={`flex items-center rounded-full   border-1 border-[#FFFFFF]   ${!userData.profile.profilePhotoUrl ? 'p-1' : 'p-0'} `}>
-              {userData.profile.profilePhotoUrl ?
-                <Image
-                  src={userData.profile.profilePhotoUrl}
-                  alt="profile"
-                  width={1000}
-                  height={1000}
-                  className=" size-[52px] rounded-full object-cover"
-                />
-                :
-                <BsPerson className='text-[#FFFFFF] size-[52px]' />
-              }
-
+      <div onClick={() => navigation.push('/profile/user')} className="cursor-pointer pt-[90px] px-[24px] pb-[24px]">
+        <Link href="/profile/user" prefetch={true}>
+          <div className="text-[hsl(0,0%,100%)] p-[24px] flex justify-between items-center w-full rounded-[20px]" style={{
+            background: 'linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)',
+          }}>
+            <div className='flex items-center gap-[8px]'>
+              <div className={`flex items-center rounded-full border-1 border-[#FFFFFF] ${!userData.profile.profilePhotoUrl ? 'p-1' : 'p-0'}`}>
+                {userData.profile.profilePhotoUrl ?
+                  <Image
+                    src={userData.profile.profilePhotoUrl}
+                    alt="profile"
+                    width={1000}
+                    height={1000}
+                    className="size-[52px] rounded-full object-cover"
+                  />
+                  :
+                  <BsPerson className='text-[#FFFFFF] size-[52px]' />
+                }
+              </div>
+              <div className='flex gap-[4px] flex-col'>
+                <h1 className='font-[500] text-[#FFFFFF] leading-[24px]'>
+                  {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
+                </h1>
+                <Image className='w-[74px] h-[24px]' alt='premium' width={1000} height={1000} src={premium} />
+              </div>
             </div>
-            <div className='flex gap-[4px] flex-col'>
-              <h1 className='font-[500] text-[#FFFFFF] leading-[24px]'>
-                {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
-
-              </h1>
-              <Image className=' w-[74px] h-[24px]' alt='premium' width={1000} height={1000} src={premium} />
-            </div>
+            <BsChevronRight size={24} />
           </div>
-          <BsChevronRight size={24} />
-        </div>
+        </Link>
       </div>
 
 

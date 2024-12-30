@@ -22,7 +22,7 @@ const DeleteSuccessModal: React.FC<IProps> = ({
     return (
         <div
             onClick={() => setShowModal(false)}
-            className='fixed bg-[#00000095] px-[24px] grid place-content-center h-[100vh] w-full z-[50] top-0'
+            className='fixed bg-[#00000095] px-[24px] grid place-content-center h-[100vh] max-w-[500px] w-full z-[50] top-0'
         >
             <div
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal

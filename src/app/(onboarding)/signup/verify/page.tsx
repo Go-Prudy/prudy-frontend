@@ -130,7 +130,7 @@ const VerifyOtpPage = () => {
       initial={{ opacity: 0, y: 90 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }} className="w-full">
+      transition={{ duration: 0.3 }} className=" w-full min-h-[100vh] ">
       <Header link={'/signup/'} title="Create account" />
       <form id="otp-form" className="pt-10 px-6" onSubmit={e => e.preventDefault()}>
         <p className="font-medium text-[#2D2D2D] text-xl mb-6">

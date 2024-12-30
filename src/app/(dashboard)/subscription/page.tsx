@@ -1,15 +1,20 @@
 'use client'
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import React, { ReactNode, useState } from 'react';
-import { BsChevronRight, BsDot, BsX } from 'react-icons/bs';
+import { BsChevronDown, BsChevronRight, BsChevronUp, BsDot, BsX } from 'react-icons/bs';
 import { motion } from 'framer-motion';
 import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps } from "@nextui-org/react";
 import paymnetIcon from '@/images/Payment method icon.png'
+import CheckcircleIcon from '@/images/Check circle.png'
 import subtract1 from '@/images/Subtract.png'
 import subtract2 from '@/images/Subtract (1).png'
+import mono1 from '@/images/mono1.png'
 import Image from 'next/image';
 import DeleteSuccessModal from '../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
+import { Select, SelectItem, Avatar } from "@nextui-org/react";
+import { Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
+
 
 interface CardFormValues {
     nameOnCard: string;
@@ -36,6 +41,7 @@ const Page = () => {
     );
     const [showMakePayment, setShowMakePayment] = useState<boolean>(false)
     const [showSubscriptionPlan, setShowSubscriptionPlan] = useState<boolean>(false)
+    const [subscriptionPlan, setSubscriptionPlan] = useState<boolean>(false)
     const [selectedPlan, setSelectedPlan] = React.useState<string>("Premium");
     const [formValues, setFormValues] = useState<CardFormValues>({
         nameOnCard: '',
@@ -44,7 +50,15 @@ const Page = () => {
         cvv: '',
     });
     const [showSuccessfullPayment, setShowSuccessfullPayment] = useState<boolean>(false)
+    const [selectedOption, setSelectedOption] = useState("Monthly");
+    const options = ["Monthly", "Quarterly", "Yearly"];
+    const [isOpen, setIsOpen] = useState(false);
+    const [plans, setPlans] = useState(['Monthly', 'Quarterly', 'Yearly']);
 
+    const handleSelect = (option: any) => {
+        setSelectedOption(option);
+        setIsOpen(false); // Close the popover after selection
+    };
     const navigation = useRouter()
     const handleChangeInMakePaymentForm = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -87,12 +101,86 @@ const Page = () => {
         duration?: string; // Optional property for duration
         description: ReactNode; // Description should be ReactNode
         children: ReactNode; // Radio button label
+        header1: string;
+        header2: string;
     }
 
 
 
     // Custom Radio button implementation
     const CustomRadio = (props: any) => {
+        const {
+            Component,
+            children,
+            isSelected,
+            description,
+            getBaseProps,
+            getWrapperProps,
+            getInputProps,
+            getLabelProps,
+            getControlProps,
+
+        } = useRadio(props);
+
+        const { duration, header1,
+            header2,
+            header3,
+            label,
+            labelText } = props;
+
+        // Combine description and duration into a single node
+        const combinedDescription = (
+            <div className="flex gap-[8px] text-[#575757] items-center">
+                <span className="text-[16px] font-[500]">{description}</span>
+                {duration && <span className='text-[12px]'>{duration}</span>} {/* Only render duration if it exists */}
+            </div>
+        );
+
+        return (
+            <Component
+                {...getBaseProps()}
+                className={cn(
+                    "group flex flex-col p-4 rounded-lg border-1 transition-all",
+                    "w-full cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4",
+                    isSelected ? "border-[#66C227] bg-[#ECFDDC]" : "bg-[#F7F7F9] border-[#EFEFF0]"
+                )}
+            >
+                <VisuallyHidden>
+                    <input {...getInputProps()} />
+                </VisuallyHidden>
+
+                <div className=' flex w-full items-start '>
+                    <div className="flex flex-col w-full  ">
+                        <div className={`flex justify-between  `}>
+                            <div >
+                                <h1 className='text-[#66C227] font-[700] text-[14px]'>{header1} {label && <span className={`px-[8px]
+                                 ${isSelected ? 'text-[#ffffff] bg-[#66C227] ' : 'text-black bg-white'}    ml-[8px] py-[2px] text-[10px]  rounded-[12px] font-[400]`}>{labelText}</span>}</h1>
+                                <h1 className='mt-[8px] flex items-start font-[700] text-[24px] leading-[24px]'>{header2} <span className=' text-[12px] font-[400] text-[#575757] ml-[8px]'>{header3}</span></h1>
+                            </div>
+                            <div  {...getWrapperProps()}>
+                                <div {...getControlProps()} />
+                            </div>
+                        </div>
+                        <div>
+                            <div {...getLabelProps()} className="text-[#575757] mt-[12px] w-full bg-[#FFFFFF] rounded-b-[12px] text-[12px] py-[12px]   px-[4px] ">{children}</div>
+                            {combinedDescription} {/* Use the combined description node */}
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+            </Component>
+        );
+    };
+
+
+
+
+    // Custom Radio button implementation
+    const CustomRadioForSubscription = (props: any) => {
         const {
             Component,
             children,
@@ -141,7 +229,6 @@ const Page = () => {
         );
     };
 
-
     const handleSubscribe = () => {
         setShowSubscriptionPlan(!showSubscriptionPlan)
         setShowMakePayment(!showMakePayment)
@@ -150,19 +237,20 @@ const Page = () => {
     const handleMakePayment = () => {
         console.log('Form submitted:', formValues);
         // Add your form submission logic here
-        setShowMakePayment(!showMakePayment)
-        setShowSuccessfullPayment(!showSuccessfullPayment)
+        setSubscriptionPlan(!subscriptionPlan)
+        // setShowMakePayment(!showMakePayment)
+        // setShowSuccessfullPayment(!showSuccessfullPayment)
 
     }
 
     return (
-        <div className=' relative  h-[844px] overflow-x-hidden' style={{
+        <div className=' relative  w-[100vw] max-w-[500px]   h-[844px] overflow-x-hidden' style={{
             background: 'linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)',
         }}>
 
-            <div className=' w-full py-[22px] px-[24px]'
+            <div className='  relative py-[22px] px-[24px]'
             >
-                <div className=' absolute top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
+                <div className='  fixed lg:absolute top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
                     <Image
                         src={subtract1}
                         className=" w-full h-full  "
@@ -170,8 +258,8 @@ const Page = () => {
                         alt="payment icon"
                     />
                 </div>
-                <div className=' absolute z-1 bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-1 h-[280.28px] '>
-                    <Image src={subtract2} className="h-full w-full " height={1000} width={1000} alt="payment icon" />
+                <div className=' fixed lg:absolute bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
+                    <Image src={subtract2} className="h-full z-[-1] w-full " height={1000} width={1000} alt="payment icon" />
                 </div>
 
                 {/* Header */}
@@ -183,66 +271,81 @@ const Page = () => {
                     <h1 className='mx-auto relative z-2 text-white text-center text-[18px] font-[500]'>Subscription</h1>
                 </div>
                 <div>
-                    <h1 className='text-[36px] z-2 relative mb-[16px] text-center text-white font-[500] leading-[40px]'>Start your 3 days <br /> free trial</h1>
-                    <p className='flex gap-[8px] py-[8px] px-[76px] border-[#FFFFFFCC] border-[0.6px] bg-[#FFFFFF33] z-2 backdrop-blur-md relative w-full text-white items-center rounded-[16px] mb-[24px]'>
-                        <span className=' z-2 relative'>3 days free</span>
-                        <span className=' z-2 relative'><BsDot /></span>
-                        <span className=' z-2 relative'>Save up to 50%</span>
+                    <h1 className='text-[36px] z-2 relative mb-[16px] text-center text-white font-[500] leading-[40px]'>Activate free trial for <br /> 30 days</h1>
+                    <p className='flex gap-[8px] py-[4px] px-[8px] mx-auto bg-[#006D00] z-2 backdrop-blur-md relative w-fit text-white items-center rounded-[16px] mb-[24px]'>
+                        2 days left
                     </p>
                 </div>
 
-                <div className='pt-[24px] mb-[56px]'>
-                    <ul className="bg-white p-[16px] rounded-[24px] ">
-                        {features.map((feature, index) => (
-                            <div key={index} className="flex items-center mb-[12px] last:mb-0">
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        checked={checkedFeatures[index]} // Set the checkbox checked state
-                                        onChange={() => handleCheckboxChange(index)} // Handle change
-                                        className={`appearance-none size-[18px] grid place-content-center rounded-md focus:ring-0 cursor-pointer ${checkedFeatures[index]
-                                            ? 'bg-[#66C227] border-none'
-                                            : 'bg-white border-[#575757] border'
-                                            }`}
-                                    />
-                                    {/* SVG tick mark to appear when checked */}
-                                    {checkedFeatures[index] && (
-                                        <svg
-                                            className="absolute inset-0 w-full h-full p-1 pointer-events-none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20"
-                                            fill="currentColor"
-                                        >
-                                            <path
-                                                fillRule="evenodd"
-                                                d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586l-2.293-2.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
-                                                clipRule="evenodd"
-                                                className="text-white"
-                                            />
-                                        </svg>
-                                    )}
+                <div className='pt-[24px] '>
+                    <div className="bg-[#F7F7F9] z-10 relative text-[#2D2D2D] text-[18px] leading-[25.2px] p-[16px] rounded-[24px] ">
+                        <div className=' items-center flex justify-between w-full'>
+                            <h1>Unstoppable 🚀</h1>
+                            <Popover isOpen={isOpen} onOpenChange={(open) => setIsOpen(!open)} placement="bottom">
+                                <PopoverTrigger>
+                                    <Button onClick={() => setIsOpen(!isOpen)} className=' bg-white font-[400] text-[14px] flex gap-[.8rem] justify-between rounded-[16px] px-[8px] py-[4px]  items-center' >
+                                        {selectedOption}
+                                        {!isOpen ?
+                                            <BsChevronDown />
+                                            :
+                                            <BsChevronUp />
+                                        }
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-2 shadow-lg">
+                                    <div className="flex flex-col">
+                                        {options.map((option) => (
+                                            <button
+
+                                                key={option}
+                                                className={`text-left px-2 py-1 hover:bg-gray-200 ${selectedOption === option ? "font-bold" : ""
+                                                    }`}
+                                                onClick={
+                                                    () => handleSelect(option)
+
+                                                }
+                                            >
+                                                {option}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div className=' bg-[#FFFFFF] mt-[12px] p-[12px] rounded-[12px] '>
+
+                            {features.map((feature, index) => (
+                                <div key={index} className="flex items-center mb-[12px] last:mb-0">
+                                    <div className="relative">
+
+                                        {/* SVG tick mark to appear when checked */}
+                                        {checkedFeatures[index] && (
+                                            <Image src={CheckcircleIcon} className="size-[16px] " height={24} width={34} alt="payment icon" />
+                                        )}
+                                    </div>
+                                    <span className="ml-[12px] text-[#575757] leading-[28px]">{feature}</span>
                                 </div>
-                                <span className="ml-[12px] text-[#575757] leading-[28px]">{feature}</span>
-                            </div>
-                        ))}
-                    </ul>
+                            ))}
+                            <button className=' bg-[#ECF7E2] rounded-[8px] mx-auto w-full text-[14px] text-[#575757] px-[24.5px] py-[12px] '>30 days free, then <span className=' font-[700] text-[16px]'>₦ 3,000</span> /monthly</button>
+                        </div>
+                        <button type="submit" className="btn w-full mt-[12px] rounded-[32px] px-[28px] py-[14px] z-2  relative bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]" onClick={() => setShowMakePayment(true)}>Continue</button>
+                    </div>
+
 
                     <div>
-                        <p className='flex flex-col mt-[24px] gap-[8px] py-[8px] px-[76px] border-[#FFFFFFCC] z-2 backdrop-blur-md relative  border-[0.6px] bg-[#FFFFFF33] text-white items-center rounded-[16px] mb-[24px]'>
-                            <span>3 days free</span>
-                            <span>then ₦ 4,500/monthly</span>
-                        </p>
-
-                        <button type="submit" className="btn w-full my-[24] rounded-[32px] px-[28px] py-[14px] z-2  relative bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]" onClick={() => setShowMakePayment(true)}>Continue</button>
 
 
-                        <button onClick={() => setShowSubscriptionPlan(!showSubscriptionPlan)} className=" text-center z-[2] relative w-full my-[24px]  text-[#FAFAFA] flex items-center justify-center gap-[5px] font-[500]">See all subscriptions <BsChevronRight /></button>
+
+
+
+                        <button onClick={() => setShowSubscriptionPlan(!showSubscriptionPlan)} className=" text-center z-[2] mb-[170px] relative w-full my-[24px]  text-[#FAFAFA] flex items-center justify-center gap-[5px] font-[500]">See all subscriptions <BsChevronRight /></button>
                     </div>
                 </div>
             </div>
 
 
-            {showSubscriptionPlan &&
+            {
+                showSubscriptionPlan &&
                 <motion.div
                     initial={{ opacity: 0, y: 90 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -309,7 +412,8 @@ const Page = () => {
 
 
 
-            {showMakePayment &&
+            {
+                showMakePayment &&
                 <motion.div
                     initial={{ opacity: 0, y: 90 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -326,86 +430,177 @@ const Page = () => {
                         close={true}
                         onClose={() => setShowMakePayment(false)}
                     >
-                        <div className="relative mt-[24px] w-full mb-4">
-                            <form
-                                className="w-full flex flex-col gap-[24px]"
-                                onSubmit={handleSubmit}
+                        <div className="relative mt-[24px]  h-[73vh] overflow-y-auto w-full mb-4">
+                            <div className='mt-[16px] p-[4px] bg-[#F7F7F9] rounded-[12px] mb-[20px] flex justify-center w-fit mx-auto'>
+                                {options.map((option: any) => (
+                                    <button onClick={() => setSelectedOption(option)} className={`${option === selectedOption && ' rounded-[12px] text-white  bg-[#66C227] '} p-[8px] `} key={option}>
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+                            <RadioGroup
+                                orientation="vertical"
+                                className=' flex flex-col w-full gap-[16px] '
+                                color='success'
+                            // onValueChange={(value) => handleBankSelect(value)}
+
                             >
-                                {/* Name on Card */}
-                                <label className="flex flex-col p-[16px] bg-[#F7F7F9] rounded-[20px] border border-[#EFEFF0] gap-[8px]" htmlFor="nameOnCard">
-                                    <h1 className="text-[12px] text-[#575757] leading-[16px]">Name on card</h1>
-                                    <input
-                                        placeholder="Enter name"
-                                        className="bg-[#ff000000] outline-none font-[500] leading-[24px]"
-                                        type="text"
-                                        name="nameOnCard"
-                                        id="nameOnCard"
-                                        value={formValues.nameOnCard}
-                                        onChange={handleChangeInMakePaymentForm}
-                                        required
-                                    />
-                                </label>
+                                <div className=' mb-[10px] flex flex-col w-full gap-[16px] '>
 
-                                {/* Card Number */}
-                                <label className="flex flex-col p-[16px] bg-[#F7F7F9] rounded-[20px] border border-[#EFEFF0] gap-[8px]" htmlFor="cardNumber">
-                                    <h1 className="text-[12px] text-[#575757] leading-[16px]">Card number</h1>
-                                    <div className="flex justify-between">
-                                        <input
-                                            placeholder="**** **** **** ****"
-                                            className="bg-[#ff000000] outline-none font-[500] leading-[24px]"
-                                            type="text"
-                                            name="cardNumber"
-                                            id="cardNumber"
-                                            autoComplete="cardNumber"
-                                            value={formValues.cardNumber}
-                                            onChange={handleChangeInMakePaymentForm}
-                                            required
-                                        />
-                                        <Image src={paymnetIcon} className="h-[24px] w-[34px]" height={24} width={34} alt="payment icon" />
-                                    </div>
-                                </label>
 
-                                {/* Expiry Date and CVV */}
-                                <div className="w-full flex gap-[24px]">
-                                    {/* Expiry Date */}
-                                    <label className="w-[159px] flex flex-col justify-center p-[16px] bg-[#F7F7F9] rounded-[20px] border border-[#EFEFF0] gap-[8px]">
-                                        <h1 className="text-[12px] text-[#575757] leading-[16px]">Expiry date</h1>
-                                        <div className="flex justify-between">
-                                            <input
-                                                className="text-[#575757] bg-[#ff000000] outline-none font-[500] leading-[24px]"
-                                                type="text"
-                                                placeholder="MM/YYYY"
-                                                name="expiryDate"
-                                                id="expiryDate"
-                                                value={formValues.expiryDate}
-                                                onChange={handleChangeInMakePaymentForm}
-                                                pattern="(0[1-9]|1[0-2])\/\d{4}" // Regex pattern to ensure valid mm/yyyy format
-                                                required
-                                            />
-                                        </div>
-                                    </label>
-
-                                    {/* CVV */}
-                                    <label className="w-[159px] flex flex-col justify-center p-[16px] bg-[#F7F7F9] rounded-[20px] border border-[#EFEFF0] gap-[8px]">
-                                        <h1 className="text-[12px] text-[#575757] leading-[16px]">CVV</h1>
-                                        <div className="flex justify-between">
-                                            <input
-                                                className="text-[#575757] bg-[#ff000000] outline-none font-[500] leading-[24px]"
-                                                type="password"
-                                                placeholder="***"
-                                                maxLength={3}
-                                                name="cvv"
-                                                id="cvv"
-                                                value={formValues.cvv}
-                                                onChange={handleChangeInMakePaymentForm}
-                                                required
-                                            />
-                                        </div>
-                                    </label>
+                                    <CustomRadio
+                                        header1='Prudy Lite 💫'
+                                        header2='Free'
+                                        className="flex w-full justify-between"
+                                        value={'free'}
+                                    >
+                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                            <li>Create smart budgets</li>
+                                            <li>3 receipt scanning monthly </li>
+                                            <li>Link 1 bank account</li>
+                                        </ul>
+                                    </CustomRadio>
+                                    {selectedOption === 'Monthly' ?
+                                        <>
+                                            <CustomRadio
+                                                header1='Money Master 💪🏽'
+                                                header2='₦ 2,500'
+                                                header3="₦ 625/week"
+                                                className="flex w-full justify-between"
+                                                value={'₦ 2,500'}
+                                                label={false}
+                                                labelText={'save 10%'}
+                                            >
+                                                <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                                    <li>Create smart budgets</li>
+                                                    <li>3 receipt scanning monthly </li>
+                                                    <li>Link 1 bank account</li>
+                                                </ul>
+                                            </CustomRadio>
+                                            <CustomRadio
+                                                header1='Unstoppable 🚀'
+                                                header2='₦ 3,000'
+                                                header3="₦ 625/week"
+                                                className="flex w-full justify-between"
+                                                value={'₦ 3,000'}
+                                            >
+                                                <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                                    <li>Create smart budgets</li>
+                                                    <li>Up to 10 receipt scanning monthly </li>
+                                                    <li>Link up to 4 bank accounts</li>
+                                                    <li>Up to 3 collaborators per budget </li>
+                                                    <li>Analytics presentation & personalized insights</li>
+                                                </ul>
+                                            </CustomRadio>
+                                        </> :
+                                        selectedOption === "Quarterly" ?
+                                            <>
+                                                <CustomRadio
+                                                    header1='Money Master 💪🏽'
+                                                    header2='₦ 7,125'
+                                                    header3="₦ 2,375/month"
+                                                    className="flex w-full justify-between"
+                                                    value={'₦ 7,125'}
+                                                    label={true}
+                                                    labelText={'Save 5%'}
+                                                >
+                                                    <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                                        <li>Create smart budgets</li>
+                                                        <li>3 receipt scanning monthly </li>
+                                                        <li>Link 1 bank account</li>
+                                                    </ul>
+                                                </CustomRadio>
+                                                <CustomRadio
+                                                    header1='Unstoppable 🚀'
+                                                    header2='₦ 8,100'
+                                                    header3="₦ 2700/month"
+                                                    className="flex w-full justify-between"
+                                                    value={'₦ 8,100'}
+                                                    label={true}
+                                                    labelText={'save 10%'}
+                                                >
+                                                    <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                                        <li>Create smart budgets</li>
+                                                        <li>Up to 10 receipt scanning monthly </li>
+                                                        <li>Link up to 4 bank accounts</li>
+                                                        <li>Up to 3 collaborators per budget </li>
+                                                        <li>Analytics presentation & personalized insights</li>
+                                                    </ul>
+                                                </CustomRadio>
+                                            </> :
+                                            selectedOption === 'Yearly' ?
+                                                <>
+                                                    <CustomRadio
+                                                        header1='Money Master 💪🏽'
+                                                        header2='₦ 27,000'
+                                                        header3="₦ 2,250/month"
+                                                        className="flex w-full justify-between"
+                                                        value={'₦ 2,500'}
+                                                        label={true}
+                                                        labelText={'save 10%'}
+                                                    >
+                                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                                            <li>Create smart budgets</li>
+                                                            <li>3 receipt scanning monthly </li>
+                                                            <li>Link 1 bank account</li>
+                                                        </ul>
+                                                    </CustomRadio>
+                                                    <CustomRadio
+                                                        header1='Unstoppable 🚀'
+                                                        header2='₦ 30,600'
+                                                        header3="₦ 2,550/month"
+                                                        className="flex w-full justify-between"
+                                                        value={'₦ 3,000'}
+                                                        label={true}
+                                                        labelText={'save 15%'}
+                                                    >
+                                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
+                                                            <li>Create smart budgets</li>
+                                                            <li>Up to 10 receipt scanning monthly </li>
+                                                            <li>Link up to 4 bank accounts</li>
+                                                            <li>Up to 3 collaborators per budget </li>
+                                                            <li>Analytics presentation & personalized insights</li>
+                                                        </ul>
+                                                    </CustomRadio>
+                                                </>
+                                                : null
+                                    }
                                 </div>
 
+                            </RadioGroup>
+                        </div>
 
-                            </form>
+
+                    </BottomDrawer>
+                </motion.div>
+            }
+
+            {
+                showSubscriptionPlan &&
+                <motion.div
+                    initial={{ opacity: 0, y: 90 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                >
+
+                    <BottomDrawer
+                        footer={<button onClick={() => handleSubscribe()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
+                        label="Subscription plans"
+                        back={false}
+                        show={showSubscriptionPlan}
+                        close={true}
+                        onClose={() => setShowSubscriptionPlan(false)}
+                    >
+                        <div className="relative mt-[12px] w-full mb-4">
+                            <div>
+                                <RadioGroup>
+                                    <CustomRadio />
+                                </RadioGroup>
+                            </div>
+
+
                         </div>
 
 
@@ -414,9 +609,41 @@ const Page = () => {
             }
 
 
+            {
+                subscriptionPlan &&
+                <motion.div
+                    initial={{ opacity: 0, y: 90 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                >
+                    <BottomDrawer
+                        label="Subscription plans"
+                        back={false}
+                        show={subscriptionPlan}
+                        close={true}
+                        onClose={() => setSubscriptionPlan(false)}
+                    >
+                        <div className=' w-full flex flex-col items-center justify-center  mx-auto mb-[203px] mt-[52px]'>
+                            <Image
+                                src={mono1}
+                                className=" size-[125px]  "
+                                height={1000} width={1000}
+                                alt="payment icon"
+                            />
+                            <p className=' font-[500] text-[20px] mt-[16px] leading-[24px]'>Payment gateway</p>
+                        </div>
 
 
-            {showSuccessfullPayment &&
+                    </BottomDrawer>
+
+
+                </motion.div>
+            }
+
+            {
+                showSuccessfullPayment &&
                 <motion.div
                     initial={{ opacity: 0, y: 90 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -436,7 +663,7 @@ const Page = () => {
             }
 
 
-        </div>
+        </div >
     );
 };
 

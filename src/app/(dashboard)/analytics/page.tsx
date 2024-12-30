@@ -223,6 +223,7 @@ export default function Page() {
 
 
 
+
   const { data: GetBudgetCategoriesAnalyticsApiData = [], isLoading: GetBudgetCaGetBudgetCategoriesAnalyticsApiIsPending } = useQuery({
     queryKey: ['GetBudgetCategoriesAnalyticsApi', selectedBudget?.uid],
     queryFn: () => GetBudgetCategoriesAnalyticsApi(authenticatedUser?.token ?? '', selectedBudget.uid),
@@ -249,9 +250,11 @@ export default function Page() {
   const bestPerformingCategory = GetOverallBudgetAnalyticsData?.bestPerformingCategory || {};
   const worstPerformingCategory = GetOverallBudgetAnalyticsData?.worstPerformingCategory || {};
 
+  console.log(GetOverallBudgetAnalyticsData);
+
 
   return (
-    <div className="bg-base-white w-full h-full">
+    <div className="bg-base-white w-[100vw] max-w-[500px] h-full">
       <Header2 title={'Analytics'} />
       <div className="flex mb-[8px] w-full items-center py-[12px] px-[24px]  mt-[90px] gap-[12px]">
         <label className=" w-full bg-[#F7F7F9] px-[8px] py-[16px] rounded-[8px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
@@ -282,46 +285,63 @@ export default function Page() {
           :
 
 
-          <div className="px-[24px]">
+          <div className="w-full px-[24px]">
             <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
               <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Budget vs Actual</h1>
 
               {/* Calculate the width percentages */}
               {(() => {
                 const { totalBudgeted, actualExpenses } = overall.breakdown || {};
-                const largerValue = Math.max(totalBudgeted, actualExpenses);
-                const smallerValue = Math.min(totalBudgeted, actualExpenses);
 
-                const largerPercentage = 100; // The larger value always takes up 100% width.
-                const smallerPercentage = largerValue > 0 ? (smallerValue / largerValue) * 100 : 0;
-                // If either value is 0, set the width to 20% (as per your requirement)
-                const adjustedBudgetPercentage = totalBudgeted <= 30 ? 50 : (largerValue === totalBudgeted ? largerPercentage : smallerPercentage);
-                const adjustedActualPercentage = smallerPercentage <= 30 ? 50 : (largerValue === actualExpenses ? largerPercentage : smallerPercentage);
+                // Calculate the difference
+                const difference = totalBudgeted - actualExpenses;
+
+                // Calculate the total for percentage calculation
+                const total = totalBudgeted + Math.abs(difference); // Ensure total is always positive
+
+                // Calculate the adjusted percentages based on the difference
+                const adjustedBudgetPercentage = (totalBudgeted / total) * 100;
+                const adjustedActualPercentage = (actualExpenses / total) * 100;
+
+                // Calculate widths dynamically based on content size (ensuring the text is fully visible)
+                const budgetTextWidth = `${(totalBudgeted?.toString().length + 10)}ch`; // Adjust based on text length
+                const actualTextWidth = `${(actualExpenses?.toString().length + 10)}ch`; // Adjust based on text length
+
                 return (
                   <>
                     {/* Budget bar */}
-                    <h1
-                      className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedBudgetPercentage}%` }}
-                    >
-                      <span className="text-[10px] font-[400]">Budget - </span>
-                      ₦ {totalBudgeted?.toLocaleString()}
-                    </h1>
+                    <div className="flex items-center mb-[12px]">
+                      <h1
+                        className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px] text-ellipsis whitespace-nowrap overflow-hidden"
+                        style={{
+                          width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                          minWidth: budgetTextWidth, // Ensure text fits fully before adjusting width
+                        }}
+                      >
+                        <span className="text-[10px] font-[400]">Budget - </span>
+                        ₦ {totalBudgeted?.toLocaleString()}
+                      </h1>
+                    </div>
 
                     {/* Actual bar */}
-                    <h1
-                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedActualPercentage}%` }}
-                    >
-                      <span className="text-[10px] font-[400]">Actual Expenses -  </span>
-                      ₦ {actualExpenses?.toLocaleString()}
-                    </h1>
+                    <div className="flex items-center mb-[12px]">
+                      <h1
+                        className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px] text-ellipsis whitespace-nowrap overflow-hidden"
+                        style={{
+                          width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
+                          minWidth: actualTextWidth, // Ensure text fits fully before adjusting width
+                        }}
+                      >
+                        <span className="text-[10px] font-[400]">Actual Expenses - </span>
+                        ₦ {actualExpenses?.toLocaleString()}
+                      </h1>
+                    </div>
                   </>
                 );
               })()}
-
-
             </div>
+
+
 
             <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
               <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
@@ -361,11 +381,11 @@ export default function Page() {
                           className="w-[24px] h-[24px] rounded-full"
                         ></div>
                         <h1 className="leading-[16px] text-[12px] text-[#474747]">
-                          {expense.name.length > 9 ? `${expense.name.substring(0, 9)}...` : expense.name}
+                          {expense.name.length > 20 ? `${expense.name.substring(0, 20)}...` : expense.name}
                         </h1>
                       </div>
                       <div className="text-[#474747] font-[500] text-[14px] leading-[16px]">
-                        ₦ {expense.amountAllocated.toLocaleString()}
+                        ₦ {expense.amountSpent.toLocaleString()}
                       </div>
                     </div>
                   ))}
@@ -374,11 +394,10 @@ export default function Page() {
 
             <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
               <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
-                Come on you stunner! 😊👏🏽
+                {GetOverallBudgetAnalyticsData?.topExpenses.remark.title}
               </h1>
               <h1 className="mt-[8px] text-[14px] leading-[18px]">
-                You spent more on your housing expenses this month, however it is way above budget.
-                Are you sure you don’t want to query some of the expenses?
+                {GetOverallBudgetAnalyticsData?.topExpenses.remark.description}
               </h1>
               <button
                 onClick={() => handleShowExpenseBreakdown()}
@@ -403,27 +422,30 @@ export default function Page() {
               {/* Calculate the width percentages */}
               {(() => {
                 const { totalBudgeted, actualExpenses } = bestPerformingCategory?.breakdown || {};
-                const largerValue = Math.max(totalBudgeted, actualExpenses);
-                const smallerValue = Math.min(totalBudgeted, actualExpenses);
 
-                console.log(bestPerformingCategory);
-                console.log(largerValue);
+                // Calculate the total for percentage calculation
+                const total = totalBudgeted + actualExpenses; // Ensure total is the sum of both values
 
+                // Calculate the adjusted percentages based on the total
+                const adjustedBudgetPercentage = total > 0 ? (totalBudgeted / total) * 100 : 0;
+                const adjustedActualPercentage = total > 0 ? (actualExpenses / total) * 100 : 0;
 
-                const largerPercentage = 100; // The larger value always takes up 100% width.
-                const smallerPercentage = largerValue > 0 ? (smallerValue / largerValue) * 100 : 0;
-
-                // If either value is 0, set the width to 20% (as per your requirement)
-                const adjustedBudgetPercentage = totalBudgeted <= 30 ? 50 : (largerValue === totalBudgeted ? largerPercentage : smallerPercentage);
-                const adjustedActualPercentage = smallerPercentage <= 30 ? 50 : (largerValue === actualExpenses ? largerPercentage : smallerPercentage);
-
+                // Calculate widths dynamically based on content size (ensuring the text is fully visible)
+                const budgetTextWidth = `${(totalBudgeted.toString().length + 10)}ch`; // Adjust based on text length
+                const actualTextWidth = `${(actualExpenses.toString().length + 10)}ch`; // Adjust based on text length
 
                 return (
-                  <>
+                  <div className=" p-[16px] bg-[#F7F7F9] border-[1px] border-[#EFEFF0] rounded-[16px] ">
+                    <h1 className="mb-[10px] text-[14px] font-[500] ">{bestPerformingCategory?.breakdown
+                      ?.title}</h1>
+
                     {/* Budget bar */}
                     <h1
-                      className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedBudgetPercentage}%` }}
+                      className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] flex py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
+                      style={{
+                        width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                        minWidth: budgetTextWidth, // Ensure text fits fully before adjusting width
+                      }}
                     >
                       <span className="text-[10px] font-[400]">Budget - </span>
                       ₦ {totalBudgeted?.toLocaleString()}
@@ -431,13 +453,16 @@ export default function Page() {
 
                     {/* Actual bar */}
                     <h1
-                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedActualPercentage}%` }}
+                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] flex py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
+                      style={{
+                        width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
+                        minWidth: actualTextWidth, // Ensure text fits fully before adjusting width
+                      }}
                     >
-                      <span className="text-[10px] font-[400]">Actual Expenses -  </span>
+                      <span className="text-[10px] font-[400]">Actual Expenses - </span>
                       ₦ {actualExpenses?.toLocaleString()}
                     </h1>
-                  </>
+                  </div>
                 );
               })()}
             </div>
@@ -461,43 +486,55 @@ export default function Page() {
           :
           <div className="px-[24px]">
             <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
-              <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Worst performing category</h1>
+              <div className=" p-[16px] bg-[#F7F7F9] border-[1px] border-[#EFEFF0] rounded-[16px] ">
+                <h1 className="mb-[10px] text-[14px] font-[500] ">{worstPerformingCategory?.breakdown
+                  ?.title}</h1>
+                <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Worst performing category</h1>
 
-              {/* Calculate the width percentages */}
-              {(() => {
-                const { totalBudgeted, actualExpenses } = worstPerformingCategory?.breakdown || {};
-                const largerValue = Math.max(totalBudgeted, actualExpenses);
-                const smallerValue = Math.min(totalBudgeted, actualExpenses);
+                {/* Calculate the width percentages */}
+                {(() => {
+                  const { totalBudgeted, actualExpenses } = worstPerformingCategory?.breakdown || {};
 
-                const largerPercentage = 100; // The larger value always takes up 100% width.
-                const smallerPercentage = largerValue > 0 ? (smallerValue / largerValue) * 100 : 0;
+                  // Calculate the difference
+                  const difference = totalBudgeted - actualExpenses;
 
-                // If either value is 0, set the width to 20% (as per your requirement)
-                const adjustedBudgetPercentage = totalBudgeted <= 30 ? 50 : (largerValue === totalBudgeted ? largerPercentage : smallerPercentage);
-                const adjustedActualPercentage = smallerPercentage <= 30 ? 50 : (largerValue === actualExpenses ? largerPercentage : smallerPercentage);
+                  // Calculate the total for percentage calculation
+                  const total = totalBudgeted + Math.abs(difference); // Ensure total is always positive
 
-                return (
-                  <>
-                    {/* Budget bar */}
-                    <h1
-                      className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedBudgetPercentage}%` }}
-                    >
-                      <span className="text-[10px] font-[400]">Budget - </span>
-                      ₦ {totalBudgeted?.toLocaleString()}
-                    </h1>
+                  // Calculate the adjusted percentages based on the difference
+                  const adjustedBudgetPercentage = (totalBudgeted / total) * 100;
+                  const adjustedActualPercentage = (actualExpenses / total) * 100;
 
-                    {/* Actual bar */}
-                    <h1
-                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedActualPercentage}%` }}
-                    >
-                      <span className="text-[10px] font-[400]">Actual Expenses -  </span>
-                      ₦ {actualExpenses?.toLocaleString()}
-                    </h1>
-                  </>
-                );
-              })()}
+                  return (
+                    <>
+                      {/* Budget bar */}
+                      <h1
+                        className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                        style={{
+                          width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                          minWidth: `${totalBudgeted.toString().length + 10}ch`, // Ensure text fits fully before adjusting width
+                        }}
+                      >
+                        <span className="text-[10px] font-[400]">Budget - </span>
+                        ₦ {totalBudgeted?.toLocaleString()}
+                      </h1>
+
+                      {/* Actual bar */}
+                      <h1
+                        className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                        style={{
+                          width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
+                          minWidth: `${actualExpenses.toString().length + 10}ch`, // Ensure text fits fully before adjusting width
+                        }}
+                      >
+                        <span className="text-[10px] font-[400]">Actual Expenses - </span>
+                        ₦ {actualExpenses?.toLocaleString()}
+                      </h1>
+                    </>
+                  );
+
+                })()}
+              </div>
             </div>
 
             <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
@@ -590,23 +627,22 @@ export default function Page() {
           onClose={() => setShowCategoryBreakDown(!showCategoryBreakDown)}
         >    <div className="h-[86vh] mt-[32px]   overflow-y-auto ">
 
-
               {GetBudgetCategoriesAnalyticsApiData.map((item: any, index: any) => {
-                // Determine the maximum value
                 // Destructure the breakdown data for easier access
                 const { title, actualExpenses, totalBudgeted } = item.breakdown;
 
-                // Determine the maximum value for calculating percentages
-                const largerValue = Math.max(totalBudgeted, actualExpenses);
-                const smallerValue = Math.min(totalBudgeted, actualExpenses);
+                // Calculate the difference
+                const difference = totalBudgeted - actualExpenses;
 
-                // Set the larger value to always take up 100% width
-                const largerPercentage = 100;
-                const smallerPercentage = largerValue > 0 ? (smallerValue / largerValue) * 100 : 0;
+                // Determine the maximum value for scaling
+                const maxValue = Math.max(totalBudgeted, actualExpenses);
 
-                // Adjust the width to 20% if the value is too low
-                const adjustedBudgetPercentage = totalBudgeted <= 30 ? 50 : (largerValue === totalBudgeted ? largerPercentage : smallerPercentage);
-                const adjustedActualPercentage = smallerPercentage <= 30 ? 50 : (largerValue === actualExpenses ? largerPercentage : smallerPercentage);
+                // Calculate the adjusted percentages based on the maximum value
+                const adjustedBudgetPercentage = (totalBudgeted / maxValue) * 100;
+                const adjustedActualPercentage = (actualExpenses / maxValue) * 100;
+
+                // Calculate the difference percentage
+                const differencePercentage = Math.min((Math.abs(difference) / totalBudgeted) * 100, 100); // Cap at 100%
 
                 return (
                   <div key={index} className="mb-[24px] bg-[#F7F7F9] border border-[#EFEFF0] rounded-[24px] p-[24px]">
@@ -615,8 +651,11 @@ export default function Page() {
 
                     {/* Budget bar */}
                     <h1
-                      className="bg-[#66C227] text-[#FFFFFF] mb-[4px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedBudgetPercentage}%` }}
+                      className="bg-[#66C227] text-[#FFFFFF] mb-[4px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                      style={{
+                        width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                        maxWidth: '100%', // Ensure the bar does not exceed the parent div
+                      }}
                     >
                       <span className="text-[10px] font-[400]">Budget - </span>
                       ₦ {totalBudgeted.toLocaleString()}
@@ -624,12 +663,18 @@ export default function Page() {
 
                     {/* Actual bar */}
                     <h1
-                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{ width: `${adjustedActualPercentage}%` }}
+                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                      style={{
+                        width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use calculated width based on the actual expenses
+                        maxWidth: '100%', // Ensure the bar does not exceed the parent div
+                      }}
                     >
-                      <span className="text-[10px] font-[400]">Actual Expenses -  </span>
+                      <span className="text-[10px] font-[400]">Actual Expenses - </span>
                       ₦ {actualExpenses.toLocaleString()}
+                      {/* Show the difference percentage in the actual expenses bar */}
+
                     </h1>
+
 
                     {/* Remark section */}
                     <div>

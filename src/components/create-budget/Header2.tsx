@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BsBell, BsPerson } from 'react-icons/bs';
 import hambugger from "@/images/hambugger2.png";
 import premium from "@/images/premium.png";
-import close from "@/images/close.png";
+import close from "@/images/closeicon.png";
 import Link from 'next/link';
 import home from "@/images/home.webp";
 import home1 from "@/images/home1.webp";
@@ -83,7 +83,7 @@ const Header2 = ({ title }: Iprop) => {
     }, [authenticatedUser]);
 
     return (
-        <div className={`z-[20] fixed top-0 bg-[#FAFAFA] pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-[#2D2D2D] w-full items-center pb-[16px] transition-all duration-300 `}>
+        <div className={`z-[20] w-[100vw] max-w-[500px]  fixed top-0 bg-[#FAFAFA] pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-[#2D2D2D]  items-center pb-[16px] transition-all duration-300 `}>
             {/* Left Section: Profile */}
             <div className='text-[#2D2D2D] flex gap-[8px] items-start'>
                 <div>
@@ -136,9 +136,9 @@ const Header2 = ({ title }: Iprop) => {
                                 {currentRoute === '/track' ? <Image className='size-[24px]' alt='track' src={track1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='track' src={track} width={1000} height={1000} />}
                                 Track
                             </Link>
-                            <Link href='/analysis' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/analysis' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
-                                {currentRoute === '/analysis' ? <Image className='size-[24px]' alt='analysis' src={status1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='analysis' src={status} width={1000} height={1000} />}
-                                Analysis
+                            <Link href='/analytics' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/analytics' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
+                                {currentRoute === '/analytics' ? <Image className='size-[24px]' alt='analytics' src={status1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='analytics' src={status} width={1000} height={1000} />}
+                                analytics
                             </Link>
                             <Link href='/profile' className={`p-[12px] rounded-[12px] w-[247px] h-[48px] flex items-center py-[7px] gap-[8px] ${currentRoute === '/profile' ? 'bg-[#ECFDDC] text-[#66C227]' : 'text-[#828282]'}`}>
                                 {currentRoute === '/profile' ? <Image className='size-[24px]' alt='profile' src={profile1} width={1000} height={1000} /> : <Image className='size-[24px]' alt='profile' src={profile} width={1000} height={1000} />}
@@ -158,7 +158,7 @@ const Header2 = ({ title }: Iprop) => {
                             </button>
                         </div>
                     </div>
-                    <div className='absolute top-0 left-0 h-[100vh] bg-[#6262628d] backdrop-blur-3xl w-[100vw]' onClick={toggleMenu} />
+                    <div className='absolute top-0 left-0 h-[100vh] w-full bg-[#6262628d] backdrop-blur-3xl max-w-[500px]' onClick={toggleMenu} />
                     <Image className=' size-[48px] top-[24px] absolute right-[24px] cursor-pointer' alt='close' width={1000} height={1000} src={close} onClick={toggleMenu} />
                 </div>
             </div>

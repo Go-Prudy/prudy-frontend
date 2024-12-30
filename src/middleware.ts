@@ -6,7 +6,7 @@ const publicRoutes = ['/signup', '/login', '/'];
 const privateRoutes = [
     '/budgets',
     '/budgets/:path*',
-    '/analysis',
+    '/analytics',
     '/budget',
     '/budget/:path*',
     '/collaborators',

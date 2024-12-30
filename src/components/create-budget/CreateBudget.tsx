@@ -97,7 +97,7 @@ const CreateBudget = ({ setShow, show }: IProps) => {
             <Component
                 {...getBaseProps()}
                 className={cn(
-                    "group inline-flex flex-1 items-center hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
+                    "group inline-flex flex-1 items-center  hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
                     "w-[164px] cursor-pointer flex-nowrap border-2 border-default rounded-[20px] gap-4 p-4",
                     "data-[selected=true]:border-[#66C227] data-[selected=true]:bg-[#F5FEED]",
                 )}
@@ -126,7 +126,7 @@ const CreateBudget = ({ setShow, show }: IProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+            className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
         >
             <form onSubmit={handleSubmit}>
                 <BottomDrawer
