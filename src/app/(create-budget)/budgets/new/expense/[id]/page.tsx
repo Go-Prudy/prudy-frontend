@@ -660,7 +660,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                 const updatedSubAllocations = bluredData.map(({ name, ...rest }) => rest);
 
-                const newAllocation = {
+                const newAllocation: any = {
                     budgetCategory: selectedBudget.uid,
                     amount: selectedBudget.amount,
                     percentage,
@@ -680,7 +680,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 // Add the new allocation to the budget using your function
                 console.log(newAllocation);
 
-                addAllocationToBudget(budgetId, [newAllocation]);
+                addAllocationToBudget(budgetId, newAllocation);
 
                 // Clear local allocations after successful save
                 calculateIncomeExpenseStats(lastBudget)
