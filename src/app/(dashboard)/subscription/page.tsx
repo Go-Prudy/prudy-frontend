@@ -14,6 +14,9 @@ import DeleteSuccessModal from '../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
 import { Select, SelectItem, Avatar } from "@nextui-org/react";
 import { Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
+import { getAllPlans } from '@/app/services/SubscriptionService';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { useQuery } from '@tanstack/react-query';
 
 
 interface CardFormValues {
@@ -23,7 +26,27 @@ interface CardFormValues {
     cvv: string;
 }
 
+interface Plan {
+    uid: string;
+    name: string;
+    basePrice: number;
+    weeklyAmount?: number;
+    monthlyAmount?: number;
+    discount?: number;
+    benefits: string[];
+}
 
+interface Plans {
+    monthly?: Plan[];
+    quaterly?: Plan[];
+    yearly?: Plan[];
+}
+
+interface SubscriptionPlansProps {
+    authenticatedUser: {
+        token: string;
+    } | null;
+}
 
 const Page = () => {
     const features = [
@@ -35,6 +58,7 @@ const Page = () => {
         "Record expense manually",
     ];
 
+    const { authenticatedUser } = useAuthentication();
     // State to manage checkbox values
     const [checkedFeatures, setCheckedFeatures] = useState(
         features.map(() => true) // Initialize all checkboxes as checked
@@ -51,9 +75,8 @@ const Page = () => {
     });
     const [showSuccessfullPayment, setShowSuccessfullPayment] = useState<boolean>(false)
     const [selectedOption, setSelectedOption] = useState("Monthly");
-    const options = ["Monthly", "Quarterly", "Yearly"];
+    const options = ["Monthly", "Quaterly", "Yearly"];
     const [isOpen, setIsOpen] = useState(false);
-    const [plans, setPlans] = useState(['Monthly', 'Quarterly', 'Yearly']);
 
     const handleSelect = (option: any) => {
         setSelectedOption(option);
@@ -104,6 +127,14 @@ const Page = () => {
         header1: string;
         header2: string;
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -242,6 +273,23 @@ const Page = () => {
         // setShowSuccessfullPayment(!showSuccessfullPayment)
 
     }
+
+    const { data: getAllPlansData = [], isPending: isGetAllPlansPending, isError } = useQuery({
+        queryKey: ['getAllPlans'],
+        queryFn: () => getAllPlans(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token, // Only fetch if token exists
+        refetchOnWindowFocus: false, // Prevent refetching on window focus
+        refetchOnMount: false, // Prevent refetching on component mount
+        refetchInterval: false, // Disable polling
+        staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    });
+
+    const plans: Plans = getAllPlansData;
+    console.log(plans);
+
+
+
+
 
     return (
         <div className=' relative  w-[100vw] max-w-[500px]   h-[844px] overflow-x-hidden' style={{
@@ -433,7 +481,7 @@ const Page = () => {
                         <div className="relative mt-[24px]  h-[73vh] overflow-y-auto w-full mb-4">
                             <div className='mt-[16px] p-[4px] bg-[#F7F7F9] rounded-[12px] mb-[20px] flex justify-center w-fit mx-auto'>
                                 {options.map((option: any) => (
-                                    <button onClick={() => setSelectedOption(option)} className={`${option === selectedOption && ' rounded-[12px] text-white  bg-[#66C227] '} p-[8px] `} key={option}>
+                                    <button onClick={() => setSelectedOption(option)} className={`${option.toLowerCase() === selectedOption.toLowerCase() && ' rounded-[12px] text-white  bg-[#66C227] '} p-[8px] `} key={option.toLowerCase()}>
                                         {option}
                                     </button>
                                 ))}
@@ -442,129 +490,32 @@ const Page = () => {
                                 orientation="vertical"
                                 className=' flex flex-col w-full gap-[16px] '
                                 color='success'
-                            // onValueChange={(value) => handleBankSelect(value)}
-
                             >
-                                <div className=' mb-[10px] flex flex-col w-full gap-[16px] '>
-
-
-                                    <CustomRadio
-                                        header1='Prudy Lite 💫'
-                                        header2='Free'
-                                        className="flex w-full justify-between"
-                                        value={'free'}
-                                    >
-                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                            <li>Create smart budgets</li>
-                                            <li>3 receipt scanning monthly </li>
-                                            <li>Link 1 bank account</li>
-                                        </ul>
-                                    </CustomRadio>
-                                    {selectedOption === 'Monthly' ?
-                                        <>
+                                <div className="mb-[10px] flex flex-col w-full gap-[16px]">
+                                    {['monthly', 'quaterly', 'yearly']?.map((period) => (
+                                        selectedOption?.toLowerCase() === period &&
+                                        plans[period as keyof Plans]?.map((plan) => (
                                             <CustomRadio
-                                                header1='Money Master 💪🏽'
-                                                header2='₦ 2,500'
-                                                header3="₦ 625/week"
+                                                key={plan?.uid}
+                                                header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
+                                                header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                                                header3={
+                                                    period === 'monthly'
+                                                        ? (plan?.weeklyAmount && plan.weeklyAmount > 0 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week` : null)
+                                                        : (plan?.monthlyAmount && plan.monthlyAmount > 0 ? `₦ ${plan.monthlyAmount.toLocaleString()}/month` : null)
+                                                }
                                                 className="flex w-full justify-between"
-                                                value={'₦ 2,500'}
-                                                label={false}
-                                                labelText={'save 10%'}
+                                                value={plan?.basePrice}
+                                                label={plan?.discount ? `save ${plan?.discount}%` : null}
                                             >
-                                                <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                                    <li>Create smart budgets</li>
-                                                    <li>3 receipt scanning monthly </li>
-                                                    <li>Link 1 bank account</li>
+                                                <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                    {plan?.benefits?.map((benefit, index) => (
+                                                        <li key={index}>{benefit}</li>
+                                                    ))}
                                                 </ul>
                                             </CustomRadio>
-                                            <CustomRadio
-                                                header1='Unstoppable 🚀'
-                                                header2='₦ 3,000'
-                                                header3="₦ 625/week"
-                                                className="flex w-full justify-between"
-                                                value={'₦ 3,000'}
-                                            >
-                                                <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                                    <li>Create smart budgets</li>
-                                                    <li>Up to 10 receipt scanning monthly </li>
-                                                    <li>Link up to 4 bank accounts</li>
-                                                    <li>Up to 3 collaborators per budget </li>
-                                                    <li>Analytics presentation & personalized insights</li>
-                                                </ul>
-                                            </CustomRadio>
-                                        </> :
-                                        selectedOption === "Quarterly" ?
-                                            <>
-                                                <CustomRadio
-                                                    header1='Money Master 💪🏽'
-                                                    header2='₦ 7,125'
-                                                    header3="₦ 2,375/month"
-                                                    className="flex w-full justify-between"
-                                                    value={'₦ 7,125'}
-                                                    label={true}
-                                                    labelText={'Save 5%'}
-                                                >
-                                                    <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                                        <li>Create smart budgets</li>
-                                                        <li>3 receipt scanning monthly </li>
-                                                        <li>Link 1 bank account</li>
-                                                    </ul>
-                                                </CustomRadio>
-                                                <CustomRadio
-                                                    header1='Unstoppable 🚀'
-                                                    header2='₦ 8,100'
-                                                    header3="₦ 2700/month"
-                                                    className="flex w-full justify-between"
-                                                    value={'₦ 8,100'}
-                                                    label={true}
-                                                    labelText={'save 10%'}
-                                                >
-                                                    <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                                        <li>Create smart budgets</li>
-                                                        <li>Up to 10 receipt scanning monthly </li>
-                                                        <li>Link up to 4 bank accounts</li>
-                                                        <li>Up to 3 collaborators per budget </li>
-                                                        <li>Analytics presentation & personalized insights</li>
-                                                    </ul>
-                                                </CustomRadio>
-                                            </> :
-                                            selectedOption === 'Yearly' ?
-                                                <>
-                                                    <CustomRadio
-                                                        header1='Money Master 💪🏽'
-                                                        header2='₦ 27,000'
-                                                        header3="₦ 2,250/month"
-                                                        className="flex w-full justify-between"
-                                                        value={'₦ 2,500'}
-                                                        label={true}
-                                                        labelText={'save 10%'}
-                                                    >
-                                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                                            <li>Create smart budgets</li>
-                                                            <li>3 receipt scanning monthly </li>
-                                                            <li>Link 1 bank account</li>
-                                                        </ul>
-                                                    </CustomRadio>
-                                                    <CustomRadio
-                                                        header1='Unstoppable 🚀'
-                                                        header2='₦ 30,600'
-                                                        header3="₦ 2,550/month"
-                                                        className="flex w-full justify-between"
-                                                        value={'₦ 3,000'}
-                                                        label={true}
-                                                        labelText={'save 15%'}
-                                                    >
-                                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                                            <li>Create smart budgets</li>
-                                                            <li>Up to 10 receipt scanning monthly </li>
-                                                            <li>Link up to 4 bank accounts</li>
-                                                            <li>Up to 3 collaborators per budget </li>
-                                                            <li>Analytics presentation & personalized insights</li>
-                                                        </ul>
-                                                    </CustomRadio>
-                                                </>
-                                                : null
-                                    }
+                                        ))
+                                    ))}
                                 </div>
 
                             </RadioGroup>
