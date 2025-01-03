@@ -9,11 +9,51 @@ import { BsChevronDown, BsChevronUp, BsPlus } from 'react-icons/bs';
 import DeleteSuccessModal from '../../components/DeleteSuccessModal';
 import Image from 'next/image';
 import warninglogo from '@/images/warn.gif';
+import { useAuthentication } from '@/app/store/AuthStore';
+import { getAllPlans, getSinglePlan } from '@/app/services/SubscriptionService';
+import { useQuery } from '@tanstack/react-query';
 
-const Manage = () => {
+
+
+interface Features {
+    maxReceiptsScanning: number;
+    maxAccountLinking: number;
+    maxTransactionSyncing: number;
+    maxCollaboratorInvites: number;
+    budgetAnalytics: boolean;
+}
+
+interface Plan {
+    uid: string;
+    name: string;
+    benefits: string[];
+    basePrice: number;
+    currency: string;
+    features: Features;
+    createdAt: string;
+    updatedAt: string;
+    discount: number;
+    weeklyAmount: number;
+    monthlyAmount: number;
+}
+
+interface Plans {
+    [frequency: string]: Plan[]; // e.g., "monthly", "quarterly", "yearly"
+}
+
+// Mock getAllPlans function type
+type GetAllPlansFn = (token: string) => Promise<Plans>;
+
+// Mock authenticated user type
+interface AuthenticatedUser {
+    token: string | null;
+}
+const Page = ({ params }: { params: { id: string } }) => {
+
+    const id: string = params['id'];
     const tabs = ['Subscription plans', 'Billing Cycle']
     const [activeTab, setActiveTab] = useState('Subscription plans')
-    const options = ["Monthly", "Quarterly", "Yearly"];
+    const options = ["All", "Monthly", "Quarterly", "Yearly"];
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState(options[0]);
     const [showCancelSubscription, setShowCancelSubscription] = useState(false);
@@ -56,6 +96,77 @@ const Manage = () => {
             amount: 'N 2,500'
         }
     ];
+
+    const { authenticatedUser } = useAuthentication();
+
+    const { data: plans = {}, isPending: isGetAllPlansPending, isError: isGetAllPlansError } = useQuery({
+        queryKey: ['getAllPlans'],
+        queryFn: () => getAllPlans(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token, // Only fetch if token exists
+        refetchOnWindowFocus: false, // Prevent refetching on window focus
+        refetchOnMount: false, // Prevent refetching on component mount
+        refetchInterval: false, // Disable polling
+        staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    });
+
+
+    const { data: getSinglePalnData = {}, isLoading: isLoadingGetSinglePlan } = useQuery({
+        queryKey: ['gestSinglePlan', params?.id],
+        queryFn: () => getSinglePlan(authenticatedUser?.token ?? '', params?.id),
+        enabled: !!authenticatedUser?.token && !!params?.id, // Only fetch if token exists and plan id is provided
+        refetchOnWindowFocus: false, // Prevent refetching on window focus
+        refetchOnMount: false, // Prevent refetching on component mount
+        refetchInterval: false, // Disable polling
+        staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    });
+
+
+    const currentPlan = getSinglePalnData?.data;
+    const billingDate = new Date(currentPlan?.createdAt); // Get the 'createdAt' date
+
+    // Format the date as needed (e.g., 'YYYY-MM-DD')
+    const formattedDate = billingDate.toLocaleDateString('en-GB'); // You can adjust the locale and format
+
+
+
+    function rearrangePlans(plans: Plans, targetId: string, selectedOption: string): Plan[] {
+        // Extract plans into separate arrays
+        const monthlyPlans = plans.monthly || [];
+        const quarterlyPlans = plans.quaterly || [];
+        const yearlyPlans = plans.yearly || [];
+
+        // Function to prioritize the targetId plan
+        const prioritizePlan = (planList: Plan[], targetId: string): Plan[] => {
+            const targetPlan = planList.find(plan => plan.uid === targetId);
+            const otherPlans = planList.filter(plan => plan.uid !== targetId);
+            return targetPlan ? [targetPlan, ...otherPlans] : otherPlans;
+        };
+
+        // Rearrange each group individually
+        const prioritizedMonthly = prioritizePlan(monthlyPlans, targetId);
+        const prioritizedQuarterly = prioritizePlan(quarterlyPlans, targetId);
+        const prioritizedYearly = prioritizePlan(yearlyPlans, targetId);
+
+        // Combine all plans with the prioritized plan at the start, filter by selected option
+        let filteredPlans: Plan[] = [];
+        if (selectedOption === "All") {
+            filteredPlans = [...prioritizedMonthly, ...prioritizedQuarterly, ...prioritizedYearly];
+        } else if (selectedOption === "Monthly") {
+            filteredPlans = prioritizedMonthly;
+        } else if (selectedOption === "Quarterly") {
+            filteredPlans = prioritizedQuarterly;
+        } else if (selectedOption === "Yearly") {
+            filteredPlans = prioritizedYearly;
+        }
+
+        return filteredPlans;
+    }
+
+
+    const rearrangedPlans = rearrangePlans(plans, params?.id, selectedOption);
+
+    console.log(rearrangedPlans);
+    console.log(plans);
 
     const handleSelect = (option: string) => {
         setSelectedOption(option);
@@ -103,7 +214,7 @@ const Manage = () => {
                 {...getBaseProps()}
                 className={cn(
                     "group flex flex-col p-4 rounded-lg border-1 transition-all",
-                    "w-full cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4",
+                    "max-w-[400px] w-[300px] h-full  cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4",
                     isSelected ? "border-[#66C227] bg-[#ECFDDC]" : "bg-[#F7F7F9] border-[#EFEFF0]"
                 )}
             >
@@ -150,7 +261,7 @@ const Manage = () => {
 
 
     return (
-        <div className='relative w-full h-screen'>
+        <div className='relative w-full max-w-[500px] overflow-x-hidden  h-screen'>
             <motion.div
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
@@ -208,37 +319,45 @@ const Manage = () => {
                         <div>
                             <RadioGroup
                                 orientation="vertical"
-                                className='flex flex-col w-full gap-[16px]'
-                                color='success'
+                                className="flex flex-col overflow-x-hidden w-full gap-[16px]"
+                                color="success"
                                 classNames={{
                                     base: 'mt-[24px]'
                                 }}
                             >
-                                <div className=' mb-[10px] flex flex-col w-full gap-[16px] '>
+                                <div className="mb-[10px] flex flex-row w-full gap-[16px] overflow-x-auto">
+                                    {rearrangedPlans?.map((plan) => (
+                                        <div key={plan?.uid} className="h-[242px] ">
+                                            <CustomRadio
+                                                header1={plan?.name}
+                                                header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                                                header3={
+                                                    plan?.basePrice !== 0
+                                                        ? (plan?.weeklyAmount && plan.weeklyAmount > 0
+                                                            ? `₦ ${plan.weeklyAmount.toLocaleString()}/week`
+                                                            : `₦ ${plan.monthlyAmount.toLocaleString()}/month`)
+                                                        : null
+                                                }
+                                                className="flex w-full h-full justify-between min-w-[300px]"
+                                                value={`₦ ${plan?.basePrice}`}
+                                                label={true}
+                                                label2={plan.uid === params.id}
+                                                label2Text={plan.uid === params.id ? "Current plan" : ""}
 
-
-                                    <CustomRadio
-                                        header1='Unstoppable 🚀'
-                                        header2='₦ 3,000'
-                                        header3="₦ 428/week"
-                                        className="flex w-full justify-between"
-                                        value={'₦ 3,000'}
-                                        label={true}
-                                        label2={true}
-                                        label2Text={'Current plan'}
-                                        labelText={'save 45%'}
-                                    >
-
-                                        <ul className=' flex flex-col gap-[8px]  pl-[1.5rem] mt-[5px] list-disc'>
-                                            <li>Create smart budgets</li>
-                                            <li>Up to 10 receipt scanning monthly </li>
-                                            <li>Link up to 4 bank accounts</li>
-                                            <li>Up to 3 collaborators per budget </li>
-                                            <li>Analytics presentation & personalized insights</li>
-                                        </ul>
-                                    </CustomRadio>
+                                                labelText={`save ${plan?.discount}%`}
+                                            >
+                                                <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                    {plan?.benefits?.map((benefit, index) => (
+                                                        <li key={index}>{benefit}</li>
+                                                    ))}
+                                                </ul>
+                                            </CustomRadio>
+                                        </div>
+                                    ))}
                                 </div>
+
                             </RadioGroup>
+
                             <div className='flex justify-between items-center mt-[40px]'>
                                 <h1>Payment methods</h1>
                                 <button className='bordr-[#E7E7EA] border rounded-[16px] p-[8px] text-[14px] text-[#575757] flex gap-[4px] items-center'>
@@ -254,13 +373,16 @@ const Manage = () => {
 
 
                     {activeTab === 'Billing Cycle' ? (
-                        <div className=' border-[#EFEFF0] bg-[#F7F7F9] flex items-start justify-between border rounded-[12px] p-[16px] mt-[16px]'>
+                        <div className='border-[#EFEFF0] bg-[#F7F7F9] flex items-start justify-between border rounded-[12px] p-[16px] mt-[16px]'>
                             <div>
-                                <h1 className=' text-[14px] font-[500]'>Next billing date   </h1>
-                                <p className=' text-[#828282] mt-[8px] text-[12px] leading-[14.4px]'> 2024-12-02</p>
+                                <h1 className='text-[14px] font-[500]'>Next billing date</h1>
+                                <p className='text-[#828282] mt-[8px] text-[12px] leading-[14.4px]'>{formattedDate}</p>
+
                             </div>
                             <div>
-                                <h1 className=' text-[16px] font-[600]'>₦ 3,000</h1>
+                                <h1 className='text-[16px] font-[600]'>
+                                    {currentPlan?.currency} {currentPlan?.basePrice}
+                                </h1>
                             </div>
                         </div>
                     ) : null}
@@ -351,4 +473,4 @@ const Manage = () => {
     )
 }
 
-export default Manage
+export default Page

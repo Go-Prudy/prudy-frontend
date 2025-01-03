@@ -14,11 +14,12 @@ import passcodeIcon from "@/images/passcode.png";
 import currencyIcon from "@/images/currency.png";
 import { FaClipboardList, FaUsers, FaBell, FaDollarSign, FaChartPie, FaQuestionCircle, FaLock, FaGlobe } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthentication } from "@/app/store/AuthStore";
 import { IAuthenticatedUser } from "@/app/Types";
 import { useEffect, useState } from "react";
 import Link from 'next/link';
+import { getAllPlans, getUserSubscription } from "@/app/services/SubscriptionService";
 
 export default function Page() {
 
@@ -39,6 +40,8 @@ export default function Page() {
     { title: 'Passcode Settings', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={passcodeIcon} />, category: 'SETTINGS', link: '/settings/passcode' },
     { title: 'Currency & Data', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={currencyIcon} />, category: 'SETTINGS', link: '/settings/currency' },
   ];
+
+
 
   const navigation = useRouter()
 
@@ -77,6 +80,30 @@ export default function Page() {
       profilePhotoUrl: '',
     }
   });
+
+  // React Query hook
+  const { data: plans = [], isPending: isGetAllPlansPending, isError: isGetAllPlansError } = useQuery({
+    queryKey: ['getAllPlans'],
+    queryFn: () => getAllPlans(authenticatedUser?.token ?? ''),
+    enabled: !!authenticatedUser?.token, // Only fetch if token exists
+    refetchOnWindowFocus: false, // Prevent refetching on window focus
+    refetchOnMount: false, // Prevent refetching on component mount
+    refetchInterval: false, // Disable polling
+    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+  });
+
+  const { data: usersubscription = {}, isPending: isGetUserSubscriptionPending, isError: isGetUserSubscriptionError } = useQuery({
+    queryKey: ['getuserSubscription'],
+    queryFn: () => getUserSubscription(authenticatedUser?.token ?? ''),
+    enabled: !!authenticatedUser?.token, // Only fetch if token exists
+    refetchOnWindowFocus: false, // Prevent refetching on window focus
+    refetchOnMount: false, // Prevent refetching on component mount
+    refetchInterval: false, // Disable polling
+    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+  });
+
+  console.log(usersubscription);
+
 
   useEffect(() => {
     if (authenticatedUser) {
@@ -131,7 +158,17 @@ export default function Page() {
                     .map((item) => (
                       <div
                         key={item.title}
-                        onClick={() => navigation.push(item.link)}
+                        onClick={() => {
+                          console.log(usersubscription?.plan?.uid);
+
+                          if (usersubscription?.plan?.uid) {
+                            navigation.push("/subscription/" + usersubscription?.plan?.uid)
+                          } else {
+                            navigation.push(item.link)
+                          }
+                        }
+
+                        }
                         className="flex items-center gap-4 p-4 border border-[#EFEFF0] rounded-[20px] bg-[#F7F7F9] hover:shadow-sm"
                       >
                         <div className="w-[40px] h-[40px] flex items-center justify-center text-[#888888] bg-[#Fff]  rounded-full">

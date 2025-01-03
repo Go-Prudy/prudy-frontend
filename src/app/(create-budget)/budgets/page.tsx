@@ -42,14 +42,11 @@ const BudgetPage = () => {
         refetchOnWindowFocus: true,
     });
 
-    console.log(getPendingInvitesApiData);
 
 
     useEffect(() => {
         if (getPendingInvitesApiData) {
             setShowInvites(true);
-            console.log(getPendingInvitesApiData);
-            console.log(showInvites);
 
         } else {
             setShowInvites(false);
