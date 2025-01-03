@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import Cookies from "js-cookie";
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { IAuthenticatedUser, IForgotPassword, ISignupForm, IVerifyOtpForm } from '../Types';
 import { useRouter } from 'next/navigation';
 import { stat } from 'fs';
@@ -124,7 +124,7 @@ export const useAuthentication = create<AuthState>()(
         }),
         {
             name: 'auth-storage',
-            getStorage: () => localStorage, // Persist in localStorage
+            storage: createJSONStorage(() => localStorage), // Using createJSONStorage to wrap localStorage
         }
     )
 );

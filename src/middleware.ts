@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 
 // Define public and private routes
-const publicRoutes = ['/signup', '/login', '/'];
+const publicRoutes = ['/signup', '/login', '/', '/terms&conditions', '/privacy&policy', '/about', '/faqs', '/contact'];
 const privateRoutes = [
     '/budgets',
     '/budgets/:path*',
@@ -11,8 +11,18 @@ const privateRoutes = [
     '/budget/:path*',
     '/collaborators',
     '/faqs',
+    '/invite',
+    '/track',
+    '/invite/:path*',
+    '/subscription',
+    '/subscription/:path*',
     '/profile',
-    '/profile/:path*'
+    '/profile/:path*',
+    '/reminders',
+    '/reports',
+    '/settings',
+    '/settings/:path*',
+
 ];
 
 // Define the middleware function

@@ -2,16 +2,17 @@
 
 'use client'
 import Header from '@/components/header'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion';
-import { Popover, PopoverTrigger, PopoverContent, Button, cn, VisuallyHidden, useRadio, RadioGroup } from "@nextui-org/react";
+import { Popover, PopoverTrigger, PopoverContent, Button, cn, VisuallyHidden, useRadio, RadioGroup, CircularProgress } from "@nextui-org/react";
 import { BsChevronDown, BsChevronUp, BsPlus } from 'react-icons/bs';
-import DeleteSuccessModal from '../../components/DeleteSuccessModal';
+import DeleteSuccessModal from '../../../../components/DeleteSuccessModal';
 import Image from 'next/image';
 import warninglogo from '@/images/warn.gif';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { getAllPlans, getSinglePlan } from '@/app/services/SubscriptionService';
 import { useQuery } from '@tanstack/react-query';
+import { getBillingCycleApi, getBillingHistoryApi } from '@/app/services/BillingServices';
 
 
 
@@ -41,6 +42,17 @@ interface Plans {
     [frequency: string]: Plan[]; // e.g., "monthly", "quarterly", "yearly"
 }
 
+interface IBillingHistory {
+    date: Date;
+    planName: string;
+    amount: number;
+}
+
+interface IBillCycle {
+    amount: number;
+    nextBillingDate: Date;
+}
+
 // Mock getAllPlans function type
 type GetAllPlansFn = (token: string) => Promise<Plans>;
 
@@ -53,49 +65,54 @@ const Page = ({ params }: { params: { id: string } }) => {
     const id: string = params['id'];
     const tabs = ['Subscription plans', 'Billing Cycle']
     const [activeTab, setActiveTab] = useState('Subscription plans')
-    const options = ["All", "Monthly", "Quarterly", "Yearly"];
+    const options = ["Monthly", "Quarterly", "Yearly"];
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState(options[0]);
     const [showCancelSubscription, setShowCancelSubscription] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSuccesfulCancelSubscription, setShowSuccesfulCancelSubscription] = useState(false);
-    const billingHistory = [
-        {
-            date: '06 June, 2024',
-            plan: 'Unstoppable',
-            amount: 'N 3,000'
-        },
-        {
-            date: '06 May, 2024',
-            plan: 'Unstoppable',
-            amount: 'N 3,000'
-        },
-        {
-            date: '06 April, 2024',
-            plan: 'Unstoppable',
-            amount: 'N 3,000'
-        },
-        {
-            date: '06 March, 2024',
-            plan: 'Money Master',
-            amount: 'N 2,500'
-        },
-        {
-            date: '06 February, 2024',
-            plan: 'Money Master',
-            amount: 'N 2,500'
-        },
-        {
-            date: '06 January, 2024',
-            plan: 'Money Master',
-            amount: 'N 2,500'
-        },
-        {
-            date: '06 June, 2024',
-            plan: 'Money Master',
-            amount: 'N 2,500'
-        }
-    ];
+    const [currentPage, setCurrentPage] = useState(1); // Track the current page
+    const [billingHistory, setBillingHistory] = useState([]); // Store fetched data
+    const [hasMore, setHasMore] = useState(true); // Determine if more data is available
+
+    const limit = 10;
+    // const billingHistory = [
+    //     {
+    //         date: '06 June, 2024',
+    //         plan: 'Unstoppable',
+    //         amount: 'N 3,000'
+    //     },
+    //     {
+    //         date: '06 May, 2024',
+    //         plan: 'Unstoppable',
+    //         amount: 'N 3,000'
+    //     },
+    //     {
+    //         date: '06 April, 2024',
+    //         plan: 'Unstoppable',
+    //         amount: 'N 3,000'
+    //     },
+    //     {
+    //         date: '06 March, 2024',
+    //         plan: 'Money Master',
+    //         amount: 'N 2,500'
+    //     },
+    //     {
+    //         date: '06 February, 2024',
+    //         plan: 'Money Master',
+    //         amount: 'N 2,500'
+    //     },
+    //     {
+    //         date: '06 January, 2024',
+    //         plan: 'Money Master',
+    //         amount: 'N 2,500'
+    //     },
+    //     {
+    //         date: '06 June, 2024',
+    //         plan: 'Money Master',
+    //         amount: 'N 2,500'
+    //     }
+    // ];
 
     const { authenticatedUser } = useAuthentication();
 
@@ -120,6 +137,28 @@ const Page = ({ params }: { params: { id: string } }) => {
         staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
     });
 
+
+    const { data: billingCycleData = {}, isPending: isGetBillingCyclePending, isError: isGetBillingCycleError } = useQuery({
+        queryKey: ['getbillingCycle'],
+        queryFn: () => getBillingCycleApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token, // Only fetch if token exists
+        refetchOnWindowFocus: false, // Prevent refetching on window focus
+        refetchOnMount: false, // Prevent refetching on component mount
+        refetchInterval: false, // Disable polling
+        staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    });
+
+    const { data: billingHistoryData = [], isPending: isGetBillingHistoryPending, isError: isGetBillingCycleHistoryError, isFetching } = useQuery({
+        queryKey: ['getbillingHistory'],
+        queryFn: () => getBillingHistoryApi(authenticatedUser?.token ?? '', currentPage, limit),
+        enabled: !!authenticatedUser?.token, // Only fetch if token exists
+        refetchOnWindowFocus: false, // Prevent refetching on window focus
+        refetchOnMount: false, // Prevent refetching on component mount
+        refetchInterval: false, // Disable polling
+        staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    });
+    console.log(billingCycleData)
+    console.log(billingHistoryData.docs)
 
     const currentPlan = getSinglePalnData?.data;
     const billingDate = new Date(currentPlan?.createdAt); // Get the 'createdAt' date
@@ -177,6 +216,25 @@ const Page = ({ params }: { params: { id: string } }) => {
         setShowCancelSubscription(false);
         setShowSuccesfulCancelSubscription(true);
     };
+
+    // Detect when user scrolls to the bottom
+    const handleScroll = () => {
+        if (
+            window.innerHeight + document.documentElement.scrollTop >=
+            document.documentElement.offsetHeight - 50 // Adjust the threshold as needed
+        ) {
+            if (hasMore && !isFetching) {
+                setCurrentPage((prev) => prev + 1); // Load the next page
+            }
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [hasMore, isFetching]); // Re-attach event listener when necessary
+
+
 
     // Custom Radio button implementation
     const CustomRadio = (props: any) => {
@@ -317,47 +375,52 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                     {activeTab === 'Subscription plans' ? (
                         <div>
-                            <RadioGroup
-                                orientation="vertical"
-                                className="flex flex-col overflow-x-hidden w-full gap-[16px]"
-                                color="success"
-                                classNames={{
-                                    base: 'mt-[24px]'
-                                }}
-                            >
-                                <div className="mb-[10px] flex flex-row w-full gap-[16px] overflow-x-auto">
-                                    {rearrangedPlans?.map((plan) => (
-                                        <div key={plan?.uid} className="h-[242px] ">
-                                            <CustomRadio
-                                                header1={plan?.name}
-                                                header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
-                                                header3={
-                                                    plan?.basePrice !== 0
-                                                        ? (plan?.weeklyAmount && plan.weeklyAmount > 0
-                                                            ? `₦ ${plan.weeklyAmount.toLocaleString()}/week`
-                                                            : `₦ ${plan.monthlyAmount.toLocaleString()}/month`)
-                                                        : null
-                                                }
-                                                className="flex w-full h-full justify-between min-w-[300px]"
-                                                value={`₦ ${plan?.basePrice}`}
-                                                label={true}
-                                                label2={plan.uid === params.id}
-                                                label2Text={plan.uid === params.id ? "Current plan" : ""}
+                            {isGetAllPlansPending ? <div className='flex items-center justify-center w-full'>
+                                <CircularProgress size='sm' />
+                            </div>
+                                :
+                                <RadioGroup
+                                    orientation="vertical"
+                                    className="flex flex-col overflow-x-hidden w-full gap-[16px]"
+                                    color="success"
+                                    classNames={{
+                                        base: 'mt-[24px]'
+                                    }}
+                                >
+                                    <div className="mb-[10px] flex flex-row w-full gap-[16px] overflow-x-auto">
 
-                                                labelText={`save ${plan?.discount}%`}
-                                            >
-                                                <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
-                                                    {plan?.benefits?.map((benefit, index) => (
-                                                        <li key={index}>{benefit}</li>
-                                                    ))}
-                                                </ul>
-                                            </CustomRadio>
-                                        </div>
-                                    ))}
-                                </div>
+                                        {rearrangedPlans?.map((plan) => (
+                                            <div key={plan?.uid} className="h-[242px] ">
+                                                <CustomRadio
+                                                    header1={plan?.name}
+                                                    header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                                                    header3={
+                                                        plan?.basePrice !== 0
+                                                            ? (plan?.weeklyAmount && plan.weeklyAmount > 0
+                                                                ? `₦ ${plan.weeklyAmount.toLocaleString()}/week`
+                                                                : `₦ ${plan.monthlyAmount.toLocaleString()}/month`)
+                                                            : null
+                                                    }
+                                                    className="flex w-full h-full justify-between min-w-[300px]"
+                                                    value={`₦ ${plan?.basePrice}`}
+                                                    label={true}
+                                                    label2={plan.uid === params.id}
+                                                    label2Text={plan.uid === params.id ? "Current plan" : ""}
 
-                            </RadioGroup>
+                                                    labelText={`save ${plan?.discount}%`}
+                                                >
+                                                    <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                        {plan?.benefits?.map((benefit, index) => (
+                                                            <li key={index}>{benefit}</li>
+                                                        ))}
+                                                    </ul>
+                                                </CustomRadio>
+                                            </div>
+                                        ))}
+                                    </div>
 
+                                </RadioGroup>
+                            }
                             <div className='flex justify-between items-center mt-[40px]'>
                                 <h1>Payment methods</h1>
                                 <button className='bordr-[#E7E7EA] border rounded-[16px] p-[8px] text-[14px] text-[#575757] flex gap-[4px] items-center'>
@@ -372,41 +435,62 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
-                    {activeTab === 'Billing Cycle' ? (
+                    {activeTab === 'Billing Cycle' ?
                         <div className='border-[#EFEFF0] bg-[#F7F7F9] flex items-start justify-between border rounded-[12px] p-[16px] mt-[16px]'>
-                            <div>
-                                <h1 className='text-[14px] font-[500]'>Next billing date</h1>
-                                <p className='text-[#828282] mt-[8px] text-[12px] leading-[14.4px]'>{formattedDate}</p>
 
+                            {isGetBillingCyclePending ? <div className='flex items-center justify-center w-full'>
+                                <CircularProgress size='sm' />
                             </div>
-                            <div>
-                                <h1 className='text-[16px] font-[600]'>
-                                    {currentPlan?.currency} {currentPlan?.basePrice}
-                                </h1>
-                            </div>
-                        </div>
-                    ) : null}
+
+                                :
+
+                                <>
+                                    <div>
+                                        <h1 className='text-[14px] font-[500]'>Next billing date</h1>
+                                        <p className='text-[#828282] mt-[8px] text-[12px] leading-[14.4px]'>
+                                            {billingCycleData.nextBillingDate
+                                                ? new Date(billingCycleData.nextBillingDate).toLocaleDateString()
+                                                : new Date().toLocaleDateString()}
+                                        </p>
+
+                                    </div>
+                                    <div>
+                                        <h1 className='text-[16px] font-[600]'>
+                                            ₦  {billingCycleData?.amount ? billingCycleData?.amount.toFixed(2) : '0'}
+                                        </h1>
+                                    </div>
+
+                                </>
+                            }
+                        </div> : null}
 
 
                     {activeTab === 'Billing Cycle' && (
                         <div className="mt-[24px]">
                             <h2 className="text-[14px] font-[500] mb-[16px]">Billing History</h2>
-                            <div className="flex flex-col gap-[16px]">
-                                {billingHistory.map((item, index) => (
-                                    <div key={index} className="flex justify-between items-center">
-                                        <div className="flex gap-[12px] items-center">
-                                            <div className="bg-[#F7F7F9] p-[8px] rounded-[8px]">
-                                                {item.plan === 'Unstoppable' ? '🚀' : '💪🏽'}
+                            {isGetBillingHistoryPending ? <div className='flex items-center justify-center w-full'>
+                                <CircularProgress size='sm' />
+                            </div> :
+                                <div className="flex flex-col gap-[16px]">
+                                    {billingHistoryData?.docs?.length > 0 ? (
+                                        billingHistoryData.docs.map((history: IBillingHistory, index: number) => (
+                                            <div key={index} className="flex justify-between items-center">
+                                                <div className="flex gap-[12px] items-center">
+                                                    <div>
+                                                        <p className="text-[14px] font-[500]">{new Date(history?.date).toLocaleDateString()}</p>
+                                                        <p className="text-[12px] text-[#828282]">{history?.planName}</p>
+                                                    </div>
+                                                </div>
+                                                <p className="text-[14px] font-[500]">{history?.amount.toFixed(2)}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-[14px] font-[500]">{item.date}</p>
-                                                <p className="text-[12px] text-[#828282]">{item.plan}</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-[14px] font-[500]">{item.amount}</p>
-                                    </div>
-                                ))}
-                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-center text-[14px] text-[#828282]">No billing history available</p>
+                                    )}
+                                    {isFetching && <p>Fetching more data...</p>}
+                                    {!hasMore && <p>No more data available</p>}
+                                </div>
+                            }
                         </div>
                     )}
                 </div>

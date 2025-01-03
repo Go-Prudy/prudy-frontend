@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsChevronDown } from 'react-icons/bs';
-import BudgetChart from '@/app/(dashboard)/components/DoughnutChart';
+import BudgetChart from '@/components/DoughnutChart';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';

@@ -20,6 +20,7 @@ import { IAuthenticatedUser } from "@/app/Types";
 import { useEffect, useState } from "react";
 import Link from 'next/link';
 import { getAllPlans, getUserSubscription } from "@/app/services/SubscriptionService";
+import { GetSettingsApi } from "@/app/services/SettingService";
 
 export default function Page() {
 
@@ -85,6 +86,16 @@ export default function Page() {
   const { data: plans = [], isPending: isGetAllPlansPending, isError: isGetAllPlansError } = useQuery({
     queryKey: ['getAllPlans'],
     queryFn: () => getAllPlans(authenticatedUser?.token ?? ''),
+    enabled: !!authenticatedUser?.token, // Only fetch if token exists
+    refetchOnWindowFocus: false, // Prevent refetching on window focus
+    refetchOnMount: false, // Prevent refetching on component mount
+    refetchInterval: false, // Disable polling
+    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+  });
+
+  const { data: settingsData = {}, isPending: isGetSettingsPending, isError: isGetSettingsError } = useQuery({
+    queryKey: ['GetSettings'],
+    queryFn: () => GetSettingsApi(authenticatedUser?.token ?? ''),
     enabled: !!authenticatedUser?.token, // Only fetch if token exists
     refetchOnWindowFocus: false, // Prevent refetching on window focus
     refetchOnMount: false, // Prevent refetching on component mount
@@ -161,7 +172,7 @@ export default function Page() {
                         onClick={() => {
                           console.log(usersubscription?.plan?.uid);
 
-                          if (usersubscription?.plan?.uid) {
+                          if (usersubscription?.plan?.uid && settingsData?.hasFreeTrial) {
                             navigation.push("/subscription/" + usersubscription?.plan?.uid)
                           } else {
                             navigation.push(item.link)

@@ -1,5 +1,5 @@
 'use client'
-import SuccessModal from '@/app/(dashboard)/components/SuccessModal';
+import SuccessModal from '@/components/SuccessModal';
 import { useAuthentication } from '@/app/store/AuthStore';
 import Header from '@/components/header';
 import Input from '@/components/input';
