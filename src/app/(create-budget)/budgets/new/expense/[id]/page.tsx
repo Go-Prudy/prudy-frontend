@@ -15,8 +15,8 @@ import { useBudgetStore } from '@/app/store/Store';
 import { IAllocation, IBudget, ICreateCategory, IExpense, ISubAllocation } from '@/app/Types';
 import { Budgets } from '@/app/data/DummyData';
 
-import DeleteSuccessModal from '@/app/(dashboard)/components/DeleteSuccessModal';
-import DeleteConfirmationModal from '@/app/(dashboard)/components/DeleteConfirmationModal';
+import DeleteSuccessModal from '@/components/DeleteSuccessModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { createBudgetApi, createBudgetCategoryApi, CreateSubCategoryApi, getAllBudgetCategoriesApi, RecordExpenseApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

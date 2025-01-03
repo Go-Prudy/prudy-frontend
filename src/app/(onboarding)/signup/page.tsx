@@ -197,7 +197,7 @@ const Page = () => {
 
             <p>
               <span className="text-[14px] leading-[24px] text-[#575757]">I have read and agreed to Prudy’s </span>
-              <Link href="#" className="text-[14px] text-lemonGreen-700">
+              <Link href="/terms&condition" className="text-[14px] text-lemonGreen-700">
                 Indemnity, Terms & Privacy Policy.
               </Link>
             </p>

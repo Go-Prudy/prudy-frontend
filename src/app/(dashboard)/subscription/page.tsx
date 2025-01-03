@@ -10,13 +10,14 @@ import subtract1 from '@/images/Subtract.png'
 import subtract2 from '@/images/Subtract (1).png'
 import mono1 from '@/images/mono1.png'
 import Image from 'next/image';
-import DeleteSuccessModal from '../components/DeleteSuccessModal';
+import DeleteSuccessModal from '../../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
 import { Select, SelectItem, Avatar } from "@nextui-org/react";
 import { Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
 import { getAllPlans } from '@/app/services/SubscriptionService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
+import { getBillingCycleApi } from '@/app/services/BillingServices';
 
 
 interface CardFormValues {
@@ -283,6 +284,8 @@ const Page = () => {
         refetchInterval: false, // Disable polling
         staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
     });
+
+
 
     const plans: Plans = getAllPlansData;
     console.log(plans);

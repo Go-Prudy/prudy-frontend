@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { GetAllBudgetsApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
-import InviteModal from '@/app/(dashboard)/components/InviteModal';
+import InviteModal from '@/components/InviteModal';
 import { getPendingInvitesApi } from '@/app/services/InviteService';
 
 const BudgetPage = () => {

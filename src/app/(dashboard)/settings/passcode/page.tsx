@@ -5,7 +5,7 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import launch from '@/images/Launch.png'
 import { motion } from 'framer-motion';
-import SuccessModal from '../../components/SuccessModal'
+import SuccessModal from '../../../../components/SuccessModal'
 import { useMutation } from '@tanstack/react-query'
 import { useAuthentication } from '@/app/store/AuthStore'
 import { CircularProgress } from '@nextui-org/react'

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsChevronDown } from 'react-icons/bs';
-import BudgetChart from '@/app/(dashboard)/components/DoughnutChart';
+import BudgetChart from '@/components/DoughnutChart';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +12,7 @@ import { CircularProgress } from '@nextui-org/react';
 import Image from 'next/image';
 import noBudgetImg from '@/images/List 2.webp'
 import { Line } from 'react-chartjs-2';
-import BudgetVisualization from '@/app/(dashboard)/components/BudgetVisualization';
+import BudgetVisualization from '@/components/BudgetVisualization';
 
 const Page = ({ params }: { params: { id: string } }) => {
 

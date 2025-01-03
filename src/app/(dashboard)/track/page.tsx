@@ -27,7 +27,7 @@ import { RadioGroup, useRadio, VisuallyHidden, cn, CircularProgress, Progress } 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import toast from "react-hot-toast";
 import { format, parseISO } from 'date-fns';
-import Scanner from "../components/scanFeature";
+import Scanner from "../../../components/scanFeature";
 import { AssignCategoryToTransactionApi } from "@/app/services/TransactionService";
 
 

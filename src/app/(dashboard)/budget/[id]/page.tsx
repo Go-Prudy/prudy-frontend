@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import BarChart from '../../components/BarChart';
+import BarChart from '../../../../components/BarChart';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import pics from '@/images/frame.webp';
@@ -15,7 +15,7 @@ import add from '@/images/add.png'
 import { CircularProgress, Progress } from '@nextui-org/react';
 import { GoChevronRight, GoPerson } from "react-icons/go";
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
-import DeleteSuccessModal from '../../components/DeleteSuccessModal';
+import DeleteSuccessModal from '../../../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { IBudget, Income, IAllocation, ISubAllocation, ICreateCategory } from '../Types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -230,7 +230,7 @@ export const useBudgetStore = create<BudgetState>()(
         }),
         {
             name: 'budget-storage',
-            getStorage: () => localStorage,
+            storage: createJSONStorage(() => localStorage), // Using createJSONStorage to wrap localStorage
         }
     )
 );
