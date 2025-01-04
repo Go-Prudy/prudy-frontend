@@ -3,7 +3,7 @@ import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import React, { ReactNode, useState } from 'react';
 import { BsChevronDown, BsChevronRight, BsChevronUp, BsDot, BsX } from 'react-icons/bs';
 import { motion } from 'framer-motion';
-import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps } from "@nextui-org/react";
+import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps, CircularProgress } from "@nextui-org/react";
 import paymnetIcon from '/public/images/Payment method icon.png'
 import CheckcircleIcon from '/public/images/Check circle.png'
 import subtract1 from '/public/images/Subtract.png'
@@ -109,6 +109,7 @@ const Page = () => {
     const handleChange = (value: string) => {
         setSelectedPlan(value);
     };
+    console.log(navigation.back());
 
 
 
@@ -405,7 +406,7 @@ const Page = () => {
             </div>
 
 
-            {
+            {/* {
                 showSubscriptionPlan &&
                 <motion.div
                     initial={{ opacity: 0, y: 90 }}
@@ -469,75 +470,9 @@ const Page = () => {
 
                     </BottomDrawer>
                 </motion.div>
-            }
+            } */}
 
 
-
-            {
-                showMakePayment &&
-                <motion.div
-                    initial={{ opacity: 0, y: 90 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-                >
-
-                    <BottomDrawer
-                        footer={<button onClick={() => handleMakePayment()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
-                        label="Make payment"
-                        back={false}
-                        show={showMakePayment}
-                        close={true}
-                        onClose={() => setShowMakePayment(false)}
-                    >
-                        <div className="relative mt-[24px]  h-[73vh] overflow-y-auto w-full mb-4">
-                            <div className='mt-[16px] p-[4px] bg-[#F7F7F9] rounded-[12px] mb-[20px] flex justify-center w-fit mx-auto'>
-                                {options.map((option: any) => (
-                                    <button onClick={() => setSelectedOption(option)} className={`${option.toLowerCase() === selectedOption.toLowerCase() && ' rounded-[12px] text-white  bg-[#66C227] '} p-[8px] `} key={option.toLowerCase()}>
-                                        {option}
-                                    </button>
-                                ))}
-                            </div>
-                            <RadioGroup
-                                orientation="vertical"
-                                className=' flex flex-col w-full gap-[16px] '
-                                color='success'
-                            >
-                                <div className="mb-[10px] flex flex-col w-full gap-[16px]">
-                                    {['monthly', 'quaterly', 'yearly']?.map((period) => (
-                                        selectedOption?.toLowerCase() === period &&
-                                        plans[period as keyof Plans]?.map((plan) => (
-                                            <CustomRadio
-                                                key={plan?.uid}
-                                                header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
-                                                header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
-                                                header3={
-                                                    period === 'monthly'
-                                                        ? (plan?.weeklyAmount && plan.weeklyAmount > 0 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week` : null)
-                                                        : (plan?.monthlyAmount && plan.monthlyAmount > 0 ? `₦ ${plan.monthlyAmount.toLocaleString()}/month` : null)
-                                                }
-                                                className="flex w-full justify-between"
-                                                value={plan?.basePrice}
-                                                label={plan?.discount ? `save ${plan?.discount}%` : null}
-                                            >
-                                                <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
-                                                    {plan?.benefits?.map((benefit, index) => (
-                                                        <li key={index}>{benefit}</li>
-                                                    ))}
-                                                </ul>
-                                            </CustomRadio>
-                                        ))
-                                    ))}
-                                </div>
-
-                            </RadioGroup>
-                        </div>
-
-
-                    </BottomDrawer>
-                </motion.div>
-            }
 
             {
                 showSubscriptionPlan &&
@@ -546,31 +481,72 @@ const Page = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className=" h-[1084px] w-full z-[40]  top-[0%] fixed bg-[#1c1c1c73]"
                 >
 
                     <BottomDrawer
-                        footer={<button onClick={() => handleSubscribe()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
+                        footer={<button onClick={() => handleMakePayment()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA]  flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
                         label="Subscription plans"
                         back={false}
                         show={showSubscriptionPlan}
                         close={true}
                         onClose={() => setShowSubscriptionPlan(false)}
                     >
-                        <div className="relative mt-[12px] w-full mb-4">
-                            <div>
-                                <RadioGroup>
-                                    <CustomRadio />
-                                </RadioGroup>
+                        <div className="relative mt-[24px]  h-[86vh] overflow-y-auto w-full mb-4">
+                            <div className='mt-[16px] p-[4px] bg-[#F7F7F9] rounded-[12px] mb-[20px] flex justify-center w-fit mx-auto'>
+                                {options.map((option: any) => (
+                                    <button onClick={() => setSelectedOption(option)} className={`${option.toLowerCase() === selectedOption.toLowerCase() && ' rounded-[12px] text-white  bg-[#66C227] '} p-[8px] `} key={option.toLowerCase()}>
+                                        {option}
+                                    </button>
+                                ))}
                             </div>
+                            {isGetAllPlansPending ?
+                                <div className='flex items-center justify-center w-full'>
+                                    <CircularProgress size='sm' />
+                                </div> :
 
+                                <RadioGroup
+                                    orientation="vertical"
+                                    className=' flex flex-col w-full gap-[16px] '
+                                    color='success'
+                                >
+                                    <div className="mb-[10px] flex flex-col w-full gap-[16px]">
+                                        {['monthly', 'quaterly', 'yearly']?.map((period) => (
+                                            selectedOption?.toLowerCase() === period &&
+                                            plans[period as keyof Plans]?.slice().reverse().map((plan) => (
+                                                <CustomRadio
+                                                    key={plan?.uid}
+                                                    header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
+                                                    header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                                                    header3={
+                                                        period === 'monthly'
+                                                            ? (plan?.weeklyAmount && plan.weeklyAmount > 0 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week` : null)
+                                                            : (plan?.monthlyAmount && plan.monthlyAmount > 0 ? `₦ ${plan.monthlyAmount.toLocaleString()}/month` : null)
+                                                    }
+                                                    className="flex w-full justify-between"
+                                                    value={plan?.basePrice}
+                                                    label={plan?.discount ? `save ${plan?.discount}%` : null}
+                                                >
+                                                    <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                        {plan?.benefits?.map((benefit, index) => (
+                                                            <li key={index}>{benefit}</li>
+                                                        ))}
+                                                    </ul>
+                                                </CustomRadio>
+                                            ))
+                                        ))}
+                                    </div>
 
+                                </RadioGroup>
+                            }
                         </div>
 
 
                     </BottomDrawer>
                 </motion.div>
             }
+
+
 
 
             {
