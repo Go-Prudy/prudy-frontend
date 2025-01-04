@@ -95,6 +95,7 @@ export const useAuthentication = create<AuthState>()(
                     firstName: '',
                     lastName: '',
                     email: '',
+                    hasFreeTrial: false,
                     phoneNumber: '',
                     registeredWith: '',
                     isVerified: false,
