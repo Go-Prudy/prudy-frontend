@@ -3,7 +3,7 @@ import Header from '@/components/header';
 import Input from '@/components/input';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import succes from '@/images/success-pJCKblmrv2.png'
+import succes from '/public/images/success-pJCKblmrv2.png'
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 

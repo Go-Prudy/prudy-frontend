@@ -3,14 +3,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsArrowRight, BsPlus } from 'react-icons/bs';
-import moneyIcon from '@/images/money.png';
-import noBudgetImg from '@/images/List 2.webp'
+import moneyIcon from '/public/images/money.png';
+import noBudgetImg from '/public/images/List 2.webp'
 
 import Image from 'next/image';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import { useRouter } from 'next/navigation';
-import warninglogo from '@/images/warn.gif'
-import Successlogo from '@/images/success.gif'
+import warninglogo from '/public/images/warn.gif'
+import Successlogo from '/public/images/success.gif'
 import { useBudgetStore } from '@/app/store/Store';
 import { IAllocation, IBudget, ICreateCategory, IExpense, ISubAllocation } from '@/app/Types';
 import { Budgets } from '@/app/data/DummyData';

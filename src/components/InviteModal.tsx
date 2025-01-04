@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { motion } from 'framer-motion';
-import shake from '@/images/shake.gif'
+import shake from '/public/images/shake.gif'
 import Image from 'next/image';
 import { BsX } from 'react-icons/bs';
 import { useMutation, useQuery } from '@tanstack/react-query';

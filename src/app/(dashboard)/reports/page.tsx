@@ -1,7 +1,7 @@
 import Header from '@/components/header'
 import Image from 'next/image'
 import React from 'react'
-import launch from '@/images/Launch.png'
+import launch from '/public/images/Launch.png'
 const page = () => {
     return (
         <div className="bg-[#FAFAFA] w-full h-screen">

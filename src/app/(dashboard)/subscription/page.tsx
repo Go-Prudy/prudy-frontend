@@ -4,11 +4,11 @@ import React, { ReactNode, useState } from 'react';
 import { BsChevronDown, BsChevronRight, BsChevronUp, BsDot, BsX } from 'react-icons/bs';
 import { motion } from 'framer-motion';
 import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps } from "@nextui-org/react";
-import paymnetIcon from '@/images/Payment method icon.png'
-import CheckcircleIcon from '@/images/Check circle.png'
-import subtract1 from '@/images/Subtract.png'
-import subtract2 from '@/images/Subtract (1).png'
-import mono1 from '@/images/mono1.png'
+import paymnetIcon from '/public/images/Payment method icon.png'
+import CheckcircleIcon from '/public/images/Check circle.png'
+import subtract1 from '/public/images/Subtract.png'
+import subtract2 from '/public/images/Subtract (1).png'
+import mono1 from '/public/images/mono1.png'
 import Image from 'next/image';
 import DeleteSuccessModal from '../../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
@@ -295,11 +295,21 @@ const Page = () => {
 
 
     return (
-        <div className=' relative  w-[100vw] max-w-[500px]   h-[844px] overflow-x-hidden' style={{
-            background: 'linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)',
-        }}>
+        <motion.div
+            initial={{ y: "100%" }} // Start completely off-screen at the bottom
+            animate={{ y: 0 }} // Animate to the top
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="relative w-full max-w-[500px] h-[884px]    overflow-x-hidden"
+            style={{
+                background: "linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)",
 
-            <div className='  relative py-[22px] px-[24px]'
+            }}
+        >
+
+
+            <div
+
+                className='  relative py-[22px] px-[24px]'
             >
                 <div className='  fixed lg:absolute top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
                     <Image
@@ -315,7 +325,7 @@ const Page = () => {
 
                 {/* Header */}
                 <div className='flex mb-[36px]  items-center w-full'>
-                    <div onClick={() => navigation.push('/profile')} className='bg-[#FFFFFF1A] rounded-[22px] grid place-content-center text-white size-[36px]'>
+                    <div onClick={() => navigation.back()} className='bg-[#FFFFFF1A] rounded-[22px] grid place-content-center text-white size-[36px]'>
                         <BsX size={20} />
                     </div>
 
@@ -617,7 +627,7 @@ const Page = () => {
             }
 
 
-        </div >
+        </motion.div >
     );
 };
 

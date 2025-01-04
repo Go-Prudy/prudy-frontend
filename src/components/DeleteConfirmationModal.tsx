@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
-import warninglogo from '@/images/warn.gif'; // Update with the correct image path if needed
+import warninglogo from '/public/images/warn.gif'; // Update with the correct image path if needed
 
 interface IDeleteConfirmationModalProps {
     showDeleteModal: boolean;

@@ -2,15 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation'
 import Image from 'next/image';
-import home from "@/images/home.webp"
-import hambugger from "@/images/hambugger.png"
-import home1 from "@/images/home1.webp"
-import track from '@/images/note.webp'
-import track1 from '@/images/note1.webp'
-import status from '@/images/status.webp'
-import status1 from '@/images/status1.png'
-import profile from '@/images/user.png'
-import profile1 from '@/images/user1.webp'
+import home from "/public/images/home.webp"
+import hambugger from "/public/images/hambugger.png"
+import home1 from "/public/images/home1.webp"
+import track from '/public/images/note.webp'
+import track1 from '/public/images/note1.webp'
+import status from '/public/images/status.webp'
+import status1 from '/public/images/status1.png'
+import profile from '/public/images/user.png'
+import profile1 from '/public/images/user1.webp'
 
 import Link from 'next/link';
 const BottomNavigation = () => {

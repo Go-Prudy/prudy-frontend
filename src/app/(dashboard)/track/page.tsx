@@ -1,18 +1,18 @@
 'use client'
 import Header2 from "@/components/create-budget/Header2";
 import Image from "next/image";
-import linkIcon from '@/images/Mindmap.png'
-import Icon1 from '@/images/Add Category.png'
-import Icon2 from '@/images/Write Content.png'
-import Icon3 from '@/images/Add Files.png'
-import wema from '@/images/wema.png'
-import kuda from '@/images/kuda.png'
-import gt from '@/images/gt.png'
-import sync from '@/images/sync.png'
-import scan from '@/images/scan.png'
-import lunch from '@/images/Launch.png'
-import mono1 from '@/images/mono1.png'
-import addManual from '@/images/addManually.png'
+import linkIcon from '/public/images/Mindmap.png'
+import Icon1 from '/public/images/Add Category.png'
+import Icon2 from '/public/images/Write Content.png'
+import Icon3 from '/public/images/Add Files.png'
+import wema from '/public/images/wema.png'
+import kuda from '/public/images/kuda.png'
+import gt from '/public/images/gt.png'
+import sync from '/public/images/sync.png'
+import scan from '/public/images/scan.png'
+import lunch from '/public/images/Launch.png'
+import mono1 from '/public/images/mono1.png'
+import addManual from '/public/images/addManually.png'
 import { BsCheck, BsChevronRight, BsPlus, BsThreeDotsVertical, BsX } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { motion } from 'framer-motion';

@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
-import Logo from '@/images/logo.webp';
+import Logo from '/public/images/logo.webp';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Slide2 from './Slide2';
-import Logo2 from '@/images/logo2.webp';
+import Logo2 from '/public/images/logo2.webp';
 const Slide1 = () => {
     return (
         <div className=' relative  '>

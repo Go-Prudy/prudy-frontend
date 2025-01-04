@@ -3,7 +3,7 @@
 import Header from '@/components/header'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import launch from '@/images/Launch.png'
+import launch from '/public/images/Launch.png'
 import { motion } from 'framer-motion';
 import SuccessModal from '../../../../components/SuccessModal'
 import { useMutation } from '@tanstack/react-query'

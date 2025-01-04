@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { Progress } from '@nextui-org/react';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import Image from 'next/image';
-import manual from '@/images/manual.png'
-import photo from '@/images/camera.png'
+import manual from '/public/images/manual.png'
+import photo from '/public/images/camera.png'
 import { GoChevronRight } from 'react-icons/go';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
