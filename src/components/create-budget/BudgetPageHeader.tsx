@@ -33,6 +33,7 @@ const BudgetPageHeader = () => {
             createdAt: '',
             updatedAt: '',
             uid: '',
+            hasFreeTrial: false,
             firstName: '',
             lastName: '',
             email: '',

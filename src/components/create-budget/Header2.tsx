@@ -66,6 +66,7 @@ const Header2 = ({ title }: Iprop) => {
             uid: '',
             firstName: '',
             lastName: '',
+            hasFreeTrial: false,
             email: '',
             phoneNumber: '',
             registeredWith: '',
