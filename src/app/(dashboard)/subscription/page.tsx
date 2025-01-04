@@ -405,7 +405,7 @@ const Page = () => {
             </div>
 
 
-            {
+            {/* {
                 showSubscriptionPlan &&
                 <motion.div
                     initial={{ opacity: 0, y: 90 }}
@@ -469,29 +469,29 @@ const Page = () => {
 
                     </BottomDrawer>
                 </motion.div>
-            }
+            } */}
 
 
 
             {
-                showMakePayment &&
+                showSubscriptionPlan &&
                 <motion.div
                     initial={{ opacity: 0, y: 90 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className=" h-[1084px] w-full z-[40]  top-[0%] fixed bg-[#1c1c1c73]"
                 >
 
                     <BottomDrawer
-                        footer={<button onClick={() => handleMakePayment()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
-                        label="Make payment"
+                        footer={<button onClick={() => handleMakePayment()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA]  flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
+                        label="Subscription plans"
                         back={false}
-                        show={showMakePayment}
+                        show={showSubscriptionPlan}
                         close={true}
-                        onClose={() => setShowMakePayment(false)}
+                        onClose={() => setShowSubscriptionPlan(false)}
                     >
-                        <div className="relative mt-[24px]  h-[73vh] overflow-y-auto w-full mb-4">
+                        <div className="relative mt-[24px]  h-[86vh] overflow-y-auto w-full mb-4">
                             <div className='mt-[16px] p-[4px] bg-[#F7F7F9] rounded-[12px] mb-[20px] flex justify-center w-fit mx-auto'>
                                 {options.map((option: any) => (
                                     <button onClick={() => setSelectedOption(option)} className={`${option.toLowerCase() === selectedOption.toLowerCase() && ' rounded-[12px] text-white  bg-[#66C227] '} p-[8px] `} key={option.toLowerCase()}>
@@ -507,7 +507,7 @@ const Page = () => {
                                 <div className="mb-[10px] flex flex-col w-full gap-[16px]">
                                     {['monthly', 'quaterly', 'yearly']?.map((period) => (
                                         selectedOption?.toLowerCase() === period &&
-                                        plans[period as keyof Plans]?.map((plan) => (
+                                        plans[period as keyof Plans]?.slice().reverse().map((plan) => (
                                             <CustomRadio
                                                 key={plan?.uid}
                                                 header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
@@ -539,38 +539,7 @@ const Page = () => {
                 </motion.div>
             }
 
-            {
-                showSubscriptionPlan &&
-                <motion.div
-                    initial={{ opacity: 0, y: 90 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-                >
 
-                    <BottomDrawer
-                        footer={<button onClick={() => handleSubscribe()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
-                        label="Subscription plans"
-                        back={false}
-                        show={showSubscriptionPlan}
-                        close={true}
-                        onClose={() => setShowSubscriptionPlan(false)}
-                    >
-                        <div className="relative mt-[12px] w-full mb-4">
-                            <div>
-                                <RadioGroup>
-                                    <CustomRadio />
-                                </RadioGroup>
-                            </div>
-
-
-                        </div>
-
-
-                    </BottomDrawer>
-                </motion.div>
-            }
 
 
             {
