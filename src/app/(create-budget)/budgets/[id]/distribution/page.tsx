@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { GetAllBudgetsApi, getBudgetDistributionApi, getSingleBudgetApi } from '@/app/services/BudgetService';
 import { CircularProgress } from '@nextui-org/react';
 import Image from 'next/image';
-import noBudgetImg from '@/images/List 2.webp'
+import noBudgetImg from '/public/images/List 2.webp'
 import { Line } from 'react-chartjs-2';
 import BudgetVisualization from '@/components/BudgetVisualization';
 

@@ -2,16 +2,16 @@
 import Header2 from "@/components/create-budget/Header2";
 import Image from "next/image";
 import { BsChevronRight, BsPerson } from "react-icons/bs";
-import premium from "@/images/premium2.png";
-import logout from "@/images/logout.png";
-import budgetIcon from "@/images/category-2.png";
-import collaborationIcon from "@/images/collaborationicon.png";
-import reminderIcon from "@/images/remindericon.png";
-import subscriptionIcon from "@/images/subscriptionicon.png";
-import reportIcon from "@/images/reporticon.png";
-import faqIcon from "@/images/faq.png";
-import passcodeIcon from "@/images/passcode.png";
-import currencyIcon from "@/images/currency.png";
+import premium from "/public/images/premium2.png";
+import logout from "/public/images/logout.png";
+import budgetIcon from "/public/images/category-2.png";
+import collaborationIcon from "/public/images/collaborationicon.png";
+import reminderIcon from "/public/images/remindericon.png";
+import subscriptionIcon from "/public/images/subscriptionicon.png";
+import reportIcon from "/public/images/reporticon.png";
+import faqIcon from "/public/images/faq.png";
+import passcodeIcon from "/public/images/passcode.png";
+import currencyIcon from "/public/images/currency.png";
 import { FaClipboardList, FaUsers, FaBell, FaDollarSign, FaChartPie, FaQuestionCircle, FaLock, FaGlobe } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -70,6 +70,7 @@ export default function Page() {
       createdAt: '',
       updatedAt: '',
       uid: '',
+      hasFreeTrial: false,
       firstName: '',
       lastName: '',
       email: '',
@@ -167,7 +168,7 @@ export default function Page() {
                   {toolItems
                     .filter((item) => item.category === category)
                     .map((item) => (
-                      <div
+                      <button
                         key={item.title}
                         onClick={() => {
                           console.log(usersubscription?.plan?.uid);
@@ -186,7 +187,7 @@ export default function Page() {
                           {item.icon}
                         </div>
                         <h1 className="text-[14px] text-[#474747]">{item.title}</h1>
-                      </div>
+                      </button>
                     ))}
                 </div>
               </div>

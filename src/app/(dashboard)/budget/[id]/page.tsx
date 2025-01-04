@@ -3,15 +3,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import BarChart from '../../../../components/BarChart';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
-import pics from '@/images/frame.webp';
-import colab from '@/images/collab.png';
+import pics from '/public/images/frame.webp';
+import colab from '/public/images/collab.png';
 import { BsPlus } from 'react-icons/bs';
 import { Budgets } from '@/app/data/DummyData';
 import { IBudget as IBudget } from '@/app/Types';
 import Image from 'next/image';
-import noBudgetImg from '@/images/List 2.webp'
-import moneyIcon from '@/images/money.png';
-import add from '@/images/add.png'
+import noBudgetImg from '/public/images/List 2.webp'
+import moneyIcon from '/public/images/money.png';
+import add from '/public/images/add.png'
 import { CircularProgress, Progress } from '@nextui-org/react';
 import { GoChevronRight, GoPerson } from "react-icons/go";
 import BottomDrawer from '@/components/create-budget/BottomDrawer';

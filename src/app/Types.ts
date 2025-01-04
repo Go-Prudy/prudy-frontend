@@ -109,6 +109,7 @@ export interface IAuthenticatedUser {
         createdAt: string;
         updatedAt: string;
         uid: string;
+        hasFreeTrial: boolean;
         firstName: string;
         lastName: string;
         email: string;

@@ -4,7 +4,7 @@ import React, { useState, useEffect, ChangeEvent } from 'react';
 import { motion } from 'framer-motion';
 import { BsCamera, BsPerson } from 'react-icons/bs';
 import Image from 'next/image';
-import cameraIcon from '@/images/camera.png';
+import cameraIcon from '/public/images/camera.png';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { useMutation, useQuery } from '@tanstack/react-query';

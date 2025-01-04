@@ -22,6 +22,12 @@ const LoginPage = () => {
   const navigate = useRouter();
 
 
+  const hasFreeTrialCookie = Cookies.get("hasFreeTrial");
+
+  const hasFreeTrial = hasFreeTrialCookie
+    ? JSON.parse(hasFreeTrialCookie)
+    : null;
+
   // React Query mutation for sending OTP
   const loginMutation = useMutation({
     mutationFn: (data: any) => loginUser(data),
@@ -33,6 +39,13 @@ const LoginPage = () => {
         console.log(rest.data);
         login(rest.data);
         Cookies.set('token', rest.data.token, { expires: 7 });
+
+        if (hasFreeTrialCookie) {
+          Cookies.set("hasFreeTrial", "false", { expires: 365 * 100, secure: true });
+        } else {
+          Cookies.set("hasFreeTrial", rest.data.profile.hasFreeTrial, { expires: 365 * 100, secure: true });
+
+        }
 
         console.log(authenticatedUser);
 

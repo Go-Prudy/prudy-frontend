@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
-import Successlogo from '@/images/success.gif';
+import Successlogo from '/public/images/success.gif';
 
 interface IProps {
     showModal: boolean;

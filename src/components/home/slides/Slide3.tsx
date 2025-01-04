@@ -4,10 +4,10 @@ import FadeTransition from '@/components/fade-transition';
 import ForwardArrow from '@/icons/forward-arrow';
 import { StaticImageData } from 'next/image';
 import { useRouter } from 'next/navigation';
-import slide2Img from '@/images/couple.webp';
-import slide3Img from '@/images/pwoman.webp';
-import slide4Img from '@/images/chart.webp';
-import FirstSlidePic from '@/images/woman.webp';
+import slide2Img from '/public/images/couple.webp';
+import slide3Img from '/public/images/pwoman.webp';
+import slide4Img from '/public/images/chart.webp';
+import FirstSlidePic from '/public/images/woman.webp';
 interface Slide3Props {
     slide: number;
     handlePrev: () => void;

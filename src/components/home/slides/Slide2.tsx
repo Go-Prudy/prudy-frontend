@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import React from 'react'
-import Logo from '@/images/logo2.webp';
+import Logo from '/public/images/logo2.webp';
 
 const Slide2 = () => {
     return (

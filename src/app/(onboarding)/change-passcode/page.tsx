@@ -4,7 +4,7 @@ import { useAuthentication } from '@/app/store/AuthStore';
 import Header from '@/components/header';
 import Input from '@/components/input';
 import { useRouter } from 'next/navigation';
-import successIcon from '@/images/success-pJCKblmrv2.png'
+import successIcon from '/public/images/success-pJCKblmrv2.png'
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';

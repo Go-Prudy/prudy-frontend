@@ -8,7 +8,7 @@ import { Popover, PopoverTrigger, PopoverContent, Button, cn, VisuallyHidden, us
 import { BsChevronDown, BsChevronUp, BsPlus } from 'react-icons/bs';
 import DeleteSuccessModal from '../../../../components/DeleteSuccessModal';
 import Image from 'next/image';
-import warninglogo from '@/images/warn.gif';
+import warninglogo from '/public/images/warn.gif';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { getAllPlans, getSinglePlan } from '@/app/services/SubscriptionService';
 import { useQuery } from '@tanstack/react-query';

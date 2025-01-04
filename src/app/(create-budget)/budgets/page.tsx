@@ -1,9 +1,9 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react';
 import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
-import pics from '@/images/frame.webp';
+import pics from '/public/images/frame.webp';
 import { BsPersonFill, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
-import noBudgetImg from '@/images/List 2.webp';
+import noBudgetImg from '/public/images/List 2.webp';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import CreateBudget from '@/components/create-budget/CreateBudget';
@@ -14,7 +14,7 @@ import { GetAllBudgetsApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import InviteModal from '@/components/InviteModal';
 import { getPendingInvitesApi } from '@/app/services/InviteService';
-
+import Cookies from "js-cookie";
 const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
@@ -24,9 +24,11 @@ const BudgetPage = () => {
 
     const [blinking, setBlinking] = useState(false);
     const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-
+    const navigate = useRouter()
 
     const { authenticatedUser } = useAuthentication();
+    console.log(authenticatedUser?.profile?.hasFreeTrial);
+
 
     const { data: budgets = [], isFetching, error, isPending, refetch: refetchAllBudgets } = useQuery({
         queryKey: ['allBudgetCategories'],
@@ -42,7 +44,17 @@ const BudgetPage = () => {
         refetchOnWindowFocus: true,
     });
 
+    const hasFreeTrialCookie = Cookies.get("hasFreeTrial");
 
+    const hasFreeTrial = hasFreeTrialCookie
+        ? JSON.parse(hasFreeTrialCookie)
+        : null;
+    useEffect(() => {
+        if (hasFreeTrial === true) {
+            Cookies.set("hasFreeTrial", "false", { expires: 365 * 100, secure: true });
+            navigate.push('/subscription');
+        }
+    }, [hasFreeTrial])
 
     useEffect(() => {
         if (getPendingInvitesApiData) {

@@ -6,7 +6,7 @@ import Flag from 'react-world-flags'; // import flag component
 import { CircularProgress, Switch } from '@nextui-org/react';
 import Link from 'next/link';
 import Image from 'next/image';
-import warninglogo from '@/images/warn.gif';
+import warninglogo from '/public/images/warn.gif';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import axios from 'axios';
 import { getAllCurrenciesApi } from '@/app/services/MISC';
