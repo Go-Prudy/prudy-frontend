@@ -1,18 +1,23 @@
 /// <reference types="react" />
 
 'use client'
+import { useRouter } from 'next/router';
 import Header from '@/components/header'
 import React, { useEffect, useState } from 'react'
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Popover, PopoverTrigger, PopoverContent, Button, cn, VisuallyHidden, useRadio, RadioGroup, CircularProgress } from "@nextui-org/react";
 import { BsChevronDown, BsChevronUp, BsPlus } from 'react-icons/bs';
 import DeleteSuccessModal from '../../../../components/DeleteSuccessModal';
 import Image from 'next/image';
 import warninglogo from '/public/images/warn.gif';
+import more from '/public/images/more.png';
+import visa from '/public/images/visa.png';
+import mastercard from '/public/images/master.png';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { getAllPlans, getSinglePlan } from '@/app/services/SubscriptionService';
-import { useQuery } from '@tanstack/react-query';
-import { getBillingCycleApi, getBillingHistoryApi } from '@/app/services/BillingServices';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { completeAddPaymentMethodApi, deletePaymentMethodApi, getBillingCycleApi, getBillingHistoryApi, getPaymentMethodsApi, initAddPaymentMethodApi, setDefaultPaymentMethodApi } from '@/app/services/BillingServices';
+import toast from 'react-hot-toast';
 
 
 
@@ -60,8 +65,10 @@ type GetAllPlansFn = (token: string) => Promise<Plans>;
 interface AuthenticatedUser {
     token: string | null;
 }
-const Page = ({ params }: { params: { id: string } }) => {
+const Page = ({ params, searchParams }: { params: { id: string }, searchParams: { status: string, tx_ref: string, transaction_id: string } }) => {
 
+    const { status, tx_ref, transaction_id } = searchParams;
+    const queryClient = useQueryClient();
     const id: string = params['id'];
     const tabs = ['Subscription plans', 'Billing Cycle']
     const [activeTab, setActiveTab] = useState('Subscription plans')
@@ -74,45 +81,26 @@ const Page = ({ params }: { params: { id: string } }) => {
     const [currentPage, setCurrentPage] = useState(1); // Track the current page
     const [billingHistory, setBillingHistory] = useState([]); // Store fetched data
     const [hasMore, setHasMore] = useState(true); // Determine if more data is available
+    const [visibleTooltipUid, setVisibleTooltipUid] = useState<string | null>(null);
+
+    const handleTooltipToggle = (uid: string) => {
+        setVisibleTooltipUid(visibleTooltipUid === uid ? null : uid);
+
+    };
+
+
+    useEffect(() => {
+        if (status && tx_ref && transaction_id) {
+            console.log('Status:', status);
+            console.log('Transaction Reference:', tx_ref);
+            console.log('Transaction ID:', transaction_id);
+            // Handle the parameters as needed
+        }
+    }, [status, tx_ref, transaction_id]);
+
 
     const limit = 10;
-    // const billingHistory = [
-    //     {
-    //         date: '06 June, 2024',
-    //         plan: 'Unstoppable',
-    //         amount: 'N 3,000'
-    //     },
-    //     {
-    //         date: '06 May, 2024',
-    //         plan: 'Unstoppable',
-    //         amount: 'N 3,000'
-    //     },
-    //     {
-    //         date: '06 April, 2024',
-    //         plan: 'Unstoppable',
-    //         amount: 'N 3,000'
-    //     },
-    //     {
-    //         date: '06 March, 2024',
-    //         plan: 'Money Master',
-    //         amount: 'N 2,500'
-    //     },
-    //     {
-    //         date: '06 February, 2024',
-    //         plan: 'Money Master',
-    //         amount: 'N 2,500'
-    //     },
-    //     {
-    //         date: '06 January, 2024',
-    //         plan: 'Money Master',
-    //         amount: 'N 2,500'
-    //     },
-    //     {
-    //         date: '06 June, 2024',
-    //         plan: 'Money Master',
-    //         amount: 'N 2,500'
-    //     }
-    // ];
+
 
     const { authenticatedUser } = useAuthentication();
 
@@ -157,8 +145,21 @@ const Page = ({ params }: { params: { id: string } }) => {
         refetchInterval: false, // Disable polling
         staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
     });
-    console.log(billingCycleData)
-    console.log(billingHistoryData.docs)
+
+
+
+    const { data: getPaymentMethodData = [], isPending: isGetPaymentMethodPending, isError: isGetPaymentMethodError } = useQuery({
+        queryKey: ['paymentMethods'],
+        queryFn: () => getPaymentMethodsApi(authenticatedUser?.token ?? ''),
+        enabled: !!authenticatedUser?.token, // Only fetch if token exists
+        refetchOnWindowFocus: false, // Prevent refetching on window focus
+        refetchOnMount: false, // Prevent refetching on component mount
+        refetchInterval: false, // Disable polling
+        staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    });
+
+    console.log(getPaymentMethodData);
+
 
     const currentPlan = getSinglePalnData?.data;
     const billingDate = new Date(currentPlan?.createdAt); // Get the 'createdAt' date
@@ -236,6 +237,113 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
+    useEffect(() => {
+        if (transaction_id) {
+            completeAddPaymentMethodMutation.mutate({
+                token: authenticatedUser?.token ?? '',
+                paymentRef: transaction_id,
+            });
+        }
+    }, [transaction_id]);
+
+
+    // React Query mutation for verifying OTP
+    const initializePaymentMethodMutation = useMutation({
+        mutationFn: (token: any) => initAddPaymentMethodApi(token),
+        onSuccess: (data: any) => {
+            if (data?.link) {
+                console.log(data.link);
+                window.location.href = data.link;
+            }
+        },
+        onError: (error: Error) => {
+            console.error('Error initializing payment method:', error);
+        },
+    });
+
+    const completeAddPaymentMethodMutation = useMutation({
+        mutationFn: ({ token, paymentRef }: { token: string, paymentRef: string }) => completeAddPaymentMethodApi(token, paymentRef),
+        onSuccess: (data: any) => {
+            console.log('Payment method added successfully:', data);
+        },
+        onError: (error: Error) => {
+            console.error('Error completing payment method:', error);
+        },
+    });
+
+
+
+    const setDefaultPaymentMethodMutation = useMutation({
+        mutationFn: ({ token, cardId }: { token: string, cardId: string }) => setDefaultPaymentMethodApi(token, cardId),
+        onMutate: async ({ cardId }) => {
+            await queryClient.cancelQueries({ queryKey: ['paymentMethods'] });
+            const previousPaymentMethods = queryClient.getQueryData(['paymentMethods']);
+            queryClient.setQueryData(['paymentMethods'], (old: any) =>
+                old.map((method: any) =>
+                    method.uid === cardId ? { ...method, isDefault: true } : { ...method, isDefault: false }
+                ).sort((a: any, b: any) => b.isDefault - a.isDefault)
+            );
+            return { previousPaymentMethods };
+        },
+        onError: (error, variables, context) => {
+            if (context?.previousPaymentMethods) {
+                queryClient.setQueryData(['paymentMethods'], context.previousPaymentMethods);
+            }
+            toast.error('Failed to set default payment method');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['paymentMethods'] });
+        },
+    });
+
+    const deletePaymentMethodMutation = useMutation({
+        mutationFn: ({ token, cardId }: { token: string, cardId: string }) => deletePaymentMethodApi(token, cardId),
+        onMutate: async ({ cardId }) => {
+            await queryClient.cancelQueries({ queryKey: ['paymentMethods'] });
+            const previousPaymentMethods = queryClient.getQueryData(['paymentMethods']);
+            queryClient.setQueryData(['paymentMethods'], (old: any) =>
+                old.filter((method: any) => method.uid !== cardId)
+            );
+            return { previousPaymentMethods };
+        },
+        onError: (error, variables, context) => {
+            if (context?.previousPaymentMethods) {
+                queryClient.setQueryData(['paymentMethods'], context.previousPaymentMethods);
+            }
+            toast.error('Failed to delete payment method');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['paymentMethods'] });
+        },
+    });
+
+
+
+    const handleSetDefaultPaymentMethod = (cardId: string) => {
+        setDefaultPaymentMethodMutation.mutate({
+            token: authenticatedUser?.token ?? '',
+            cardId,
+        });
+        setVisibleTooltipUid(null)
+    };
+
+    const handleDeletePaymentMethod = (cardId: string) => {
+        deletePaymentMethodMutation.mutate({
+            token: authenticatedUser?.token ?? '',
+            cardId,
+        });
+        setVisibleTooltipUid(null)
+    };
+
+    const handleAddNewCard = async () => {
+        try {
+            initializePaymentMethodMutation.mutateAsync(authenticatedUser?.token ?? '');
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
     // Custom Radio button implementation
     const CustomRadio = (props: any) => {
         const {
@@ -266,6 +374,8 @@ const Page = ({ params }: { params: { id: string } }) => {
                 {duration && <span className='text-[12px]'>{duration}</span>} {/* Only render duration if it exists */}
             </div>
         );
+
+
 
         return (
             <Component
@@ -325,10 +435,10 @@ const Page = ({ params }: { params: { id: string } }) => {
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'tween', stiffness: 600 }}
-                className=''
+                className=' pb-[44px]'
             >
                 <Header link={`/profile`} title="Manage Subscription" />
-                <div className='px-[24px]'>
+                <div className='px-[24px] pb-[44px]'>
 
                     <div className=' bg-[#F7F7F9] mb-[28px] rounded-[12px]  flex  p-[4px] mt-[12px]  '>
                         {tabs.map((tab: string, i) => (
@@ -374,7 +484,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     </div>
 
                     {activeTab === 'Subscription plans' ? (
-                        <div>
+                        <div  >
                             {isGetAllPlansPending ? <div className='flex items-center justify-center w-full'>
                                 <CircularProgress size='sm' />
                             </div>
@@ -423,13 +533,70 @@ const Page = ({ params }: { params: { id: string } }) => {
                             }
                             <div className='flex justify-between items-center mt-[40px]'>
                                 <h1>Payment methods</h1>
-                                <button className='bordr-[#E7E7EA] border rounded-[16px] p-[8px] text-[14px] text-[#575757] flex gap-[4px] items-center'>
+                                <button onClick={() => handleAddNewCard()} className='bordr-[#E7E7EA] border rounded-[16px] p-[8px] text-[14px] text-[#575757] flex gap-[4px] items-center'>
                                     <span><BsPlus size={20} /></span> Add new card
                                 </button>
                             </div>
-                            <p className='text-[10px] text-center text-[#575757] mt-[36px]'>
-                                No payment methods added yet
-                            </p>
+                            {initializePaymentMethodMutation.isPending && (
+                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                    <CircularProgress />
+                                </div>
+                            )}
+                            {isGetPaymentMethodPending ? <div className='flex items-center justify-center w-full'>
+                                <CircularProgress size='sm' />
+                            </div>
+                                :
+                                <div className=' flex gap-[16px] flex-col mt-[16px] '>
+                                    {getPaymentMethodData.length > 0 ? (
+                                        <AnimatePresence>
+                                            {getPaymentMethodData.map((item: any) => (
+                                                <motion.div
+                                                    key={item.uid}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -20 }}
+                                                    transition={{ duration: 0.3 }}
+                                                    className={`flex justify-between p-[16px] rounded-[16px] ${item.isDefault ? 'bg-[#ECFDDC] border-[#66C227] border' : 'bg-[#ffffff] border border-[#EFEFF0]'} items-center`}
+                                                >
+                                                    <div className="flex gap-[12px] items-start">
+                                                        <div className="flex gap-[8px] items-center">
+                                                            {item.type === "MASTERCARD" && <Image className='w-[40px] h-[35px]' src={mastercard} width={1000} height={1000} alt="payment icon" />}
+                                                            {item.type === "VISA" && <Image className='w-[40px] h-[35px]' src={visa} width={1000} height={1000} alt="payment icon" />}
+                                                            <div className='flex flex-col gap-[4px]'>
+                                                                <p className="text-[14px] font-[500] text-[#2D2D2D]">{'**** **** **** '} {item.lastFourDigits}</p>
+                                                                <p className="text-[12px] text-[#828282]">Expiry {item.expiry}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[12px] px-[8px] py-[2px] rounded-[12px] bg-white text-[#66C227]">{item.isDefault ? 'default' : ''}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="relative">
+                                                        <button onClick={() => handleTooltipToggle(item.uid)}>
+                                                            <Image src={more} className='w-6 h-6' alt="more" width={24} height={24} />
+                                                        </button>
+                                                        {visibleTooltipUid === item.uid && (
+                                                            <div className="absolute top-[60%] grid gap-[24px] place-content-center w-[109px] min-h-[72px]  right-[20px] transform translate-y-2 z-10 bg-white p-2 rounded-md shadow-xl">
+                                                                <div className="flex text-[#575757] gap-[8px] flex-col">
+                                                                    <button className="text-[12px] p-2  hover:bg-gray-100 rounded-md" onClick={() => handleSetDefaultPaymentMethod(item.uid)}>
+                                                                        Make Default
+                                                                    </button>
+                                                                    <button className="text-[12px] p-2  hover:bg-gray-100 rounded-md" onClick={() => handleDeletePaymentMethod(item.uid)}>
+                                                                        Delete Card
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                    ) : (
+                                        <p className='text-[14px] text-center text-[#575757] mt-[36px] font-medium'>
+                                            No payment methods added yet
+                                        </p>
+                                    )}
+                                </div>}
                         </div>
                     ) : null}
 
