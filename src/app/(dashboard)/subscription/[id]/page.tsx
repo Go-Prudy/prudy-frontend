@@ -3,7 +3,7 @@
 'use client'
 import { useRouter } from 'next/router';
 import Header from '@/components/header'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
 import { Popover, PopoverTrigger, PopoverContent, Button, cn, VisuallyHidden, useRadio, RadioGroup, CircularProgress } from "@nextui-org/react";
 import { BsChevronDown, BsChevronUp, BsPlus } from 'react-icons/bs';
@@ -18,6 +18,7 @@ import { getAllPlans, getSinglePlan } from '@/app/services/SubscriptionService';
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { completeAddPaymentMethodApi, deletePaymentMethodApi, getBillingCycleApi, getBillingHistoryApi, getPaymentMethodsApi, initAddPaymentMethodApi, setDefaultPaymentMethodApi } from '@/app/services/BillingServices';
 import toast from 'react-hot-toast';
+import BottomDrawer from '@/components/create-budget/BottomDrawer';
 
 
 
@@ -74,7 +75,6 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
     const [activeTab, setActiveTab] = useState('Subscription plans')
     const options = ["Monthly", "Quarterly", "Yearly"];
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedOption, setSelectedOption] = useState(options[0]);
     const [showCancelSubscription, setShowCancelSubscription] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSuccesfulCancelSubscription, setShowSuccesfulCancelSubscription] = useState(false);
@@ -82,7 +82,7 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
     const [billingHistory, setBillingHistory] = useState([]); // Store fetched data
     const [hasMore, setHasMore] = useState(true); // Determine if more data is available
     const [visibleTooltipUid, setVisibleTooltipUid] = useState<string | null>(null);
-
+    const [showSubscriptionPlan, setShowSubscriptionPlan] = useState<boolean>(false)
     const handleTooltipToggle = (uid: string) => {
         setVisibleTooltipUid(visibleTooltipUid === uid ? null : uid);
 
@@ -104,7 +104,7 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
 
     const { authenticatedUser } = useAuthentication();
 
-    const { data: plans = {}, isPending: isGetAllPlansPending, isError: isGetAllPlansError } = useQuery({
+    const { data: getAllPlansData = [], isPending: isGetAllPlansPending, isError } = useQuery({
         queryKey: ['getAllPlans'],
         queryFn: () => getAllPlans(authenticatedUser?.token ?? ''),
         enabled: !!authenticatedUser?.token, // Only fetch if token exists
@@ -114,6 +114,16 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
         staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
     });
 
+    const allOptions = Object.keys(getAllPlansData) || [];
+
+
+    const [selectedOption, setSelectedOption] = useState<string>('');
+
+    useEffect(() => {
+        if (allOptions.length > 0 && !selectedOption) {
+            setSelectedOption(allOptions[0]);
+        }
+    }, [allOptions, selectedOption]);
 
     const { data: getSinglePalnData = {}, isLoading: isLoadingGetSinglePlan } = useQuery({
         queryKey: ['gestSinglePlan', params?.id],
@@ -124,6 +134,9 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
         refetchInterval: false, // Disable polling
         staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
     });
+
+    console.log(getSinglePalnData);
+
 
 
     const { data: billingCycleData = {}, isPending: isGetBillingCyclePending, isError: isGetBillingCycleError } = useQuery({
@@ -157,6 +170,8 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
         refetchInterval: false, // Disable polling
         staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
     });
+
+
 
     console.log(getPaymentMethodData);
 
@@ -203,10 +218,9 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
     }
 
 
-    const rearrangedPlans = rearrangePlans(plans, params?.id, selectedOption);
+    const rearrangedPlans = rearrangePlans(getAllPlansData, params?.id, selectedOption);
 
     console.log(rearrangedPlans);
-    console.log(plans);
 
     const handleSelect = (option: string) => {
         setSelectedOption(option);
@@ -236,15 +250,17 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
     }, [hasMore, isFetching]); // Re-attach event listener when necessary
 
 
+    const transactionIdRef = useRef(false);
 
     useEffect(() => {
-        if (transaction_id) {
+        if (transaction_id && !transactionIdRef.current) {
             completeAddPaymentMethodMutation.mutate({
                 token: authenticatedUser?.token ?? '',
                 paymentRef: transaction_id,
             });
+            transactionIdRef.current = true;
         }
-    }, [transaction_id]);
+    }, [transaction_id, authenticatedUser?.token]);
 
 
     // React Query mutation for verifying OTP
@@ -343,6 +359,15 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
         }
     }
 
+    const plans: Plans = getAllPlansData
+
+
+
+
+    const handleMakePayment = () => {
+
+    }
+
 
     // Custom Radio button implementation
     const CustomRadio = (props: any) => {
@@ -363,7 +388,6 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
             header2,
             header3,
             label,
-            label2,
             label2Text,
             labelText } = props;
 
@@ -375,14 +399,12 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
             </div>
         );
 
-
-
         return (
             <Component
                 {...getBaseProps()}
                 className={cn(
                     "group flex flex-col p-4 rounded-lg border-1 transition-all",
-                    "max-w-[400px] w-[300px] h-full  cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4",
+                    "w-full cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4",
                     isSelected ? "border-[#66C227] bg-[#ECFDDC]" : "bg-[#F7F7F9] border-[#EFEFF0]"
                 )}
             >
@@ -394,16 +416,11 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
                     <div className="flex flex-col w-full  ">
                         <div className={`flex justify-between  `}>
                             <div >
-                                <h1 className='text-[#66C227] font-[700] text-[14px]'>{header1}
+                                <h1 className='text-[#66C227] font-[700] text-[14px]'>{header1} {label && <span className={`px-[8px]
+                                 ${isSelected ? 'text-[#ffffff] bg-[#66C227] ' : 'text-black bg-white'}    ml-[8px] py-[2px] text-[10px]  rounded-[12px] font-[400]`}>{labelText}</span>}  {label2Text && <span className={`px-[8px]
+                                    ${isSelected ? 'text-[#ffffff] bg-[#66C227] ' : 'text-black bg-white'}    ml-[8px] py-[2px] text-[10px]  rounded-[12px] font-[400]`}>{label2Text}</span>}</h1>
 
-                                    {label2 && <span className={`px-[8px]
-                                 ${isSelected ? 'bg-[#ffffff] text-[#66C227] ' : 'text-black bg-white'}    ml-[8px] py-[2px] text-[10px]  rounded-[12px] font-[400]`}>{label2Text}</span>}
-
-                                    {label && <span className={`px-[8px]
-                                 ${isSelected ? 'text-[#ffffff] bg-[#66C227] ' : 'text-black bg-white'}    ml-[8px] py-[2px] text-[10px]  rounded-[12px] font-[400]`}>{labelText}</span>}
-
-                                </h1>
-                                <h1 className='mt-[8px] flex items-start font-[700] text-[24px] leading-[24px]'>{header2}  <span className=' text-[12px] font-[400] text-[#575757] ml-[8px]'>{header3}</span></h1>
+                                <h1 className='mt-[8px] flex items-start font-[700] text-[24px] leading-[24px]'>{header2} <span className=' text-[12px] font-[400] text-[#575757] ml-[8px]'>{header3}</span></h1>
                             </div>
                             <div  {...getWrapperProps()}>
                                 <div {...getControlProps()} />
@@ -423,6 +440,8 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
             </Component>
         );
     };
+
+
 
 
 
@@ -448,41 +467,14 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
                     <div className='flex px-[8px] items-center justify-between'>
                         <h2 className=''>{activeTab}</h2>
                         {activeTab === 'Subscription plans' ? (
-                            <Popover isOpen={isOpen} onOpenChange={(open) => setIsOpen(!open)} placement="bottom">
-                                <PopoverTrigger>
-                                    <Button onClick={() => setIsOpen(!isOpen)} className=' bg-[#F7F7F9] font-[400] text-[14px] flex gap-[.8rem] justify-between rounded-[16px] px-[8px] py-[4px]  items-center' >
-                                        {selectedOption}
-                                        {!isOpen ?
-                                            <BsChevronDown />
-                                            :
-                                            <BsChevronUp />
-                                        }
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="p-2 shadow-lg">
-                                    <div className="flex flex-col">
-                                        {options.map((option) => (
-                                            <button
+                            <Button onClick={() => setShowSubscriptionPlan(true)} className=' bg-[#fff] border border-[#E7E7EA] font-[400] text-[14px] flex gap-[.8rem] justify-between rounded-[24px] px-[12px] py-[8px]  items-center' >
+                                Change plan
+                            </Button>
 
-                                                key={option}
-                                                className={`text-left px-2 py-1 hover:bg-gray-200 ${selectedOption === option ? "font-bold" : ""
-                                                    }`}
-                                                onClick={
-                                                    () => handleSelect(option)
-
-                                                }
-                                            >
-                                                {option}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
                         ) : (
                             <button onClick={() => setShowCancelSubscription(true)} className='text-[12px] cursor-pointer font-[400] text-[#D2303E]'>Cancel Subscription</button>
                         )}
                     </div>
-
                     {activeTab === 'Subscription plans' ? (
                         <div  >
                             {isGetAllPlansPending ? <div className='flex items-center justify-center w-full'>
@@ -490,7 +482,7 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
                             </div>
                                 :
                                 <RadioGroup
-                                    orientation="vertical"
+
                                     className="flex flex-col overflow-x-hidden w-full gap-[16px]"
                                     color="success"
                                     classNames={{
@@ -499,34 +491,32 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
                                 >
                                     <div className="mb-[10px] flex flex-row w-full gap-[16px] overflow-x-auto">
 
-                                        {rearrangedPlans?.map((plan) => (
-                                            <div key={plan?.uid} className="h-[242px] ">
-                                                <CustomRadio
-                                                    header1={plan?.name}
-                                                    header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
-                                                    header3={
-                                                        plan?.basePrice !== 0
-                                                            ? (plan?.weeklyAmount && plan.weeklyAmount > 0
-                                                                ? `₦ ${plan.weeklyAmount.toLocaleString()}/week`
-                                                                : `₦ ${plan.monthlyAmount.toLocaleString()}/month`)
-                                                            : null
-                                                    }
-                                                    className="flex w-full h-full justify-between min-w-[300px]"
-                                                    value={`₦ ${plan?.basePrice}`}
-                                                    label={true}
-                                                    label2={plan.uid === params.id}
-                                                    label2Text={plan.uid === params.id ? "Current plan" : ""}
+                                        <div key={getSinglePalnData?.data?.uid} className="h-[242px] w-full ">
+                                            <CustomRadio
+                                                header1={getSinglePalnData?.data?.name}
+                                                header2={` ${getSinglePalnData?.data?.basePrice === 0 ? 'Free' : '₦' + getSinglePalnData?.data?.basePrice.toLocaleString()}`}
+                                                header3={
+                                                    getSinglePalnData?.data?.basePrice !== 0
+                                                        ? (getSinglePalnData?.data?.weeklyAmount && getSinglePalnData?.data?.weeklyAmount > 0
+                                                            ? `₦ ${getSinglePalnData?.data?.weeklyAmount.toLocaleString()}/week`
+                                                            : `₦ ${getSinglePalnData?.data?.monthlyAmount.toLocaleString()}/month`)
+                                                        : null
+                                                }
+                                                className="flex w-full h-full justify-between min-w-[300px]"
+                                                value={`₦ ${getSinglePalnData?.data?.basePrice}`}
+                                                label={getSinglePalnData?.data?.discount}
+                                                label2={getSinglePalnData?.data?.uid === params.id}
+                                                label2Text={getSinglePalnData?.data?.uid === params.id ? "Current plan" : "d"}
 
-                                                    labelText={`save ${plan?.discount}%`}
-                                                >
-                                                    <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
-                                                        {plan?.benefits?.map((benefit, index) => (
-                                                            <li key={index}>{benefit}</li>
-                                                        ))}
-                                                    </ul>
-                                                </CustomRadio>
-                                            </div>
-                                        ))}
+                                                labelText={`save ${getSinglePalnData?.data?.discount}%`}
+                                            >
+                                                <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                    {getSinglePalnData?.data?.benefits?.map((benefit: any, index: any) => (
+                                                        <li key={index}>{benefit}</li>
+                                                    ))}
+                                                </ul>
+                                            </CustomRadio>
+                                        </div>
                                     </div>
 
                                 </RadioGroup>
@@ -599,6 +589,7 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
                                 </div>}
                         </div>
                     ) : null}
+
 
 
 
@@ -709,6 +700,76 @@ const Page = ({ params, searchParams }: { params: { id: string }, searchParams: 
                             </div>
                         </div>
                     </div>
+                </motion.div>
+            }
+
+
+
+
+            {
+                showSubscriptionPlan &&
+                <motion.div
+                    initial={{ opacity: 0, y: 90 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full w-full z-[40] fixed bg-[#1c1c1c73] top-0  max-w-[500px] flex items-center justify-center"
+                >
+                    <BottomDrawer
+                        footer={<button onClick={() => handleMakePayment()} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Subscribe</button>}
+                        label="Subscription plans"
+                        back={false}
+                        show={showSubscriptionPlan}
+                        close={true}
+                        onClose={() => setShowSubscriptionPlan(false)}
+                    >
+                        <div className="relative mt-[24px] overflow-y-auto h-[calc(80vh-100px)] w-full mb-4">
+                            <div className='mt-[16px] p-[4px] bg-[#F7F7F9] rounded-[12px] mb-[20px] flex justify-center w-fit mx-auto'>
+                                {allOptions.map((option: any) => (
+                                    <button onClick={() => setSelectedOption(option)} className={`${option === selectedOption && 'rounded-[12px] text-white bg-[#66C227]'} p-[8px]`} key={option}>
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+                            {isGetAllPlansPending ?
+                                <div className='flex items-center justify-center w-full'>
+                                    <CircularProgress size='sm' />
+                                </div> :
+                                <RadioGroup
+                                    orientation="vertical"
+                                    className='flex flex-col w-full gap-[16px]'
+                                    color='success'
+                                >
+                                    <div className="mb-[10px] overflow-y-auto flex flex-col w-full gap-[16px]">
+                                        {['monthly', 'quaterly', 'yearly']?.map((period) => (
+                                            selectedOption === period &&
+                                            plans[period as keyof Plans]?.slice().reverse().map((plan) => (
+                                                <CustomRadio
+                                                    key={plan?.uid}
+                                                    header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
+                                                    header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                                                    header3={
+                                                        period === 'monthly'
+                                                            ? (plan?.weeklyAmount && plan.weeklyAmount > 0 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week` : null)
+                                                            : (plan?.monthlyAmount && plan.monthlyAmount > 0 ? `₦ ${plan.monthlyAmount.toLocaleString()}/month` : null)
+                                                    }
+                                                    className="flex w-full justify-between"
+                                                    value={plan?.basePrice}
+                                                    label={plan?.discount ? `save ${plan?.discount}%` : null}
+                                                >
+                                                    <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                        {plan?.benefits?.map((benefit, index) => (
+                                                            <li key={index}>{benefit}</li>
+                                                        ))}
+                                                    </ul>
+                                                </CustomRadio>
+                                            ))
+                                        ))}
+                                    </div>
+                                </RadioGroup>
+                            }
+                        </div>
+                    </BottomDrawer>
                 </motion.div>
             }
 
