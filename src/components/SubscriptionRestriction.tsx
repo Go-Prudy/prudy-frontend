@@ -10,7 +10,6 @@ import subtract1 from '/public/images/Subtract.png'
 import subtract2 from '/public/images/Subtract (1).png'
 import mono1 from '/public/images/mono1.png'
 import Image from 'next/image';
-import DeleteSuccessModal from '../../../components/DeleteSuccessModal';
 import { useRouter } from 'next/navigation';
 import { Select, SelectItem, Avatar } from "@nextui-org/react";
 import { Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
@@ -18,6 +17,7 @@ import { getAllPlans } from '@/app/services/SubscriptionService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
 import { getBillingCycleApi } from '@/app/services/BillingServices';
+import DeleteSuccessModal from './DeleteSuccessModal';
 
 
 interface CardFormValues {
@@ -49,7 +49,8 @@ interface SubscriptionPlansProps {
     } | null;
 }
 
-const Page = () => {
+
+const SubscriptionRestriction = ({ setShowSubscriptionRestriction, showSubscriptionRestriction, mainText }: any) => {
     const features = [
         "Create smart budgets",
         "Link up to 3 bank accounts",
@@ -288,7 +289,6 @@ const Page = () => {
 
 
     const plans: Plans = getAllPlansData
-    console.log(navigation);
 
 
 
@@ -319,23 +319,23 @@ const Page = () => {
                         alt="payment icon"
                     />
                 </div>
-                <div className=' fixed lg:absolute bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
+                <div className=' fixed lg:absolute bottom-[-130px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
                     <Image src={subtract2} className="h-full z-[-1] w-full " height={1000} width={1000} alt="payment icon" />
                 </div>
 
                 {/* Header */}
                 <div className='flex mb-[36px]  items-center w-full'>
-                    <div onClick={() => navigation.back()} className='bg-[#FFFFFF1A] rounded-[22px] grid place-content-center text-white size-[36px]'>
+                    <div onClick={() => setShowSubscriptionRestriction(!showSubscriptionRestriction)} className='bg-[#FFFFFF1A] rounded-[22px] grid place-content-center text-white size-[36px]'>
                         <BsX size={20} />
                     </div>
 
                     <h1 className='mx-auto relative z-2 text-white text-center text-[18px] font-[500]'>Subscription</h1>
                 </div>
                 <div>
-                    <h1 className='text-[36px] z-2 relative mb-[16px] text-center text-white font-[500] leading-[40px]'>Activate free trial for <br /> 30 days</h1>
-                    <p className='flex gap-[8px] py-[4px] px-[8px] mx-auto bg-[#006D00] z-2 backdrop-blur-md relative w-fit text-white items-center rounded-[16px] mb-[24px]'>
+                    <h1 className='text-[36px] z-2 relative mb-[16px] text-center text-white font-[500] leading-[40px]'>{mainText}</h1>
+                    {/* <p className='flex gap-[8px] py-[4px] px-[8px] mx-auto bg-[#006D00] z-2 backdrop-blur-md relative w-fit text-white items-center rounded-[16px] mb-[24px]'>
                         2 days left
-                    </p>
+                    </p> */}
                 </div>
 
                 <div className='pt-[24px] '>
@@ -483,38 +483,7 @@ const Page = () => {
 
 
 
-            {
-                subscriptionPlan &&
-                <motion.div
-                    initial={{ opacity: 0, y: 90 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-                >
-                    <BottomDrawer
-                        label="Subscription plans"
-                        back={false}
-                        show={subscriptionPlan}
-                        close={true}
-                        onClose={() => setSubscriptionPlan(false)}
-                    >
-                        <div className=' w-full flex flex-col items-center justify-center  mx-auto mb-[203px] mt-[52px]'>
-                            <Image
-                                src={mono1}
-                                className=" size-[125px]  "
-                                height={1000} width={1000}
-                                alt="payment icon"
-                            />
-                            <p className=' font-[500] text-[20px] mt-[16px] leading-[24px]'>Payment gateway</p>
-                        </div>
 
-
-                    </BottomDrawer>
-
-
-                </motion.div>
-            }
 
             {
                 showSuccessfullPayment &&
@@ -541,4 +510,4 @@ const Page = () => {
     );
 };
 
-export default Page;
+export default SubscriptionRestriction;
