@@ -10,6 +10,8 @@ import { GetAllBudgetsApi, getSingleBudgetApi } from "@/app/services/BudgetServi
 import { CircularProgress } from "@nextui-org/react";
 import { GetBudgetCategoriesAnalyticsApi, GetOverallBudgetAnalyticsApi } from "@/app/services/AnalyticsService";
 import { BudgetVsActualSkeleton, TopExpensesSkeleton } from "@/components/Skelentons/AnalysisSkeleton";
+import { GetSettingsApi } from "@/app/services/SettingService";
+import SubscriptionRestriction from "@/components/SubscriptionRestriction";
 export default function Page() {
   const allBudgets: string[] = [
     'January budget',
@@ -163,7 +165,7 @@ export default function Page() {
   const [showBudget, setShowBudget] = useState<boolean>(false);
   const [showCategoryBreakDown, setShowCategoryBreakDown] = useState<boolean>(false);
   const [showExpenseBreakDown, setShowExpenseBreakDown] = useState<boolean>(false);
-  // const [selectedMonth, setSelectedMonth] = useState(monthlyBudget[0]);
+  const [showSubscriptionRestriction, setShowSubscriptionRestriction] = useState<boolean>(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
@@ -251,492 +253,334 @@ export default function Page() {
 
   console.log(GetOverallBudgetAnalyticsData);
 
+  const { data: settingsData = {}, isPending: isGetSettingsPending, isError: isGetSettingsError } = useQuery({
+    queryKey: ['GetSettings'],
+    queryFn: () => GetSettingsApi(authenticatedUser?.token ?? ''),
+    enabled: !!authenticatedUser?.token, // Only fetch if token exists
+    refetchOnWindowFocus: false, // Prevent refetching on window focus
+    refetchOnMount: false, // Prevent refetching on component mount
+    refetchInterval: false, // Disable polling
+    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+  });
+
 
   return (
-    <div className="bg-base-white w-[100vw] max-w-[500px] h-full">
-      <Header2 title={'Analytics'} />
-      <div className="flex mb-[8px] w-full items-center py-[12px] px-[24px]  mt-[90px] gap-[12px]">
-        <label className=" w-full bg-[#F7F7F9] px-[8px] py-[16px] rounded-[8px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
 
-          <button onClick={() => setShowBudget(!showBudget)} className='  text-[14px]  items-center border-[#EFEFF0] w-full  bg-[#F7F7F9] rounded-[8px] flex  justify-between'>
-            {isPending ?
-              <div className=' w-full   my-auto  flex  items-center'>
-                loading...
-              </div>
-              :
-              <>
-                <h1>{selectedBudget.name} </h1>
-                <BsChevronDown size={10} className=' text-[#645D72] ' />
-              </>
-            }
+    <>
+      {showSubscriptionRestriction ?
+        <SubscriptionRestriction mainText="Do a lot more with GoPrudy" setShowSubscriptionRestriction={setShowSubscriptionRestriction} showSubscriptionRestriction={showSubscriptionRestriction} />
+        :
 
-          </button>
-        </label>
-        <button className=" rounded-[32px] bg-[#EFEFF0] px-[12px] py-[4px] h-[40px] text-[12px] font-[500]  text-center">Download</button>
-      </div>
+        <div className="bg-base-white w-[100vw] max-w-[500px] h-full">
+          <Header2 title={'Analytics'} />
+          <div className="flex mb-[8px] w-full items-center py-[12px] px-[24px]  mt-[90px] gap-[12px]">
+            <label className=" w-full bg-[#F7F7F9] px-[8px] py-[16px] rounded-[8px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
 
-      <div className=" flex  mb-[131.5px] flex-col gap-[24px]">
-
-        {/* BUDGET VS ACTUAL */}
-
-        {GetOverallBudgetAnalyticIsPending ?
-          <BudgetVsActualSkeleton />
-          :
-
-
-          <div className="w-full px-[24px]">
-            <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
-              <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Budget vs Actual</h1>
-
-              {/* Calculate the width percentages */}
-              {(() => {
-                const { totalBudgeted, actualExpenses } = overall.breakdown || {};
-
-                // Calculate the difference
-                const difference = totalBudgeted - actualExpenses;
-
-                // Calculate the total for percentage calculation
-                const total = totalBudgeted + Math.abs(difference); // Ensure total is always positive
-
-                // Calculate the adjusted percentages based on the difference
-                const adjustedBudgetPercentage = (totalBudgeted / total) * 100;
-                const adjustedActualPercentage = (actualExpenses / total) * 100;
-
-                // Calculate widths dynamically based on content size (ensuring the text is fully visible)
-                const budgetTextWidth = `${(totalBudgeted?.toString().length + 10)}ch`; // Adjust based on text length
-                const actualTextWidth = `${(actualExpenses?.toString().length + 10)}ch`; // Adjust based on text length
-
-                return (
-                  <>
-                    {/* Budget bar */}
-                    <div className="flex items-center mb-[12px]">
-                      <h1
-                        className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px] text-ellipsis whitespace-nowrap overflow-hidden"
-                        style={{
-                          width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
-                          minWidth: budgetTextWidth, // Ensure text fits fully before adjusting width
-                        }}
-                      >
-                        <span className="text-[10px] font-[400]">Budget - </span>
-                        ₦ {totalBudgeted?.toLocaleString()}
-                      </h1>
-                    </div>
-
-                    {/* Actual bar */}
-                    <div className="flex items-center mb-[12px]">
-                      <h1
-                        className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px] text-ellipsis whitespace-nowrap overflow-hidden"
-                        style={{
-                          width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
-                          minWidth: actualTextWidth, // Ensure text fits fully before adjusting width
-                        }}
-                      >
-                        <span className="text-[10px] font-[400]">Actual Expenses - </span>
-                        ₦ {actualExpenses?.toLocaleString()}
-                      </h1>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-
-
-            <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
-              <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
-                {overall.remark?.title}
-              </h1>
-              <h1 className="mt-[8px] text-[14px] leading-[18px]">
-                {overall.remark?.description}
-              </h1>
-              <button
-                onClick={handleShowCategoryBreakdown}
-                className="mt-[16px] text-[#474747] bg-white flex w-full justify-between rounded-[20px] border border-[#EFEFF0] p-[12px]"
-              >
-                See categories breakdown <span><BsChevronRight className="text-[#888888]" size={24} /></span>
-              </button>
-            </div>
-          </div>
-        }
-
-        {/* Top expenses */}
-
-        {GetOverallBudgetAnalyticIsPending ?
-          <TopExpensesSkeleton />
-          :
-          <div className="w-full px-[24px]">
-            <div className="p-[24px] w-full rounded-t-[24px] border-[1px] border-[#EFEFF0]">
-              <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Top expenses</h1>
-              <div className="w-full flex flex-col gap-[12px]">
-                {GetOverallBudgetAnalyticsData?.topExpenses?.categories
-                  .map((expense: any) => (
-                    <div
-                      key={expense.uid}
-                      className="flex rounded-[12px] border border-[#EFEFF0] bg-[#F7F7F9] p-[8px] justify-between w-full"
-                    >
-                      <div className="flex gap-[8px] items-center">
-                        <div
-                          style={{ backgroundColor: expense.color }}
-                          className="w-[24px] h-[24px] rounded-full"
-                        ></div>
-                        <h1 className="leading-[16px] text-[12px] text-[#474747]">
-                          {expense.name.length > 20 ? `${expense.name.substring(0, 20)}...` : expense.name}
-                        </h1>
-                      </div>
-                      <div className="text-[#474747] font-[500] text-[14px] leading-[16px]">
-                        ₦ {expense.amountSpent.toLocaleString()}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
-              <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
-                {GetOverallBudgetAnalyticsData?.topExpenses.remark.title}
-              </h1>
-              <h1 className="mt-[8px] text-[14px] leading-[18px]">
-                {GetOverallBudgetAnalyticsData?.topExpenses.remark.description}
-              </h1>
-              <button
-                onClick={() => handleShowExpenseBreakdown()}
-                className="mt-[16px] text-[#474747] bg-white flex w-full justify-between rounded-[20px] border border-[#EFEFF0] p-[12px]"
-              >
-                See all expenses breakdown <span><BsChevronRight className="text-[#888888]" size={24} /></span>
-              </button>
-            </div>
-          </div>}
-
-
-
-        {/* BEST PERFORMING CATEGORY */}
-
-        {GetOverallBudgetAnalyticIsPending ?
-          <BudgetVsActualSkeleton />
-          :
-          <div className="px-[24px]">
-            <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
-              <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Best performing category</h1>
-
-              {/* Calculate the width percentages */}
-              {(() => {
-                const { totalBudgeted, actualExpenses } = bestPerformingCategory?.breakdown || {};
-
-                // Calculate the total for percentage calculation
-                const total = totalBudgeted + actualExpenses; // Ensure total is the sum of both values
-
-                // Calculate the adjusted percentages based on the total
-                const adjustedBudgetPercentage = total > 0 ? (totalBudgeted / total) * 100 : 0;
-                const adjustedActualPercentage = total > 0 ? (actualExpenses / total) * 100 : 0;
-
-                // Calculate widths dynamically based on content size (ensuring the text is fully visible)
-                const budgetTextWidth = `${(totalBudgeted.toString().length + 10)}ch`; // Adjust based on text length
-                const actualTextWidth = `${(actualExpenses.toString().length + 10)}ch`; // Adjust based on text length
-
-                return (
-                  <div className=" p-[16px] bg-[#F7F7F9] border-[1px] border-[#EFEFF0] rounded-[16px] ">
-                    <h1 className="mb-[10px] text-[14px] font-[500] ">{bestPerformingCategory?.breakdown
-                      ?.title}</h1>
-
-                    {/* Budget bar */}
-                    <h1
-                      className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] flex py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{
-                        width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
-                        minWidth: budgetTextWidth, // Ensure text fits fully before adjusting width
-                      }}
-                    >
-                      <span className="text-[10px] font-[400]">Budget - </span>
-                      ₦ {totalBudgeted?.toLocaleString()}
-                    </h1>
-
-                    {/* Actual bar */}
-                    <h1
-                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] flex py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{
-                        width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
-                        minWidth: actualTextWidth, // Ensure text fits fully before adjusting width
-                      }}
-                    >
-                      <span className="text-[10px] font-[400]">Actual Expenses - </span>
-                      ₦ {actualExpenses?.toLocaleString()}
-                    </h1>
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
-              <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
-                {bestPerformingCategory?.remark?.title || null}
-              </h1>
-              <h1 className="mt-[8px] text-[14px] leading-[18px]">
-                {bestPerformingCategory?.remark?.description || null}
-              </h1>
-            </div>
-          </div>}
-
-
-
-
-        {/* WORST PERFORMING CATEGORY */}
-        {GetOverallBudgetAnalyticIsPending ?
-          <BudgetVsActualSkeleton />
-          :
-          <div className="px-[24px]">
-            <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
-              <div className=" p-[16px] bg-[#F7F7F9] border-[1px] border-[#EFEFF0] rounded-[16px] ">
-                <h1 className="mb-[10px] text-[14px] font-[500] ">{worstPerformingCategory?.breakdown
-                  ?.title}</h1>
-                <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Worst performing category</h1>
-
-                {/* Calculate the width percentages */}
-                {(() => {
-                  const { totalBudgeted, actualExpenses } = worstPerformingCategory?.breakdown || {};
-
-                  // Calculate the difference
-                  const difference = totalBudgeted - actualExpenses;
-
-                  // Calculate the total for percentage calculation
-                  const total = totalBudgeted + Math.abs(difference); // Ensure total is always positive
-
-                  // Calculate the adjusted percentages based on the difference
-                  const adjustedBudgetPercentage = (totalBudgeted / total) * 100;
-                  const adjustedActualPercentage = (actualExpenses / total) * 100;
-
-                  return (
-                    <>
-                      {/* Budget bar */}
-                      <h1
-                        className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
-                        style={{
-                          width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
-                          minWidth: `${totalBudgeted.toString().length + 10}ch`, // Ensure text fits fully before adjusting width
-                        }}
-                      >
-                        <span className="text-[10px] font-[400]">Budget - </span>
-                        ₦ {totalBudgeted?.toLocaleString()}
-                      </h1>
-
-                      {/* Actual bar */}
-                      <h1
-                        className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
-                        style={{
-                          width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
-                          minWidth: `${actualExpenses.toString().length + 10}ch`, // Ensure text fits fully before adjusting width
-                        }}
-                      >
-                        <span className="text-[10px] font-[400]">Actual Expenses - </span>
-                        ₦ {actualExpenses?.toLocaleString()}
-                      </h1>
-                    </>
-                  );
-
-                })()}
-              </div>
-            </div>
-
-            <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
-              <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
-                {worstPerformingCategory?.remark?.title}
-              </h1>
-              <h1 className="mt-[8px] text-[14px] leading-[18px]">
-                {worstPerformingCategory?.remark?.description}
-              </h1>
-            </div>
-          </div>
-        }
-
-
-      </div>
-
-
-
-
-
-
-
-
-
-
-
-      {showBudget &&
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, y: 90 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 90 }} // Exit animation similar to the opening animation
-            transition={{ duration: 0.3 }}
-            className="h-[120vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-          >
-            <BottomDrawer
-              label="Filter budget name"
-              back={false}
-              show={showBudget}
-              close={true}
-              onClose={() => setShowBudget(!showBudget)}
-            >
-              <div className="flex h-[396px] overflow-y-scroll flex-col">
+              <button onClick={() => setShowBudget(!showBudget)} className='  text-[14px]  items-center border-[#EFEFF0] w-full  bg-[#F7F7F9] rounded-[8px] flex  justify-between'>
                 {isPending ?
-                  <div className=' w-full mx-auto  my-auto mt-[10rem] flex justify-center items-center'>
-                    <CircularProgress size='md' color='default' />
+                  <div className=' w-full   my-auto  flex  items-center'>
+                    loading...
                   </div>
                   :
                   <>
+                    <h1>{selectedBudget.name} </h1>
+                    <BsChevronDown size={10} className=' text-[#645D72] ' />
+                  </>
+                }
 
-                    {budgets.map((budget, index) => (
-                      <button
-                        key={budget.uid} // Unique key for each month
-                        onClick={() => {
-                          console.log(budget);
+              </button>
+            </label>
+            {/* <button className=" rounded-[32px] bg-[#EFEFF0] px-[12px] py-[4px] h-[40px] text-[12px] font-[500]  text-center">Download</button> */}
+          </div>
 
-                          setSelectedBudget(budget); // Set selected budget
-                          setShowBudget(false); // Close the drawer
-                        }}
-                        className={`py-[16px] px-[8px] text-start ${index === budgets.length - 1 ? '' : 'border-b-1'} border-b-[#EFEFF0]`}
-                      >
-                        {budget.name}
-                      </button>
-                    ))}
-                  </>}
-              </div>
-            </BottomDrawer>
-          </motion.div>
-        </AnimatePresence>
+          <div className=" flex  mb-[131.5px] flex-col gap-[24px]">
 
-      }
+            {/* BUDGET VS ACTUAL */}
+
+            {GetOverallBudgetAnalyticIsPending ?
+              <BudgetVsActualSkeleton />
+              :
 
 
+              <div className="w-full px-[24px]">
+                <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
+                  <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Budget vs Actual</h1>
 
+                  {/* Calculate the width percentages */}
+                  {(() => {
+                    const { totalBudgeted, actualExpenses } = overall.breakdown || {};
 
+                    // Calculate the difference
+                    const difference = totalBudgeted - actualExpenses;
 
+                    // Calculate the total for percentage calculation
+                    const total = totalBudgeted + Math.abs(difference); // Ensure total is always positive
 
-      {showCategoryBreakDown &&
-        <motion.div
-          initial={{ opacity: 0, y: 90 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="h-[100vh]  w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-        > <BottomDrawer
-          label={`Budget vs Actual`}
-          back={false}
-          show={showCategoryBreakDown}
-          close={true}
-          onClose={() => setShowCategoryBreakDown(!showCategoryBreakDown)}
-        >    <div className="h-[86vh] mt-[32px]   overflow-y-auto ">
+                    // Calculate the adjusted percentages based on the difference
+                    const adjustedBudgetPercentage = (totalBudgeted / total) * 100;
+                    const adjustedActualPercentage = (actualExpenses / total) * 100;
 
-              {GetBudgetCategoriesAnalyticsApiData.map((item: any, index: any) => {
-                // Destructure the breakdown data for easier access
-                const { title, actualExpenses, totalBudgeted } = item.breakdown;
+                    // Calculate widths dynamically based on content size (ensuring the text is fully visible)
+                    const budgetTextWidth = `${(totalBudgeted?.toString().length + 10)}ch`; // Adjust based on text length
+                    const actualTextWidth = `${(actualExpenses?.toString().length + 10)}ch`; // Adjust based on text length
 
-                // Calculate the difference
-                const difference = totalBudgeted - actualExpenses;
+                    return (
+                      <>
+                        {/* Budget bar */}
+                        <div className="flex items-center mb-[12px]">
+                          <h1
+                            className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px] text-ellipsis whitespace-nowrap overflow-hidden"
+                            style={{
+                              width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                              minWidth: budgetTextWidth, // Ensure text fits fully before adjusting width
+                            }}
+                          >
+                            <span className="text-[10px] font-[400]">Budget - </span>
+                            ₦ {totalBudgeted?.toLocaleString()}
+                          </h1>
+                        </div>
 
-                // Determine the maximum value for scaling
-                const maxValue = Math.max(totalBudgeted, actualExpenses);
-
-                // Calculate the adjusted percentages based on the maximum value
-                const adjustedBudgetPercentage = (totalBudgeted / maxValue) * 100;
-                const adjustedActualPercentage = (actualExpenses / maxValue) * 100;
-
-                // Calculate the difference percentage
-                const differencePercentage = Math.min((Math.abs(difference) / totalBudgeted) * 100, 100); // Cap at 100%
-
-                return (
-                  <div key={index} className="mb-[24px] bg-[#F7F7F9] border border-[#EFEFF0] rounded-[24px] p-[24px]">
-                    {/* Display the type of expense */}
-                    <h2 className="text-[14px] text-[#2D2D2D] font-[500] mb-[4px]">{title}</h2>
-
-                    {/* Budget bar */}
-                    <h1
-                      className="bg-[#66C227] text-[#FFFFFF] mb-[4px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{
-                        width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
-                        maxWidth: '100%', // Ensure the bar does not exceed the parent div
-                      }}
-                    >
-                      <span className="text-[10px] font-[400]">Budget - </span>
-                      ₦ {totalBudgeted.toLocaleString()}
-                    </h1>
-
-                    {/* Actual bar */}
-                    <h1
-                      className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
-                      style={{
-                        width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use calculated width based on the actual expenses
-                        maxWidth: '100%', // Ensure the bar does not exceed the parent div
-                      }}
-                    >
-                      <span className="text-[10px] font-[400]">Actual Expenses - </span>
-                      ₦ {actualExpenses.toLocaleString()}
-                      {/* Show the difference percentage in the actual expenses bar */}
-
-                    </h1>
-
-
-                    {/* Remark section */}
-                    <div>
-                      <h3 className="text-[12px] text-[#2D2D2D] font-[500] mb-[4px]">{item.remark.title}</h3>
-                      <p className="text-[12px] text-[#2D2D2D]">{item.remark.description}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-
-          </BottomDrawer>
-        </motion.div>
-      }
+                        {/* Actual bar */}
+                        <div className="flex items-center mb-[12px]">
+                          <h1
+                            className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] rounded-r-[8px] font-[700] leading-[16px] text-ellipsis whitespace-nowrap overflow-hidden"
+                            style={{
+                              width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
+                              minWidth: actualTextWidth, // Ensure text fits fully before adjusting width
+                            }}
+                          >
+                            <span className="text-[10px] font-[400]">Actual Expenses - </span>
+                            ₦ {actualExpenses?.toLocaleString()}
+                          </h1>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
 
 
 
-
-
-
-      {showExpenseBreakDown && (
-        <motion.div
-          initial={{ opacity: 0, y: 90 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-        >
-          <BottomDrawer
-            label={`Top expenses`}
-            back={false}
-            show={showExpenseBreakDown}
-            close={true}
-            onClose={() => setShowExpenseBreakDown(!showExpenseBreakDown)}
-          >
-            <div className="h-[86vh] mt-[32px] overflow-y-auto">
-              <div className="w-full flex flex-col gap-[12px]">
-                {/* Map over budgetCategories to display their details */}
-                {getSingleBudgetApiData?.budgetCategories?.map((category: any) => (
-                  <div
-                    key={category.uid}
-                    className="flex rounded-[12px] border border-[#EFEFF0] bg-[#F7F7F9] p-[8px] justify-between w-full"
+                <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
+                  <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
+                    {overall.remark?.title}
+                  </h1>
+                  <h1 className="mt-[8px] text-[14px] leading-[18px]">
+                    {overall.remark?.description}
+                  </h1>
+                  <button
+                    onClick={() => {
+                      if (settingsData?.hasFreeTrial) {
+                        setShowSubscriptionRestriction(true);
+                      } else {
+                        handleShowCategoryBreakdown();
+                      }
+                    }}
+                    className="mt-[16px] text-[#474747] bg-white flex w-full justify-between rounded-[20px] border border-[#EFEFF0] p-[12px]"
                   >
-                    <div className="flex gap-[8px] items-center">
-                      <div
-                        style={{ backgroundColor: category.color }}
-                        className="w-[24px] h-[24px] rounded-full"
-                      ></div>
-                      <h1 className="leading-[16px] text-[12px] text-[#474747]">
-                        {category.name.length > 9 ? `${category.name.substring(0, 9)}...` : category.name}
-                      </h1>
-                    </div>
-                    <div className="text-[#474747] font-[500] text-[14px] leading-[16px]">
-                      ₦ {category.amountSpent.toLocaleString()}
-                    </div>
-                  </div>
-                ))}
+                    See categories breakdown <span><BsChevronRight className="text-[#888888]" size={24} /></span>
+                  </button>
+                </div>
               </div>
-            </div>
-          </BottomDrawer>
-        </motion.div>
-      )}
+            }
+
+            {/* Top expenses */}
+
+            {GetOverallBudgetAnalyticIsPending ?
+              <TopExpensesSkeleton />
+              :
+              <div className="w-full px-[24px]">
+                <div className="p-[24px] w-full rounded-t-[24px] border-[1px] border-[#EFEFF0]">
+                  <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Top expenses</h1>
+                  <div className="w-full flex flex-col gap-[12px]">
+                    {GetOverallBudgetAnalyticsData?.topExpenses?.categories
+                      .map((expense: any) => (
+                        <div
+                          key={expense.uid}
+                          className="flex rounded-[12px] border border-[#EFEFF0] bg-[#F7F7F9] p-[8px] justify-between w-full"
+                        >
+                          <div className="flex gap-[8px] items-center">
+                            <div
+                              style={{ backgroundColor: expense.color }}
+                              className="w-[24px] h-[24px] rounded-full"
+                            ></div>
+                            <h1 className="leading-[16px] text-[12px] text-[#474747]">
+                              {expense.name.length > 20 ? `${expense.name.substring(0, 20)}...` : expense.name}
+                            </h1>
+                          </div>
+                          <div className="text-[#474747] font-[500] text-[14px] leading-[16px]">
+                            ₦ {expense.amountSpent.toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
+                  <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
+                    {GetOverallBudgetAnalyticsData?.topExpenses?.remark?.title}
+                  </h1>
+                  <h1 className="mt-[8px] text-[14px] leading-[18px]">
+                    {GetOverallBudgetAnalyticsData?.topExpenses?.remark?.description}
+                  </h1>
+                  <button
+                    onClick={() => {
+                      if (settingsData?.hasFreeTrial) {
+                        setShowSubscriptionRestriction(true);
+                      } else {
+                        handleShowExpenseBreakdown()
+                      }
+                    }
+
+                    }
+                    className="mt-[16px] text-[#474747] bg-white flex w-full justify-between rounded-[20px] border border-[#EFEFF0] p-[12px]"
+                  >
+                    See all expenses breakdown <span><BsChevronRight className="text-[#888888]" size={24} /></span>
+                  </button>
+                </div>
+              </div>}
+
+
+
+            {/* BEST PERFORMING CATEGORY */}
+
+            {GetOverallBudgetAnalyticIsPending ?
+              <BudgetVsActualSkeleton />
+              :
+              <div className="px-[24px]">
+                <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
+                  <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Best performing category</h1>
+
+                  {/* Calculate the width percentages */}
+                  {(() => {
+                    const { totalBudgeted, actualExpenses } = bestPerformingCategory?.breakdown || {};
+
+                    // Calculate the total for percentage calculation
+                    const total = totalBudgeted + actualExpenses; // Ensure total is the sum of both values
+
+                    // Calculate the adjusted percentages based on the total
+                    const adjustedBudgetPercentage = total > 0 ? (totalBudgeted / total) * 100 : 0;
+                    const adjustedActualPercentage = total > 0 ? (actualExpenses / total) * 100 : 0;
+
+                    // Calculate widths dynamically based on content size (ensuring the text is fully visible)
+                    const budgetTextWidth = `${(totalBudgeted?.toString().length + 10)}ch`; // Adjust based on text length
+                    const actualTextWidth = `${(actualExpenses?.toString().length + 10)}ch`; // Adjust based on text length
+
+                    return (
+                      <div className=" p-[16px] bg-[#F7F7F9] border-[1px] border-[#EFEFF0] rounded-[16px] ">
+                        <h1 className="mb-[10px] text-[14px] font-[500] ">{bestPerformingCategory?.breakdown
+                          ?.title}</h1>
+
+                        {/* Budget bar */}
+                        <h1
+                          className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] flex py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
+                          style={{
+                            width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                            minWidth: budgetTextWidth, // Ensure text fits fully before adjusting width
+                          }}
+                        >
+                          <span className="text-[10px] font-[400]">Budget - </span>
+                          ₦ {totalBudgeted?.toLocaleString()}
+                        </h1>
+
+                        {/* Actual bar */}
+                        <h1
+                          className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] flex py-[6px] rounded-r-[8px] font-[700] leading-[16px]"
+                          style={{
+                            width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
+                            minWidth: actualTextWidth, // Ensure text fits fully before adjusting width
+                          }}
+                        >
+                          <span className="text-[10px] font-[400]">Actual Expenses - </span>
+                          ₦ {actualExpenses?.toLocaleString()}
+                        </h1>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
+                  <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
+                    {bestPerformingCategory?.remark?.title || null}
+                  </h1>
+                  <h1 className="mt-[8px] text-[14px] leading-[18px]">
+                    {bestPerformingCategory?.remark?.description || null}
+                  </h1>
+                </div>
+              </div>}
+
+
+
+
+            {/* WORST PERFORMING CATEGORY */}
+            {GetOverallBudgetAnalyticIsPending ?
+              <BudgetVsActualSkeleton />
+              :
+              <div className="px-[24px]">
+                <div className="p-[24px] rounded-t-[24px] border-[1px] border-[#EFEFF0]">
+                  <div className=" p-[16px] bg-[#F7F7F9] border-[1px] border-[#EFEFF0] rounded-[16px] ">
+                    <h1 className="mb-[10px] text-[14px] font-[500] ">{worstPerformingCategory?.breakdown
+                      ?.title}</h1>
+                    <h1 className="text-[#2D2D2D] mb-[16px] font-[500] leading-[16px]">Worst performing category</h1>
+
+                    {/* Calculate the width percentages */}
+                    {(() => {
+                      const { totalBudgeted, actualExpenses } = worstPerformingCategory?.breakdown || {};
+
+                      // Calculate the difference
+                      const difference = totalBudgeted - actualExpenses;
+
+                      // Calculate the total for percentage calculation
+                      const total = totalBudgeted + Math.abs(difference); // Ensure total is always positive
+
+                      // Calculate the adjusted percentages based on the difference
+                      const adjustedBudgetPercentage = (totalBudgeted / total) * 100;
+                      const adjustedActualPercentage = (actualExpenses / total) * 100;
+
+                      return (
+                        <>
+                          {/* Budget bar */}
+                          <h1
+                            className="bg-[#66C227] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                            style={{
+                              width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                              minWidth: `${totalBudgeted?.toString().length + 10}ch`, // Ensure text fits fully before adjusting width
+                            }}
+                          >
+                            <span className="text-[10px] font-[400]">Budget - </span>
+                            ₦ {totalBudgeted?.toLocaleString()}
+                          </h1>
+
+                          {/* Actual bar */}
+                          <h1
+                            className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                            style={{
+                              width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use 'fit-content' for small percentages
+                              minWidth: `${actualExpenses?.toString().length + 10}ch`, // Ensure text fits fully before adjusting width
+                            }}
+                          >
+                            <span className="text-[10px] font-[400]">Actual Expenses - </span>
+                            ₦ {actualExpenses?.toLocaleString()}
+                          </h1>
+                        </>
+                      );
+
+                    })()}
+                  </div>
+                </div>
+
+                <div className="rounded-b-[24px] pb-[24px] pt-[16px] bg-[#F3F0FA] px-[24px]">
+                  <h1 className="text-[#2D2D2D] font-[500] leading-[18px]">
+                    {worstPerformingCategory?.remark?.title}
+                  </h1>
+                  <h1 className="mt-[8px] text-[14px] leading-[18px]">
+                    {worstPerformingCategory?.remark?.description}
+                  </h1>
+                </div>
+              </div>
+            }
+
+
+          </div>
 
 
 
@@ -748,6 +592,198 @@ export default function Page() {
 
 
 
-    </div>
+          {showBudget &&
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, y: 90 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 90 }} // Exit animation similar to the opening animation
+                transition={{ duration: 0.3 }}
+                className="h-[120vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+              >
+                <BottomDrawer
+                  label="Filter budget name"
+                  back={false}
+                  show={showBudget}
+                  close={true}
+                  onClose={() => setShowBudget(!showBudget)}
+                >
+                  <div className="flex h-[396px] overflow-y-scroll flex-col">
+                    {isPending ?
+                      <div className=' w-full mx-auto  my-auto mt-[10rem] flex justify-center items-center'>
+                        <CircularProgress size='md' color='default' />
+                      </div>
+                      :
+                      <>
+
+                        {budgets.map((budget, index) => (
+                          <button
+                            key={budget.uid} // Unique key for each month
+                            onClick={() => {
+                              console.log(budget);
+
+                              setSelectedBudget(budget); // Set selected budget
+                              setShowBudget(false); // Close the drawer
+                            }}
+                            className={`py-[16px] px-[8px] text-start ${index === budgets.length - 1 ? '' : 'border-b-1'} border-b-[#EFEFF0]`}
+                          >
+                            {budget.name}
+                          </button>
+                        ))}
+                      </>}
+                  </div>
+                </BottomDrawer>
+              </motion.div>
+            </AnimatePresence>
+
+          }
+
+
+
+
+
+
+          {showCategoryBreakDown &&
+            <motion.div
+              initial={{ opacity: 0, y: 90 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="h-[100vh]  w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+            > <BottomDrawer
+              label={`Budget vs Actual`}
+              back={false}
+              show={showCategoryBreakDown}
+              close={true}
+              onClose={() => setShowCategoryBreakDown(!showCategoryBreakDown)}
+            >    <div className="h-[86vh] mt-[32px]   overflow-y-auto ">
+
+                  {GetBudgetCategoriesAnalyticsApiData.map((item: any, index: any) => {
+                    // Destructure the breakdown data for easier access
+                    const { title, actualExpenses, totalBudgeted } = item.breakdown;
+
+                    // Calculate the difference
+                    const difference = totalBudgeted - actualExpenses;
+
+                    // Determine the maximum value for scaling
+                    const maxValue = Math.max(totalBudgeted, actualExpenses);
+
+                    // Calculate the adjusted percentages based on the maximum value
+                    const adjustedBudgetPercentage = (totalBudgeted / maxValue) * 100;
+                    const adjustedActualPercentage = (actualExpenses / maxValue) * 100;
+
+                    // Calculate the difference percentage
+                    const differencePercentage = Math.min((Math.abs(difference) / totalBudgeted) * 100, 100); // Cap at 100%
+
+                    return (
+                      <div key={index} className="mb-[24px] bg-[#F7F7F9] border border-[#EFEFF0] rounded-[24px] p-[24px]">
+                        {/* Display the type of expense */}
+                        <h2 className="text-[14px] text-[#2D2D2D] font-[500] mb-[4px]">{title}</h2>
+
+                        {/* Budget bar */}
+                        <h1
+                          className="bg-[#66C227] text-[#FFFFFF] mb-[4px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                          style={{
+                            width: adjustedBudgetPercentage < 30 ? 'fit-content' : `${adjustedBudgetPercentage}%`, // Use 'fit-content' for small percentages
+                            maxWidth: '100%', // Ensure the bar does not exceed the parent div
+                          }}
+                        >
+                          <span className="text-[10px] font-[400]">Budget - </span>
+                          ₦ {totalBudgeted.toLocaleString()}
+                        </h1>
+
+                        {/* Actual bar */}
+                        <h1
+                          className="bg-[#F89446] text-[#FFFFFF] mb-[12px] text-[10px] px-[10px] py-[6px] flex rounded-r-[8px] font-[700] leading-[16px]"
+                          style={{
+                            width: adjustedActualPercentage < 40 ? 'fit-content' : `${adjustedActualPercentage}%`, // Use calculated width based on the actual expenses
+                            maxWidth: '100%', // Ensure the bar does not exceed the parent div
+                          }}
+                        >
+                          <span className="text-[10px] font-[400]">Actual Expenses - </span>
+                          ₦ {actualExpenses.toLocaleString()}
+                          {/* Show the difference percentage in the actual expenses bar */}
+
+                        </h1>
+
+
+                        {/* Remark section */}
+                        <div>
+                          <h3 className="text-[12px] text-[#2D2D2D] font-[500] mb-[4px]">{item.remark.title}</h3>
+                          <p className="text-[12px] text-[#2D2D2D]">{item.remark.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+
+              </BottomDrawer>
+            </motion.div>
+          }
+
+
+
+
+
+
+          {showExpenseBreakDown && (
+            <motion.div
+              initial={{ opacity: 0, y: 90 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+            >
+              <BottomDrawer
+                label={`Top expenses`}
+                back={false}
+                show={showExpenseBreakDown}
+                close={true}
+                onClose={() => setShowExpenseBreakDown(!showExpenseBreakDown)}
+              >
+                <div className="h-[86vh] mt-[32px] overflow-y-auto">
+                  <div className="w-full flex flex-col gap-[12px]">
+                    {/* Map over budgetCategories to display their details */}
+                    {getSingleBudgetApiData?.budgetCategories?.map((category: any) => (
+                      <div
+                        key={category.uid}
+                        className="flex rounded-[12px] border border-[#EFEFF0] bg-[#F7F7F9] p-[8px] justify-between w-full"
+                      >
+                        <div className="flex gap-[8px] items-center">
+                          <div
+                            style={{ backgroundColor: category.color }}
+                            className="w-[24px] h-[24px] rounded-full"
+                          ></div>
+                          <h1 className="leading-[16px] text-[12px] text-[#474747]">
+                            {category.name.length > 9 ? `${category.name.substring(0, 9)}...` : category.name}
+                          </h1>
+                        </div>
+                        <div className="text-[#474747] font-[500] text-[14px] leading-[16px]">
+                          ₦ {category.amountSpent.toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </BottomDrawer>
+            </motion.div>
+          )}
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+      }
+
+
+    </>
   );
 }
