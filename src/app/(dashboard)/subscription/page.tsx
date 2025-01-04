@@ -3,7 +3,7 @@ import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import React, { ReactNode, useState } from 'react';
 import { BsChevronDown, BsChevronRight, BsChevronUp, BsDot, BsX } from 'react-icons/bs';
 import { motion } from 'framer-motion';
-import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps } from "@nextui-org/react";
+import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps, CircularProgress } from "@nextui-org/react";
 import paymnetIcon from '/public/images/Payment method icon.png'
 import CheckcircleIcon from '/public/images/Check circle.png'
 import subtract1 from '/public/images/Subtract.png'
@@ -109,6 +109,7 @@ const Page = () => {
     const handleChange = (value: string) => {
         setSelectedPlan(value);
     };
+    console.log(navigation.back());
 
 
 
@@ -499,39 +500,45 @@ const Page = () => {
                                     </button>
                                 ))}
                             </div>
-                            <RadioGroup
-                                orientation="vertical"
-                                className=' flex flex-col w-full gap-[16px] '
-                                color='success'
-                            >
-                                <div className="mb-[10px] flex flex-col w-full gap-[16px]">
-                                    {['monthly', 'quaterly', 'yearly']?.map((period) => (
-                                        selectedOption?.toLowerCase() === period &&
-                                        plans[period as keyof Plans]?.slice().reverse().map((plan) => (
-                                            <CustomRadio
-                                                key={plan?.uid}
-                                                header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
-                                                header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
-                                                header3={
-                                                    period === 'monthly'
-                                                        ? (plan?.weeklyAmount && plan.weeklyAmount > 0 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week` : null)
-                                                        : (plan?.monthlyAmount && plan.monthlyAmount > 0 ? `₦ ${plan.monthlyAmount.toLocaleString()}/month` : null)
-                                                }
-                                                className="flex w-full justify-between"
-                                                value={plan?.basePrice}
-                                                label={plan?.discount ? `save ${plan?.discount}%` : null}
-                                            >
-                                                <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
-                                                    {plan?.benefits?.map((benefit, index) => (
-                                                        <li key={index}>{benefit}</li>
-                                                    ))}
-                                                </ul>
-                                            </CustomRadio>
-                                        ))
-                                    ))}
-                                </div>
+                            {isGetAllPlansPending ?
+                                <div className='flex items-center justify-center w-full'>
+                                    <CircularProgress size='sm' />
+                                </div> :
 
-                            </RadioGroup>
+                                <RadioGroup
+                                    orientation="vertical"
+                                    className=' flex flex-col w-full gap-[16px] '
+                                    color='success'
+                                >
+                                    <div className="mb-[10px] flex flex-col w-full gap-[16px]">
+                                        {['monthly', 'quaterly', 'yearly']?.map((period) => (
+                                            selectedOption?.toLowerCase() === period &&
+                                            plans[period as keyof Plans]?.slice().reverse().map((plan) => (
+                                                <CustomRadio
+                                                    key={plan?.uid}
+                                                    header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
+                                                    header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                                                    header3={
+                                                        period === 'monthly'
+                                                            ? (plan?.weeklyAmount && plan.weeklyAmount > 0 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week` : null)
+                                                            : (plan?.monthlyAmount && plan.monthlyAmount > 0 ? `₦ ${plan.monthlyAmount.toLocaleString()}/month` : null)
+                                                    }
+                                                    className="flex w-full justify-between"
+                                                    value={plan?.basePrice}
+                                                    label={plan?.discount ? `save ${plan?.discount}%` : null}
+                                                >
+                                                    <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
+                                                        {plan?.benefits?.map((benefit, index) => (
+                                                            <li key={index}>{benefit}</li>
+                                                        ))}
+                                                    </ul>
+                                                </CustomRadio>
+                                            ))
+                                        ))}
+                                    </div>
+
+                                </RadioGroup>
+                            }
                         </div>
 
 
