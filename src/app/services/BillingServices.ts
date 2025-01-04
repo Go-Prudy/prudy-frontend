@@ -18,6 +18,7 @@ export const getBillingCycleApi = async (token: string) => {
 
     }
 };
+
 export const getBillingHistoryApi = async (token: string, offset: number, limit: number) => {
     try {
         const response = await api.get(`billing/history?offset=${offset}&limit=${limit}`, {

@@ -9,8 +9,7 @@ import { useAuthentication } from "@/app/store/AuthStore";
 import { GetAllBudgetsApi, getSingleBudgetApi } from "@/app/services/BudgetService";
 import { CircularProgress } from "@nextui-org/react";
 import { GetBudgetCategoriesAnalyticsApi, GetOverallBudgetAnalyticsApi } from "@/app/services/AnalyticsService";
-import { BudgetVsActualSkeleton, TopExpensesSkeleton } from "../components/Skelentons/AnalysisSkeleton";
-
+import { BudgetVsActualSkeleton, TopExpensesSkeleton } from "@/components/Skelentons/AnalysisSkeleton";
 export default function Page() {
   const allBudgets: string[] = [
     'January budget',
