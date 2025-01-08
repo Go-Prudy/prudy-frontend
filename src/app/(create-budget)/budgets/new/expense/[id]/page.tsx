@@ -738,9 +738,14 @@ const Page = ({ params }: { params: { id: string } }) => {
     const CreateBudgetMutation = useMutation({
         mutationFn: (data: any) => {
             if (authenticatedUser) {
-                console.log(data);
+                // Remove the color property from allocations
+                const newData = {
+                    ...data,
+                    allocations: data.allocations.map(({ color, ...rest }: any) => rest)
+                };
 
-                return createBudgetApi(data, authenticatedUser.token);
+                console.log(newData);
+                return createBudgetApi(newData, authenticatedUser.token);
             }
             throw new Error("User is not authenticated");
         },
@@ -905,7 +910,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 >
                     <BottomDrawer
                         footer={<div className="w-full grid gap-y-[16px]">
@@ -1069,7 +1074,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 >
                     <form onSubmit={(e) => {
                         e.preventDefault()

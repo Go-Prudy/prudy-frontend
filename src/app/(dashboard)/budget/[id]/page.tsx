@@ -426,7 +426,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                        className="h-[100vh] w-full z-[40] max-w-[500px] bottom-0 fixed bg-[#1c1c1c73]"
                     >
                         <div>
                             <BottomDrawer
@@ -493,7 +493,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 >
                     <form onSubmit={handleSubmit}>
                         <BottomDrawer
