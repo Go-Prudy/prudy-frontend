@@ -490,7 +490,7 @@ const Page = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
                 >
                     <BottomDrawer
                         label="Subscription plans"
@@ -523,7 +523,7 @@ const Page = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+                    className="h-[100vh] w-full z-[40] bottom-0 max-w-[500px] fixed bg-[#1c1c1c73]"
                 >
 
                     <DeleteSuccessModal

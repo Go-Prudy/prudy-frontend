@@ -1059,7 +1059,7 @@ export default function Page() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+        className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
       > <BottomDrawer
         footer={<div className="w-full  grid gap-y-[16px]">
           <button onClick={() => { handleAddManually() }} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
@@ -1142,7 +1142,7 @@ export default function Page() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="h-[100vh] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+        className="h-[100vh] w-full z-[40] bottom-0 fixed max-w-[500px] bg-[#1c1c1c73]"
       > <BottomDrawer
 
         label={`Sync transactions`}

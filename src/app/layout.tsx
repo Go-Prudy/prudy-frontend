@@ -22,8 +22,9 @@ export default function RootLayout({
         <NextUIProvider>
           <Toaster position="top-right" reverseOrder={false} />
           <Providers>
-            <div className="w-[100vw] max-w-[500px] bg-white">
+            <div className="w-[100vw] font-aeonik max-w-[500px] bg-white">
               {children}
+
             </div>
           </Providers>
         </NextUIProvider>
