@@ -63,11 +63,6 @@ const LoginPage = () => {
     event.preventDefault();
     try {
       setIsLoading(true);
-      // const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&redirect_uri=${encodeURIComponent(
-      //   'http://localhost:8080/api/v1/auth/google/callback'
-      // )}&scope=email profile&client_id=894501822618-m6gjh1e1t27s5abbaarhnt6uchpliac4.apps.googleusercontent.com`;
-      // await loginWithGoogleMutation.mutateAsync();
-      // window.location.href = googleAuthUrl;
       event.preventDefault();
       window.location.href = getGoogleUrl();
     } catch (error) {
