@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import Cookies from "js-cookie"
 import api from "../../utils/axiosInstance";
 import { IForgotPassword, ILoginForm, IOtpResponse, ISignupForm } from "../Types";
 
@@ -78,6 +79,18 @@ export const signUpWithGoogle = async () => {
     }
 };
 
+export const loginWithGoogle = async () => {
+    try {
+        const response = await api.get('/auth/google/callback');
+        toast.success(response.data.message);
+        // console.log(response.data);
+        return response.data;
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message);
+    }
+};
+
 
 
 
@@ -95,9 +108,40 @@ export const forgotPassword = async (data: IForgotPassword) => {
     }
 };
 
+export const fetchUserProfile = async () => {
+    try {
+        const token = Cookies.get("token")
+        const response = await api.get('/settings/profile', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        // toast.success(response.data.message);
+        // console.log(response.data);
 
+        return response.data;
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message);
+    }
+};
 
+export const getGoogleUrl = () => {
+    const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
 
+      const options = {
+        redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_REDIRECT_URL!,
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+        access_type: 'offline',
+        response_type: 'code',
+        prompt: 'consent',
+        scope: 'email profile',
+      };
 
+      console.log(options);
+
+      const qs = new URLSearchParams(options).toString();
+      return `${rootUrl}?${qs}`;
+}
 
 

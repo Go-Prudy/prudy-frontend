@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import Cookies from "js-cookie";
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { IAuthenticatedUser, IForgotPassword, ISignupForm, IVerifyOtpForm } from '../Types';
+import { IAuthenticatedUser, IForgotPassword, ISignupForm, IUserProfile, IVerifyOtpForm } from '../Types';
 import { useRouter } from 'next/navigation';
 import { stat } from 'fs';
-
-
 
 
 interface AuthState {
@@ -17,6 +15,7 @@ interface AuthState {
     verifyOtpForm: IVerifyOtpForm
     signup: (form: ISignupForm) => void;
     verifyOtp: (form: IVerifyOtpForm) => void;
+    updateAuthenticatedUser: (data: IAuthenticatedUser) => void;
     ForgotPassword: (form: IForgotPassword) => void;
     ForgotPasswordForm: IForgotPassword
     canResend: boolean;
@@ -78,6 +77,10 @@ export const useAuthentication = create<AuthState>()(
                     verifyOtpForm: { ...state.form, ...formData }, // Update form with the provided form data
                 })),
 
+            updateAuthenticatedUser: (data: IAuthenticatedUser) => 
+                set((state) => ({
+                    authenticatedUser: { ...state.authenticatedUser as IAuthenticatedUser, ...data }
+                })),
             ForgotPassword: (formData: IForgotPassword) => set((state) => (
                 {
                     ForgotPasswordForm: { ...state.ForgotPasswordForm, ...formData }
@@ -118,6 +121,7 @@ export const useAuthentication = create<AuthState>()(
             // Logout: Clear authenticated user data
             LogOut: () => {
                 Cookies.remove('token');
+                localStorage.clear();
                 window.location.href = '/login';
 
             },
