@@ -105,21 +105,23 @@ export interface IResendState {
 
 export interface IAuthenticatedUser {
     token: string;
-    profile: {
-        createdAt: string;
-        updatedAt: string;
-        uid: string;
-        hasFreeTrial: boolean;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phoneNumber: string;
-        registeredWith: string;
-        isVerified: boolean;
-        hasOnboarded: boolean;
-        accountProviderId: string | null;
-        profilePhotoUrl: string | null;
-    };
+    profile: IUserProfile;
+}
+
+export interface IUserProfile {
+    createdAt: string;
+    updatedAt: string;
+    uid: string;
+    hasFreeTrial: boolean;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    registeredWith: string;
+    isVerified: boolean;
+    hasOnboarded: boolean;
+    accountProviderId: string | null;
+    profilePhotoUrl: string | null;
 }
 
 

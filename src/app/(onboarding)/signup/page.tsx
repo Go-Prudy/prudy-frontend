@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { useAuthentication } from '@/app/store/AuthStore';
 import api from '../../../utils/axiosInstance';
 import { useMutation } from '@tanstack/react-query';
-import { sendOtp, signupUser, signUpWithGoogle } from '@/app/services/AuthenticationService';
+import { getGoogleUrl, sendOtp, signupUser, signUpWithGoogle } from '@/app/services/AuthenticationService';
 import { IOtpResponse } from '@/app/Types';
 
 const Page = () => {
@@ -100,32 +100,10 @@ const Page = () => {
     }
   };
 
-
-
-  // React Query mutation for handling google
-  const handleGoogleMutation = useMutation({
-    mutationFn: () => signUpWithGoogle(),
-    onSuccess: (data: any) => {
-      if (data?.success) {
-        // const reference = data.data.reference;
-        // console.log(data);
-        navigate.push('/signup/social/phone')
-        setIsLoading(false)
-      }
-    },
-    onError: (error: Error) => {
-      setIsLoading(false)
-      console.error(error);
-    },
-  });
-
-
-
-
   const handleGoogle = async () => {
     try {
       setIsLoading(true)
-      handleGoogleMutation.mutateAsync()
+      window.location.href = getGoogleUrl();
     } catch (error) {
       setIsLoading(false)
       console.log(error);
