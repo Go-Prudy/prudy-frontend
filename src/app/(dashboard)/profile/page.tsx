@@ -9,6 +9,7 @@ import collaborationIcon from "/public/images/collaborationicon.png";
 import reminderIcon from "/public/images/remindericon.png";
 import subscriptionIcon from "/public/images/subscriptionicon.png";
 import reportIcon from "/public/images/reporticon.png";
+import trialIcon from "/public/images/icons/trial.svg";
 import faqIcon from "/public/images/faq.png";
 import passcodeIcon from "/public/images/passcode.png";
 import currencyIcon from "/public/images/currency.png";
@@ -123,7 +124,7 @@ export default function Page() {
     }
   }, [authenticatedUser]);
   return (
-    <div className="bg-[#FAFAFA]  w-[100vw] max-w-[500px]  h-screen">
+    <div className="bg-[#FAFAFA]  w-[100vw] max-w-[500px] h-screen">
       <Header2 title={'Profile'} />
       <div onClick={() => navigation.push('/profile/user')} className="cursor-pointer pt-[90px] px-[24px] pb-[24px]">
         <Link href="/profile/user" prefetch={true}>
@@ -144,11 +145,29 @@ export default function Page() {
                   <BsPerson className='text-[#FFFFFF] size-[52px]' />
                 }
               </div>
-              <div className='flex gap-[4px] flex-col'>
+              <div className='grid grid-cols-1 gap-[4px] justify-start items-start'>
                 <h1 className='font-[500] text-[#FFFFFF] leading-[24px]'>
                   {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
                 </h1>
-                <Image className='w-[74px] h-[24px]' alt='premium' width={1000} height={1000} src={premium} />
+                <div className="w-[64px] h-[20px]">
+
+                {!userData.profile.hasFreeTrial ? (
+                                    <Image
+                                        className=''
+                                        alt='premium'
+                                        width={1000}
+                                        height={1000}
+                                        src={premium}
+                                    />
+                                ) :
+                                    <Image
+                                        alt='premium'
+                                        width={1000}
+                                        height={1000}
+                                        src={trialIcon} />
+                                }
+                </div>
+                {/* <Image className='w-[74px] h-[24px]' alt='premium' width={1000} height={1000} src={premium} /> */}
               </div>
             </div>
             <BsChevronRight size={24} />
@@ -171,17 +190,19 @@ export default function Page() {
                       <button
                         key={item.title}
                         onClick={() => {
-                          console.log(usersubscription?.plan?.uid);
+                          console.log('--------------------------');
+                          console.log(item);
+                          //  console.log(usersubscription?.plan?.uid);
 
-                          if (usersubscription?.plan?.uid && settingsData?.hasFreeTrial) {
-                            navigation.push("/subscription/" + usersubscription?.plan?.uid)
-                          } else {
-                            navigation.push(item.link)
+                           if (!usersubscription?.plan?.uid && !settingsData?.hasFreeTrial) {
+                             navigation.push("/subscription/" + usersubscription?.plan?.uid)
+                           } else {
+                             navigation.push(item.link)
                           }
                         }
 
                         }
-                        className="flex items-center gap-4 p-4 border border-[#EFEFF0] rounded-[20px] bg-[#F7F7F9] hover:shadow-sm"
+                        className="flex flex-col  gap-2 p-4 border border-[#EFEFF0] rounded-[20px] bg-[#F7F7F9] hover:shadow-sm"
                       >
                         <div className="w-[40px] h-[40px] flex items-center justify-center text-[#888888] bg-[#Fff]  rounded-full">
                           {item.icon}

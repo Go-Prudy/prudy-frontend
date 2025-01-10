@@ -12,7 +12,7 @@ export const getAllBudgetCategoriesApi = async (token: string) => {
                 Authorization: `Bearer ${token}`, // Include the token in the Authorization header
             },
         });
-        console.log(response.data.data);
+        // console.log(response.data.data);
         return response.data.data
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");

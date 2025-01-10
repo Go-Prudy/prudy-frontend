@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BsBell, BsPerson } from 'react-icons/bs';
 import hambugger from "/public/images/hambugger2.png";
 import premium from "/public/images/premium.png";
+import trialIcon from "/public/images/icons/trial.svg";
 import close from "/public/images/closeicon.png";
 import Link from 'next/link';
 import home from "/public/images/home.webp";
@@ -123,7 +124,25 @@ const Header2 = ({ title }: Iprop) => {
                                     {userData.profile.lastName ? `${userData.profile.firstName} ${userData.profile.lastName}` : 'User'}
 
                                 </h1>
-                                <Image className='backdrop-blur-3xl w-[74px] h-[20px]' alt='premium' width={1000} height={1000} src={premium} />
+
+                                {!userData.profile.hasFreeTrial ? (
+                                    <Image
+                                        className=''
+                                        alt='premium'
+                                        width={1000}
+                                        height={1000}
+                                        src={premium}
+                                    />
+                                ) :
+                                    <Image
+                                        className=''
+                                        alt='free'
+                                        width={1000}
+                                        height={1000}
+                                        src={trialIcon} />
+                                }
+
+                                {/* <Image className='backdrop-blur-3xl w-[74px] h-[20px]' alt='premium' width={1000} height={1000} src={premium} /> */}
                             </div>
                         </div>
 

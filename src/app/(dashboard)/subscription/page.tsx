@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { RadioGroup, useRadio, VisuallyHidden, cn, RadioProps, CircularProgress } from "@nextui-org/react";
 import paymnetIcon from '/public/images/Payment method icon.png'
 import CheckcircleIcon from '/public/images/Check circle.png'
+import subscriptionIcon from '/public/images/subscription.svg'
 import subtract1 from '/public/images/Subtract.png'
 import subtract2 from '/public/images/Subtract (1).png'
 import mono1 from '/public/images/mono1.png'
@@ -299,29 +300,23 @@ const Page = () => {
             initial={{ y: "100%" }} // Start completely off-screen at the bottom
             animate={{ y: 0 }} // Animate to the top
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="relative w-full max-w-[500px] h-[884px]    overflow-x-hidden"
-            style={{
-                background: "linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)",
-
-            }}
+            className="relative w-[100vw] h-[100vh] subscription-bg bg-no-repeat bg-cover"
+            
         >
 
 
-            <div
-
-                className='  relative py-[22px] px-[24px]'
-            >
-                <div className='  fixed lg:absolute top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
+            <div className='relative py-[22px] px-[24px]'>
+                {/* <div className='  fixed lg:absolute top-[-80.53px] right-[-10px]  rotate-[4.05deg]  w-[186.14px] z-1 h-[360.28px] '>
                     <Image
                         src={subtract1}
                         className=" w-full h-full  "
                         height={1000} width={1000}
                         alt="payment icon"
                     />
-                </div>
-                <div className=' fixed lg:absolute bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
+                </div> */}
+                {/* <div className=' fixed lg:absolute bottom-[-60px] left-[-60px]  rotate-[0.05deg]  w-[316.14px] z-0 h-[280.28px] '>
                     <Image src={subtract2} className="h-full z-[-1] w-full " height={1000} width={1000} alt="payment icon" />
-                </div>
+                </div> */}
 
                 {/* Header */}
                 <div className='flex mb-[36px]  items-center w-full'>
@@ -332,14 +327,14 @@ const Page = () => {
                     <h1 className='mx-auto relative z-2 text-white text-center text-[18px] font-[500]'>Subscription</h1>
                 </div>
                 <div>
-                    <h1 className='text-[36px] z-2 relative mb-[16px] text-center text-white font-[500] leading-[40px]'>Activate free trial for <br /> 30 days</h1>
-                    <p className='flex gap-[8px] py-[4px] px-[8px] mx-auto bg-[#006D00] z-2 backdrop-blur-md relative w-fit text-white items-center rounded-[16px] mb-[24px]'>
-                        2 days left
+                    <h1 className='text-[36px] z-2 relative mb-[16px] text-center text-white font-[500] leading-[40px]'>Activate free trial for <br /> 14 days</h1>
+                    <p className='flex gap-[8px] py-[4px] px-6 mx-auto bg-[#006D00] z-2 backdrop-blur-md relative w-fit text-white items-center rounded-[16px] mb-[24px]'>
+                        Cancel anytime
                     </p>
                 </div>
 
-                <div className='pt-[24px] '>
-                    <div className="bg-[#F7F7F9] z-10 relative text-[#2D2D2D] text-[18px] leading-[25.2px] p-[16px] rounded-[24px] ">
+                <div className=''>
+                <div className="bg-[#F7F7F9] z-10 relative text-[#2D2D2D] text-[18px] leading-[25.2px] p-[16px] rounded-[24px] ">
                         <div className=' items-center flex justify-between w-full'>
                             <h1>Unstoppable 🚀</h1>
                             <Popover isOpen={isOpen} onOpenChange={(open) => setIsOpen(!open)} placement="bottom">
@@ -374,7 +369,6 @@ const Page = () => {
                             </Popover>
                         </div>
                         <div className=' bg-[#FFFFFF] mt-[12px] p-[12px] rounded-[12px] '>
-
                             {features.map((feature, index) => (
                                 <div key={index} className="flex items-center mb-[12px] last:mb-0">
                                     <div className="relative">
@@ -384,22 +378,16 @@ const Page = () => {
                                             <Image src={CheckcircleIcon} className="size-[16px] " height={24} width={34} alt="payment icon" />
                                         )}
                                     </div>
-                                    <span className="ml-[12px] text-[#575757] leading-[28px]">{feature}</span>
+                                    <span className="ml-[12px] text-[#575757] leading-[28px] text-base">{feature}</span>
                                 </div>
                             ))}
                             <button className=' bg-[#ECF7E2] rounded-[8px] mx-auto w-full text-[14px] text-[#575757] px-[24.5px] py-[12px] '>30 days free, then <span className=' font-[700] text-[16px]'>₦ 3,000</span> /monthly</button>
                         </div>
                         <button type="submit" className="btn w-full mt-[12px] rounded-[32px] px-[28px] py-[14px] z-2  relative bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]" onClick={() => setShowMakePayment(true)}>Continue</button>
                     </div>
-
-
+                    
                     <div>
-
-
-
-
-
-                        <button onClick={() => setShowSubscriptionPlan(!showSubscriptionPlan)} className=" text-center z-[2] mb-[170px] relative w-full my-[24px]  text-[#FAFAFA] flex items-center justify-center gap-[5px] font-[500]">See all subscriptions <BsChevronRight /></button>
+                        <button onClick={() => setShowSubscriptionPlan(!showSubscriptionPlan)} className=" text-center z-[2] relative w-full my-[24px]  text-[#FAFAFA] flex items-center justify-center gap-[5px] font-[500]">See all subscriptions <BsChevronRight /></button>
                     </div>
                 </div>
             </div>
