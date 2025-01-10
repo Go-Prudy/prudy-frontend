@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 
 // Define public and private routes
-const publicRoutes = ['/signup', '/login', '/', '/terms&conditions', '/privacy&policy', '/about', '/faqs', '/contact'];
+const publicRoutes = ['/signup', '/login', '/', '/terms&conditions', '/privacy&policy', '/about', '/contact'];
 const privateRoutes = [
     '/budgets',
     '/budgets/:path*',

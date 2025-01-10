@@ -299,11 +299,11 @@ const SubscriptionRestriction = ({ setShowSubscriptionRestriction, showSubscript
             initial={{ y: "100%" }} // Start completely off-screen at the bottom
             animate={{ y: 0 }} // Animate to the top
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="relative w-full max-w-[500px] h-[884px]    overflow-x-hidden"
-            style={{
-                background: "linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)",
+            className="relative w-full max-w-[500px] h-[884px]  subscription-bg  overflow-x-hidden"
+            // style={{
+            //     background: "linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)",
 
-            }}
+            // }}
         >
 
 

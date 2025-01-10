@@ -37,15 +37,13 @@ const Slide3: React.FC<Slide3Props> = ({ slide, handlePrev, handleNext }) => {
         }
     }, [slide]);
     return (
-        <div
-            className="max-w-[500px] min-h-[944px] bg-no-repeat bg-black relative bg-contain bg-top transition-all duration-300 ease-out"
-            style={{ backgroundImage: `url(${backgroundImage})` }}
-        >
+        <div className="max-w-[500px] min-h-[100vh] bg-no-repeat bg-black relative bg-contain bg-top transition-all duration-300 ease-out"
+            style={{ backgroundImage: `url(${backgroundImage})` }}>
 
             <div className="absolute h-full bg-gradient-to-b top-0 to-[#121212] from-[#ffffff05] left-0 px-6 w-full"></div>
             <div className="fixed top-0 left-0 w-full h-full" style={{ background: 'linear-gradient(180.32deg, #12121200 -16.27%, black 67.38%)' }}></div>
 
-            <div className="fixed mt-[432px] bg-gradient-to-b to-[#070D04] via-[#070D04] from-[#ffffff00] py-[40px] bottom-10 left-0 px-6 w-full">
+            <div className="fixed mt-[432px] bg-gradient-to-b to-[#070D04] via-[#070D04] from-[#ffffff00] pb-[40px] bottom-0 left-0 px-6 w-full">
                 <div className="px-6 pt-6 pb-10 transition-all ease-in bg-[#121212] min-h-10 w-full border border-[#212121] rounded-3xl">
                     <FadeTransition shouldChange={String(slide)}>
                         {slide === 0 && (

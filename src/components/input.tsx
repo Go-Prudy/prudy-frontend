@@ -88,7 +88,7 @@ const Input = ({
               maxLength={maxLength}
               onChange={handleChange}
               placeholder={placeholder}
-              className={`bg-[#F7F7F9] border border-[#EFEFF0] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2 ${disabled ? 'cursor-not-allowed bg-gray-200' : ''}`}
+              className={`bg-[#F7F7F9] border outline-[#66C227] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2 ${disabled ? 'cursor-not-allowed bg-gray-200' : ''}`}
               disabled={disabled}
             />
           </div>

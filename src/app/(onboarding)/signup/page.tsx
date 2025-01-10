@@ -116,7 +116,7 @@ const Page = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-[500px] min-h-[100vh] ">
+      className="max-w-[500px] min-h-[100vh]">
       <Header link={'/'} title="Create account" />
       <div className="px-6 py-10">
         <div className="w-full">

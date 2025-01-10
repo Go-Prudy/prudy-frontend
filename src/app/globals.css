@@ -212,3 +212,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .PhoneInputCountrySelect span:not(.PhoneInputCountrySelectCode) {
   display: none;
 }
+
+.subscription-bg{
+  background-image: url('./images/subscription.svg');
+}

@@ -134,7 +134,7 @@ const BudgetPage = () => {
             transition={{ duration: 0.5 }}
             className='  '
         >
-            <div className=' overscroll-none '>
+            <div className=' overscroll-none'>
                 <div
                     className="relative  w-full max-w-[500px] overscroll-none bg-no-repeat bg-contain bg-top transition-all duration-300 ease-out min-h-screen"
                     style={{
@@ -166,7 +166,7 @@ const BudgetPage = () => {
                         }
 
                     </div>
-                    <div className='bg-[#F7F7F9]  mt-[40px] min-h-[389px] w-full rounded-t-[24px]'>
+                    <div className='bg-[#F7F7F9] bottom-0 absolute min-h-[389px] w-full rounded-t-[24px]'>
                         {isPending ? (
                             <div className='flex flex-col mb-[90px] gap-[24px] p-[24px]'>
                                 {[...Array(3)].map((_, index) => (

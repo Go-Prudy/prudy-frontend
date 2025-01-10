@@ -877,7 +877,9 @@ const Page = ({ params }: { params: { id: string } }) => {
                             ) : (
                                 // Data Display
                                 <>
-                                    {budgetCategoriesArray.map((budget: any) => (
+
+                                    {/* for each  lastBudget?.allocations */}
+                                    {/* {budgetCategoriesArray.map((budget: any) => (
                                         <ul key={budget.id} className="budget-list grid grid-cols-1 gap-[16px] w-full">
                                             <li
                                                 onClick={() => handleBudgetClick(budget)}
@@ -888,9 +890,37 @@ const Page = ({ params }: { params: { id: string } }) => {
                                                     style={{ backgroundColor: budget.color }}
                                                 ></div>
                                                 <h1 className="text-[12px]">{budget.name}</h1>
+                                                <span>Amount: amount here</span>
                                             </li>
                                         </ul>
-                                    ))}
+                                    ))} */}
+                                    
+                                    {budgetCategoriesArray.map((budget: any) => {
+                                        // Find the corresponding allocation for this budget using the uid
+                                        const allocation = lastBudget?.allocations?.find(
+                                            (allocation: any) => allocation.budgetCategory === budget.uid
+                                        );
+
+                                        // If an allocation is found, use its amount; otherwise, use 0
+                                        const totalAmount = allocation?.amount || 0;
+
+                                        return (
+                                            <ul key={budget.uid} className="budget-list grid grid-cols-1 gap-[16px] w-full">
+                                                <li
+                                                    onClick={() => handleBudgetClick(budget)}
+                                                    className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
+                                                >
+                                                    <div
+                                                        className="w-[20px] h-[20px] rounded-full"
+                                                        style={{ backgroundColor: budget.color }}
+                                                    ></div>
+                                                    <h1 className="text-[12px]">{budget.name}</h1>
+                                                    <span>₦ {totalAmount.toLocaleString('en-US')}</span>
+                                                </li>
+                                            </ul>
+                                        );
+                                    })}
+
                                 </>
                             )}
                         </>
