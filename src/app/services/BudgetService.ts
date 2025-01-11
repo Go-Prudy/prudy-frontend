@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 import api from "../../utils/axiosInstance";
-import { ICreateBudgetCategory, IExpense, IForgotPassword, ILoginForm, IOtpResponse, ISignupForm, ManualData } from "../Types";
+import { IBudget, ICreateBudgetCategory, IExpense, IForgotPassword, ILoginForm, IOtpResponse, ISignupForm, ManualData } from "../Types";
 
 
 // Function to get all budgets categories
@@ -82,33 +82,27 @@ export const RecordExpenseApi = async (budgetId: string, budgetCategoryId: strin
 
 export const GetAllBudgetsApi = async (token: string) => {
     try {
-        let allBudgets: any[] = [];
-        const limit = 10;
-        const totalPages = 5;
-
-        // Create an array of promises for fetching multiple pages
-        const fetchPromises = Array.from({ length: totalPages }, (_, index) => {
-            const page = index + 1;
-            return api.get(`budgets/?page=${page}&limit=${limit}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-        });
+        const limit = 12;
+        const page = 1;
 
         // Fetch all pages in parallel
-        const responses = await Promise.all(fetchPromises);
 
         // Process each response
-        responses.forEach(response => {
-            const { docs } = response.data.data; // Adjust if the response structure is different
-            if (docs) {
-                allBudgets = [...allBudgets, ...docs];
-            }
+        // responses.forEach(response => {
+        //     const { docs } = response.data.data; // Adjust if the response structure is different
+        //     if (docs) {
+        //         allBudgets = [...allBudgets, ...docs];
+        //     }
+        // });
+
+        const budgets = await api.get(`budgets/?page=${page}&limit=${limit}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
 
-        console.log('All budgets fetched:', allBudgets);
-        return allBudgets;
+        console.log('All budgets fetched:', budgets);
+        return budgets.data.data.docs as any[];
     } catch (error: any) {
         toast.error(error?.response?.data?.message || "An error occurred");
         console.error(error);

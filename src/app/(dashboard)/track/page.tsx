@@ -157,24 +157,6 @@ export default function Page() {
     date: string;
   };
 
-  // const initialCategories: Category[] = [
-  //   { id: 1, name: 'Housing', totalAmount: 5000000, remaining: 4250000, color: '#01B0C5', selected: false },   // Blue
-  //   { id: 2, name: 'Food', totalAmount: 450000, remaining: 450000, color: '#FB8417', selected: false },       // Orange
-  //   { id: 3, name: 'Transport', totalAmount: 450000, remaining: 450000, color: '#A858EE', selected: false },  // Purple
-  //   { id: 4, name: 'Education', totalAmount: 450000, remaining: 450000, color: '#F18987', selected: false },  // Pink
-  //   { id: 5, name: 'Entertainment', totalAmount: 600000, remaining: 300000, color: '#99DFAD', selected: false }, // Green
-  //   { id: 6, name: 'Health', totalAmount: 200000, remaining: 150000, color: '#6F6C8F', selected: false },     // Red
-  //   { id: 7, name: 'Utilities', totalAmount: 1000000, remaining: 700000, color: '#E3B53C', selected: false }, // Yellow
-  //   { id: 8, name: 'Shopping', totalAmount: 800000, remaining: 600000, color: '#FDC1C1', selected: false },   // Teal
-  //   { id: 9, name: 'Travel', totalAmount: 900000, remaining: 800000, color: '#97E0F7', selected: false },     // Indigo
-  //   { id: 10, name: 'Miscellaneous', totalAmount: 300000, remaining: 150000, color: '#66C227', selected: false }, // Gray
-  // ];
-
-
-
-
-
-
 
   const navigation = useRouter()
 
@@ -263,13 +245,8 @@ export default function Page() {
 
 
   const handleSaveManually = () => {
-    console.log('Saved Item Data:', manualData);
     // setAddManualModal(!AddManualModal)
   };
-
-
-
-
 
 
   // Function to handle category selection
@@ -280,7 +257,6 @@ export default function Page() {
 
   const handleAssign = () => {
     if (selectedCategory) {
-      console.log('Assigned category:', selectedCategory.name);
       // Handle assignment logic here...
     }
   };
@@ -376,7 +352,7 @@ export default function Page() {
     sortBy: 'accountName',
     sortDir: 'ASC',
     limit: 12,
-    page: 12,
+    page: 1,
   };
 
   // React Query hook
@@ -388,15 +364,12 @@ export default function Page() {
     refetchOnMount: false, // Prevent refetching on component mount
     refetchInterval: false, // Disable polling
   });
-  console.log(accounts);
 
 
   // React Query mutation to link an account
   const linkAccountMutation = useMutation({
     mutationFn: () => initLinkAccountApi(authenticatedUser?.token ?? ''),
     onSuccess: (data) => {
-
-      console.log('Account linked successfully!', data);
       // Any other success handling logic such as redirecting or updating UI
     },
     onError: (error: unknown) => {
@@ -409,8 +382,7 @@ export default function Page() {
 
   useEffect(() => {
     if (linkAccountMutation.isPending) {
-      setShowSyncModal(true)
-      console.log(linkAccountMutation.isPending);
+      // setShowSyncModal(true)
     }
   }, [linkAccountMutation])
 
@@ -473,14 +445,6 @@ export default function Page() {
     enabled: !!authenticatedUser?.token && !!selectedBudget?.uid,
     refetchOnWindowFocus: true, // This should be directly in the options object.
   });
-  console.log(selectedBudget?.uid);
-
-
-  console.log(singleBudgetData);
-
-
-
-  console.log(syncAccountTransactions);
 
 
 
@@ -494,8 +458,6 @@ export default function Page() {
     refetchInterval: false, // Disable polling
     staleTime: Infinity, // Keep the data fresh indefinitely
   });
-
-  console.log(activeBudgetCategories);
 
   useEffect(() => {
     if (activeBudgetCategories.length > 0) {
@@ -518,7 +480,6 @@ export default function Page() {
   const handleBudgetChange = (selectedUid: string) => {
     const budget = budgets.find((budget) => budget.uid === selectedUid);
     setSelectedBudget(budget); // Save the full budget object
-    console.log('Selected Budget Object:', budget);
 
     // Trigger active categories fetching for the selected budget
     refetchActiveBudgetCategories();
@@ -550,8 +511,6 @@ export default function Page() {
     staleTime: Infinity, // Keep the data fresh indefinitely
   });
 
-  console.log(data);
-
 
   useEffect(() => {
     if (data?.pages && data.pages.length > 0) {
@@ -561,7 +520,6 @@ export default function Page() {
 
   useEffect(() => {
     if (syncAccountTransactions && syncAccountTransactions.length > 0) {
-      console.log(syncAccountTransactions);
 
       setTransactions(syncAccountTransactions || []);
     }
@@ -578,7 +536,6 @@ export default function Page() {
   const handleBankSelect = (index: any) => {
     setSelectedBankIndex(index);
     setSelectedBankAccount(accounts[index])
-    console.log(selectedBankAccount);
 
   };
 
@@ -632,7 +589,6 @@ export default function Page() {
         }
         setSelectedCategory(categories[0]?.id);
       }
-      console.log(activeBudgetCategories[0]);
 
       setSelectedCategoryId(activeBudgetCategories[0]?.uid);
     } else {
@@ -669,7 +625,6 @@ export default function Page() {
         authenticatedUser?.token ?? ''
       ),
     onSuccess: (data) => {
-      console.log("Expense recorded successfully:", data);
       setManualData({
         itemName: '',
         amount: 0,
@@ -678,7 +633,7 @@ export default function Page() {
       })
     },
     onError: (error) => {
-      console.log("Error recording expense:", error);
+      console.error("Error recording expense:", error);
     },
   });
 
@@ -687,7 +642,6 @@ export default function Page() {
   const addManualMutation = useMutation({
     mutationFn: async (data) => RecordExpenseApi(selectedBudget.uid, selectedCategoryId, data, authenticatedUser?.token ?? ''),
     onSuccess: (data) => {
-      console.log(' successful', data);
       setAddManualModal(!AddManualModal)
     },
     onError: (error) => {
@@ -704,13 +658,8 @@ export default function Page() {
     };
 
     try {
-      console.log(manualData.category);
-      console.log(selectedCategory);
-
       setSelectedCategory(manualData.category)
       const result = await addManualMutation.mutateAsync(expenseData);
-      console.log('Expense added:', expenseData);
-      console.log('Expense added:', result);
     } catch (error) {
       console.error('Error adding expense:', error);
     }
@@ -728,8 +677,6 @@ export default function Page() {
 
       setSelectedCategory(selectedCategory.id)
       setSelectedCategoryId(categories[0].id)
-      console.log(categories);
-
     }
   };
 
@@ -756,7 +703,6 @@ export default function Page() {
       return { previousTransactions };
     },
     onSuccess: (data) => {
-      console.log('Category assigned successfully:', data);
       toast.success("Transaction updated with selected category!");
       setSelectedCategoryForTransaction(null)
       // Close the categories modal
