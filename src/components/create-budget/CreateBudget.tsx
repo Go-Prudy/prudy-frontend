@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import BottomDrawer from './BottomDrawer';
 import Input from '../input'; // Assuming this is your input component
@@ -10,16 +10,40 @@ import { useRouter } from 'next/navigation';
 import { useBudgetStore } from '@/app/store/Store';
 import { IBudget } from '@/app/Types';
 import { v4 as uuidv4 } from 'uuid';
+import { IPreviousBudget } from '@/app/types/budget';
+import { fetchPreviousBudgetApi } from '@/app/services/BudgetService';
 
 interface IProps {
     setShow: (i: boolean) => void;
-    show: boolean
+    show: boolean,
+    previousBudget: IPreviousBudget | null,
+    fetchPreviousBudget: () => void;
+    clearPreviousBudget: () => void;
+}
+
+enum BudgetActionType {
+    CreateNewBudget = 'Create new budget',
+    DuplicateLastBudget = 'Duplicate last budget'
 }
 
 
-const CreateBudget = ({ setShow, show }: IProps) => {
+const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget }: IProps) => {
     // State to manage form data
-    const [budgetData, setBudgetData] = useState<IBudget>({
+    // const [budgetData, setBudgetData] = useState<IBudget>({
+    //     id: uuidv4(),
+    //     name: '',
+    //     purpose: '',
+    //     startDate: '',
+    //     endDate: '',
+    // });
+
+    const { getPreviousBudget, addBudget } = useBudgetStore((state) => ({
+        addBudget: state.addBudget,
+        // duplicateLastBudget: state.duplicateLastBudget,
+        getPreviousBudget: state.getPreviousBudget
+    }));
+
+    const [budgetData, setBudgetData] = useState<IPreviousBudget | IBudget>({
         id: uuidv4(),
         name: '',
         purpose: '',
@@ -27,22 +51,32 @@ const CreateBudget = ({ setShow, show }: IProps) => {
         endDate: '',
     });
 
-    const { addBudget, duplicateLastBudget } = useBudgetStore((state) => ({
-        addBudget: state.addBudget,
-        duplicateLastBudget: state.duplicateLastBudget,
-    }));
-
 
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
-    const [budgetType, setBudgetType] = useState<string>('Create new budget');
-
+    const [budgetType, setBudgetType] = useState<BudgetActionType>(BudgetActionType.CreateNewBudget);
 
     const navigate = useRouter()
     // Handle form input changes
     const handleChange = (key: string, value: string) => {
         setBudgetData(prevData => ({ ...prevData, [key]: value }));
     };
+
+    useEffect(() => {
+        if (budgetType === BudgetActionType.DuplicateLastBudget) {
+            setBudgetData(getPreviousBudget() as IPreviousBudget);
+        } else {
+            setBudgetData({
+                id: uuidv4(),
+                name: '',
+                purpose: '',
+                startDate: '',
+                endDate: '',
+            });
+            // clearPreviousBudget();
+        }
+
+    }, [budgetType])
 
 
     const handleChangeDate = (field: 'startDate' | 'endDate', value: string) => {
@@ -58,11 +92,9 @@ const CreateBudget = ({ setShow, show }: IProps) => {
         });
     };
 
-
-
     // Calculate the minimum selectable end date (the day after the start date)
-    const minEndDate = budgetData.startDate
-        ? new Date(new Date(budgetData.startDate).getTime() + 86400000).toISOString().split('T')[0]
+    const minEndDate = budgetData?.startDate
+        ? new Date(new Date(budgetData?.startDate).getTime() + 86400000).toISOString().split('T')[0]
         : '';
 
 
@@ -70,11 +102,13 @@ const CreateBudget = ({ setShow, show }: IProps) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (budgetType === 'Create new budget') {
-            addBudget(budgetData);
+            budgetData.allocations = [];
+            budgetData.incomes = [];
+            addBudget(budgetData as IBudget);
         } else if (budgetType === 'Duplicate last budget') {
-            duplicateLastBudget();
+            addBudget(budgetData as unknown as IBudget);
         }
-        navigate.push(`/budgets/new/income/${budgetData.id}`);
+        navigate.push(`/budgets/new/income/${budgetData?.id}`);
         setShow(false);
     };
 
@@ -138,8 +172,8 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                     onClose={() => setShow(false)}
                 >
                     <div className="budget-form pt-[24px] mt-[0px]">
-                        <Input label="Name of budget" inputName="Nameofbudget" inputType="text" placeholder="January..." onChange={(value) => handleChange('name', value)} />
-                        <Input label="Purpose of budget" inputName="Purposeofbudget" inputType="text" placeholder="Monthly expenses..." onChange={(value) => handleChange('purpose', value)} />
+                        <Input label="Name of budget" inputName="Nameofbudget" inputType="text" placeholder="January..." value={budgetData?.name} onChange={(value) => handleChange('name', value)} />
+                        <Input label="Purpose of budget" inputName="Purposeofbudget" inputType="text" placeholder="Monthly expenses..." value={budgetData?.purpose} onChange={(value) => handleChange('purpose', value)} />
                         <div className="flex gap-[16px] justify-between">
                             <Input
                                 label="Start date"
@@ -147,7 +181,7 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                                 inputType="date"
                                 placeholder="Select date..."
                                 onChange={(value) => handleChangeDate('startDate', value)}
-                                value={budgetData.startDate} // Bind the startDate state to the Input component
+                                value={budgetData?.startDate} // Bind the startDate state to the Input component
                             />
                             <Input
                                 label="End date"
@@ -156,8 +190,8 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                                 placeholder="Select date..."
                                 onChange={(value) => handleChangeDate('endDate', value)}
                                 min={minEndDate} // Prevent selecting a date before the start date
-                                disabled={!budgetData.startDate} // Disable end date input until a start date is selected
-                                value={budgetData.endDate} // Bind the endDate state to the Input component
+                                disabled={!budgetData?.startDate} // Disable end date input until a start date is selected
+                                value={budgetData?.endDate} // Bind the endDate state to the Input component
                             />
                         </div>
 
@@ -168,18 +202,17 @@ const CreateBudget = ({ setShow, show }: IProps) => {
                             className=' flex w-full  justify-between  gap-[16px]'
                             color='success'
                             onValueChange={(value) => handleChange('budgetType', value)}
-
                         >
                             <CustomRadio
-                                isSelected={budgetType === "Duplicate last budget"} onChange={() => setBudgetType("Duplicate last budget")}
+                                isSelected={budgetType === BudgetActionType.DuplicateLastBudget} onChange={() => { setBudgetType(BudgetActionType.DuplicateLastBudget); fetchPreviousBudget() }}
 
 
-                                description="Duplicate last budget" value="Duplicate last budget">
+                                description="Duplicate last budget" value={BudgetActionType.DuplicateLastBudget}>
                             </CustomRadio>
 
-                            <CustomRadio isSelected={budgetType === "Create new budget"} onChange={() => setBudgetType("Create new budget")}
+                            <CustomRadio isSelected={budgetType === BudgetActionType.CreateNewBudget} onChange={() => {setBudgetType(BudgetActionType.CreateNewBudget);}}
 
-                                description="Create new budget" value="Create new budget">
+                                description="Create new budget" value={BudgetActionType.CreateNewBudget}>
                             </CustomRadio>
 
                         </RadioGroup>

@@ -1,33 +1,23 @@
 'use client'
 import Header from '@/components/header'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import { getAllBudgetCategoriesApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
+import { useBudgetStore } from '@/app/store/Store';
 
 const Page = () => {
-
-    // Define the data array
-    const budgetCategories = [
-        { name: 'Housing', percentage: 12, color: '#4CAF50' },  // Green
-        { name: 'Food', percentage: 30, color: '#FFB74D' },     // Orange
-        { name: 'Emergency', percentage: 10, color: '#E57373' },// Red
-        { name: 'Miscellaneous', percentage: 5, color: '#9575CD' }, // Purple
-        { name: 'Utilities', percentage: 12, color: '#F06292' }, // Pink
-        { name: 'Tithe', percentage: 10, color: '#8D6E63' },    // Brown
-        { name: 'Transportation', percentage: 7, color: '#42A5F5' }, // Blue
-        { name: 'Generosity', percentage: 10, color: '#FF8A65' }, // Coral
-        { name: 'Personal', percentage: 12, color: '#BCAAA4' }, // Light Brown
-        { name: 'Savings', percentage: 30, color: '#81D4FA' },  // Light Blue
-        { name: 'Utilities', percentage: 10, color: '#90A4AE' }, // Grey
-        { name: 'Health', percentage: 10, color: '#9575CD' },    // Purple
-    ];
 
     const { authenticatedUser } = useAuthentication();
     const [showEditCategory, setShowEditCategory] = useState<boolean>(false)
     const [EditCategory, setEditCategory] = useState<any>({})
+    const { previousBudget } = useBudgetStore()
+
+    useEffect(() => {
+        
+    })
 
     const { data: listofCategories = [], isPending: listofCategoriesisPending } = useQuery({
         queryKey: ['listofCategories'],

@@ -3,7 +3,7 @@
 'use client'
 import { useRouter } from 'next/router';
 import Header from '@/components/header'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, use } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Popover, PopoverTrigger, PopoverContent, Button, cn, VisuallyHidden, useRadio, RadioGroup, CircularProgress } from "@nextui-org/react";
 import { BsChevronDown, BsChevronUp, BsPlus } from 'react-icons/bs';
@@ -66,7 +66,11 @@ type GetAllPlansFn = (token: string) => Promise<Plans>;
 interface AuthenticatedUser {
     token: string | null;
 }
-const Page = ({ params, searchParams }: { params: { id: string }, searchParams: { status: string, tx_ref: string, transaction_id: string } }) => {
+const Page = (
+    props0: { params: Promise<{ id: string }>, searchParams: Promise<{ status: string, tx_ref: string, transaction_id: string }> }
+) => {
+    const searchParams = use(props0.searchParams);
+    const params = use(props0.params);
 
     const { status, tx_ref, transaction_id } = searchParams;
     const queryClient = useQueryClient();

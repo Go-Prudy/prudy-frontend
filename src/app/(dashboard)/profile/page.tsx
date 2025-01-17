@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthentication } from "@/app/store/AuthStore";
 import { IAuthenticatedUser } from "@/app/Types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import Link from 'next/link';
 import { getAllPlans, getUserSubscription } from "@/app/services/SubscriptionService";
 import { GetSettingsApi } from "@/app/services/SettingService";

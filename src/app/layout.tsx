@@ -1,5 +1,5 @@
 import { aeonik } from '@/fonts';
-import { NextUIProvider } from "@nextui-org/system";
+import { NextUIProvider } from '@nextui-org/system';
 import './globals.css';
 import Head from 'next/head';
 import Script from 'next/script';
@@ -12,20 +12,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en" className={`${aeonik.variable}`}>
       <Head>
-        <link rel='icon' sizes='' href='/icon.ico?e17e014ad5625454' />
+        <link rel="icon" sizes="" href="/icon.ico?e17e014ad5625454" />
       </Head>
       <body className="font-aeonik bg-white flex justify-center min-h-screen">
         <NextUIProvider>
           <Toaster position="top-right" reverseOrder={false} />
           <Providers>
-            <div className="w-[100vw] font-aeonik max-w-[500px] bg-white">
-              {children}
-
-            </div>
+            <div className="w-[100vw] font-aeonik max-w-[500px] bg-white">{children}</div>
           </Providers>
         </NextUIProvider>
         <Script id="gtm-script" strategy="afterInteractive">
@@ -34,6 +30,19 @@ export default function RootLayout({
           j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-W9FRXW3P');`}
+        </Script>
+        <Script id='tawk-script' strategy="afterInteractive">
+          {`
+            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+            (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src='https://embed.tawk.to/6776d57f49e2fd8dfe01c226/1igk33vbd';
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+            })();
+          `}
         </Script>
       </body>
     </html>

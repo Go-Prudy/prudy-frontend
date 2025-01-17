@@ -21,17 +21,18 @@ const Page = ({ params }: { params: { id: string } }) => {
     const navigate = useRouter();
     const budgetId = params.id;
 
-    const budgets = useBudgetStore((state) => state.budgets);
+    const { budgets, previousBudget } = useBudgetStore();
     const budget = budgets.find((b) => b.id === budgetId);
 
-    const [allIncomes, setIncomes] = useState<Income[]>([]);
+    const [allIncomes, setIncomes] = useState<Income[]>(previousBudget?.incomes ?? []);
 
     useEffect(() => {
         if (budget?.incomes?.length) {
             setIncomes(budget.incomes);
-        } else {
-            setIncomes([{ name: '', amount: 0 }]);
-        }
+        } 
+        // else {
+        //     setIncomes([{ name: '', amount: 0 }]);
+        // }
     }, [budget]);
 
     const spanRefs = useRef<(HTMLSpanElement | null)[]>([]);

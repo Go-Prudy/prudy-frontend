@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsArrowRight, BsPlus } from 'react-icons/bs';
@@ -22,10 +22,10 @@ import { useAuthentication } from '@/app/store/AuthStore';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircularProgress } from '@nextui-org/react';
 import toast from 'react-hot-toast';
+import { IPreviousBudget, IPreviousBudgetAllocation } from '@/app/types/budget';
 
-const Page = ({ params }: { params: { id: string } }) => {
-
-    const budgetId = params.id;
+const Page = (props: { params: { id: string } }) => {
+    const budgetId = props.params.id;
     const all_Budgets = useBudgetStore((state) => state.budgets);
     const currentBudget = all_Budgets?.find((b) => b.id === budgetId);
 
@@ -61,7 +61,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     const [allocations, setAllocations] = useState<IAllocation[]>([])
     const [previousSubAllocations, setPreviousSubAllocations] = useState<ISubAllocation[]>([]);
     const { addAllocationToBudget, createBudgetCategory } = useBudgetStore();
-    const [lastBudget, setLastBudget] = useState<IBudget | null>(null);
+    const [lastBudget, setLastBudget] = useState<IBudget | IPreviousBudget | null>(null);
     const [categoryName, setCategoryName] = useState<string>('')
     const [allDisplayedBudgets, setAllDisplayedBudgets] = useState<BudgetAllocation[]>([])
     const [loading, setLoading] = useState(false)
@@ -71,10 +71,11 @@ const Page = ({ params }: { params: { id: string } }) => {
     const navigate = useRouter();
     const { authenticatedUser } = useAuthentication();
 
-    const { getLastBudget, budgets, allCategories } = useBudgetStore((state) => ({
+    const { getLastBudget, previousBudget, budgets, allCategories } = useBudgetStore((state) => ({
         getLastBudget: state.getLastBudget,
         budgets: state.budgets,
         allCategories: state.allCategories,
+        previousBudget: state.previousBudget
 
     }))
 
@@ -590,10 +591,27 @@ const Page = ({ params }: { params: { id: string } }) => {
         refetchOnWindowFocus: true,
     });
 
-    const budgetCategoriesArray = Array.isArray(budgetCategoriesData) ? budgetCategoriesData : [];
+    let budgetCategoriesArray = Array.isArray(budgetCategoriesData) ? budgetCategoriesData : [];
 
 
     console.log(budgetCategoriesData);
+
+    if (lastBudget && lastBudget.allocations && lastBudget.allocations.length > 0) {
+        const allocationMap: Record<string, IPreviousBudgetAllocation> = {};
+        // create hashmap
+        (lastBudget.allocations as IPreviousBudgetAllocation[]).forEach((a) => {
+            allocationMap[a.budgetCategory] = a;
+        });
+
+        budgetCategoriesArray = budgetCategoriesArray.map((bc) => {
+            const allocation = allocationMap[bc.name];
+            return {
+                ...bc,
+                amount: allocation?.amount || 0,
+                subAllocations: allocation?.subAllocations || [],
+            };
+        })
+    }
 
 
     const handleSaveCategory = async () => {
@@ -805,16 +823,15 @@ const Page = ({ params }: { params: { id: string } }) => {
         }
     }
 
-
     return (
-        <motion.div
+        (<motion.div
             initial={{ opacity: 0, y: 90 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className=" w-[100vw] max-w-[500px]"
         >
-            <Header link={`/budgets/new/income/${lastBudget?.id}`} title="Create new budget" />
+            <Header link={`/budgets/new/income/${lastBudget?.id ?? ""}`} title="Create new budget" />
             <div className='mt-[39.5px]  px-[24px] w-full'>
                 <div className='flex gap-[8px]'>
                     <div className='bg-[#66C227] rounded-[10px] h-[8px] w-full'></div>
@@ -850,8 +867,6 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
             </div>
-
-
             {/* CATEGORIES  OR ALLOCATIONS */}
             <div className={` bg-[#F7F7F9]  grid ${budgetCategoriesData?.length == 0 ? 'grid-cols-1' : 'grid-cols-1'}  gap-[12px] overflow-y-scroll overflow-x-hidden min-h-[322px] py-[16px] px-[24px] mb-[100px] `}>
 
@@ -860,24 +875,23 @@ const Page = ({ params }: { params: { id: string } }) => {
                 <div className={`grid ${fetchStatus === 'pending' || budgetCategoriesArray.length === 0 ? 'grid-cols-1' : 'grid-cols-2'} gap-[16px]`}>
                     {fetchStatus === 'pending' ? (
                         // Loading State
-                        <div key="loading" className="flex justify-center items-center py-[25px]">
+                        (<div key="loading" className="flex justify-center items-center py-[25px]">
                             <CircularProgress size="md" color="default" />
-                        </div>
+                        </div>)
                     ) : (
                         <>
                             {budgetCategoriesArray.length === 0 ? (
                                 // No Data State
-                                <div className="w-full">
+                                (<div className="w-full">
                                     <div className="py-[25px] w-full text-center flex flex-col gap-[8px] justify-center items-center px-[51px]">
                                         <Image src={noBudgetImg.src} width={1000} height={1000} className="size-[124px] mb-[8px]" alt="No Budget" />
                                         <h1 className="font-[500] leading-[24px]">You do not have any budget history yet.</h1>
                                         <h1 className="text-[14px] text-[#828282] leading-[16.8px]">Click the create button above to <br /> get started.</h1>
                                     </div>
-                                </div>
+                                </div>)
                             ) : (
                                 // Data Display
-                                <>
-
+                                (<>
                                     {/* for each  lastBudget?.allocations */}
                                     {/* {budgetCategoriesArray.map((budget: any) => (
                                         <ul key={budget.id} className="budget-list grid grid-cols-1 gap-[16px] w-full">
@@ -894,11 +908,10 @@ const Page = ({ params }: { params: { id: string } }) => {
                                             </li>
                                         </ul>
                                     ))} */}
-                                    
                                     {budgetCategoriesArray.map((budget: any) => {
                                         // Find the corresponding allocation for this budget using the uid
                                         const allocation = lastBudget?.allocations?.find(
-                                            (allocation: any) => allocation.budgetCategory === budget.uid
+                                            (allocation: any) => allocation.budgetCategory === budget.name
                                         );
 
                                         // If an allocation is found, use its amount; otherwise, use 0
@@ -920,8 +933,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                             </ul>
                                         );
                                     })}
-
-                                </>
+                                </>)
                             )}
                         </>
                     )}
@@ -930,8 +942,6 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
             </div>
-
-
             {/*  INDIVIDUAL EXPENSE OR ALLOCATION */}
             {
                 showSelectedBudget &&
@@ -1069,10 +1079,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 </motion.div>
 
             }
-
-
             {/* MODAL TO DELETE CATEGORY */}
-
             {showDeleteModal && (
                 <DeleteConfirmationModal
                     showDeleteModal={showDeleteModal}
@@ -1081,7 +1088,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                     categoryId="your-category-id" // Pass the specific category ID here
                 />
             )}
-
             {showDeleteSuccessModal &&
                 <DeleteSuccessModal
                     showModal={showDeleteSuccessModal}
@@ -1092,10 +1098,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                 />
 
             }
-
-
-
-
             {/* TO CREATE A NEW CATEGORY */}
             {showNewBudgetCategory &&
 
@@ -1171,9 +1173,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     </button>
                 </div>
             </div>
-
-
-        </motion.div >
+        </motion.div >)
     );
 };
 

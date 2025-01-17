@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { IBudget, Income, IAllocation, ISubAllocation, ICreateCategory } from '../Types';
 import { v4 as uuidv4 } from 'uuid';
+import { IPreviousBudget } from '../types/budget';
 
 // Function to generate a random color
 const generateRandomColor = (): string => {
@@ -21,6 +22,7 @@ const getUniqueColor = (usedColors: Set<string>): string => {
 interface BudgetState {
     budgets: IBudget[];
     allCategories: ICreateCategory[];
+    previousBudget: IPreviousBudget | null;
     addToCategory: (data: ICreateCategory, id: string) => void
     addBudget: (budget: IBudget) => void;
     createBudgetCategory: (index: string) => void
@@ -33,7 +35,10 @@ interface BudgetState {
     deleteAllocationFromBudget: (budgetId: string, category: string) => void;
     clearBudgets: () => void;
     getLastBudget: () => IBudget | undefined;
-    duplicateLastBudget: () => void;
+    getPreviousBudget: () => IPreviousBudget | null;
+    setPreviousBudget: (budget: IPreviousBudget) => void;
+    clearPreviousBudget: () => void;
+    // duplicateLastBudget: () => void;
 
 }
 
@@ -42,6 +47,7 @@ export const useBudgetStore = create<BudgetState>()(
         (set, get) => ({
             budgets: [],
             allCategories: [],
+            previousBudget: null,
             addToCategory: (data: ICreateCategory, id: string) =>
                 set((state) => {
                     const existingCategory = state.allCategories.find(category => category.id === id);
@@ -215,18 +221,28 @@ export const useBudgetStore = create<BudgetState>()(
                 return budgets[budgets.length - 1];
             },
 
-            duplicateLastBudget: () => {
-                const lastBudget = get().getLastBudget();
-                if (lastBudget) {
-                    const newBudget: IBudget = {
-                        ...lastBudget,
-                        id: uuidv4(),
-                    };
-                    set((state) => ({
-                        budgets: [...state.budgets, newBudget],
-                    }));
-                }
+            // duplicateLastBudget: () => {
+            //     const lastBudget = get().getLastBudget();
+            //     if (lastBudget) {
+            //         const newBudget: IBudget = {
+            //             ...lastBudget,
+            //             id: uuidv4(),
+            //         };
+            //         set((state) => ({
+            //             budgets: [...state.budgets, newBudget],
+            //         }));
+            //     }
+            // },
+            getPreviousBudget: () => {
+                const { previousBudget } = get();
+                return previousBudget;
             },
+            setPreviousBudget: (budget: IPreviousBudget) => {
+                set({ previousBudget: budget });
+            },
+            clearPreviousBudget: () => {
+                set({ previousBudget: null });
+            }
         }),
         {
             name: 'budget-storage',

@@ -33,21 +33,12 @@ export const initLinkAccountApi = async (
     }
 };
 
-
-
-
-export const getAllAccountsApi = async (token: string, params: AccountParams): Promise<any> => {
+export const getAllAccountsApi = async (token: string, params?: AccountParams): Promise<any> => {
     try {
         const response = await api.get(`accounts/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
-            },
-            params: {
-                sortBy: params.sortBy ?? 'Samuel Olamide', // Default sortBy to 'accountName' if not provided
-                sortDir: params.sortDir ?? 'ASC', // Default sortDir to 'ASC' if not provided
-                limit: params.limit ?? 2, // Default limit to 2 if not provided
-                page: params.page ?? 1, // Default page to 1 if not provided
-            },
+            }
         });
         console.log(response.data);
 
@@ -58,9 +49,6 @@ export const getAllAccountsApi = async (token: string, params: AccountParams): P
 
     }
 };
-
-
-
 
 export const fetchAccountInfoApi = async (
     token: string,
@@ -76,6 +64,24 @@ export const fetchAccountInfoApi = async (
     } catch (error: any) {
         toast.error(error.response.data?.message || "An error occurred while fetching");
         console.error("Error fetching account information:", error);
+
+    }
+};
+
+export const removeAccountApi = async (
+    token: string,
+    id: string
+): Promise<any> => {
+    try {
+        const response = await api.delete(`accounts/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            },
+        });
+        return response.data; // Assuming account information is in `data`
+    } catch (error: any) {
+        toast.error(error.response.data?.message || "An error occurred while fetching");
+        console.error("Error deleting account information:", error);
 
     }
 };
