@@ -85,8 +85,6 @@ export const GetAllBudgetsApi = async (token: string) => {
         const limit = 12;
         const page = 1;
 
-        // Fetch all pages in parallel
-
         // Process each response
         // responses.forEach(response => {
         //     const { docs } = response.data.data; // Adjust if the response structure is different
@@ -110,20 +108,14 @@ export const GetAllBudgetsApi = async (token: string) => {
     }
 };
 
-
-
 // Function to get a single budget by ID
 export const getSingleBudgetApi = async (token: string, budgetId: string) => {
     try {
-        console.log(budgetId);
-
         const response = await api.get(`budgets/${budgetId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log(budgetId);
-        console.log(response.data);
 
         // toast.success(response.data.message);
         return response.data.data; // Return the budget data
@@ -132,6 +124,21 @@ export const getSingleBudgetApi = async (token: string, budgetId: string) => {
         console.log(error);
     }
 };
+
+export const fetchPreviousBudgetApi = async (token: string) => {
+    try {
+        const response = await api.get(`budgets/previous`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return response.data;
+    } catch (error: any) {
+        toast.error(error?.response?.data?.message || "An error occurred");
+        console.log(error);
+    }
+}
 
 
 

@@ -209,3 +209,10 @@ export interface ExpenseResponse {
         totalPages: number;
     };
 }
+
+export type IAddManualInput = {
+    itemName: string;
+    amount: number;
+    category: string;
+    date: string;
+};

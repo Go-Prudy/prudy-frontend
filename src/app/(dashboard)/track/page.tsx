@@ -14,7 +14,7 @@ import lunch from '/public/images/Launch.png'
 import mono1 from '/public/images/mono1.png'
 import addManual from '/public/images/addManually.png'
 import { BsCheck, BsChevronRight, BsPlus, BsThreeDotsVertical, BsX } from "react-icons/bs";
-import { useEffect, useRef, useState } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import { motion } from 'framer-motion';
 import BottomDrawer from "@/components/create-budget/BottomDrawer";
 import { useRouter } from "next/navigation";
@@ -22,13 +22,14 @@ import Tesseract from 'tesseract.js';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthentication } from "@/app/store/AuthStore";
 import { getActiveBudgetCategoriesApi, GetAllBudgetsApi, getSingleBudgetApi, RecordExpenseApi } from "@/app/services/BudgetService";
-import { fetchAccountInfoApi, fetchAccountTransactionsApi, getAllAccountsApi, initLinkAccountApi, syncAccountTransactionsApi } from "@/app/services/AccountService";
+import { fetchAccountInfoApi, fetchAccountTransactionsApi, getAllAccountsApi, initLinkAccountApi, removeAccountApi, syncAccountTransactionsApi } from "@/app/services/AccountService";
 import { RadioGroup, useRadio, VisuallyHidden, cn, CircularProgress, Progress } from "@nextui-org/react";
 import { useInfiniteQuery } from '@tanstack/react-query';
 import toast from "react-hot-toast";
 import { format, parseISO } from 'date-fns';
 import Scanner from "../../../components/scanFeature";
 import { AssignCategoryToTransactionApi } from "@/app/services/TransactionService";
+import { IAddManualInput } from "@/app/Types";
 
 
 interface Bank {
@@ -150,12 +151,6 @@ export default function Page() {
     color: string;
     selected: boolean;
   }
-  type ManualData = {
-    itemName: string;
-    amount: number;
-    category: string;
-    date: string;
-  };
 
 
   const navigation = useRouter()
@@ -211,7 +206,7 @@ export default function Page() {
   const [isSyncing, setIsSyncing] = useState(false);
   // ADD MANUAL STATE
   const [AddManualModal, setAddManualModal] = useState<boolean>(false);
-  const [manualData, setManualData] = useState<ManualData>({
+  const [manualData, setManualData] = useState<IAddManualInput>({
     itemName: '',
     amount: 0,
     category: '', // Default category
@@ -235,6 +230,9 @@ export default function Page() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<any>(null);
   const [showBalance, setShowBalance] = useState(true); // Track balance visibility
   const [showTooltipIndex, setShowTooltipIndex] = useState<number | null>(null); // Track which account's tooltip is open
+  const [connectedAccounts, setConnectedAccounts] = useState([]);
+  const [isApiLoading, setIsApiLoading] = useState(false);
+  const [addManualModalTitle, setAddManualModalTitle] = useState<string>("Add Manual")
 
   // Toggle balance visibility
   const toggleBalanceVisibility = () => {
@@ -347,23 +345,25 @@ export default function Page() {
     refetchInterval: false, // Disable polling
   });
 
-
-  const params = {
-    sortBy: 'accountName',
-    sortDir: 'ASC',
-    limit: 12,
-    page: 1,
-  };
-
   // React Query hook
   const { data: accounts = [], isPending: isGetAllAccountPending, isError } = useQuery({
     queryKey: ['accounts'],
-    queryFn: () => getAllAccountsApi(authenticatedUser?.token ?? '', params),
+    queryFn: () => getAllAccountsApi(authenticatedUser?.token ?? ''),
     enabled: !!authenticatedUser?.token, // Only fetch if token exists
     refetchOnWindowFocus: false, // Prevent refetching on window focus
     refetchOnMount: false, // Prevent refetching on component mount
     refetchInterval: false, // Disable polling
   });
+
+  useEffect(() => {
+    if (isPending) {
+      setIsApiLoading(true);
+    }
+    if (accounts.length > 0) {
+      setConnectedAccounts(accounts);
+      setIsApiLoading(false);
+    }
+  }, [accounts])
 
 
   // React Query mutation to link an account
@@ -733,6 +733,17 @@ export default function Page() {
     });
   };
 
+  const handleRemoveAccount = async (id: string) => {
+    setIsApiLoading(true);
+    const response = await removeAccountApi(authenticatedUser?.token ?? "", id);
+    if (response.success) {
+      // delete the account from the accoumts array
+      setConnectedAccounts(connectedAccounts.filter((account: any) => account.uid !== id));
+      setShowTooltipIndex(null);
+    }
+    setIsApiLoading(false);
+  }
+
 
   // Custom Radio button implementation
   const CustomRadio = (props: any) => {
@@ -809,13 +820,13 @@ export default function Page() {
         <div className=" flex px-[24px] mt-[27px] justify-between">
           <h1 className=" text-[18px] font-[500] leading-[21.6px]">Linked Accounts</h1>
 
-          {accounts.length > 0 && <button onClick={() => handleLinkAccount()} className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "><BsPlus size={20} /> Add new</button>}
+          {connectedAccounts.length > 0 && <button onClick={() => handleLinkAccount()} className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "><BsPlus size={20} /> Add new</button>}
         </div>
 
         <div className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}>
           <div className=" w-full px-[24px] ">
 
-            {isGetAllAccountPending ?
+            {isApiLoading ?
 
               <div className=' flex gap-2 items-center justify-center mx-auto w-full'>
                 <CircularProgress color='default' size='sm' />
@@ -823,7 +834,7 @@ export default function Page() {
               </div>
               :
               <>
-                {accounts.length > 0 ?
+                {connectedAccounts.length > 0 ?
                   <>
                     <div className="   w-full  mt-[19px]   rounded-t-[24px] gap-[24px] grid grid-cols-2  ">
                       {/* Show loading state */}
@@ -833,8 +844,8 @@ export default function Page() {
                       {isError && <div>Failed to load accounts. Please try again later.</div>}
 
                       {/* Render account details */}
-                      {!isGetAllAccountPending && !isError && accounts.length > 0 && (
-                        accounts.map((account: any, index: any) => (
+                      {!isGetAllAccountPending && !isError && connectedAccounts.length > 0 && (
+                        connectedAccounts.map((account: any, index: any) => (
                           <div
                             onClick={() => {
                               setShowSyncDataModal(true);
@@ -869,10 +880,7 @@ export default function Page() {
                             {showTooltipIndex === index && ( // Show tooltip only for the selected account
                               <div
                                 className="absolute w-fit h-fit flex gap-[8px] right-[10px] top-[55px] items-center justify-center bg-white text-[12px] text-black px-[8px] py-[6px] rounded-md"
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Stop propagation when clicking on the tooltip
-                                  setShowTooltipIndex(null); // Close the tooltip
-                                }}
+                                onClick={(e) => {e.stopPropagation(); handleRemoveAccount(account.uid)}}
                               >
                                 <span className=" text-white size-[16px] grid place-content-center rounded-[4px]  bg-[#F5365C]">-</span>
                                 <p>Remove </p>
@@ -1014,7 +1022,7 @@ export default function Page() {
         </div>}
 
 
-        label={`Add Manual`}
+        label={addManualModalTitle}
         back={false}
         show={AddManualModal}
         close={true}
@@ -1475,7 +1483,7 @@ export default function Page() {
               className="h-full top-6  left-0 z-40 w-full max-w-[500px] flex justify-center items-center bg-[#1c1c1c73] absolute"
               onClick={() => setScanState(false)} // Close on background click
             ></div>
-            <Scanner scanState={scanState} setScanState={setScanState} />
+            <Scanner scanState={scanState} setScanState={setScanState} setManualData={setManualData} setAddManualModal={setAddManualModal} defaultCategory={activeBudgetCategories[0]} setAddManualModalTitle={setAddManualModalTitle} />
 
           </div>
 
