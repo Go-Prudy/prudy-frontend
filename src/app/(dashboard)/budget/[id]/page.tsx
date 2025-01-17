@@ -41,7 +41,7 @@ interface Budget {
     subAllocations: SubAllocation[];
 }
 
-const Page = ({ params }: { params: { id: string } }) => {
+const Page = ({params}: { params: { id: string } }) => {
     const navigation = useRouter()
     const [showNewBudgetCategory, setShowNewBudgetCategory] = useState<boolean>(false)
     const [showSucces, setShowSuccess] = useState<boolean>(false)
@@ -236,7 +236,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     }
 
     return (
-        <motion.div
+        (<motion.div
             initial={{ opacity: 0, y: 90 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -259,8 +259,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                     ]}
                 />
             </div>
-
-
             <motion.div
                 initial={{ opacity: 0, y: 90 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -383,7 +381,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                                     <GoPerson className="text-[30px] text-[#A3A3A3]" />
                                                 )}
                                                 <h1 className="text-[#2D2D2D] text-lg font-medium">{item.name}</h1>
-                                                <h1 className="text-[#828282] rounded-[10px] bg-white text-lg px-[8px]  py-[2px] font-medium">GUEST</h1>
+                                                <h1 className="text-[#828282] rounded-[10px] bg-white text-lg px-[8px]  py-[2px] font-medium">{item.isHost ? "HOST" : "GUEST"}</h1>
                                             </div>
                                         ))
                                     ) : (
@@ -412,13 +410,6 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                 </div>
             </motion.div>
-
-
-
-
-
-
-
             <>
                 {showInvite && (
                     <motion.div
@@ -473,7 +464,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                     </motion.div>
                 )}
             </>
-
             {
                 showSucces && <>
                     <DeleteSuccessModal
@@ -485,7 +475,6 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                 </>
             }
-
             {showNewBudgetCategory &&
 
                 <motion.div
@@ -635,14 +624,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 </motion.div>
 
             }
-
-
-
-
-
-
-
-        </motion.div>
+        </motion.div>)
     );
 };
 

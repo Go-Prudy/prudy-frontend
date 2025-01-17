@@ -1,6 +1,6 @@
 'use client';
 import Header from '@/components/header';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from '@nextui-org/react';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
@@ -24,7 +24,8 @@ const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('en-US', options).replace(/(\d{1,2})(st|nd|rd|th)/, '$1');
 };
 
-const Page = ({ params }: { params: { id: string; id2: string } }) => {
+const Page = (props: { params: Promise<{ id: string; id2: string }> }) => {
+    const params = use(props.params);
     const queryClient = useQueryClient();
     const { authenticatedUser } = useAuthentication();
 
@@ -219,7 +220,7 @@ const Page = ({ params }: { params: { id: string; id2: string } }) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     return (
-        <div className=' relative'
+        (<div className=' relative'
         >
             <motion.div
                 initial={{ x: '100%' }}  // Start from the right side of the screen
@@ -362,8 +363,6 @@ const Page = ({ params }: { params: { id: string; id2: string } }) => {
 
                 </motion.div>
             )}
-
-
             <>
                 {showAddManual && (
                     <motion.div
@@ -488,8 +487,7 @@ const Page = ({ params }: { params: { id: string; id2: string } }) => {
                     </motion.div>
                 )}
             </>
-
-        </div>
+        </div>)
     );
 };
 

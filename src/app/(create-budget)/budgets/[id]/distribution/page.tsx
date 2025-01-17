@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsChevronDown } from 'react-icons/bs';
@@ -14,7 +14,8 @@ import noBudgetImg from '/public/images/List 2.webp'
 import { Line } from 'react-chartjs-2';
 import BudgetVisualization from '@/components/BudgetVisualization';
 
-const Page = ({ params }: { params: { id: string } }) => {
+const Page = (props: { params: { id: string } }) => {
+    const params = props.params
 
 
     interface Category {

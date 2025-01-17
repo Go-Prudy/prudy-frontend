@@ -10,20 +10,23 @@ import CreateBudget from '@/components/create-budget/CreateBudget';
 import { CircularProgress, Skeleton } from "@nextui-org/react";
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { GetAllBudgetsApi } from '@/app/services/BudgetService';
+import { fetchPreviousBudgetApi, GetAllBudgetsApi } from '@/app/services/BudgetService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import InviteModal from '@/components/InviteModal';
 import { getPendingInvitesApi } from '@/app/services/InviteService';
 import Cookies from "js-cookie";
+import { IPreviousBudget } from '@/app/types/budget';
+import { useBudgetStore } from '@/app/store/Store';
 const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
-    const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
+    const [createBudgetComponent, setCreateBudgetComponent] = useState(true);
     const [treshold, setTreshold] = useState(0);
     const navigation = useRouter();
 
     const [blinking, setBlinking] = useState(false);
     const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+    // const [previousBudget, setPreviousBudget] = useState<IPreviousBudget | null>(null);
     const navigate = useRouter()
 
     const { authenticatedUser } = useAuthentication();
@@ -43,6 +46,9 @@ const BudgetPage = () => {
         enabled: !!authenticatedUser?.token,
         refetchOnWindowFocus: true,
     });
+
+    const { previousBudget, setPreviousBudget, clearPreviousBudget: clearBudget } = useBudgetStore()
+    const [ localPreviousBudget, setLocalPreviousBudget ] = useState<IPreviousBudget | null>(null)
 
     const hasFreeTrialCookie = Cookies.get("hasFreeTrial");
 
@@ -125,6 +131,25 @@ const BudgetPage = () => {
             window.removeEventListener("scroll", handleScroll); // Cleanup on unmount
         };
     }, []); // Empty dependency array to run only on mount
+
+    const handleFetchPreviousBudget = async () => {
+        if (localPreviousBudget) {
+           // use local previous budget
+           setPreviousBudget(localPreviousBudget)
+           return
+        }
+        // fetch using api
+        const previousBudgetResp = await fetchPreviousBudgetApi(authenticatedUser?.token ?? "")
+        console.log(previousBudgetResp)
+        if(previousBudgetResp.success) {
+            setPreviousBudget(previousBudgetResp.data)
+            setLocalPreviousBudget(previousBudgetResp.data)
+        }
+    }
+
+    const clearPreviousBudget = async () => {
+        clearBudget();
+    }
 
     return (
         <motion.div
@@ -282,7 +307,7 @@ const BudgetPage = () => {
                         )}
                     </div>
                 </div>
-                {createBudgetComponent && <CreateBudget show={createBudgetComponent} setShow={setCreateBudgetComponent} />}
+                {createBudgetComponent && <CreateBudget show={createBudgetComponent} setShow={setCreateBudgetComponent} previousBudget={previousBudget} fetchPreviousBudget={handleFetchPreviousBudget} clearPreviousBudget={clearPreviousBudget} />}
                 {showInvites && getPendingInvitesApiData.length > 0 && <InviteModal refetchAllBudgets={refetchAllBudgets} getPendingInvitesApiData={getPendingInvitesApiData} show={showInvites} setShow={setShowInvites} />}
 
             </div>
