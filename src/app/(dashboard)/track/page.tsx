@@ -30,6 +30,7 @@ import { format, parseISO } from 'date-fns';
 import Scanner from "../../../components/scanFeature";
 import { AssignCategoryToTransactionApi } from "@/app/services/TransactionService";
 import { IAddManualInput } from "@/app/Types";
+import BudgetPageHeader from "@/components/create-budget/BudgetPageHeader";
 
 
 interface Bank {
@@ -791,11 +792,13 @@ export default function Page() {
 
   return (
     <div className="bg-white min-h-[100vh] w-[100vw] relative max-w-[500px] h-full">
-      <Header2 title={'Track expenses'} />
+      <BudgetPageHeader headerType="dashboard" title={'Track expenses'} />
 
-
-
-      <div className={` mt-[66px]   border-t-[4px] border-t-[#F7F7F9]  py-[24px] w-full   ${bankData ? 'mb-0' : 'mb-[16px]'} `}>
+      
+      
+      <div
+        className={` mt-[66px]   border-t-[4px] border-t-[#F7F7F9]  py-[24px] w-full   ${bankData ? 'mb-0' : 'mb-[16px]'} `}
+      >
         <div className=" border-b-[4px] px-[24px] py-[16px]  border-b-[#F7F7F9]">
           <select
             name="budget"
@@ -820,37 +823,50 @@ export default function Page() {
         <div className=" flex px-[24px] mt-[27px] justify-between">
           <h1 className=" text-[18px] font-[500] leading-[21.6px]">Linked Accounts</h1>
 
-          {connectedAccounts.length > 0 && <button onClick={() => handleLinkAccount()} className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "><BsPlus size={20} /> Add new</button>}
+          {connectedAccounts.length > 0 && (
+            <button
+              onClick={() => handleLinkAccount()}
+              className=" py-[4px] px-[8px] items-center justify-center bg-[#EFEFF0] rounded-[32px] font-[500] text-[12px] flex gap-[4px] "
+            >
+              <BsPlus size={20} /> Add new
+            </button>
+          )}
         </div>
 
-        <div className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}>
+        <div
+          className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}
+        >
           <div className=" w-full px-[24px] ">
 
-            {isApiLoading ?
+            {isApiLoading ? (
 
-              <div className=' flex gap-2 items-center justify-center mx-auto w-full'>
-                <CircularProgress color='default' size='sm' />
-
+              <div className=" flex gap-2 items-center justify-center mx-auto w-full">
+                <CircularProgress color="default" size="sm" />
+              
               </div>
-              :
+            ) : (
               <>
-                {connectedAccounts.length > 0 ?
+                {connectedAccounts.length > 0 ? (
                   <>
                     <div className="   w-full  mt-[19px]   rounded-t-[24px] gap-[24px] grid grid-cols-2  ">
                       {/* Show loading state */}
 
-
+                      
                       {/* Show error state */}
-                      {isError && <div>Failed to load accounts. Please try again later.</div>}
+                      {isError && (
+                        <div>Failed to load accounts. Please try again later.</div>
+                      )}
 
                       {/* Render account details */}
-                      {!isGetAllAccountPending && !isError && connectedAccounts.length > 0 && (
+                      {!isGetAllAccountPending &&
+                        !isError &&
+                        connectedAccounts.length > 0 &&
                         connectedAccounts.map((account: any, index: any) => (
                           <div
                             onClick={() => {
                               setShowSyncDataModal(true);
                               setSelectedBankAccount(account);
-
+                            
                             }}
                             key={account.id}
                             className="flex px-[16px] relative border-[1px] py-[12px] rounded-[16px] border-[#EFEFF0] bg-[#F7F7F9] w-full justify-between"
@@ -864,7 +880,9 @@ export default function Page() {
                                 alt={account.institutionName}
                                 className=" size-[24px] rounded-[12px]  mr-[8px]"
                               />
-                              <span className="text-[14px]">{account.institutionName}</span>
+                              <span className="text-[14px]">
+                                {account.institutionName}
+                              </span>
                               <span className="text-[14px]">{account.accountName}</span>
                               <span className="text-[14px]">{account.accountNumber}</span>
                             </div>
@@ -872,7 +890,9 @@ export default function Page() {
                               className="text-[14px] font-[500] size-[32px] grid place-content-center bg-white rounded-[8px] p-[16px]"
                               onClick={(e) => {
                                 e.stopPropagation(); // Stop propagation to the parent div
-                                setShowTooltipIndex(showTooltipIndex === index ? null : index); // Toggle tooltip visibility for this account
+                                setShowTooltipIndex(
+                                  showTooltipIndex === index ? null : index,
+                                ); // Toggle tooltip visibility for this account
                               }}
                             >
                               <BsThreeDotsVertical />
@@ -880,75 +900,113 @@ export default function Page() {
                             {showTooltipIndex === index && ( // Show tooltip only for the selected account
                               <div
                                 className="absolute w-fit h-fit flex gap-[8px] right-[10px] top-[55px] items-center justify-center bg-white text-[12px] text-black px-[8px] py-[6px] rounded-md"
-                                onClick={(e) => {e.stopPropagation(); handleRemoveAccount(account.uid)}}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveAccount(account.uid);
+                                }}
                               >
-                                <span className=" text-white size-[16px] grid place-content-center rounded-[4px]  bg-[#F5365C]">-</span>
+                                <span className=" text-white size-[16px] grid place-content-center rounded-[4px]  bg-[#F5365C]">
+                                  -
+                                </span>
                                 <p>Remove </p>
                                 {/* Add more options as needed */}
                               </div>
                             )}
                           </div>
-                        ))
-                      )}
+                        ))}
+
                     </div>
                   </>
-                  :
-
+                  ) : (
+                      
                   <>
                     <div className="  border-[#EFEFF0] mb-[24px] mt-[19px] justify-center items-center  rounded-[24px] flex flex-col  p-[24px] bg-[#F7F7F9] border-[1px] ">
-                      <Image src={linkIcon} className=" w-[94.42px] object-contain h-[84px] " width={1000} height={1000} alt="goprudy" />
-                      <h1 className=" font-[500] text-center text-[#2D2D2D] leading-[19.2px]">Link your bank accounts to track your transactions easily</h1>
-                      <button onClick={() => handleLinkAccount()} className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center">
-                        {!linkAccountMutation.isPending ?
-                          <> Link now <BsChevronRight />
+                      <Image
+                        src={linkIcon}
+                        className=" w-[94.42px] object-contain h-[84px] "
+                        width={1000}
+                        height={1000}
+                        alt="goprudy"
+                      />
+                      <h1 className=" font-[500] text-center text-[#2D2D2D] leading-[19.2px]">
+                        Link your bank accounts to track your transactions easily
+                      </h1>
+                      <button
+                        onClick={() => handleLinkAccount()}
+                        className=" text-[14px] mt-[8px] w-[108px] rounded-[32px] bg-[#66C227] px-[16px] py-[6px] text-[#FAFAFA] items-center justify-center flex gap-[4px] leading-[20px] text-center"
+                      >
+                        {!linkAccountMutation.isPending ? (
+                          <>
+                            {' '}
+                            Link now <BsChevronRight />
                           </>
-                          :
+                        ) : (
                           'Linking...'
-                        }
-
+                            )}
+                            
                       </button>
                     </div>
-                    <p className=" text-[14px] leading-[16.8px]"> By continuing you agree to our <span className=" text-[#66C227] font-[500] ">Privacy Policy and Terms of Service .</span></p>
+                    <p className=" text-[14px] leading-[16.8px]">
+                      {' '}
+                      By continuing you agree to our{' '}
+                      <span className=" text-[#66C227] font-[500] ">
+                        Privacy Policy and Terms of Service .
+                      </span>
+                    </p>
                   </>
-                }
-              </>}
-
+                )}
+              </>
+            )}
 
           </div>
         </div>
 
-        {accounts ?
-
+        {accounts ? (
+          
           <div className="  pb-[106px] border-t-[4px] border-t-[#F7F7F9]  pt-[24px] px-[24px] ">
-            <h1 className=" font-[500]   text-[#2D2D2D] mt-[0px] text-[18px]">Track your finances</h1>
+            <h1 className=" font-[500]   text-[#2D2D2D] mt-[0px] text-[18px]">
+              Track your finances
+            </h1>
 
             <div className=" flex justify-between  mt-[24px] gap-[16px]">
-              <Image onClick={() => {
-                if (accounts.length === 1) {
-                  setShowSyncDataModal(true)
-                  setSelectedBankAccount(accounts[0])
-                } else {
-                  setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal)
-                }
-              }} width={1000} height={1000} src={sync} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
-
+              <Image
+                onClick={() => {
+                  if (accounts.length === 1) {
+                    setShowSyncDataModal(true);
+                    setSelectedBankAccount(accounts[0]);
+                  } else {
+                    setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal);
+                  }
+                }}
+                width={1000}
+                height={1000}
+                src={sync}
+                alt={'goprudy'}
+                className="  h-[118px] w-[104px]  "
+              />
 
               <button
                 onClick={() => setScanState(true)}
                 className=""
               >
-                <Image width={1000} height={1000} src={scan} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
+                <Image
+                  width={1000}
+                  height={1000}
+                  src={scan}
+                  alt={'goprudy'}
+                  className="  h-[118px] w-[104px]  "
+                />
               </button>
 
-
-
-
-              <Image onClick={() => setAddManualModal(!AddManualModal)} width={1000} height={1000} src={addManual} alt={'goprudy'} className="  h-[118px] w-[104px]  " />
-
+              <Image
+                onClick={() => setAddManualModal(!AddManualModal)}
+                width={1000}
+                height={1000}
+                src={addManual}
+                alt={'goprudy'}
+                className="  h-[118px] w-[104px]  "
+              />
             </div>
-
-
-
 
             {loading && <p className="mt-4">Scanning the receipt, please wait...</p>}
             {text && (
@@ -958,11 +1016,13 @@ export default function Page() {
               </div>
             )}
           </div>
-          :
-
-          <div>
-
-            <h1 className=" font-[500] px-[24px]  text-[#2D2D2D] mt-[28px] text-[18px]">3 ways to track your expenses</h1>
+        ) : (
+            
+            <div>
+              
+            <h1 className=" font-[500] px-[24px]  text-[#2D2D2D] mt-[28px] text-[18px]">
+              3 ways to track your expenses
+            </h1>
             <div className=" w-full px-[24px] mt-[24px]">
               <div className=" flex justify-center flex-col gap-[24px]">
                 {cardItems.map((item, index) => (
@@ -978,10 +1038,18 @@ export default function Page() {
                   >
                     <div className="mb-[12px] items-center  flex gap-[0px]">
                       <div className=" relative w-[57.14px]    h-[50px]">
-                        <Image width={1000} height={1000} src={item.image.src} alt={item.title} className="  w-full  top-0 left-[-12px]  absolute  h-full" />
+                        <Image
+                          width={1000}
+                          height={1000}
+                          src={item.image.src}
+                          alt={item.title}
+                          className="  w-full  top-0 left-[-12px]  absolute  h-full"
+                        />
                       </div>
 
-                      <h2 className="font-[500] mr-2 pb-[22px] leading-[19.2px]">{item.title}</h2>
+                      <h2 className="font-[500] mr-2 pb-[22px] leading-[19.2px]">
+                        {item.title}
+                      </h2>
                     </div>
 
                     <p className="text-[14px] leading-[20px]">{item.subtext}</p>
@@ -1000,7 +1068,7 @@ export default function Page() {
               </div>
             </div>
           </div>
-        }
+        )}
 
 
 
@@ -1008,422 +1076,482 @@ export default function Page() {
       <div className=" bg-[#FAFAFA]  w-full " />
 
 
-      {AddManualModal && <motion.div
-        initial={{ opacity: 0, y: 90 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-      > <BottomDrawer
-        footer={<div className="w-full  grid gap-y-[16px]">
-          <button onClick={() => { handleAddManually() }} className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
-            disabled={addManualMutation.status === 'pending'}
-          > {addManualMutation.status === 'pending' ? 'Saving...' : 'Save'} </button>
-        </div>}
+      {AddManualModal && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] max-w-[500px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+        >
+          {' '}
+          <BottomDrawer
+            footer={
+              <div className="w-full  grid gap-y-[16px]">
+                <button
+                  onClick={() => {
+                    handleAddManually();
+                  }}
+                  className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+                  disabled={addManualMutation.status === 'pending'}
+                >
+                  {' '}
+                  {addManualMutation.status === 'pending' ? 'Saving...' : 'Save'}{' '}
+                </button>
+              </div>
+            }
 
-
-        label={addManualModalTitle}
-        back={false}
-        show={AddManualModal}
-        close={true}
-        onClose={() => setAddManualModal(!AddManualModal)}
-      >
-          <div className=" mb-[24px] pt-[24px] flex flex-col gap-[16px] w-full">
-            <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
-              Name of item
-              <input
-                name="itemName"
-                className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
-                placeholder="Enter name"
-                type="text"
-                value={manualData.itemName}
-                onChange={handleInputChange}
-              />
-            </label>
-
-            <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
-              Amount
-              <div className="flex text-[17px] gap-[4px] items-center">
-                ₦
+            label={addManualModalTitle}
+            back={false}
+            show={AddManualModal}
+            close={true}
+            onClose={() => setAddManualModal(!AddManualModal)}
+          >
+            <div className=" mb-[24px] pt-[24px] flex flex-col gap-[16px] w-full">
+              <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
+                Name of item
                 <input
-                  name="amount"
+                  name="itemName"
                   className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
-                  placeholder="Enter amount"
+                  placeholder="Enter name"
                   type="text"
-                  value={manualData.amount.toLocaleString()}
+                  value={manualData.itemName}
                   onChange={handleInputChange}
                 />
-              </div>
-            </label>
+              </label>
 
-            <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
-              Category
-              <select
-                name="category"
-                className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
-                value={manualData.category || ''} // Allow no default selection
-                onChange={handleCategoryChange}
-              >
-                <option value="" disabled>Select a category</option> {/* Placeholder option */}
-                {categories.map((category: any) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
+                Amount
+                <div className="flex text-[17px] gap-[4px] items-center">
+                  ₦
+                  <input
+                    name="amount"
+                    className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
+                    placeholder="Enter amount"
+                    type="text"
+                    value={manualData.amount.toLocaleString()}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </label>
 
-            <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
-              Date
-              <input
-                name="date"
-                className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
-                type="date"
-                value={manualData.date}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-
-
-        </BottomDrawer>
-      </motion.div>}
-
-
-
-      {showSyncModal && <motion.div
-        initial={{ opacity: 0, y: 90 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="h-[100vh] w-full z-[40] bottom-0 fixed max-w-[500px] bg-[#1c1c1c73]"
-      > <BottomDrawer
-
-        label={`Sync transactions`}
-        back={false}
-        show={showSyncModal}
-        close={true}
-        onClose={() => setShowSyncModal(!showSyncModal)}
-      >
-          <div className=" flex justify-center items-center py-[60px] flex-col gap-[16px] w-full">
-            <CircularProgress size="md" />
-          </div>
-
-
-        </BottomDrawer>
-      </motion.div>}
-
-
-
-
-      {showSyncTransactionFirstModal && <motion.div
-        initial={{ opacity: 0, y: 90 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[40]  bottom-0 fixed bg-[#1c1c1c73]"
-      > <div
-        className=" bg-white p-[24px] w-full rounded-[40px] "
-      >
-          <div className=" w-full flex justify-between">
-            <div></div>
-            <div className=" text-[20px] font-[500]">Sync Transactions</div>
-            <div className=" cursor-pointer "><BsX size={28} onClick={() => setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal)} className=" bg-[#F7F7F9] rounded-[8px]" /></div>
-          </div>
-          <h1 className=" mb-[24px] font-[400] mt-[8px] leading-[24px] text-center ">Kindly select the bank account you <br /> would like to sync with</h1>
-          <RadioGroup
-            orientation="vertical"
-            className=' flex flex-col w-full  '
-            color='success'
-            onValueChange={(value) => handleBankSelect(value)}
-
-          >
-            {/* Show loading state */}
-            {isGetAllAccountPending && <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>}
-
-            {/* Show error state */}
-            {isError && <div>Failed to load accounts. Please try again later.</div>}
-
-            {/* Render account details */}
-            {!isGetAllAccountPending && !isError && accounts.length > 0 && (
-              accounts.map((account: any, index: any) => (
-                <CustomRadio
-                  key={index} // Key is important for performance optimization
-                  isSelected={selectedBankIndex === index}
-                  onChange={() => handleBankSelect(index)}
-                  className="flex w-full justify-between"
-                  value={index}
+              <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
+                Category
+                <select
+                  name="category"
+                  className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
+                  value={manualData.category || ''} // Allow no default selection
+                  onChange={handleCategoryChange}
                 >
-                  <div className="w-full">
-                    {/* Display Bank Name */}
-                    <h1 className="text-[#2f1a1a] text-[14px]">{account.institutionName}</h1>
+                  <option value="" disabled>
+                    Select a category
+                  </option>{' '}
+                  {/* Placeholder option */}
+                  {categories.map((category: any) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                    {/* Display Account Details */}
-                    <div className="w-full flex">
-                      <h1 className="text-[14px] flex w-full text-base-black">
-                        {account.accountName} |
-                        <span className="font-[500]"> {account.accountNumber}</span>
+              <label className="bg-[#F7F7F9] p-[16px] rounded-[20px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
+                Date
+                <input
+                  name="date"
+                  className="outline-none bg-[#ff000000] font-[500] leading-[24px] text-[16px] text-black"
+                  type="date"
+                  value={manualData.date}
+                  onChange={handleInputChange}
+                />
+              </label>
+            </div>
+
+
+          </BottomDrawer>
+        </motion.div>
+      )}
+
+
+      
+      {showSyncModal && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-full z-[40] bottom-0 fixed max-w-[500px] bg-[#1c1c1c73]"
+        >
+          {' '}
+          <BottomDrawer
+            label={`Sync transactions`}
+            back={false}
+            show={showSyncModal}
+            close={true}
+            onClose={() => setShowSyncModal(!showSyncModal)}
+          >
+            <div className=" flex justify-center items-center py-[60px] flex-col gap-[16px] w-full">
+              <CircularProgress size="md" />
+            </div>
+
+
+          </BottomDrawer>
+        </motion.div>
+      )}
+
+
+      
+
+      {showSyncTransactionFirstModal && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[40]  bottom-0 fixed bg-[#1c1c1c73]"
+        > <div
+          className=" bg-white p-[24px] w-full rounded-[40px] ">
+            <div className=" w-full flex justify-between">
+              <div></div>
+              <div className=" text-[20px] font-[500]">Sync Transactions</div>
+              <div className=" cursor-pointer ">
+                <BsX
+                  size={28}
+                  onClick={() =>
+                    setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal)
+                  }
+                  className=" bg-[#F7F7F9] rounded-[8px]"
+                />
+              </div>
+            </div>
+            <h1 className=" mb-[24px] font-[400] mt-[8px] leading-[24px] text-center ">
+              Kindly select the bank account you <br /> would like to sync with
+            </h1>
+            <RadioGroup
+              orientation="vertical"
+              className=" flex flex-col w-full  "
+              color="success"
+              onValueChange={(value) => handleBankSelect(value)}
+            
+            >
+              {/* Show loading state */}
+              {isGetAllAccountPending && (
+                <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>
+              )}
+
+              {/* Show error state */}
+              {isError && <div>Failed to load accounts. Please try again later.</div>}
+
+              {/* Render account details */}
+              {!isGetAllAccountPending &&
+                !isError &&
+                accounts.length > 0 &&
+                accounts.map((account: any, index: any) => (
+                  <CustomRadio
+                    key={index} // Key is important for performance optimization
+                    isSelected={selectedBankIndex === index}
+                    onChange={() => handleBankSelect(index)}
+                    className="flex w-full justify-between"
+                    value={index}
+                  >
+                    <div className="w-full">
+                      {/* Display Bank Name */}
+                      <h1 className="text-[#2f1a1a] text-[14px]">
+                        {account.institutionName}
                       </h1>
+
+                      {/* Display Account Details */}
+                      <div className="w-full flex">
+                        <h1 className="text-[14px] flex w-full text-base-black">
+                          {account.accountName} |
+                          <span className="font-[500]"> {account.accountNumber}</span>
+                        </h1>
+                      </div>
                     </div>
-                  </div>
-                </CustomRadio>
-              ))
-            )}
+                  </CustomRadio>
+                )
+                )}
 
-            {/* Fallback for no accounts */}
-            {!isGetAllAccountPending && !isError && accounts.length === 0 && (
-              <div>No accounts available for selection.</div>
-            )}
+              {/* Fallback for no accounts */}
+              {!isGetAllAccountPending && !isError && accounts.length === 0 && (
+                <div>No accounts available for selection.</div>
+              )}
 
 
-          </RadioGroup>
-          <button disabled={isGetAllAccountPending} onClick={() => {
-            selectedBankAccount.accountName ?
-              setShowSyncDataModal(true)
-              :
-              alert("Select a bank account")
-          }
-
-          } type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Proceed </button>
-        </div>
-      </motion.div>}
-
+            </RadioGroup>
+            <button
+              disabled={isGetAllAccountPending}
+              onClick={() => {
+                selectedBankAccount.accountName
+                  ? setShowSyncDataModal(true)
+                  : alert('Select a bank account');
+              }}
+              type="submit"
+              className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+            >
+              Proceed
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {showSyncDataModal && <motion.div
-        initial={{ opacity: 0, y: 90 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
       >
-
-        <div className=" text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
-          <div className=" pt-[72px] px-[24px]">
-            <button onClick={() => setShowSyncDataModal(!showSyncDataModal)} className=" grid place-content-center top-[24px] bg-[#7CD741] absolute right-[24px] size-[36px] rounded-full  ">
-              <BsX size={'24px'} />
-            </button>
-            <div className="  w-full   gap-[16px] p-[8px] rounded-[20px] ">
-
-
+        
+          <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
+            <div className=" pt-[72px] px-[24px]">
+              <button
+                onClick={() => setShowSyncDataModal(!showSyncDataModal)}
+                className=" grid place-content-center top-[24px] bg-[#7CD741] absolute right-[24px] size-[36px] rounded-full  "
+              >
+                <BsX size={'24px'} />
+              </button>
+              <div className="  w-full   gap-[16px] p-[8px] rounded-[20px] ">
+                
+                
               <h1 className="  uppercase mb-[12px] text-[12px] font-[400] ">{selectedBankAccount.institutionName}</h1>
-              <div className=" flex justify-between">
-                <h1>{selectedBankAccount.accountName}</h1>
-                <h1>{selectedBankAccount.accountNumber}</h1>
+                <div className=" flex justify-between">
+                  <h1>{selectedBankAccount.accountName}</h1>
+                  <h1>{selectedBankAccount.accountNumber}</h1>
+                </div>
+                <div className=" border-[#5EB325] border rounded-[8px] mt-[12px] bg-[#4A9F11] p-[8px] ">
+                  <h1 className=" text-[12px] ">Available balance</h1>
+                  <div className=" flex justify-between w-full">
+                    <h1 className="font-[700] aeonik mt-[8px] ">
+                      {showBalance ? (
+                        <> ₦ {selectedBankAccount.accountBalance}</>
+                      ) : (
+                        '  ₦ *******'
+                      )}
+                    </h1>
+                    <button
+                      onClick={toggleBalanceVisibility}
+                      className=" bg-[#368B00] text-[10px] py-[4px] px-[8px] rounded-[12px] "
+                    >
+                      {showBalance ? 'Hide balance' : 'Show balance'}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className=" border-[#5EB325] border rounded-[8px] mt-[12px] bg-[#4A9F11] p-[8px] ">
-                <h1 className=" text-[12px] ">Available balance</h1>
-                <div className=" flex justify-between w-full">
-                  <h1 className="font-[700] aeonik mt-[8px] ">
-                    {showBalance ? <> ₦ {selectedBankAccount.accountBalance}</> : '  ₦ *******'}
 
-                  </h1>
-                  <button onClick={toggleBalanceVisibility} className=" bg-[#368B00] text-[10px] py-[4px] px-[8px] rounded-[12px] ">
-                    {showBalance ? 'Hide balance' : 'Show balance'}
+            </div>
+            <div className="bg-white h-full w-full">
+              <h1 className="px-6 my-4 text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">Click on the transaction to assign it to the right category</h1>
+
+
+
+              <div className="h-full w-full space-y-4">
+
+                <div className="flex px-6 w-full items-center justify-between">
+                  <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">Latest transactions</h1>
+                  <button
+                    onClick={handleSyncTransactions}
+                    className="bg-[#EFEFF0] font-[500] text-[12px] text-[#2D2D2D] py-[4px] px-[8px] rounded-[32px]"
+                    disabled={isSyncing} // Disable button while syncing
+                  >
+                    {isSyncing ? 'Syncing...' : 'Sync Latest'}
                   </button>
+                </div>
+                <div className="bg-[#F7F7F9] h-full w-full">
+
+                  {/* Conditional Rendering based on currentView state */}
+                  {currentView === 'loading' && (
+                    <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
+                      <motion.div
+                        initial={{ opacity: 0, y: 90 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col items-center justify-center w-full"
+                      >
+                        <Image
+                          width={1000}
+                          height={1000}
+                          src={lunch}
+                          alt="loading"
+                          className="h-[141.27px] w-[126.52px]"
+                        />
+                      </motion.div>
+                      <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">Yaay! 😎</h1>
+                      <h1 className="text-[#828282] text-[16px] leading-[19.2px]">You’re all synced up</h1>
+                    </div>
+                  )}
+
+                  {currentView === 'syncedData' && (
+                    <div className="px-6 py-4 h-[calc(100%-331.3px)] overflow-y-scroll space-y-4">
+                      {transactions.map((transaction, index) => (
+                        <div
+                          key={transaction.uid}
+                          onClick={() => AssignExpense(transaction.uid)}
+                          className={`flex justify-between items-center ${index !== transactions.length - 1 ? 'border-b border-b-[#E7E7EA]' : ''
+                          } pb-2`}
+                        >
+                          <div>
+                            <p className="font-[500] text-[14px] text-[#2d2d2d]">{transaction.narration}</p>
+                            <p className="text-[#575757] flex gap-3  text-[12px]">{formatDateTime(transaction.date)}
+                            </p>
+                          </div>
+                          <div
+                            className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap"
+                          >
+                            ₦ {transaction.amount.toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+
+                      {isFetchingNextPage && <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>}
+
+                      <button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage || isFetchingNextPage}
+                        className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
+                      >
+                        {isLoadingfetchAccountTransactions
+                          ? 'Loading...'
+                          : isFetchingNextPage
+                            ? 'Loading...'
+                            : hasNextPage
+                              ? 'Load More'
+                              : 'No More Data'}
+                      </button>
+                    </div>
+                )}
+                
                 </div>
               </div>
             </div>
-
           </div>
-          <div className=" bg-white  w-full">
-            <h1 className=" px-[24px] my-[16px] text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">Click on the transaction to assign it to the right category</h1>
 
-
-
-            <div className=" w-full">
-
-              <div className=" flex px-[24px] w-full items-center justify-between">
-                <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">Latest transactions</h1>
-                <button
-                  onClick={handleSyncTransactions}
-                  className="bg-[#EFEFF0] font-[500] text-[12px] text-[#2D2D2D] py-[4px] px-[8px] rounded-[32px]"
-                  disabled={isSyncing} // Disable button while syncing
-                >
-                  {isSyncing ? 'Syncing...' : 'Sync Latest'}
-                </button>
-              </div>
-              <div className="py-[16px] bg-[#F7F7F9] min- h-[534px]  mt-[16px] w-full">
-
-                {/* Conditional Rendering based on currentView state */}
-                {currentView === 'loading' && (
-                  <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
-                    <motion.div
-                      initial={{ opacity: 0, y: 90 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex flex-col items-center justify-center w-full"
-                    >
-                      <Image
-                        width={1000}
-                        height={1000}
-                        src={lunch}
-                        alt="loading"
-                        className="h-[141.27px] w-[126.52px]"
-                      />
-                    </motion.div>
-                    <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">Yaay! 😎</h1>
-                    <h1 className="text-[#828282] text-[16px] leading-[19.2px]">You’re all synced up</h1>
-                  </div>
-                )}
-
-                {currentView === 'syncedData' && (
-                  <div className="px-[24px] max-h-[50vh] overflow-y-scroll space-y-4 mt-[16px]">
-                    {transactions.map((transaction, index) => (
-                      <div
-                        key={transaction.uid}
-                        onClick={() => AssignExpense(transaction.uid)}
-                        className={`flex justify-between items-center ${index !== transactions.length - 1 ? 'border-b border-b-[#E7E7EA]' : ''
-                          } pb-2`}
-                      >
-                        <div>
-                          <p className="font-[500] text-[14px] text-[#2d2d2d]">{transaction.narration}</p>
-                          <p className="text-[#575757] flex gap-3  text-[12px]">{formatDateTime(transaction.date)}
-                          </p>
-                        </div>
-                        <div
-                          className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap"
-                        >
-                          ₦ {transaction.amount.toLocaleString()}
-                        </div>
-                      </div>
-                    ))}
-
-                    {isFetchingNextPage && <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>}
-
-                    <button
-                      onClick={() => fetchNextPage()}
-                      disabled={!hasNextPage || isFetchingNextPage}
-                      className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
-                    >
-                      {isLoadingfetchAccountTransactions
-                        ? 'Loading...'
-                        : isFetchingNextPage
-                          ? 'Loading...'
-                          : hasNextPage
-                            ? 'Load More'
-                            : 'No More Data'}
-                    </button>
-                  </div>
-                )}
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-      </motion.div>
+        
+        </motion.div>
       }
 
 
 
       {
         showCategories && (
-          <div className="h-[100vh] w-[100vw] max-w-[500px] z-[40] fixed bottom-0">
-            {/* Dark background */}
-            <div
-              className="h-full w-full bg-[#1c1c1c73] fixed"
-              onClick={() => setShowCategories(false)} // Close on background click
-            ></div>
+        <div className="h-[100vh] w-[100vw] max-w-[500px] z-[40] fixed bottom-0">
+          {/* Dark background */}
+          <div
+            className="h-full w-full bg-[#1c1c1c73] fixed"
+            onClick={() => setShowCategories(false)} // Close on background click
+          ></div>
 
-            {/* Bottom drawer */}
-            <motion.div
-              initial={{ opacity: 0, y: 90 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed bottom-0  w-full z-[50]"
-            >
+          {/* Bottom drawer */}
+          <motion.div
+            initial={{ opacity: 0, y: 90 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-0  w-full z-[50]"
+          >
               <BottomDrawer
+                
+              label={`Sync transactions`}
+              back={false}
+              show={showCategories}
+              close={true}
+              padding={1}
+              removePadding={false}
+              footer={
+                <button
+                  className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+                  onClick={handleAssignCategory}
+                  disabled={assignCategoryMutation.isPending} // Disable button when loading
+                >
+                  {assignCategoryMutation.isPending ? (
+                    // Show a loading spinner or some text when loading
+                    <span className="flex items-center">
+                      <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin"></div>
+                      <span className="ml-2">Assigning...</span>
+                    </span>
+                  ) : (
+                    // Regular button text
+                    'Assign'
+                  )}
+                </button>
+              }
+              onClose={() => setShowCategories(!showCategories)}
+            >
 
-                label={`Sync transactions`}
-                back={false}
-                show={showCategories}
-                close={true}
-                padding={1}
-                removePadding={false}
-                footer={
-                  <button
-                    className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
-                    onClick={handleAssignCategory}
-                    disabled={assignCategoryMutation.isPending} // Disable button when loading
-                  >
-                    {assignCategoryMutation.isPending ? (
-                      // Show a loading spinner or some text when loading
-                      <span className="flex items-center">
-                        <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin"></div>
-                        <span className="ml-2">Assigning...</span>
-                      </span>
-                    ) : (
-                      // Regular button text
-                      'Assign'
-                    )}
-                  </button>
-                }
-                onClose={() => setShowCategories(!showCategories)}
-              >
+                
+              <div className="bg-white  pt-4 pb-[32px] px-4   rounded-t-lg shadow-lg">
+                <h1 className="text-[16px] font-[500] text-[#514F6E] mb-[24px]">
+                  Select category
+                </h1>
 
-
-                <div className="bg-white  pt-4 pb-[32px] px-4   rounded-t-lg shadow-lg">
-                  <h1 className="text-[16px] font-[500] text-[#514F6E] mb-[24px]">Select category</h1>
-
-                  <div className="grid grid-cols-3 max-h-[50vh]  overflow-y-scroll gap-4">
-
+                <div className="grid grid-cols-3 max-h-[50vh]  overflow-y-scroll gap-4">
+                  
                     {singleBudgetData?.budgetCategories?.map((category: any) => (
-                      <div
-                        key={category.uid}
-                        className={`relative p-[8px] w-[105.67px] h-[100px] border rounded-[20px] ${selectedCategoryForTransaction === category.uid ? 'border-blue-500' : 'border-gray-300'
-                          } cursor-pointer`}
-                        onClick={() => handleSelectCategory(category.uid)}
-                        style={{
-                          backgroundColor:
-                            selectedCategoryForTransaction === category.uid
-                              ? lightenColor(category.color, 0.9)
-                              : 'transparent',
-                          borderColor:
-                            selectedCategoryForTransaction === category.uid ? category.color : '#EFEFF0',
-                        }}
-                      >
+                    <div
+                      key={category.uid}
+                      className={`relative p-[8px] w-[105.67px] h-[100px] border rounded-[20px] ${
+                        selectedCategoryForTransaction === category.uid
+                          ? 'border-blue-500'
+                          : 'border-gray-300'
+                      } cursor-pointer`}
+                      onClick={() => handleSelectCategory(category.uid)}
+                      style={{
+                        backgroundColor:
+                          selectedCategoryForTransaction === category.uid
+                            ? lightenColor(category.color, 0.9)
+                            : 'transparent',
+                        borderColor:
+                          selectedCategoryForTransaction === category.uid
+                            ? category.color
+                            : '#EFEFF0',
+                      }}
+                    >
+                      <div className="flex flex-col">
                         <div className="flex flex-col">
-                          <div className="flex flex-col">
-                            <div
-                              className="w-5 h-5 rounded-full flex items-center justify-center"
-                              style={{
-                                backgroundColor:
-                                  selectedCategoryForTransaction === category.uid
-                                    ? category.color
-                                    : 'transparent',
-                                borderColor: category.color,
-                                borderWidth: '2px',
-                              }}
-                            >
-                              {selectedCategoryForTransaction === category.uid && <BsCheck className="text-white" />}
-                            </div>
-                            <h1 className="text-[#2d2d2d] text-[12px] truncate">
-                              {category.name}
-                            </h1>
+                          <div
+                            className="w-5 h-5 rounded-full flex items-center justify-center"
+                            style={{
+                              backgroundColor:
+                                selectedCategoryForTransaction === category.uid
+                                  ? category.color
+                                  : 'transparent',
+                              borderColor: category.color,
+                              borderWidth: '2px',
+                            }}
+                          >
+                            {selectedCategoryForTransaction === category.uid && (
+                              <BsCheck className="text-white" />
+                            )}
                           </div>
-                          <h1 className="font-medium text-[14px] text-[#2d2d2d] truncate">
-                            ₦ {category.amountLeft}
-                            <span className="text-[#828282] text-[10px] font-[400]"> left</span>
+                          <h1 className="text-[#2d2d2d] text-[12px] truncate">
+                            {category.name}
                           </h1>
                         </div>
-                        <div className="mt-2">
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-[#575757] h-2 rounded-full"
-                              style={{
-                                width: `${(category.amountLeft / category.amountAllocated) * 100
-                                  }%`,
-                              }}
-                            ></div>
-                          </div>
+                        <h1 className="font-medium text-[14px] text-[#2d2d2d] truncate">
+                          ₦ {category.amountLeft}
+                          <span className="text-[#828282] text-[10px] font-[400]">
+                            {' '}
+                            left
+                          </span>
+                        </h1>
+                      </div>
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-[#575757] h-2 rounded-full"
+                            style={{
+                              width: `${
+                                (category.amountLeft / category.amountAllocated) * 100
+                              }%`,
+                            }}
+                          ></div>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  ))}
 
-                    {/* {categories.map((category) => (
+                  {/* {categories.map((category) => (
                       <div
                         key={category.id}
                         className={`relative p-[8px] w-[105.67px] h-[100px] border rounded-[20px] ${category.selected ? 'border-blue-500' : 'border-gray-300'} cursor-pointer`}
@@ -1464,32 +1592,36 @@ export default function Page() {
                         </div>
                       </div>
                     ))} */}
-
-                  </div>
                 </div>
-              </BottomDrawer>
-            </motion.div>
-          </div>
+              </div>
+            </BottomDrawer>
+          </motion.div>
+        </div>
         )
       }
 
-
+      
       {scanState &&
         <div className=" text-center w-full grid   place-content-center gap-3 ">
-
           <div className=" w-full ">
             {/* Dark background */}
             <div
               className="h-full top-6  left-0 z-40 w-full max-w-[500px] flex justify-center items-center bg-[#1c1c1c73] absolute"
               onClick={() => setScanState(false)} // Close on background click
             ></div>
-            <Scanner scanState={scanState} setScanState={setScanState} setManualData={setManualData} setAddManualModal={setAddManualModal} defaultCategory={activeBudgetCategories[0]} setAddManualModalTitle={setAddManualModalTitle} />
-
+            <Scanner
+              scanState={scanState}
+              setScanState={setScanState}
+              setManualData={setManualData}
+              setAddManualModal={setAddManualModal}
+              defaultCategory={activeBudgetCategories[0]}
+              setAddManualModalTitle={setAddManualModalTitle}
+            />
           </div>
 
         </div>
-
-
+      
+      
       }
 
 

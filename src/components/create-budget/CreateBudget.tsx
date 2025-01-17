@@ -12,6 +12,7 @@ import { IBudget } from '@/app/Types';
 import { v4 as uuidv4 } from 'uuid';
 import { IPreviousBudget } from '@/app/types/budget';
 import { fetchPreviousBudgetApi } from '@/app/services/BudgetService';
+import { format } from 'date-fns';
 
 interface IProps {
     setShow: (i: boolean) => void;
@@ -42,14 +43,14 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
         // duplicateLastBudget: state.duplicateLastBudget,
         getPreviousBudget: state.getPreviousBudget
     }));
-
-    const [budgetData, setBudgetData] = useState<IPreviousBudget | IBudget>({
+     const initialBudget:IPreviousBudget |IBudget= {
         id: uuidv4(),
         name: '',
         purpose: '',
         startDate: '',
         endDate: '',
-    });
+    };
+    const [budgetData, setBudgetData] = useState<IPreviousBudget | IBudget>(initialBudget);
 
 
     const [startDate, setStartDate] = useState<string>('');
@@ -63,16 +64,10 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
     };
 
     useEffect(() => {
-        if (budgetType === BudgetActionType.DuplicateLastBudget) {
+        if (budgetType === BudgetActionType.DuplicateLastBudget) {            
             setBudgetData(getPreviousBudget() as IPreviousBudget);
         } else {
-            setBudgetData({
-                id: uuidv4(),
-                name: '',
-                purpose: '',
-                startDate: '',
-                endDate: '',
-            });
+            setBudgetData(initialBudget);
             // clearPreviousBudget();
         }
 
@@ -155,71 +150,96 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 90 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-        >
-            <form onSubmit={handleSubmit}>
-                <BottomDrawer
-                    footer={<button type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">Continue <BsArrowRight /></button>}
-                    label="Create budget"
-                    back={false}
-                    show={show}
-                    close={true}
-                    onClose={() => setShow(false)}
-                >
-                    <div className="budget-form pt-[24px] mt-[0px]">
-                        <Input label="Name of budget" inputName="Nameofbudget" inputType="text" placeholder="January..." value={budgetData?.name} onChange={(value) => handleChange('name', value)} />
-                        <Input label="Purpose of budget" inputName="Purposeofbudget" inputType="text" placeholder="Monthly expenses..." value={budgetData?.purpose} onChange={(value) => handleChange('purpose', value)} />
-                        <div className="flex gap-[16px] justify-between">
-                            <Input
-                                label="Start date"
-                                inputName="Startdate"
-                                inputType="date"
-                                placeholder="Select date..."
-                                onChange={(value) => handleChangeDate('startDate', value)}
-                                value={budgetData?.startDate} // Bind the startDate state to the Input component
-                            />
-                            <Input
-                                label="End date"
-                                inputName="Enddate"
-                                inputType="date"
-                                placeholder="Select date..."
-                                onChange={(value) => handleChangeDate('endDate', value)}
-                                min={minEndDate} // Prevent selecting a date before the start date
-                                disabled={!budgetData?.startDate} // Disable end date input until a start date is selected
-                                value={budgetData?.endDate} // Bind the endDate state to the Input component
-                            />
-                        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 90 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+      >
+        <form onSubmit={handleSubmit}>
+          <BottomDrawer
+            footer={
+              <button
+                type="submit"
+                className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+              >
+                Continue <BsArrowRight />
+              </button>
+            }
+            label="Create budget"
+            back={false}
+            show={show}
+            close={true}
+            onClose={() => setShow(false)}
+          >
+            <div className="budget-form pt-[24px] mt-[0px]">
+              <Input
+                label="Name of budget"
+                inputName="Nameofbudget"
+                inputType="text"
+                placeholder="January..."
+                value={budgetData?.name}
+                onChange={(value) => handleChange('name', value)}
+              />
+              <Input
+                label="Purpose of budget"
+                inputName="Purposeofbudget"
+                inputType="text"
+                placeholder="Monthly expenses..."
+                value={budgetData?.purpose}
+                onChange={(value) => handleChange('purpose', value)}
+              />
+              <div className="flex gap-[16px] justify-between">
+                <Input
+                  label="Start date"
+                  inputName="Startdate"
+                  inputType="date"
+                  placeholder="Select date..."
+                  onChange={(value) => handleChangeDate('startDate', value)}
+                  value={budgetData?.startDate ? format(budgetData.startDate, 'yyyy-MM-dd') : ''} // Bind the startDate state to the Input component
+                />
+                <Input
+                  label="End date"
+                  inputName="Enddate"
+                  inputType="date"
+                  placeholder="Select date..."
+                  onChange={(value) => handleChangeDate('endDate', value)}
+                  min={minEndDate} // Prevent selecting a date before the start date
+                  disabled={!budgetData?.startDate} // Disable end date input until a start date is selected
+                  value={budgetData?.endDate ? format(budgetData.endDate, 'yyyy-MM-dd') : ''} // Bind the endDate state to the Input component
+                />
+              </div>
 
+              <RadioGroup
+                orientation="horizontal"
+                className=' flex w-full  justify-between  gap-[16px]'
+                color='success'
+                onValueChange={(value) => handleChange('budgetType', value)}
+              >
+                <CustomRadio
+                  isSelected={budgetType === BudgetActionType.DuplicateLastBudget}
+                  onChange={() => {
+                    setBudgetType(BudgetActionType.DuplicateLastBudget);
+                    fetchPreviousBudget();
+                  }}
+                  description="Duplicate last budget"
+                  value={BudgetActionType.DuplicateLastBudget}
+                ></CustomRadio>
 
-
-                        <RadioGroup
-                            orientation="horizontal"
-                            className=' flex w-full  justify-between  gap-[16px]'
-                            color='success'
-                            onValueChange={(value) => handleChange('budgetType', value)}
-                        >
-                            <CustomRadio
-                                isSelected={budgetType === BudgetActionType.DuplicateLastBudget} onChange={() => { setBudgetType(BudgetActionType.DuplicateLastBudget); fetchPreviousBudget() }}
-
-
-                                description="Duplicate last budget" value={BudgetActionType.DuplicateLastBudget}>
-                            </CustomRadio>
-
-                            <CustomRadio isSelected={budgetType === BudgetActionType.CreateNewBudget} onChange={() => {setBudgetType(BudgetActionType.CreateNewBudget);}}
-
-                                description="Create new budget" value={BudgetActionType.CreateNewBudget}>
-                            </CustomRadio>
-
-                        </RadioGroup>
-                    </div>
-                </BottomDrawer>
-            </form>
-        </motion.div>
+                <CustomRadio
+                  isSelected={budgetType === BudgetActionType.CreateNewBudget}
+                  onChange={() => {
+                    setBudgetType(BudgetActionType.CreateNewBudget);
+                  }}
+                  description="Create new budget"
+                  value={BudgetActionType.CreateNewBudget}
+                ></CustomRadio>
+              </RadioGroup>
+            </div>
+          </BottomDrawer>
+        </form>
+      </motion.div>
     );
 };
 

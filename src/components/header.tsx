@@ -27,7 +27,7 @@ const Header = ({ title, light = true, link, ...props }: HeaderProps) => {
       } pl-6`}
       {...props}
     >
-      <Link href={link}>
+      <Link href={link} className='inline-block h-10'>
         <button
           // onClick={() => navigate.back()}
           className={`absolute rounded-full ${isLight ? 'bg-white text-black' : 'text-white bg-[#FFFFFF0A]'}  w-10 h-10 inline-flex justify-center items-center`}
