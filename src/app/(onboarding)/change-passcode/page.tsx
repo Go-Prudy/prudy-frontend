@@ -69,7 +69,7 @@ const ChangePasscodePage = () => {
 
   return (
     <div className="w-full">
-      <Header title="Reset passcode" />
+      <Header title="Reset passcode" link='/change-passcode' />
       <div className="px-6 py-10">
         <div className="w-full mb-6">
           <p className="mb-6">Reset passcode</p>
