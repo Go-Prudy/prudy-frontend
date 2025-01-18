@@ -151,7 +151,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                         </div>
                         <button onClick={handleAddIncome} className='flex gap-x-4 items-center hover:scale-105'>
                             <Image src={addAnotherIcon} className='size-8' alt={'icon'} />
-                            <span className='text-[#514F6E] text-[14px] font-[500]'>Add Another</span>
+                            <span className='text-[#514F6E] text-[14px] font-[500]'>Add New</span>
                         </button>
                     </div>
                 </div>
