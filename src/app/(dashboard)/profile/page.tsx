@@ -22,6 +22,7 @@ import { useEffect, useState, type JSX } from "react";
 import Link from 'next/link';
 import { getAllPlans, getUserSubscription } from "@/app/services/SubscriptionService";
 import { GetSettingsApi } from "@/app/services/SettingService";
+import BudgetPageHeader from "@/components/create-budget/BudgetPageHeader";
 
 export default function Page() {
 
@@ -125,7 +126,7 @@ export default function Page() {
   }, [authenticatedUser]);
   return (
     <div className="bg-[#FAFAFA]  w-[100vw] max-w-[500px] h-screen">
-      <Header2 title={'Profile'} />
+      <BudgetPageHeader headerType="dashboard" title={'Profile'} />
       <div onClick={() => navigation.push('/profile/user')} className="cursor-pointer pt-[90px] px-[24px] pb-[24px]">
         <Link href="/profile/user" prefetch={true}>
           <div className="text-[hsl(0,0%,100%)] p-[24px] flex justify-between items-center w-full rounded-[20px]" style={{

@@ -20,7 +20,7 @@ import { useBudgetStore } from '@/app/store/Store';
 const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
-    const [createBudgetComponent, setCreateBudgetComponent] = useState(true);
+    const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
     const [treshold, setTreshold] = useState(0);
     const navigation = useRouter();
 
@@ -168,11 +168,11 @@ const BudgetPage = () => {
                         backgroundPosition: 'center',
                     }}
                 >
-                    <BudgetPageHeader />
-                    <p className='px-[24px] pt-[136px] text-[32px] font-[700] text-white'>
+                    <BudgetPageHeader headerType='budget' />
+                    <p className='px-6 pt-[136px] text-[32px] font-[700] text-white'>
                         Take charge of your income, budget effectively and track your finances
                     </p>
-                    <div className='px-[24px] w-full relative max-w-[500px] '>
+                    <div className='px-6 w-full relative max-w-[500px] '>
                         {!scrolled ?
                             <button onClick={() => setCreateBudgetComponent(!createBudgetComponent)} className='mt-[24px] w-full justify-center items-center text-center font-[500] bg-[#8EF846] px-[28px] py-[16px] rounded-[32px] flex gap-[8px]'>
                                 <BsPlus size={30} />
@@ -191,7 +191,7 @@ const BudgetPage = () => {
                         }
 
                     </div>
-                    <div className='bg-[#F7F7F9] bottom-0 absolute min-h-[389px] w-full rounded-t-[24px]'>
+                    <div className='bg-[#F7F7F9] mt-10 min-h-[389px] w-full rounded-t-[24px]'>
                         {isPending ? (
                             <div className='flex flex-col mb-[90px] gap-[24px] p-[24px]'>
                                 {[...Array(3)].map((_, index) => (

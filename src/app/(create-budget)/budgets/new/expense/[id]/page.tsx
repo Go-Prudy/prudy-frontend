@@ -615,7 +615,7 @@ const Page = (props: { params: { id: string } }) => {
 
 
     const handleSaveCategory = async () => {
-
+        
         const totalSubAllocationAmount = Array.isArray(selectedBudget?.subAllocations)
             ? selectedBudget.subAllocations.reduce(
                 (sum: any, allocation: any) => sum + allocation.amount,
@@ -911,7 +911,7 @@ const Page = (props: { params: { id: string } }) => {
                                     {budgetCategoriesArray.map((budget: any) => {
                                         // Find the corresponding allocation for this budget using the uid
                                         const allocation = lastBudget?.allocations?.find(
-                                            (allocation: any) => allocation.budgetCategory === budget.name
+                                          (allocation: any) => allocation.budgetCategory === budget.uid,
                                         );
 
                                         // If an allocation is found, use its amount; otherwise, use 0

@@ -12,6 +12,7 @@ import { GetBudgetCategoriesAnalyticsApi, GetOverallBudgetAnalyticsApi } from "@
 import { BudgetVsActualSkeleton, TopExpensesSkeleton } from "@/components/Skelentons/AnalysisSkeleton";
 import { GetSettingsApi } from "@/app/services/SettingService";
 import SubscriptionRestriction from "@/components/SubscriptionRestriction";
+import BudgetPageHeader from "@/components/create-budget/BudgetPageHeader";
 export default function Page() {
   const allBudgets: string[] = [
     'January budget',
@@ -272,7 +273,7 @@ export default function Page() {
         :
 
         <div className="bg-base-white w-[100vw] max-w-[500px] h-full">
-          <Header2 title={'Analytics'} />
+          <BudgetPageHeader headerType="dashboard" title={'Analytics'} />
           <div className="flex mb-[8px] w-full items-center py-[12px] px-[24px]  mt-[90px] gap-[12px]">
             <label className=" w-full bg-[#F7F7F9] px-[8px] py-[16px] rounded-[8px] border-[#EFEFF0] border flex flex-col gap-[8px] text-[12px] text-[#575757]">
 

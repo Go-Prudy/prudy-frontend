@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { BsBell, BsPerson } from 'react-icons/bs';
 import hambugger from '/public/images/hambugger.png';
+import hambugger2 from '/public/images/hambugger2.png';
 import premium from '/public/images/premium.png';
 import close from '/public/images/close.png';
 import Link from 'next/link';
@@ -26,7 +27,12 @@ import { fetchUserProfile } from '@/app/services/AuthenticationService';
 import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 
-const BudgetPageHeader = () => {
+interface BudgetPageHeaderProp {
+  title?: string;
+  headerType: 'budget' | 'dashboard';
+}
+
+const BudgetPageHeader = ({ headerType, title }: BudgetPageHeaderProp) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { updateAuthenticatedUser } = useAuthentication();
@@ -104,34 +110,52 @@ const BudgetPageHeader = () => {
   };
 
   return (
+    // <div
+    //   className={`z-[20] w-[100vw] max-w-[500px]  fixed top-0
+    //                                                       bg-[#FAFAFA]
+    //                                                       pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg
+    //                                                                                                                                         text-[#2D2D2D]
+    //                                                                                                                                                    items-center pb-[16px] transition-all duration-300 `}>
+
     <div
-      className={`z-[30] w-[100vw] max-w-[500px] fixed top-0 pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-white items-center pb-[16px] transition-all duration-300 ${scrolled ? 'scrolled-bg' : 'bg-[#00000064]'}`}
+      className={`z-[30] w-[100vw] max-w-[500px] fixed top-0 pt-[24px] px-[24px] flex justify-between backdrop-brightness-105 backdrop-blur-lg text-white items-center pb-[16px] transition-all duration-300 
+        
+        ${headerType === 'budget' ? (scrolled ? 'scrolled-bg text-white' : 'bg-[#00000064] text-white') : 'bg-[#FAFAFA] text-[#2D2D2D]'}
+        `}
     >
       {/* Left Section: Profile */}
-      <div className="text-white flex gap-[8px] items-start">
-        <div
-          className={`rounded-full ${!userData.profile.profilePhotoUrl ? 'p-1 border border-[white]' : 'p-0'} `}
-        >
-          {userData?.profile?.profilePhotoUrl ? (
-            <Image
-              src={userData.profile.profilePhotoUrl}
-              alt="profile"
-              width={1000}
-              height={1000}
-              className=" size-[48px] rounded-full object-cover"
-            />
-          ) : (
-            <BsPerson className="text-white size-[38px]" />
-          )}
+      {headerType === 'budget' ? (
+        <div className="text-white flex gap-[8px] items-start">
+          <div
+            className={`rounded-full ${!userData.profile.profilePhotoUrl ? 'p-1 border border-[white]' : 'p-0'} `}
+          >
+            {userData?.profile?.profilePhotoUrl ? (
+              <Image
+                src={userData.profile.profilePhotoUrl}
+                alt="profile"
+                width={1000}
+                height={1000}
+                className=" size-[48px] rounded-full object-cover"
+              />
+            ) : (
+              <BsPerson className="text-white size-[38px]" />
+            )}
+          </div>
+          <div>
+            <h1 className="text-[12px] leading-[16px]">Welcome 👋</h1>
+            <h1 className="font-[500] leading-[24px]">
+              {' '}
+              {userData.profile.lastName ? userData.profile.lastName : 'User'}
+            </h1>
+          </div>
         </div>
-        <div>
-          <h1 className="text-[12px] leading-[16px]">Welcome 👋</h1>
-          <h1 className="font-[500] leading-[24px]">
-            {' '}
-            {userData.profile.lastName ? userData.profile.lastName : 'User'}
-          </h1>
+      ) : (
+        <div className="text-[#2D2D2D] flex gap-[8px] items-start">
+          <div>
+            <h1 className="font-[500] text-[18px] leading-[24px]">{title}</h1>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Middle Section: Hamburger Icon */}
 
@@ -142,7 +166,7 @@ const BudgetPageHeader = () => {
             alt="hamburger"
             width={1000}
             height={1000}
-            src={hambugger}
+            src={headerType === 'budget' ? hambugger : hambugger2}
             onClick={toggleMenu}
           />
         </div>
