@@ -20,7 +20,7 @@ import { useBudgetStore } from '@/app/store/Store';
 const BudgetPage = () => {
     const [scrolled, setScrolled] = useState(false);
     const [showInvites, setShowInvites] = useState(false);
-    const [createBudgetComponent, setCreateBudgetComponent] = useState(true);
+    const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
     const [treshold, setTreshold] = useState(0);
     const navigation = useRouter();
 
