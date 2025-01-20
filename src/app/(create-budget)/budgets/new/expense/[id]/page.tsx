@@ -156,31 +156,6 @@ const Page = (props: { params: { id: string } }) => {
     //     return '50px'; // Default minimum width
     // };
 
-
-    const handleSubmit = async () => {
-        try {
-            setLoading(true)
-            const createCategoryData = {
-                name: categoryName,
-                subCategories: [],
-            };
-            console.log(createCategoryData);
-            await createCategoryMutation.mutateAsync(createCategoryData);
-            setCategoryName('')
-            setLoading(false)
-            setShowNewBudgetCategory(false)
-        } catch (error) {
-            console.log(error);
-            setLoading(false)
-        }
-    };
-
-
-
-
-
-
-
     const handleClose = () => {
         setShowSelectedBudget(false);
     };
@@ -275,7 +250,7 @@ const Page = (props: { params: { id: string } }) => {
                     if (selectedBudget?.amount > 0) {
                         try {
                             const res = await createSubCategoryMutation.mutateAsync(data);
-                            console.log("SubCategory Response:", res.data);
+                            // console.log("SubCategory Response:", res.data);
 
                             let updatedSubAllocations: any[] = [];
 
@@ -292,19 +267,19 @@ const Page = (props: { params: { id: string } }) => {
                             );
 
                             if (existingSubAllocation) {
-                                console.log("Updating existing allocation");
+                                // console.log("Updating existing allocation");
 
                                 updatedSubAllocations = updatedSubAllocations.map((sub) =>
                                     sub.subCategory === res.data.uid ? newSubAllocation : sub
                                 );
                             } else {
-                                console.log("Adding new allocation");
+                                // console.log("Adding new allocation");
 
                                 updatedSubAllocations.push(newSubAllocation);
 
                                 // Find the existing allocations and subAllocations
                                 const foundBudget = lastBudget
-                                console.log(foundBudget);
+                                // console.log(foundBudget);
 
 
                                 const existingSubAllocations =
@@ -320,7 +295,7 @@ const Page = (props: { params: { id: string } }) => {
                                 );
 
                                 if (!entryExists) {
-                                    console.log(existingSubAllocations);
+                                    // console.log(existingSubAllocations);
 
                                     setBluredData((prevData: any[]) => {
                                         const lastIndex = prevData.length - 1;
@@ -375,7 +350,7 @@ const Page = (props: { params: { id: string } }) => {
                                 newAllocation,
                             ]);
 
-                            console.log("Updated SubAllocations:", updatedSubAllocations);
+                            // console.log("Updated SubAllocations:", updatedSubAllocations);
                         } catch (error) {
                             console.error("Error creating subcategory:", error);
                         }
@@ -385,7 +360,7 @@ const Page = (props: { params: { id: string } }) => {
                 }
             }
         } else {
-            console.log("Both category and amount are required before blurring.");
+            // console.log("Both category and amount are required before blurring.");
         }
 
         setFocusedIndex(null); // Reset focus tracking
@@ -396,7 +371,7 @@ const Page = (props: { params: { id: string } }) => {
         mutationFn: (data: any) => CreateSubCategoryApi(data.token, data.budgetCategoryId, data.name),
         onSuccess: (data: any) => {
             if (data?.success) {
-                console.log(data)
+                // console.log(data)
                 return data
             }
         },
@@ -534,8 +509,8 @@ const Page = (props: { params: { id: string } }) => {
 
     useEffect(() => {
         if (selectedBudget && !hasSelectedBudget.current) {
-            console.log(selectedBudget);
-            console.log(allDisplayedBudgets);
+            // console.log(selectedBudget);
+            // console.log(allDisplayedBudgets);
 
             if (allDisplayedBudgets.length > 0) {
                 // Find the matching budget in allDisplayedBudgets
@@ -591,27 +566,71 @@ const Page = (props: { params: { id: string } }) => {
         refetchOnWindowFocus: true,
     });
 
-    let budgetCategoriesArray = Array.isArray(budgetCategoriesData) ? budgetCategoriesData : [];
+    // console.log(budgetCategoriesData);
 
+       const [budgetCategoriesArray, setBudgetCategoriesArray] =
+        useState(budgetCategoriesData);
+    
+    useEffect(() => {
+        if (budgetCategoriesData) {
+          setBudgetCategoriesArray(budgetCategoriesData);
+      }
+    }, [budgetCategoriesArray])
+    
+    
+    const [createCategoryLoading,setCreateCategoryLoading] = useState<boolean>(false)
+    
+    useEffect(() => {
+      
+        if (lastBudget && lastBudget.allocations && lastBudget.allocations.length > 0) {
+            const allocationMap: Record<string, IPreviousBudgetAllocation> = {};
+            // create hashmap
+            (lastBudget.allocations as IPreviousBudgetAllocation[]).forEach((a) => {
+                allocationMap[a.budgetCategory] = a;
+            });            
 
-    console.log(budgetCategoriesData);
-
-    if (lastBudget && lastBudget.allocations && lastBudget.allocations.length > 0) {
-        const allocationMap: Record<string, IPreviousBudgetAllocation> = {};
-        // create hashmap
-        (lastBudget.allocations as IPreviousBudgetAllocation[]).forEach((a) => {
-            allocationMap[a.budgetCategory] = a;
-        });
-
-        budgetCategoriesArray = budgetCategoriesArray.map((bc) => {
-            const allocation = allocationMap[bc.name];
-            return {
-                ...bc,
-                amount: allocation?.amount || 0,
-                subAllocations: allocation?.subAllocations || [],
-            };
-        })
+            const updatedBudgetCategoriesArray = budgetCategoriesArray.map((bc:any) => {
+                const allocation = allocationMap[bc.name];
+                return {
+                    ...bc,
+                    amount: allocation?.amount || 0,
+                    subAllocations: allocation?.subAllocations || [],
+                };
+            })
+            setBudgetCategoriesArray(updatedBudgetCategoriesArray);
+        }
     }
+, [budgetCategoriesData, lastBudget]);
+
+    
+       const handleSubmit = async () => {
+         try {
+           setCreateCategoryLoading(true);
+           const createCategoryData = {
+             name: categoryName,
+             subCategories: [],
+           };
+           if (authenticatedUser) {
+             const res = await createBudgetCategoryApi(
+               createCategoryData,
+               authenticatedUser.token,
+             );
+
+             const updatedCategories = budgetCategoriesArray;
+             updatedCategories.push(res.category);
+
+             setBudgetCategoriesArray(updatedCategories);
+           } else {
+             throw new Error('User is not authenticated');
+           }
+           setCategoryName('');
+           setShowNewBudgetCategory(false);
+         } catch (error) {
+           console.error('Error creating category:', error);
+         } finally {
+           setCreateCategoryLoading(false);
+         }
+       };
 
 
     const handleSaveCategory = async () => {
@@ -622,7 +641,7 @@ const Page = (props: { params: { id: string } }) => {
                 0
             )
             : 0;
-        console.log(selectedBudget?.amount > totalSubAllocationAmount);
+        // console.log(selectedBudget?.amount > totalSubAllocationAmount);
 
         if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
             alert("Your expense is greater than your current budget");
@@ -665,7 +684,7 @@ const Page = (props: { params: { id: string } }) => {
                     (sub: any) => sub.subCategory && sub.amount > 0
                 ) || [];
 
-                console.log(singleBudget.subAllocations);
+                // console.log(singleBudget.subAllocations);
 
                 const SingleValidSubAllocations = singleBudget.subAllocations?.filter(
                     (sub: any) => sub.subCategory && sub.amount > 0
@@ -686,7 +705,7 @@ const Page = (props: { params: { id: string } }) => {
                 };
 
 
-                console.log("Validated Allocation:", bluredData);
+                // console.log("Validated Allocation:", bluredData);
 
                 const fetchedLastBudget = getLastBudget();
                 if (fetchedLastBudget) {
@@ -696,7 +715,7 @@ const Page = (props: { params: { id: string } }) => {
                     setLastBudget(lastBudget);
                 }
                 // Add the new allocation to the budget using your function
-                console.log(newAllocation);
+                // console.log(newAllocation);
 
                 addAllocationToBudget(budgetId, newAllocation);
 
@@ -720,38 +739,6 @@ const Page = (props: { params: { id: string } }) => {
     }, [selectedBudget]);
 
 
-
-
-
-
-
-    // Mutations
-    const createCategoryMutation = useMutation({
-        mutationFn: (data: any) => {
-            if (authenticatedUser) {
-                return createBudgetCategoryApi(data, authenticatedUser.token);
-            }
-            throw new Error("User is not authenticated");
-        },
-        onSuccess: (data: any) => {
-            if (data?.success) {
-                setLoading(false);
-                console.log(data);
-                const { success, message, ...rest } = data;
-                console.log(rest.data);
-            }
-        },
-        onError: (error: Error) => {
-            console.error('Error creating category:', error);
-            setLoading(false);
-        },
-    });
-
-
-
-
-
-
     // Mutations
     const CreateBudgetMutation = useMutation({
         mutationFn: (data: any) => {
@@ -762,7 +749,7 @@ const Page = (props: { params: { id: string } }) => {
                     allocations: data.allocations.map(({ color, ...rest }: any) => rest)
                 };
 
-                console.log(newData);
+                // console.log(newData);
                 return createBudgetApi(newData, authenticatedUser.token);
             }
             throw new Error("User is not authenticated");
@@ -770,9 +757,9 @@ const Page = (props: { params: { id: string } }) => {
         onSuccess: (data: any) => {
             if (data?.success) {
                 setLoading(false);
-                console.log(data);
+                // console.log(data);
                 const { success, message, ...rest } = data;
-                console.log(rest.data);
+                // console.log(rest.data);
                 queryClient.invalidateQueries({ queryKey: ['allBudgetCategories'] });
                 navigate.push('/budgets')
             }
@@ -789,10 +776,10 @@ const Page = (props: { params: { id: string } }) => {
 
     const handleCreateBudget = async () => {
         try {
-            console.log(currentBudget);
+            // console.log(currentBudget);
             const { id, budgetType, ...rest } = currentBudget || {};
             const newData: any = { ...rest, allocations: lastBudget?.allocations || [] }
-            console.log(newData);
+            // console.log(newData);
 
             const FilteredData = {
                 ...newData, // Copy over the non-allocations data
@@ -804,14 +791,14 @@ const Page = (props: { params: { id: string } }) => {
                 }))
             };
 
-            console.log(FilteredData);
+            // console.log(FilteredData);
 
 
             const res = await CreateBudgetMutation.mutateAsync(FilteredData)
-            console.log(res);
+            // console.log(res);
             setBluredData([])
             if (res) {
-                console.log(res);
+                // console.log(res);
                 navigate.push('/budget/' + res.uid)
             }
 
@@ -868,7 +855,7 @@ const Page = (props: { params: { id: string } }) => {
 
             </div>
             {/* CATEGORIES  OR ALLOCATIONS */}
-            <div className={` bg-[#F7F7F9]  grid ${budgetCategoriesData?.length == 0 ? 'grid-cols-1' : 'grid-cols-1'}  gap-[12px] overflow-y-scroll overflow-x-hidden min-h-[322px] py-[16px] px-[24px] mb-[100px] `}>
+            <div className={` bg-[#F7F7F9]  grid ${budgetCategoriesArray?.length == 0 ? 'grid-cols-1' : 'grid-cols-1'}  gap-[12px] overflow-y-scroll overflow-x-hidden min-h-[322px] py-[16px] px-[24px] mb-[100px] `}>
 
 
 
@@ -1115,9 +1102,9 @@ const Page = (props: { params: { id: string } }) => {
                     >
 
                         <BottomDrawer
-                            footer={<button disabled={createCategoryMutation.isPending} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
+                            footer={<button disabled={createCategoryLoading} type="submit" className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]">
 
-                                {createCategoryMutation.isPending ?
+                                {createCategoryLoading ?
                                     <div className=' flex gap-2 items-center justify-center mx-auto w-full'>
                                         <CircularProgress color='default' size='sm' />
 
