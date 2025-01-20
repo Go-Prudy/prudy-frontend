@@ -256,28 +256,28 @@ export default function Page() {
     setShowBalance((prevState) => !prevState);
   };
 
-  const handleSaveManually = () => {
-    // setAddManualModal(!AddManualModal)
-  };
+  // const handleSaveManually = () => {
+  //   // setAddManualModal(!AddManualModal)
+  // };
 
   // Function to handle category selection
   const handleSelectCategory = (id: any) => {
     setSelectedCategoryForTransaction(id);
   };
 
-  const handleAssign = () => {
-    if (selectedCategory) {
-      // Handle assignment logic here...
-    }
-  };
+  // const handleAssign = () => {
+  //   if (selectedCategory) {
+  //     // Handle assignment logic here...
+  //   }
+  // };
 
   // Calculate total combined balance
-  const totalBalance = bankData.reduce((acc, bank) => acc + bank.balance, 0);
+  // const totalBalance = bankData.reduce((acc, bank) => acc + bank.balance, 0);
 
   // Toggle the balance view
-  const toggleBalance = () => {
-    setShowBalance(!showBalance);
-  };
+  // const toggleBalance = () => {
+  //   setShowBalance(!showBalance);
+  // };
 
   const handleSyncTransaction = async () => {
     // Set loading state when sync starts
@@ -307,13 +307,13 @@ export default function Page() {
     } catch (error) {}
   };
 
-  const abbreviateNumber = (num: number): string => {
-    if (num >= 1_000_000) {
-      return `${(num / 1_000_000).toFixed(2)}M`; // Millions
-    }
+  // const abbreviateNumber = (num: number): string => {
+  //   if (num >= 1_000_000) {
+  //     return `${(num / 1_000_000).toFixed(2)}M`; // Millions
+  //   }
 
-    return num.toLocaleString(); // Less than thousand
-  };
+  //   return num.toLocaleString(); // Less than thousand
+  // };
 
   const handleSyncTransactions = async () => {
     // Show loader when syncing starts
@@ -368,7 +368,7 @@ export default function Page() {
 
   useEffect(() => {
     try {
-      if (isPending) {
+      if (isGetAllAccountPending) {
         setIsApiLoading(true);
       }
       if (accounts.length > 0) {
@@ -847,7 +847,7 @@ export default function Page() {
           className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}
         >
           <div className=" w-full px-[24px] ">
-            {isApiLoading ? (
+            {isGetAllAccountPending ? (
               <div className=" flex gap-2 items-center justify-center mx-auto w-full">
                 <CircularProgress color="default" size="sm" />
               </div>
@@ -864,8 +864,7 @@ export default function Page() {
                       )}
 
                       {/* Render account details */}
-                      {!isGetAllAccountPending &&
-                        !isError &&
+                      {!isError &&
                         connectedAccounts.length > 0 &&
                         connectedAccounts.map((account: any, index: any) => (
                           <div
@@ -1214,47 +1213,45 @@ export default function Page() {
               color="success"
               onValueChange={(value) => handleBankSelect(value)}
             >
-              {/* Show loading state */}
-              {isGetAllAccountPending && (
-                <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>
-              )}
-
-              {/* Show error state */}
-              {isError && <div>Failed to load accounts. Please try again later.</div>}
-
-              {/* Render account details */}
-              {!isGetAllAccountPending &&
-                !isError &&
-                accounts.length > 0 &&
-                accounts.map((account: any, index: any) => (
-                  <CustomRadio
-                    key={index} // Key is important for performance optimization
-                    isSelected={selectedBankIndex === index}
-                    onChange={() => handleBankSelect(index)}
-                    className="flex w-full justify-between"
-                    value={index}
-                  >
-                    <div className="w-full">
-                      {/* Display Bank Name */}
-                      <h1 className="text-[#2f1a1a] text-[14px]">
-                        {account.institutionName}
-                      </h1>
-
-                      {/* Display Account Details */}
-                      <div className="w-full flex">
-                        <h1 className="text-[14px] flex w-full text-base-black">
-                          {account.accountName} |
-                          <span className="font-[500]"> {account.accountNumber}</span>
+              {
+                // Show loading state
+                isGetAllAccountPending ? (
+                  <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>
+                ) : // Show error state
+                isError ? (
+                  <div>Failed to load accounts. Please try again later.</div>
+                ) : // Render account details
+                accounts.length > 0 ? (
+                  accounts.map((account: any, index: any) => (
+                    <CustomRadio
+                      key={index} // Key is important for performance optimization
+                      isSelected={selectedBankIndex === index}
+                      onChange={() => handleBankSelect(index)}
+                      className="flex w-full justify-between"
+                      value={index}
+                    >
+                      <div className="w-full">
+                        {/* Display Bank Name */}
+                        <h1 className="text-[#2f1a1a] text-[14px]">
+                          {account.institutionName}
                         </h1>
-                      </div>
-                    </div>
-                  </CustomRadio>
-                ))}
 
-              {/* Fallback for no accounts */}
-              {!isGetAllAccountPending && !isError && accounts.length === 0 && (
-                <div>No accounts available for selection.</div>
-              )}
+                        {/* Display Account Details */}
+                        <div className="w-full flex">
+                          <h1 className="text-[14px] flex w-full text-base-black">
+                            {account.accountName} |
+                            <span className="font-[500]"> {account.accountNumber}</span>
+                          </h1>
+                        </div>
+                      </div>
+                    </CustomRadio>
+                  ))
+                ) : (
+                  // Fallback for no accounts
+
+                  accounts.length === 0 && <div>No accounts available for selection.</div>
+                )
+              }
             </RadioGroup>
             <button
               disabled={isGetAllAccountPending}
