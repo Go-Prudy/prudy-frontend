@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import BottomDrawer from './BottomDrawer';
 import Input from '../input'; // Assuming this is your input component
-import { RadioGroup, useRadio, VisuallyHidden, cn } from "@nextui-org/react";
+import { RadioGroup, useRadio, VisuallyHidden, cn, Skeleton } from "@nextui-org/react";
 import { BsArrowRight } from 'react-icons/bs';
 import { useRouter } from 'next/navigation';
 import { useBudgetStore } from '@/app/store/Store';
@@ -19,7 +19,8 @@ interface IProps {
     show: boolean,
     previousBudget: IPreviousBudget | null,
     fetchPreviousBudget: () => void;
-    clearPreviousBudget: () => void;
+  clearPreviousBudget: () => void;
+  isLoadingPreviousBudget:boolean
 }
 
 enum BudgetActionType {
@@ -28,7 +29,7 @@ enum BudgetActionType {
 }
 
 
-const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget }: IProps) => {
+const CreateBudget = ({ setShow, show, fetchPreviousBudget,previousBudget, clearPreviousBudget,isLoadingPreviousBudget }: IProps) => {
     // State to manage form data
     // const [budgetData, setBudgetData] = useState<IBudget>({
     //     id: uuidv4(),
@@ -38,7 +39,7 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
     //     endDate: '',
     // });
 
-    const { getPreviousBudget, addBudget } = useBudgetStore((state) => ({
+    const { getPreviousBudget, addBudget, } = useBudgetStore((state) => ({
         addBudget: state.addBudget,
         // duplicateLastBudget: state.duplicateLastBudget,
         getPreviousBudget: state.getPreviousBudget
@@ -51,27 +52,33 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
         endDate: '',
     };
     const [budgetData, setBudgetData] = useState<IPreviousBudget | IBudget>(initialBudget);
-
-
-    const [startDate, setStartDate] = useState<string>('');
-    const [endDate, setEndDate] = useState<string>('');
     const [budgetType, setBudgetType] = useState<BudgetActionType>(BudgetActionType.CreateNewBudget);
 
-    const navigate = useRouter()
+  const navigate = useRouter()
+  
     // Handle form input changes
     const handleChange = (key: string, value: string) => {
         setBudgetData(prevData => ({ ...prevData, [key]: value }));
     };
 
-    useEffect(() => {
-        if (budgetType === BudgetActionType.DuplicateLastBudget) {            
-            setBudgetData(getPreviousBudget() as IPreviousBudget);
-        } else {
-            setBudgetData(initialBudget);
-            // clearPreviousBudget();
-        }
+    // useEffect(() => {
+    //     if (budgetType === BudgetActionType.DuplicateLastBudget) {            
+    //         setBudgetData(getPreviousBudget() as IPreviousBudget);
+    //     } else {
+    //         setBudgetData(initialBudget);
+    //         // clearPreviousBudget();
+    //     }
 
-    }, [budgetType])
+    // }, [budgetType])
+    
+    
+    // Update budget data if previous budget is available
+    useEffect(() => {
+      if(previousBudget){
+        setBudgetData(previousBudget);
+      }
+    }, [previousBudget]);
+
 
 
     const handleChangeDate = (field: 'startDate' | 'endDate', value: string) => {
@@ -173,8 +180,13 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
             close={true}
             onClose={() => setShow(false)}
           >
-            <div className="budget-form pt-[24px] mt-[0px]">
-              <Input
+            <div className="budget-form pt-6 mt-[0px]">
+              {isLoadingPreviousBudget ?  <div className='flex flex-col gap-6 pb-6'>
+                                {[...Array(3)].map((_, index) => (
+                                    <Skeleton key={index} className='h-[30px] w-full rounded-[20px]' />
+                                ))}
+                            </div>: <>
+               <Input
                 label="Name of budget"
                 inputName="Nameofbudget"
                 inputType="text"
@@ -197,7 +209,11 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
                   inputType="date"
                   placeholder="Select date..."
                   onChange={(value) => handleChangeDate('startDate', value)}
-                  value={budgetData?.startDate ? format(budgetData.startDate, 'yyyy-MM-dd') : ''} // Bind the startDate state to the Input component
+                  value={
+                    budgetData?.startDate
+                      ? format(budgetData.startDate, 'yyyy-MM-dd')
+                      : ''
+                  } // Bind the startDate state to the Input component
                 />
                 <Input
                   label="End date"
@@ -207,14 +223,17 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget, clearPreviousBudget 
                   onChange={(value) => handleChangeDate('endDate', value)}
                   min={minEndDate} // Prevent selecting a date before the start date
                   disabled={!budgetData?.startDate} // Disable end date input until a start date is selected
-                  value={budgetData?.endDate ? format(budgetData.endDate, 'yyyy-MM-dd') : ''} // Bind the endDate state to the Input component
+                  value={
+                    budgetData?.endDate ? format(budgetData.endDate, 'yyyy-MM-dd') : ''
+                  } // Bind the endDate state to the Input component
                 />
-              </div>
+              </div></>}
+             
 
               <RadioGroup
                 orientation="horizontal"
-                className=' flex w-full  justify-between  gap-[16px]'
-                color='success'
+                className=" flex w-full  justify-between  gap-[16px]"
+                color="success"
                 onValueChange={(value) => handleChange('budgetType', value)}
               >
                 <CustomRadio

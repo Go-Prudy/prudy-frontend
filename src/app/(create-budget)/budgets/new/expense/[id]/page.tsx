@@ -93,7 +93,7 @@ const Page = (props: { params: { id: string } }) => {
         } else {
             setLastBudget(null);
         }
-        console.log(fetchedLastBudget);
+        // console.log(fetchedLastBudget);
     }, [getLastBudget, bluredData]);
 
     const calculateIncomeExpenseStats = (lastBudget: any) => {
@@ -113,12 +113,12 @@ const Page = (props: { params: { id: string } }) => {
         const percentageIncomeLeft = 100 - percentageIncomeUsed;
 
         // Debugging logs
-        console.log("Last Budget:", lastBudget);
-        console.log("Income:", income);
-        console.log("Expense:", expense);
-        console.log("Income Left:", incomeLeft);
-        console.log("Percentage of Income Used:", percentageIncomeUsed);
-        console.log("Percentage of Income Left:", percentageIncomeLeft);
+        // console.log("Last Budget:", lastBudget);
+        // console.log("Income:", income);
+        // console.log("Expense:", expense);
+        // console.log("Income Left:", incomeLeft);
+        // console.log("Percentage of Income Used:", percentageIncomeUsed);
+        // console.log("Percentage of Income Left:", percentageIncomeLeft);
 
         return { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft };
     };
@@ -126,35 +126,35 @@ const Page = (props: { params: { id: string } }) => {
     const { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft } =
         calculateIncomeExpenseStats(lastBudget);
 
-    useEffect(() => {
-        const newData = {
-            uid: selectedBudget?.uid,
-            amount: selectedBudget?.amount,
-            percentage: selectedBudget?.amount / incomeLeft * 100,
-            subAllocations: []
-        }
+    // useEffect(() => {
+    //     const newData = {
+    //         uid: selectedBudget?.uid,
+    //         amount: selectedBudget?.amount,
+    //         percentage: selectedBudget?.amount / incomeLeft * 100,
+    //         subAllocations: []
+    //     }
 
-        console.log(selectedBudget);
+    //     console.log(selectedBudget);
 
-    }, [selectedBudget]);
+    // }, [selectedBudget]);
 
 
-    const formatNumber = (num: number) => {
-        return num.toLocaleString();
-    };
+    // const formatNumber = (num: number) => {
+    //     return num.toLocaleString();
+    // };
 
-    const parseNumber = (value: string) => {
-        // Remove commas before parsing
-        return parseFloat(value.replace(/,/g, '')) || 0;
-    };
+    // const parseNumber = (value: string) => {
+    //     // Remove commas before parsing
+    //     return parseFloat(value.replace(/,/g, '')) || 0;
+    // };
 
-    const getInputWidth = (index: number) => {
-        if (spanRefs.current[index]) {
-            // Calculate width but cap it at 100px
-            return `${Math.min(spanRefs.current[index]!.offsetWidth + 30, 140)}px`;
-        }
-        return '50px'; // Default minimum width
-    };
+    // const getInputWidth = (index: number) => {
+    //     if (spanRefs.current[index]) {
+    //         // Calculate width but cap it at 100px
+    //         return `${Math.min(spanRefs.current[index]!.offsetWidth + 30, 140)}px`;
+    //     }
+    //     return '50px'; // Default minimum width
+    // };
 
 
     const handleSubmit = async () => {

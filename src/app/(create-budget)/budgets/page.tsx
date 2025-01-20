@@ -30,7 +30,7 @@ const BudgetPage = () => {
     const navigate = useRouter()
 
     const { authenticatedUser } = useAuthentication();
-    console.log(authenticatedUser?.profile?.hasFreeTrial);
+    // console.log(authenticatedUser?.profile?.hasFreeTrial);
 
 
     const { data: budgets = [], isFetching, error, isPending, refetch: refetchAllBudgets } = useQuery({
@@ -114,23 +114,25 @@ const BudgetPage = () => {
     };
 
 
-    const scrollIcon = () => {
-        if (window.scrollY >= 300) {
-            setScrolled(true)
-        }
-        else {
-            setScrolled(false)
-        }
-    }
+   
 
     useEffect(() => {
-        const handleScroll = () => scrollIcon(); // Create a handleScroll function
+    // HandleScroll function
+          const handleScroll = () => {
+            if (window.scrollY > 300) {
+              setScrolled(true);
+            } else {
+              setScrolled(false);
+            }
+          };
         window.addEventListener("scroll", handleScroll); // Add event listener
 
         return () => {
             window.removeEventListener("scroll", handleScroll); // Cleanup on unmount
         };
     }, []); // Empty dependency array to run only on mount
+
+const [isLoadingPreviousBudget, setIsLoadingPreviousBudget] = useState(false);
 
     const handleFetchPreviousBudget = async () => {
         if (localPreviousBudget) {
@@ -139,12 +141,22 @@ const BudgetPage = () => {
            return
         }
         // fetch using api
-        const previousBudgetResp = await fetchPreviousBudgetApi(authenticatedUser?.token ?? "")
-        console.log(previousBudgetResp)
-        if(previousBudgetResp.success) {
-            setPreviousBudget(previousBudgetResp.data)
-            setLocalPreviousBudget(previousBudgetResp.data)
-        }
+        try {
+              setIsLoadingPreviousBudget(true);
+          const previousBudgetResp = await fetchPreviousBudgetApi(
+            authenticatedUser?.token ?? '',
+          );
+        //   console.log(previousBudgetResp);
+          if (previousBudgetResp.success) {
+            setPreviousBudget(previousBudgetResp.data);
+            setLocalPreviousBudget(previousBudgetResp.data);
+          }
+      } catch (error) {
+        
+      } finally {
+                  setIsLoadingPreviousBudget(false);
+
+      }
     }
 
     const clearPreviousBudget = async () => {
@@ -179,7 +191,7 @@ const BudgetPage = () => {
                                 Create budget
                             </button>
                             :
-                            <div className="  z-[21] md:left-[61vw] left-[80vw] fixed w-full max-w-[500px]">
+                            <div className="z-[21] right-6 bottom-[240px] fixed w-fit">
                                 <button
                                     onClick={() => setCreateBudgetComponent(!createBudgetComponent)}
                                     className=" top-[550px] mt-[24px] justify-center items-center text-center font-[500]  bg-[#8EF846]  p-[14px] w-fit rounded-[32px] flex gap-[8px]"
@@ -307,7 +319,7 @@ const BudgetPage = () => {
                         )}
                     </div>
                 </div>
-                {createBudgetComponent && <CreateBudget show={createBudgetComponent} setShow={setCreateBudgetComponent} previousBudget={previousBudget} fetchPreviousBudget={handleFetchPreviousBudget} clearPreviousBudget={clearPreviousBudget} />}
+                {createBudgetComponent && <CreateBudget show={createBudgetComponent} setShow={setCreateBudgetComponent} previousBudget={previousBudget} fetchPreviousBudget={handleFetchPreviousBudget} isLoadingPreviousBudget={isLoadingPreviousBudget} clearPreviousBudget={clearPreviousBudget} />}
                 {showInvites && getPendingInvitesApiData.length > 0 && <InviteModal refetchAllBudgets={refetchAllBudgets} getPendingInvitesApiData={getPendingInvitesApiData} show={showInvites} setShow={setShowInvites} />}
 
             </div>

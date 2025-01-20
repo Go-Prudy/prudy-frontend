@@ -191,7 +191,7 @@ const Page = (props: { params: { id: string } }) => {
                 transition={{ duration: 0.3 }}
                 className=" w-[100vw] min-h-[100vh] max-w-[500px]  "
             >
-                <Header link={`/profile`} title="Budget distribution" />
+                <Header link={`/budget/${params.id}`} title="Budget distribution" />
                 <div className=' px-[24px] gap-[16px] w-full border-b-1 border-b-[#F7F7F9] py-[8.5px]  flex justify-center'>
                     <button onClick={() => setShowCategories(!showCategories)} className=' border-[0.4px] text-[14px] items-center border-[#EFEFF0] w-full  bg-[#F7F7F9] rounded-[8px] flex p-[8px]  justify-between'>
                         <h1>All categories</h1>
