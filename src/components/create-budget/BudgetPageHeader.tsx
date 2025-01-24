@@ -26,6 +26,7 @@ import { IAuthenticatedUser } from '@/app/Types';
 import { fetchUserProfile } from '@/app/services/AuthenticationService';
 import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
+import trialIcon from '/public/images/icons/trial.svg';
 
 interface BudgetPageHeaderProp {
   title?: string;
@@ -204,13 +205,23 @@ const BudgetPageHeader = ({ headerType, title }: BudgetPageHeaderProp) => {
                     ? `${userData.profile.firstName} ${userData.profile.lastName}`
                     : 'User'}
                 </h1>
-                <Image
-                  className="backdrop-blur-3xl w-[74px] h-[20px]"
-                  alt="premium"
-                  width={1000}
-                  height={1000}
-                  src={premium}
-                />
+                {!userData.profile.hasFreeTrial ? (
+                  <Image
+                    className="backdrop-blur-3xl w-[74px] h-[20px]"
+                    alt="premium"
+                    width={1000}
+                    height={1000}
+                    src={premium}
+                  />
+                ) : (
+                  <Image
+                    className="backdrop-blur-3xl w-[74px] h-[20px]"
+                    alt="free"
+                    width={1000}
+                    height={1000}
+                    src={trialIcon}
+                  />
+                )}
               </div>
             </div>
 

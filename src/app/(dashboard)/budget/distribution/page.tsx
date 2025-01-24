@@ -99,7 +99,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
 
 
-    console.log(budgetDistributionData);
+    // console.log(budgetDistributionData);
 
     return (
         <div>

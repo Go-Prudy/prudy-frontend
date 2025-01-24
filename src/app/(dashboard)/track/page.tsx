@@ -1,46 +1,69 @@
-'use client'
-import Header2 from "@/components/create-budget/Header2";
-import Image from "next/image";
-import linkIcon from '/public/images/Mindmap.png'
-import Icon1 from '/public/images/Add Category.png'
-import Icon2 from '/public/images/Write Content.png'
-import Icon3 from '/public/images/Add Files.png'
-import wema from '/public/images/wema.png'
-import kuda from '/public/images/kuda.png'
-import gt from '/public/images/gt.png'
-import sync from '/public/images/sync.png'
-import scan from '/public/images/scan.png'
-import lunch from '/public/images/Launch.png'
-import mono1 from '/public/images/mono1.png'
-import addManual from '/public/images/addManually.png'
-import { BsCheck, BsChevronRight, BsPlus, BsThreeDotsVertical, BsX } from "react-icons/bs";
-import { MouseEvent, useEffect, useRef, useState } from "react";
+'use client';
+import Header2 from '@/components/create-budget/Header2';
+import Image from 'next/image';
+import linkIcon from '/public/images/Mindmap.png';
+import Icon1 from '/public/images/Add Category.png';
+import Icon2 from '/public/images/Write Content.png';
+import Icon3 from '/public/images/Add Files.png';
+import wema from '/public/images/wema.png';
+import kuda from '/public/images/kuda.png';
+import gt from '/public/images/gt.png';
+import sync from '/public/images/sync.png';
+import scan from '/public/images/scan.png';
+import lunch from '/public/images/Launch.png';
+import mono1 from '/public/images/mono1.png';
+import addManual from '/public/images/addManually.png';
+import {
+  BsCheck,
+  BsChevronRight,
+  BsPlus,
+  BsThreeDotsVertical,
+  BsX,
+} from 'react-icons/bs';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import BottomDrawer from "@/components/create-budget/BottomDrawer";
-import { useRouter } from "next/navigation";
+import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import { useRouter } from 'next/navigation';
 import Tesseract from 'tesseract.js';
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAuthentication } from "@/app/store/AuthStore";
-import { getActiveBudgetCategoriesApi, GetAllBudgetsApi, getSingleBudgetApi, RecordExpenseApi } from "@/app/services/BudgetService";
-import { fetchAccountInfoApi, fetchAccountTransactionsApi, getAllAccountsApi, initLinkAccountApi, removeAccountApi, syncAccountTransactionsApi } from "@/app/services/AccountService";
-import { RadioGroup, useRadio, VisuallyHidden, cn, CircularProgress, Progress } from "@nextui-org/react";
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAuthentication } from '@/app/store/AuthStore';
+import {
+  getActiveBudgetCategoriesApi,
+  GetAllBudgetsApi,
+  getSingleBudgetApi,
+  RecordExpenseApi,
+} from '@/app/services/BudgetService';
+import {
+  fetchAccountInfoApi,
+  fetchAccountTransactionsApi,
+  getAllAccountsApi,
+  initLinkAccountApi,
+  removeAccountApi,
+  syncAccountTransactionsApi,
+} from '@/app/services/AccountService';
+import {
+  RadioGroup,
+  useRadio,
+  VisuallyHidden,
+  cn,
+  CircularProgress,
+  Progress,
+} from '@nextui-org/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import toast from "react-hot-toast";
+import toast from 'react-hot-toast';
 import { format, parseISO } from 'date-fns';
-import Scanner from "../../../components/scanFeature";
-import { AssignCategoryToTransactionApi } from "@/app/services/TransactionService";
-import { IAddManualInput } from "@/app/Types";
-import BudgetPageHeader from "@/components/create-budget/BudgetPageHeader";
-
+import Scanner from '../../../components/scanFeature';
+import { AssignCategoryToTransactionApi } from '@/app/services/TransactionService';
+import { IAddManualInput } from '@/app/Types';
+import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
 
 interface Bank {
   name: string;
   balance: number;
   logo: any;
-  user: string,
-  number: string
+  user: string;
+  number: string;
 }
-
 
 // Example bank data array
 const bank_data: Bank[] = [
@@ -49,20 +72,17 @@ const bank_data: Bank[] = [
   // { name: 'GT Bank', balance: 450000, logo: gt, user: 'Ayomide Asekun', number: '0248356709' },
 ];
 
-
 export default function Page() {
-
-  // Define the type for the array items  
+  // Define the type for the array items
   interface CardItem {
     color: string;
     title: string;
     subtext: string;
     btnText: string;
     border: string;
-    image: any; // Assuming the image is a URL or path  
+    image: any; // Assuming the image is a URL or path
     buttonColor: string;
   }
-
 
   interface Transaction {
     uid: string;
@@ -88,11 +108,12 @@ export default function Page() {
     {
       color: '#E0E7FF', // Light blue
       title: 'Assign transactions from your bank account',
-      subtext: 'Assign your transactions from your bank account to the right budget category and win 20 points',
+      subtext:
+        'Assign your transactions from your bank account to the right budget category and win 20 points',
       btnText: 'Assign now',
       border: '1px solid #F3F0FA', // Example border color
       image: Icon1, // Replace with actual image path
-      buttonColor: '#8A62D8'
+      buttonColor: '#8A62D8',
     },
     {
       color: '#FDF4EC', // Light yellow
@@ -101,7 +122,7 @@ export default function Page() {
       btnText: 'Scan now',
       border: '1px solid #FBE9DA', // Example border color
       image: Icon2, // Replace with actual image path
-      buttonColor: '#E67731'
+      buttonColor: '#E67731',
     },
     {
       color: '#EBFAFD', // Light cyan
@@ -110,10 +131,9 @@ export default function Page() {
       btnText: 'Add now',
       border: '1px solid #D7F4FB', // Example border color
       image: Icon3, // Replace with actual image path
-      buttonColor: '#11CDEF'
+      buttonColor: '#11CDEF',
     },
   ];
-
 
   interface Transaction {
     id: number;
@@ -142,8 +162,6 @@ export default function Page() {
     institutionType: 'PERSONAL_BANKING' | 'CORPORATE_BANKING' | 'OTHER'; // Type of institution
   }
 
-
-
   interface Category {
     id: number;
     name: string;
@@ -153,8 +171,7 @@ export default function Page() {
     selected: boolean;
   }
 
-
-  const navigation = useRouter()
+  const navigation = useRouter();
 
   const lightenColor = (hex: string, percent: number): string => {
     const hexToRgb = (hex: string) => {
@@ -177,10 +194,7 @@ export default function Page() {
     return rgbToHex(newR, newG, newB);
   };
 
-
-
-
-  const [bankData, setBankData] = useState<Bank[]>(bank_data)
+  const [bankData, setBankData] = useState<Bank[]>(bank_data);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSyncDataModal, setShowSyncDataModal] = useState(false);
   const [selectedBankAccount, setSelectedBankAccount] = useState<IAccount>({
@@ -201,8 +215,10 @@ export default function Page() {
     institutionType: 'PERSONAL_BANKING',
   });
   const [showCategories, setShowCategories] = useState(false);
-  const [transactionId, setTransactionId] = useState('')
-  const [showSyncTransactionFirstModal, setShowSyncTransactionFirstModal] = useState<any>(bankData[0]);
+  const [transactionId, setTransactionId] = useState('');
+  const [showSyncTransactionFirstModal, setShowSyncTransactionFirstModal] = useState<any>(
+    bankData[0],
+  );
   const [currentView, setCurrentView] = useState('syncedData'); // default, loading, syncedData
   const [isSyncing, setIsSyncing] = useState(false);
   // ADD MANUAL STATE
@@ -214,10 +230,10 @@ export default function Page() {
     date: '',
   });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedCategoryForTransaction, setSelectedCategoryForTransaction] = useState(null);
+  const [selectedCategoryForTransaction, setSelectedCategoryForTransaction] =
+    useState(null);
 
-
-  // SCAN RECEIPT 
+  // SCAN RECEIPT
 
   const [text, setText] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -233,40 +249,35 @@ export default function Page() {
   const [showTooltipIndex, setShowTooltipIndex] = useState<number | null>(null); // Track which account's tooltip is open
   const [connectedAccounts, setConnectedAccounts] = useState([]);
   const [isApiLoading, setIsApiLoading] = useState(false);
-  const [addManualModalTitle, setAddManualModalTitle] = useState<string>("Add Manual")
+  const [addManualModalTitle, setAddManualModalTitle] = useState<string>('Add Manual');
 
   // Toggle balance visibility
   const toggleBalanceVisibility = () => {
-    setShowBalance(prevState => !prevState);
+    setShowBalance((prevState) => !prevState);
   };
 
-
-
-
-  const handleSaveManually = () => {
-    // setAddManualModal(!AddManualModal)
-  };
-
+  // const handleSaveManually = () => {
+  //   // setAddManualModal(!AddManualModal)
+  // };
 
   // Function to handle category selection
   const handleSelectCategory = (id: any) => {
     setSelectedCategoryForTransaction(id);
   };
 
-
-  const handleAssign = () => {
-    if (selectedCategory) {
-      // Handle assignment logic here...
-    }
-  };
+  // const handleAssign = () => {
+  //   if (selectedCategory) {
+  //     // Handle assignment logic here...
+  //   }
+  // };
 
   // Calculate total combined balance
-  const totalBalance = bankData.reduce((acc, bank) => acc + bank.balance, 0);
+  // const totalBalance = bankData.reduce((acc, bank) => acc + bank.balance, 0);
 
   // Toggle the balance view
-  const toggleBalance = () => {
-    setShowBalance(!showBalance);
-  };
+  // const toggleBalance = () => {
+  //   setShowBalance(!showBalance);
+  // };
 
   const handleSyncTransaction = async () => {
     // Set loading state when sync starts
@@ -286,31 +297,23 @@ export default function Page() {
   };
 
   useEffect(() => {
-    showSyncModal && handleSyncTransaction()
-  }, [showSyncModal])
-
+    showSyncModal && handleSyncTransaction();
+  }, [showSyncModal]);
 
   const AssignExpense = (transactionId: string) => {
     try {
       setTransactionId(transactionId);
-      setShowCategories(!showCategories)
-    } catch (error) {
-
-    }
-  }
-
-
-  const abbreviateNumber = (num: number): string => {
-    if (num >= 1_000_000) {
-      return `${(num / 1_000_000).toFixed(2)}M`; // Millions
-    }
-
-    return num.toLocaleString(); // Less than thousand
+      setShowCategories(!showCategories);
+    } catch (error) {}
   };
 
+  // const abbreviateNumber = (num: number): string => {
+  //   if (num >= 1_000_000) {
+  //     return `${(num / 1_000_000).toFixed(2)}M`; // Millions
+  //   }
 
-
-
+  //   return num.toLocaleString(); // Less than thousand
+  // };
 
   const handleSyncTransactions = async () => {
     // Show loader when syncing starts
@@ -333,11 +336,14 @@ export default function Page() {
     }
   };
 
-
-
   const { authenticatedUser } = useAuthentication();
 
-  const { data: budgets = [], isLoading, isPending, error } = useQuery({
+  const {
+    data: budgets = [],
+    isLoading,
+    isPending,
+    error,
+  } = useQuery({
     queryKey: ['allBudgetCategories'],
     queryFn: () => GetAllBudgetsApi(authenticatedUser?.token ?? ''),
     enabled: !!authenticatedUser?.token,
@@ -347,7 +353,11 @@ export default function Page() {
   });
 
   // React Query hook
-  const { data: accounts = [], isPending: isGetAllAccountPending, isError } = useQuery({
+  const {
+    data: accounts = [],
+    isPending: isGetAllAccountPending,
+    isError,
+  } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => getAllAccountsApi(authenticatedUser?.token ?? ''),
     enabled: !!authenticatedUser?.token, // Only fetch if token exists
@@ -357,15 +367,19 @@ export default function Page() {
   });
 
   useEffect(() => {
-    if (isPending) {
-      setIsApiLoading(true);
-    }
-    if (accounts.length > 0) {
-      setConnectedAccounts(accounts);
+    try {
+      if (isGetAllAccountPending) {
+        setIsApiLoading(true);
+      }
+      if (accounts.length > 0) {
+        setConnectedAccounts(accounts);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
       setIsApiLoading(false);
     }
-  }, [accounts])
-
+  }, [accounts]);
 
   // React Query mutation to link an account
   const linkAccountMutation = useMutation({
@@ -379,13 +393,11 @@ export default function Page() {
     },
   });
 
-
-
   useEffect(() => {
     if (linkAccountMutation.isPending) {
       // setShowSyncModal(true)
     }
-  }, [linkAccountMutation])
+  }, [linkAccountMutation]);
 
   // Handler to call the mutation
   const handleLinkAccount = async () => {
@@ -395,7 +407,6 @@ export default function Page() {
       console.error('Error in handleLinkAccount:', error);
     }
   };
-
 
   function formatDateTime(dateTime: string): string {
     let dateObject: Date;
@@ -419,18 +430,13 @@ export default function Page() {
     }
   }
 
-
-
   const accountId = selectedBankAccount.uid || ''; // Replace with actual account ID
-
-
-
 
   const {
     data: syncAccountTransactions = [],
     isLoading: syncAccountTransactionsisLoading,
     isError: syncAccountTransactionsisError,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['accountInfo', accountId],
     queryFn: () => syncAccountTransactionsApi(authenticatedUser?.token ?? '', accountId),
@@ -442,17 +448,22 @@ export default function Page() {
 
   const { data: singleBudgetData = [], isPending: singleBudgetStatus } = useQuery({
     queryKey: ['singleBudgetData' + selectedBudget?.uid],
-    queryFn: () => getSingleBudgetApi(authenticatedUser?.token ?? '', selectedBudget?.uid),
+    queryFn: () =>
+      getSingleBudgetApi(authenticatedUser?.token ?? '', selectedBudget?.uid),
     enabled: !!authenticatedUser?.token && !!selectedBudget?.uid,
     refetchOnWindowFocus: true, // This should be directly in the options object.
   });
 
-
-
   // Fetch active categories for the selected budget
-  const { data: activeBudgetCategories = [], isLoading: activeBudgetCategoriesIsLoading, isError: activeBudgetCategoriesIsError, refetch: refetchActiveBudgetCategories } = useQuery({
+  const {
+    data: activeBudgetCategories = [],
+    isLoading: activeBudgetCategoriesIsLoading,
+    isError: activeBudgetCategoriesIsError,
+    refetch: refetchActiveBudgetCategories,
+  } = useQuery({
     queryKey: ['activeBudgetCategories', selectedBudget?.uid],
-    queryFn: () => getActiveBudgetCategoriesApi(authenticatedUser?.token ?? '', selectedBudget?.uid),
+    queryFn: () =>
+      getActiveBudgetCategoriesApi(authenticatedUser?.token ?? '', selectedBudget?.uid),
     enabled: !!selectedBudget?.uid, // Only fetch if a valid budget is selected
     refetchOnWindowFocus: false, // Prevent refetching on window focus
     refetchOnMount: false, // Prevent refetching on component mount
@@ -469,14 +480,12 @@ export default function Page() {
     }
   }, [activeBudgetCategories]); // Run effect when activeBudgetCategories changes
 
-
   // Set the first budget as the default if no budget is selected
   useEffect(() => {
     if (budgets.length > 0 && !selectedBudget) {
       setSelectedBudget(budgets[0]); // Set the first budget as default
     }
   }, [budgets, selectedBudget]);
-
 
   const handleBudgetChange = (selectedUid: string) => {
     const budget = budgets.find((budget) => budget.uid === selectedUid);
@@ -485,11 +494,6 @@ export default function Page() {
     // Trigger active categories fetching for the selected budget
     refetchActiveBudgetCategories();
   };
-
-
-
-
-
 
   // Fetch transactions API
 
@@ -502,7 +506,12 @@ export default function Page() {
   } = useInfiniteQuery<TransactionsPage, Error>({
     queryKey: ['accountTransactions', accountId], // Use accountId to uniquely identify the query
     queryFn: async ({ pageParam = 1 }: any) =>
-      await fetchAccountTransactionsApi(authenticatedUser?.token ?? '', accountId, limit, pageParam),
+      await fetchAccountTransactionsApi(
+        authenticatedUser?.token ?? '',
+        accountId,
+        limit,
+        pageParam,
+      ),
     getNextPageParam: (lastPage) => lastPage.next?.page ?? undefined, // Fetch the next page based on the API response
     enabled: !!authenticatedUser?.token && !!accountId, // Fetch only if the token and accountId are available
     initialPageParam: 1, // Set the initial page parameter
@@ -512,7 +521,6 @@ export default function Page() {
     staleTime: Infinity, // Keep the data fresh indefinitely
   });
 
-
   useEffect(() => {
     if (data?.pages && data.pages.length > 0) {
       setTransactions(data.pages.flatMap((page: TransactionsPage) => page.docs) || []);
@@ -521,34 +529,23 @@ export default function Page() {
 
   useEffect(() => {
     if (syncAccountTransactions && syncAccountTransactions.length > 0) {
-
       setTransactions(syncAccountTransactions || []);
     }
   }, [syncAccountTransactions]);
-
-
-
-
-
 
   // Handle form input changes
   const [selectedBankIndex, setSelectedBankIndex] = useState(-1); // -1 indicates no selection initially
 
   const handleBankSelect = (index: any) => {
     setSelectedBankIndex(index);
-    setSelectedBankAccount(accounts[index])
-
+    setSelectedBankAccount(accounts[index]);
   };
-
-
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
     }
   };
-
-
 
   useEffect(() => {
     if (activeBudgetCategories.length > 0) {
@@ -573,7 +570,7 @@ export default function Page() {
       // Handle single or default category logic
       if (mappedCategories.length === 1) {
         setSelectedCategory((prev: any) =>
-          prev !== mappedCategories[0]?.id ? mappedCategories[0]?.id : prev
+          prev !== mappedCategories[0]?.id ? mappedCategories[0]?.id : prev,
         );
         setManualData((prevData) => ({
           ...prevData,
@@ -581,7 +578,9 @@ export default function Page() {
         }));
         setSelectedCategory(categories[0]?.id);
       } else {
-        const defaultCategory = mappedCategories.find((category: any) => category.selected);
+        const defaultCategory = mappedCategories.find(
+          (category: any) => category.selected,
+        );
         if (defaultCategory) {
           setManualData((prevData) => ({
             ...prevData,
@@ -597,11 +596,10 @@ export default function Page() {
     }
   }, [activeBudgetCategories]);
 
-
-
-
   // Handle input changes for both the category select and other inputs
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
 
     if (name === 'amount') {
@@ -617,13 +615,18 @@ export default function Page() {
       }));
     }
   };
-  const { mutate: recordExpense, isError: isErrorRecordExpense, isSuccess, error: errorRecordExpense } = useMutation({
+  const {
+    mutate: recordExpense,
+    isError: isErrorRecordExpense,
+    isSuccess,
+    error: errorRecordExpense,
+  } = useMutation({
     mutationFn: (expenseData: any) =>
       RecordExpenseApi(
         selectedBudget.uid ?? '', // budgetId
         selectedBudget.uid ?? '', // budgetCategoryId
         expenseData,
-        authenticatedUser?.token ?? ''
+        authenticatedUser?.token ?? '',
       ),
     onSuccess: (data) => {
       setManualData({
@@ -631,25 +634,28 @@ export default function Page() {
         amount: 0,
         category: '',
         date: '',
-      })
+      });
     },
     onError: (error) => {
-      console.error("Error recording expense:", error);
+      console.error('Error recording expense:', error);
     },
   });
 
-
-
   const addManualMutation = useMutation({
-    mutationFn: async (data) => RecordExpenseApi(selectedBudget.uid, selectedCategoryId, data, authenticatedUser?.token ?? ''),
+    mutationFn: async (data) =>
+      RecordExpenseApi(
+        selectedBudget.uid,
+        selectedCategoryId,
+        data,
+        authenticatedUser?.token ?? '',
+      ),
     onSuccess: (data) => {
-      setAddManualModal(!AddManualModal)
+      setAddManualModal(!AddManualModal);
     },
     onError: (error) => {
       console.error('Error during logout:', error);
     },
   });
-
 
   const handleAddManually = async () => {
     const expenseData: any = {
@@ -659,7 +665,7 @@ export default function Page() {
     };
 
     try {
-      setSelectedCategory(manualData.category)
+      setSelectedCategory(manualData.category);
       const result = await addManualMutation.mutateAsync(expenseData);
     } catch (error) {
       console.error('Error adding expense:', error);
@@ -668,7 +674,9 @@ export default function Page() {
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCategoryId: any = e.target.value; // Get the selected category ID
-    const selectedCategory: any = categories.find(category => category.id === selectedCategoryId); // Find the category by ID
+    const selectedCategory: any = categories.find(
+      (category) => category.id === selectedCategoryId,
+    ); // Find the category by ID
 
     if (selectedCategory) {
       setManualData((prevData) => ({
@@ -676,42 +684,49 @@ export default function Page() {
         category: selectedCategory.id, // Update the category in manualData with the selected category ID
       }));
 
-      setSelectedCategory(selectedCategory.id)
-      setSelectedCategoryId(categories[0].id)
+      setSelectedCategory(selectedCategory.id);
+      setSelectedCategoryId(categories[0].id);
     }
   };
 
-
   const assignCategoryMutation = useMutation({
-    mutationFn: async (data: { accountId: string; transactionId: string; budgetId: string; categoryId: any }) =>
+    mutationFn: async (data: {
+      accountId: string;
+      transactionId: string;
+      budgetId: string;
+      categoryId: any;
+    }) =>
       AssignCategoryToTransactionApi(
         data.accountId,
         data.transactionId,
         data.budgetId,
         data.categoryId,
-        authenticatedUser?.token ?? ''
+        authenticatedUser?.token ?? '',
       ),
     onMutate: async (variables) => {
       // Store previous transactions state for rollback if needed
       const previousTransactions = transactions;
 
       // Optimistically update the transactions state
-      setTransactions((prevTransactions) =>
-        prevTransactions.filter(transaction => transaction.uid !== variables.transactionId) // Remove the assigned transaction
+      setTransactions(
+        (prevTransactions) =>
+          prevTransactions.filter(
+            (transaction) => transaction.uid !== variables.transactionId,
+          ), // Remove the assigned transaction
       );
 
       // Return context with previous transactions for rollback
       return { previousTransactions };
     },
     onSuccess: (data) => {
-      toast.success("Transaction updated with selected category!");
-      setSelectedCategoryForTransaction(null)
+      toast.success('Transaction updated with selected category!');
+      setSelectedCategoryForTransaction(null);
       // Close the categories modal
       setShowCategories(false);
     },
     onError: (error, variables, context) => {
       console.error('Error assigning category:', error);
-      toast.error("Failed to assign category. Please try again.");
+      toast.error('Failed to assign category. Please try again.');
 
       // Rollback to previous state if there's an error
       if (context?.previousTransactions) {
@@ -722,7 +737,7 @@ export default function Page() {
 
   const handleAssignCategory = () => {
     if (!selectedCategoryForTransaction) {
-      toast.error("Please select a category");
+      toast.error('Please select a category');
       return;
     }
 
@@ -736,15 +751,16 @@ export default function Page() {
 
   const handleRemoveAccount = async (id: string) => {
     setIsApiLoading(true);
-    const response = await removeAccountApi(authenticatedUser?.token ?? "", id);
+    const response = await removeAccountApi(authenticatedUser?.token ?? '', id);
     if (response.success) {
       // delete the account from the accoumts array
-      setConnectedAccounts(connectedAccounts.filter((account: any) => account.uid !== id));
+      setConnectedAccounts(
+        connectedAccounts.filter((account: any) => account.uid !== id),
+      );
       setShowTooltipIndex(null);
     }
     setIsApiLoading(false);
-  }
-
+  };
 
   // Custom Radio button implementation
   const CustomRadio = (props: any) => {
@@ -759,17 +775,15 @@ export default function Page() {
       getLabelProps,
       getLabelWrapperProps,
       getControlProps,
-
     } = useRadio(props);
-
 
     return (
       <Component
         {...getBaseProps()}
         className={cn(
-          "group mb-[24px] inline-flex flex-1 hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent",
-          "w-full cursor-pointer border-1 border-default rounded-[20px] gap-4 p-4",
-          "data-[selected=true]:border-[#66C227] bg-[#F7F7F9]  data-[selected=true]:bg-[#F5FEED]",
+          'group mb-[24px] inline-flex flex-1 hover:opacity-70 active:opacity-50 justify-between flex-row-reverse tap-highlight-transparent',
+          'w-full cursor-pointer border-1 border-default rounded-[20px] gap-4 p-4',
+          'data-[selected=true]:border-[#66C227] bg-[#F7F7F9]  data-[selected=true]:bg-[#F5FEED]',
         )}
       >
         <VisuallyHidden>
@@ -779,11 +793,10 @@ export default function Page() {
           <span {...getControlProps()} />
         </span>
         <div {...getLabelWrapperProps()}>
-
           {children && (
-            <span className="text-[12px] max-w-[229px] font-[500] text-foreground opacity-70">{children}</span>
-
-
+            <span className="text-[12px] max-w-[229px] font-[500] text-foreground opacity-70">
+              {children}
+            </span>
           )}
         </div>
       </Component>
@@ -794,8 +807,6 @@ export default function Page() {
     <div className="bg-white min-h-[100vh] w-[100vw] relative max-w-[500px] h-full">
       <BudgetPageHeader headerType="dashboard" title={'Track expenses'} />
 
-      
-      
       <div
         className={` mt-[66px]   border-t-[4px] border-t-[#F7F7F9]  py-[24px] w-full   ${bankData ? 'mb-0' : 'mb-[16px]'} `}
       >
@@ -817,7 +828,6 @@ export default function Page() {
               ))
             )}
           </select>
-
         </div>
 
         <div className=" flex px-[24px] mt-[27px] justify-between">
@@ -837,12 +847,9 @@ export default function Page() {
           className={` w-full mb-[24px]  ${!bankData ? 'border-b-[#fafafa] w-full  border-b-[4px]' : 'border-b-[#F7F7F9] w-full  border-b-[0px]'}`}
         >
           <div className=" w-full px-[24px] ">
-
-            {isApiLoading ? (
-
+            {isGetAllAccountPending ? (
               <div className=" flex gap-2 items-center justify-center mx-auto w-full">
                 <CircularProgress color="default" size="sm" />
-              
               </div>
             ) : (
               <>
@@ -851,22 +858,19 @@ export default function Page() {
                     <div className="   w-full  mt-[19px]   rounded-t-[24px] gap-[24px] grid grid-cols-2  ">
                       {/* Show loading state */}
 
-                      
                       {/* Show error state */}
                       {isError && (
                         <div>Failed to load accounts. Please try again later.</div>
                       )}
 
                       {/* Render account details */}
-                      {!isGetAllAccountPending &&
-                        !isError &&
+                      {!isError &&
                         connectedAccounts.length > 0 &&
                         connectedAccounts.map((account: any, index: any) => (
                           <div
                             onClick={() => {
                               setShowSyncDataModal(true);
                               setSelectedBankAccount(account);
-                            
                             }}
                             key={account.id}
                             className="flex px-[16px] relative border-[1px] py-[12px] rounded-[16px] border-[#EFEFF0] bg-[#F7F7F9] w-full justify-between"
@@ -914,11 +918,9 @@ export default function Page() {
                             )}
                           </div>
                         ))}
-
                     </div>
                   </>
-                  ) : (
-                      
+                ) : (
                   <>
                     <div className="  border-[#EFEFF0] mb-[24px] mt-[19px] justify-center items-center  rounded-[24px] flex flex-col  p-[24px] bg-[#F7F7F9] border-[1px] ">
                       <Image
@@ -942,8 +944,7 @@ export default function Page() {
                           </>
                         ) : (
                           'Linking...'
-                            )}
-                            
+                        )}
                       </button>
                     </div>
                     <p className=" text-[14px] leading-[16.8px]">
@@ -957,12 +958,10 @@ export default function Page() {
                 )}
               </>
             )}
-
           </div>
         </div>
 
         {accounts ? (
-          
           <div className="  pb-[106px] border-t-[4px] border-t-[#F7F7F9]  pt-[24px] px-[24px] ">
             <h1 className=" font-[500]   text-[#2D2D2D] mt-[0px] text-[18px]">
               Track your finances
@@ -985,10 +984,7 @@ export default function Page() {
                 className="  h-[118px] w-[104px]  "
               />
 
-              <button
-                onClick={() => setScanState(true)}
-                className=""
-              >
+              <button onClick={() => setScanState(true)} className="">
                 <Image
                   width={1000}
                   height={1000}
@@ -1017,9 +1013,7 @@ export default function Page() {
             )}
           </div>
         ) : (
-            
-            <div>
-              
+          <div>
             <h1 className=" font-[500] px-[24px]  text-[#2D2D2D] mt-[28px] text-[18px]">
               3 ways to track your expenses
             </h1>
@@ -1062,19 +1056,14 @@ export default function Page() {
                         <BsChevronRight />
                       </button>
                     </div>
-
                   </div>
                 ))}
               </div>
             </div>
           </div>
         )}
-
-
-
       </div>
       <div className=" bg-[#FAFAFA]  w-full " />
-
 
       {AddManualModal && (
         <motion.div
@@ -1100,7 +1089,6 @@ export default function Page() {
                 </button>
               </div>
             }
-
             label={addManualModalTitle}
             back={false}
             show={AddManualModal}
@@ -1166,14 +1154,10 @@ export default function Page() {
                 />
               </label>
             </div>
-
-
           </BottomDrawer>
         </motion.div>
       )}
 
-
-      
       {showSyncModal && (
         <motion.div
           initial={{ opacity: 0, y: 90 }}
@@ -1193,14 +1177,9 @@ export default function Page() {
             <div className=" flex justify-center items-center py-[60px] flex-col gap-[16px] w-full">
               <CircularProgress size="md" />
             </div>
-
-
           </BottomDrawer>
         </motion.div>
       )}
-
-
-      
 
       {showSyncTransactionFirstModal && (
         <motion.div
@@ -1209,8 +1188,9 @@ export default function Page() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[40]  bottom-0 fixed bg-[#1c1c1c73]"
-        > <div
-          className=" bg-white p-[24px] w-full rounded-[40px] ">
+        >
+          {' '}
+          <div className=" bg-white p-[24px] w-full rounded-[40px] ">
             <div className=" w-full flex justify-between">
               <div></div>
               <div className=" text-[20px] font-[500]">Sync Transactions</div>
@@ -1232,52 +1212,46 @@ export default function Page() {
               className=" flex flex-col w-full  "
               color="success"
               onValueChange={(value) => handleBankSelect(value)}
-            
             >
-              {/* Show loading state */}
-              {isGetAllAccountPending && (
-                <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>
-              )}
-
-              {/* Show error state */}
-              {isError && <div>Failed to load accounts. Please try again later.</div>}
-
-              {/* Render account details */}
-              {!isGetAllAccountPending &&
-                !isError &&
-                accounts.length > 0 &&
-                accounts.map((account: any, index: any) => (
-                  <CustomRadio
-                    key={index} // Key is important for performance optimization
-                    isSelected={selectedBankIndex === index}
-                    onChange={() => handleBankSelect(index)}
-                    className="flex w-full justify-between"
-                    value={index}
-                  >
-                    <div className="w-full">
-                      {/* Display Bank Name */}
-                      <h1 className="text-[#2f1a1a] text-[14px]">
-                        {account.institutionName}
-                      </h1>
-
-                      {/* Display Account Details */}
-                      <div className="w-full flex">
-                        <h1 className="text-[14px] flex w-full text-base-black">
-                          {account.accountName} |
-                          <span className="font-[500]"> {account.accountNumber}</span>
+              {
+                // Show loading state
+                isGetAllAccountPending ? (
+                  <div className=" mx-auto w-full my-[3rem]">Loading accounts...</div>
+                ) : // Show error state
+                isError ? (
+                  <div>Failed to load accounts. Please try again later.</div>
+                ) : // Render account details
+                accounts.length > 0 ? (
+                  accounts.map((account: any, index: any) => (
+                    <CustomRadio
+                      key={index} // Key is important for performance optimization
+                      isSelected={selectedBankIndex === index}
+                      onChange={() => handleBankSelect(index)}
+                      className="flex w-full justify-between"
+                      value={index}
+                    >
+                      <div className="w-full">
+                        {/* Display Bank Name */}
+                        <h1 className="text-[#2f1a1a] text-[14px]">
+                          {account.institutionName}
                         </h1>
+
+                        {/* Display Account Details */}
+                        <div className="w-full flex">
+                          <h1 className="text-[14px] flex w-full text-base-black">
+                            {account.accountName} |
+                            <span className="font-[500]"> {account.accountNumber}</span>
+                          </h1>
+                        </div>
                       </div>
-                    </div>
-                  </CustomRadio>
+                    </CustomRadio>
+                  ))
+                ) : (
+                  // Fallback for no accounts
+
+                  accounts.length === 0 && <div>No accounts available for selection.</div>
                 )
-                )}
-
-              {/* Fallback for no accounts */}
-              {!isGetAllAccountPending && !isError && accounts.length === 0 && (
-                <div>No accounts available for selection.</div>
-              )}
-
-
+              }
             </RadioGroup>
             <button
               disabled={isGetAllAccountPending}
@@ -1295,14 +1269,14 @@ export default function Page() {
         </motion.div>
       )}
 
-      {showSyncDataModal && <motion.div
+      {showSyncDataModal && (
+        <motion.div
           initial={{ opacity: 0, y: 90 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-      >
-        
+        >
           <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
             <div className=" pt-[72px] px-[24px]">
               <button
@@ -1312,9 +1286,9 @@ export default function Page() {
                 <BsX size={'24px'} />
               </button>
               <div className="  w-full   gap-[16px] p-[8px] rounded-[20px] ">
-                
-                
-              <h1 className="  uppercase mb-[12px] text-[12px] font-[400] ">{selectedBankAccount.institutionName}</h1>
+                <h1 className="  uppercase mb-[12px] text-[12px] font-[400] ">
+                  {selectedBankAccount.institutionName}
+                </h1>
                 <div className=" flex justify-between">
                   <h1>{selectedBankAccount.accountName}</h1>
                   <h1>{selectedBankAccount.accountNumber}</h1>
@@ -1338,17 +1312,17 @@ export default function Page() {
                   </div>
                 </div>
               </div>
-
             </div>
             <div className="bg-white h-full w-full">
-              <h1 className="px-6 my-4 text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">Click on the transaction to assign it to the right category</h1>
-
-
+              <h1 className="px-6 my-4 text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">
+                Click on the transaction to assign it to the right category
+              </h1>
 
               <div className="h-full w-full space-y-4">
-
                 <div className="flex px-6 w-full items-center justify-between">
-                  <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">Latest transactions</h1>
+                  <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">
+                    Latest transactions
+                  </h1>
                   <button
                     onClick={handleSyncTransactions}
                     className="bg-[#EFEFF0] font-[500] text-[12px] text-[#2D2D2D] py-[4px] px-[8px] rounded-[32px]"
@@ -1358,7 +1332,6 @@ export default function Page() {
                   </button>
                 </div>
                 <div className="bg-[#F7F7F9] h-full w-full">
-
                   {/* Conditional Rendering based on currentView state */}
                   {currentView === 'loading' && (
                     <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
@@ -1377,8 +1350,12 @@ export default function Page() {
                           className="h-[141.27px] w-[126.52px]"
                         />
                       </motion.div>
-                      <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">Yaay! 😎</h1>
-                      <h1 className="text-[#828282] text-[16px] leading-[19.2px]">You’re all synced up</h1>
+                      <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">
+                        Yaay! 😎
+                      </h1>
+                      <h1 className="text-[#828282] text-[16px] leading-[19.2px]">
+                        You’re all synced up
+                      </h1>
                     </div>
                   )}
 
@@ -1388,23 +1365,29 @@ export default function Page() {
                         <div
                           key={transaction.uid}
                           onClick={() => AssignExpense(transaction.uid)}
-                          className={`flex justify-between items-center ${index !== transactions.length - 1 ? 'border-b border-b-[#E7E7EA]' : ''
+                          className={`flex justify-between items-center ${
+                            index !== transactions.length - 1
+                              ? 'border-b border-b-[#E7E7EA]'
+                              : ''
                           } pb-2`}
                         >
                           <div>
-                            <p className="font-[500] text-[14px] text-[#2d2d2d]">{transaction.narration}</p>
-                            <p className="text-[#575757] flex gap-3  text-[12px]">{formatDateTime(transaction.date)}
+                            <p className="font-[500] text-[14px] text-[#2d2d2d]">
+                              {transaction.narration}
+                            </p>
+                            <p className="text-[#575757] flex gap-3  text-[12px]">
+                              {formatDateTime(transaction.date)}
                             </p>
                           </div>
-                          <div
-                            className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap"
-                          >
+                          <div className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap">
                             ₦ {transaction.amount.toLocaleString()}
                           </div>
                         </div>
                       ))}
 
-                      {isFetchingNextPage && <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>}
+                      {isFetchingNextPage && (
+                        <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>
+                      )}
 
                       <button
                         onClick={() => fetchNextPage()}
@@ -1420,21 +1403,15 @@ export default function Page() {
                               : 'No More Data'}
                       </button>
                     </div>
-                )}
-                
+                  )}
                 </div>
               </div>
             </div>
           </div>
-
-        
         </motion.div>
-      }
+      )}
 
-
-
-      {
-        showCategories && (
+      {showCategories && (
         <div className="h-[100vh] w-[100vw] max-w-[500px] z-[40] fixed bottom-0">
           {/* Dark background */}
           <div
@@ -1450,8 +1427,7 @@ export default function Page() {
             transition={{ duration: 0.3 }}
             className="fixed bottom-0  w-full z-[50]"
           >
-              <BottomDrawer
-                
+            <BottomDrawer
               label={`Sync transactions`}
               back={false}
               show={showCategories}
@@ -1478,16 +1454,13 @@ export default function Page() {
               }
               onClose={() => setShowCategories(!showCategories)}
             >
-
-                
               <div className="bg-white  pt-4 pb-[32px] px-4   rounded-t-lg shadow-lg">
                 <h1 className="text-[16px] font-[500] text-[#514F6E] mb-[24px]">
                   Select category
                 </h1>
 
                 <div className="grid grid-cols-3 max-h-[50vh]  overflow-y-scroll gap-4">
-                  
-                    {singleBudgetData?.budgetCategories?.map((category: any) => (
+                  {singleBudgetData?.budgetCategories?.map((category: any) => (
                     <div
                       key={category.uid}
                       className={`relative p-[8px] w-[105.67px] h-[100px] border rounded-[20px] ${
@@ -1597,11 +1570,9 @@ export default function Page() {
             </BottomDrawer>
           </motion.div>
         </div>
-        )
-      }
+      )}
 
-      
-      {scanState &&
+      {scanState && (
         <div className=" text-center w-full grid   place-content-center gap-3 ">
           <div className=" w-full ">
             {/* Dark background */}
@@ -1618,15 +1589,8 @@ export default function Page() {
               setAddManualModalTitle={setAddManualModalTitle}
             />
           </div>
-
         </div>
-      
-      
-      }
-
-
-
-
-    </div >
+      )}
+    </div>
   );
 }
