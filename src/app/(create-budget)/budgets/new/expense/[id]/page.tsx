@@ -185,17 +185,14 @@ const Page = (props: { params: { id: string } }) => {
 
 
 
-
-
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const enteredAmount = parseFloat(e.target.value.replace(/,/g, "")) || 0;  // Remove commas for parsing
         const cappedAmount = Math.min(enteredAmount, incomeLeft);  // Cap the amount to not exceed income
         const percentage = incomeLeft > 0 ? (cappedAmount / incomeLeft) * 100 : 0;
 
         if (enteredAmount > income) {
-            alert(`Your expense exceeds your total income for ${lastBudget?.name}`);
+            toast.error(`Your expense exceeds your total income for ${lastBudget?.name}`);
         }
-
         // Update the selected budget's amount and percentage
         setSelectedBudget((prev: any) => ({
             ...prev,
@@ -457,7 +454,7 @@ const Page = (props: { params: { id: string } }) => {
 
 
     // Function to call when allocation changes
-    const handleAllocationChange = (index: number, field: 'subCategory' | 'amount', value: string) => {
+    const handleAllocationChange = (index: number, field: 'subCategory' | 'amount', value: string) => {     
         if (!selectedBudget) return;
 
         if (selectedBudget?.amount?.toLocaleString() === '') {
@@ -669,7 +666,7 @@ const Page = (props: { params: { id: string } }) => {
                 ? allDisplayedBudgets.map(budget =>
                     budget.uid === newData.uid ? newData : budget
                 )
-                : [...allDisplayedBudgets, newData];
+                : [...allDisplayedBudgets, newData];   
 
             setAllDisplayedBudgets(updatedBudgets);
 
@@ -679,7 +676,7 @@ const Page = (props: { params: { id: string } }) => {
                     return;
                 }
 
-                // Filter out invalid subAllocations
+                                // Filter out invalid subAllocations
                 const validSubAllocations = selectedBudget.subAllocations?.filter(
                     (sub: any) => sub.subCategory && sub.amount > 0
                 ) || [];
@@ -973,7 +970,7 @@ const Page = (props: { params: { id: string } }) => {
                                         type="text"
                                         name="amount"
                                         placeholder='enter amount'
-                                        onChange={handleAmountChange}
+                                        onChange={handleBudgetCategoryAmountChange}
                                     />
                                 </div>
                                 <div className='py-[12px] w-[90%] border-l px-[16px] border-l-[#E7E7EA]'>

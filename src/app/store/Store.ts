@@ -180,7 +180,18 @@ export const useBudgetStore = create<BudgetState>()(
                 set((state) => ({
                     budgets: state.budgets.map((budget) =>
                         budget.id === budgetId
-                            ? { ...budget, allocations: [...(budget.allocations || []), updatedAllocation] }
+                            ? {
+                    ...budget,
+                   allocations: budget.allocations 
+                        ? budget.allocations.some(allocation => allocation.budgetCategory === newAllocation.budgetCategory)
+                            ? budget.allocations.map(allocation => 
+                                allocation.budgetCategory === newAllocation.budgetCategory 
+                                    ? updatedAllocation 
+                                    : allocation
+                            )
+                            : [...budget.allocations, updatedAllocation]
+                        : [updatedAllocation]
+                }
                             : budget
                     ),
                 }));
