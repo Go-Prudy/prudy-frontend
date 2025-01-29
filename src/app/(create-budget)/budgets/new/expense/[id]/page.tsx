@@ -190,6 +190,7 @@ const Page = (props: { params: { id: string } }) => {
         const cappedAmount = Math.min(enteredAmount, incomeLeft);  // Cap the amount to not exceed income
         const percentage = incomeLeft > 0 ? (cappedAmount / incomeLeft) * 100 : 0;
 
+        // TODO: update income as entered amount is updating
         if (enteredAmount > income) {
             toast.error(`Your expense exceeds your total income for ${lastBudget?.name}`);
         }
@@ -536,14 +537,10 @@ const Page = (props: { params: { id: string } }) => {
     }, [selectedBudget]);
 
     const handleBudgetClick = (budget: any) => {
-        if (incomeLeft > 0) {
-            setShowSelectedBudget(!showSelectedBudget);
+      setShowSelectedBudget(!showSelectedBudget);
             setSelectedBudget(budget);
             setSingleBudget(budget);
-            hasSelectedBudget.current = false; // Reset the ref each time a new budget is selected 
-        } else {
-            alert('You have no income left')
-        }
+            hasSelectedBudget.current = false; // Reset the ref each time a new budget is selected
 
     };
 
@@ -569,7 +566,7 @@ const Page = (props: { params: { id: string } }) => {
         useState(budgetCategoriesData);
     
     useEffect(() => {
-        if (budgetCategoriesData) {
+        if (budgetCategoriesData) {            
           setBudgetCategoriesArray(budgetCategoriesData);
       }
     }, [budgetCategoriesArray])
@@ -895,8 +892,8 @@ const Page = (props: { params: { id: string } }) => {
                                     {budgetCategoriesArray.map((budget: any) => {
                                         // Find the corresponding allocation for this budget using the uid
                                         const allocation = lastBudget?.allocations?.find(
-                                          (allocation: any) => allocation.budgetCategory === budget.uid,
-                                        );
+                                          (allocation: any) => allocation.budgetCategory.uid? allocation.budgetCategory.uid === budget.uid: allocation.budgetCategory ===budget.uid,
+                                        )  
 
                                         // If an allocation is found, use its amount; otherwise, use 0
                                         const totalAmount = allocation?.amount || 0;
@@ -904,7 +901,7 @@ const Page = (props: { params: { id: string } }) => {
                                         return (
                                             <ul key={budget.uid} className="budget-list grid grid-cols-1 gap-[16px] w-full">
                                                 <li
-                                                    onClick={() => handleBudgetClick(budget)}
+                                                    onClick={() => handleBudgetClick(allocation??budget)}
                                                     className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
                                                 >
                                                     <div
@@ -948,7 +945,7 @@ const Page = (props: { params: { id: string } }) => {
 
                             <button onClick={() => handleDeleteOfCategory('111')} className="btn w-full text-[#F5365C] rounded-[32px] px-[28px] py-[14px] bg-[#FBEDEF] flex items-center justify-center gap-[8px] font-[500]">Delete category</button>
                         </div>}
-                        label={`${selectedBudget?.name}`}
+                        label={`${selectedBudget?.budgetCategory?.name ?? selectedBudget?.name}`}
                         back={false}
                         show={showSelectedBudget}
                         close={true}
