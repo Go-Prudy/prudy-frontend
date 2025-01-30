@@ -367,7 +367,7 @@ const Page = ({params}: { params: { id: string } }) => {
                                         singleBudgetData?.collaborators?.map((item: any) => (
                                             <div
                                                 key={item?.uid}
-                                                className="bg-[#F7F7F9] rounded-[20px] items-center border border-[#EFEFF0] p-[16px] flex flex-col justify-center w-full"
+                                                className="bg-[#F7F7F9] rounded-[20px] items-center border border-[#EFEFF0] p-[16px] flex flex-col justify-center gap-3 w-full"
                                             >
                                                 {item?.picture ? (
                                                     <Image
@@ -380,8 +380,8 @@ const Page = ({params}: { params: { id: string } }) => {
                                                 ) : (
                                                     <GoPerson className="text-[30px] text-[#A3A3A3]" />
                                                 )}
-                                                <h1 className="text-[#2D2D2D] text-lg font-medium">{item.name}</h1>
-                                                <h1 className="text-[#828282] rounded-[10px] bg-white text-lg px-[8px]  py-[2px] font-medium">{item.isHost ? "HOST" : "GUEST"}</h1>
+                                                <h1 className="text-[#2D2D2D] text-base font-medium text-center">{item.name}</h1>
+                                                <h1 className="text-[#828282] rounded-[10px] bg-white text-sm px-[8px]  py-[2px] font-medium">{item.isHost ? "HOST" : "GUEST"}</h1>
                                             </div>
                                         ))
                                     ) : (
@@ -395,7 +395,7 @@ const Page = ({params}: { params: { id: string } }) => {
 
 
                         {singleBudgetData?.collaborators?.length <= 1 &&
-                            <div onClick={() => setShowInvite(!showInvite)} className='rounded-[20px] h-[172px] bg-[#F5FEED] items-center border-dashed border-[#66C227] border-2 p-[16px] flex flex-col justify-center w-full'>
+                            <div onClick={() => setShowInvite(!showInvite)} className='rounded-[20px] h-[172px] bg-[#F5FEED] items-center border-dashed border-[#66C227] border-2 p-[16px] flex flex-col justify-center gap-3 w-full'>
                                 <Image src={add} width={1000}
                                     height={1000} alt='hello' className='w-[52px] h-[52px] rounded-[12px]' />
                                 <h1 className='text-[#2D2D2D] leading-[16px] text-center'>

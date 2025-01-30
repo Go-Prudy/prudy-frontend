@@ -6,142 +6,155 @@ import { IForgotPassword, ILoginForm, IOtpResponse, ISignupForm } from "../Types
 
 // Function to send OTP with SIGNUP
 export const sendOtp = async (otpFormData: any) => {
+  
+  try {
+    const response = await api.post('/auth/otp', otpFormData);
+    // console.log(response.data);
+    toast.success(response.data.message);
+    return response.data
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message);
+    console.log(error);
 
-    try {
-        const response = await api.post('/auth/otp', otpFormData);
-        // console.log(response.data);
-        toast.success(response.data.message);
-        return response.data
-    } catch (error: any) {
-        toast.error(error?.response?.data?.message);
-        console.log(error);
+  }
+};
 
-    }
+// Validate Email on Signup
+export const validateUserEmailOnSignup = async (email: string, phoneNumber:string) => {
+  try {
+    const response = await api.post('/auth/validate-credential', { email, phoneNumber });
+    // console.log(response.data);
+    // toast.success(response.data.message);
+    return response.data;
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message);
+    console.log(error);
+  }
 };
 
 // Function to Verify OTP with SIGNUP
 export const verifyOtp = async (otpFormData: any) => {
-    try {
-        const response = await api.post('auth/otp/verify', otpFormData);
-        toast.success(response.data.message);
-        // console.log(response.data);
+  try {
+    const response = await api.post('auth/otp/verify', otpFormData);
+    toast.success(response.data.message);
+    // console.log(response.data);
 
-        return response.data
+    return response.data
 
-    } catch (error: any) {
-        console.log(error.response.data.message);
+  } catch (error: any) {
+    console.log(error.response.data.message);
 
-        toast.error(error?.response?.data?.message);
+    toast.error(error?.response?.data?.message);
 
-    }
+  }
 
 };
 
 // Function to signup with OTP reference
 
 export const signupUser = async (formData: ISignupForm) => {
-    try {
-        const response = await api.post('/auth/signup', formData);
-        toast.success(response.data.message);
-        // console.log(response.data);
-        return response.data;
-    } catch (error: any) {
-        console.log(error);
-        toast.error(error?.response?.data?.message);
-    }
+  try {
+    const response = await api.post('/auth/signup', formData);
+    toast.success(response.data.message);
+    // console.log(response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  }
 };
 
 
 
 export const loginUser = async (formData: ILoginForm) => {
-    try {
-        const response = await api.post('/auth/login', formData);
-        toast.success(response.data.message);
-        // console.log(response.data);
+  try {
+    const response = await api.post('/auth/login', formData);
+    toast.success(response.data.message);
+    // console.log(response.data);
 
-        return response.data;
-    } catch (error: any) {
-        console.log(error);
-        toast.error(error?.response?.data?.message);
-    }
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  }
 };
 
 
 export const signUpWithGoogle = async () => {
-    try {
-        const response = await api.get('/auth/google');
-        toast.success(response.data.message);
-        // console.log(response.data);
-        return response.data;
-    } catch (error: any) {
-        console.log(error);
-        toast.error(error?.response?.data?.message);
-    }
+  try {
+    const response = await api.get('/auth/google');
+    toast.success(response.data.message);
+    // console.log(response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  }
 };
 
 export const loginWithGoogle = async () => {
-    try {
-        const response = await api.get('/auth/google/callback');
-        toast.success(response.data.message);
-        // console.log(response.data);
-        return response.data;
-    } catch (error: any) {
-        console.log(error);
-        toast.error(error?.response?.data?.message);
-    }
+  try {
+    const response = await api.get('/auth/google/callback');
+    toast.success(response.data.message);
+    // console.log(response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  }
 };
 
 
 
 
 export const forgotPassword = async (data: IForgotPassword) => {
-    try {
-        console.log(data);
+  try {
+    console.log(data);
 
-        const response = await api.post('auth/forgot-pin', data);
-        toast.success(response.data.message);
-        // console.log(response.data);
-        return response.data;
-    } catch (error: any) {
-        console.log(error);
-        toast.error(error?.response?.data?.message);
-    }
+    const response = await api.post('auth/forgot-pin', data);
+    toast.success(response.data.message);
+    // console.log(response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  }
 };
 
 export const fetchUserProfile = async () => {
-    try {
-        const token = Cookies.get("token")
-        const response = await api.get('/settings/profile', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        // toast.success(response.data.message);
-        // console.log(response.data);
+  try {
+    const token = Cookies.get("token")
+    const response = await api.get('/settings/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    // toast.success(response.data.message);
+    // console.log(response.data);
 
-        return response.data;
-    } catch (error: any) {
-        console.log(error);
-        toast.error(error?.response?.data?.message);
-    }
+    return response.data;
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message);
+  }
 };
 
 export const getGoogleUrl = () => {
-    const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+  const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
 
-      const options = {
-        redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_REDIRECT_URL!,
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-        access_type: 'offline',
-        response_type: 'code',
-        prompt: 'consent',
-        scope: 'email profile',
-      };
+  const options = {
+    redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_REDIRECT_URL!,
+    client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+    access_type: 'offline',
+    response_type: 'code',
+    prompt: 'consent',
+    scope: 'email profile',
+  };
 
-      console.log(options);
+  console.log(options);
 
-      const qs = new URLSearchParams(options).toString();
-      return `${rootUrl}?${qs}`;
+  const qs = new URLSearchParams(options).toString();
+  return `${rootUrl}?${qs}`;
 }
 
 

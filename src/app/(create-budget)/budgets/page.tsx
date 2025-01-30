@@ -97,7 +97,7 @@ const BudgetPage = () => {
                             height={32}
                             src={partner.picture}
                             alt={partner.name}
-                            className={`relative inline-block rounded-full border-2 border-white object-cover ${index > 0 ? '-ml-2' : ''}`}
+                            className={`relative inline-block rounded-full border-2 border-white object-cover w-8 h-8 ${index > 0 ? '-ml-2' : ''}`}
                             style={{ zIndex: maxAvatarsToShow - index }}
                         />
                         :
@@ -186,14 +186,14 @@ const [isLoadingPreviousBudget, setIsLoadingPreviousBudget] = useState(false);
                     </p>
                     <div className='px-6 w-full relative max-w-[500px] '>
                         {!scrolled ?
-                            <button onClick={() => setCreateBudgetComponent(!createBudgetComponent)} className='mt-[24px] w-full justify-center items-center text-center font-[500] bg-[#8EF846] px-[28px] py-[16px] rounded-[32px] flex gap-[8px]'>
+                            <button onClick={() =>{clearBudget(); setCreateBudgetComponent(!createBudgetComponent)}} className='mt-[24px] w-full justify-center items-center text-center font-[500] bg-[#8EF846] px-[28px] py-[16px] rounded-[32px] flex gap-[8px]'>
                                 <BsPlus size={30} />
                                 Create budget
                             </button>
                             :
                             <div className="z-[21] right-6 bottom-[240px] fixed w-fit">
                                 <button
-                                    onClick={() => setCreateBudgetComponent(!createBudgetComponent)}
+                                    onClick={() =>{clearBudget(); setCreateBudgetComponent(!createBudgetComponent)}}
                                     className=" top-[550px] mt-[24px] justify-center items-center text-center font-[500]  bg-[#8EF846]  p-[14px] w-fit rounded-[32px] flex gap-[8px]"
 
                                 >
@@ -247,9 +247,9 @@ const [isLoadingPreviousBudget, setIsLoadingPreviousBudget] = useState(false);
                                                     </button>
                                                     {activeTooltip === budget.uid && (
                                                         <div className=" absolute z-[12] bg-white border flex flex-col gap-[8px] top-[40px] right-[10px] rounded shadow-md mt-2 p-2">
-                                                            <button onClick={() => { setActiveTooltip(null); alert('Duplicate clicked'); }} className="block w-full text-left">Duplicate</button>
-                                                            <button onClick={() => { setActiveTooltip(null); alert('Delete clicked'); }} className="block w-full text-left">Delete</button>
-                                                            <button onClick={() => { setActiveTooltip(null); alert('Invite Collaborator clicked'); }} className="block w-full text-left">Invite Collaborator</button>
+                                                            <button onClick={() => { setActiveTooltip(null);}} className="block w-full text-left">Duplicate</button>
+                                                            <button onClick={() => { setActiveTooltip(null);}} className="block w-full text-left">Delete</button>
+                                                            <button onClick={() => { setActiveTooltip(null);}} className="block w-full text-left">Invite Collaborator</button>
                                                         </div>
                                                     )}
                                                 </div>
