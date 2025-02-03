@@ -264,7 +264,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
         ) {
             const data = {
                 amount: subAllocation.amount,
-                budgetCategoryId: selectedBudget?.uid,
+                budgetCategoryId: selectedBudget?.budgetCategory?.uid,
                 name: subAllocation.subCategory, // Pass the subCategory name to create it
                 date: getCurrentDate(),
             };
@@ -286,6 +286,8 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
 
 
                     if (selectedBudget?.amount > 0) {
+                        console.log(data);
+                        
                         try {                           
                             const res = await createSubCategoryMutation.mutateAsync(data);
 
