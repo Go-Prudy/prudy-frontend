@@ -25,14 +25,14 @@ interface BudgetState {
     previousBudget: IPreviousBudget | null;
     addToCategory: (data: ICreateCategory, id: string) => void
     addBudget: (budget: IBudget) => void;
-    createBudgetCategory: (index: string) => void
-    createAllocation: (budgetId: string, budgetCategory: string, color: string) => void; // New function
+    // createBudgetCategory: (index: string) => void
+    // createAllocation: (budgetId: string, budgetCategory: string, color: string) => void; // New function
     addIncomeToBudget: (budgetId: string, newIncomes: Income[]) => void;
     updateIncomeInBudget: (budgetId: string, income: Income) => void;
     deleteIncomeFromBudget: (budgetId: string, incomeName: string) => void;
     addAllocationToBudget: (budgetId: string, allocation: IAllocation) => void;
     updateAllocationInBudget: (budgetId: string, allocation: IAllocation) => void;
-    deleteAllocationFromBudget: (budgetId: string, category: string) => void;
+    // deleteAllocationFromBudget: (budgetId: string, category: string) => void;
     clearBudgets: () => void;
     getLastBudget: () => IBudget | undefined;
     getPreviousBudget: () => IPreviousBudget | null;
@@ -77,43 +77,43 @@ export const useBudgetStore = create<BudgetState>()(
                 }),
 
 
-            createBudgetCategory: (budgetId: string) =>
-                set((state) => ({
-                    budgets: state.budgets.map((budget) => {
-                        // Match the budget by its id
-                        if (budget.id === budgetId) {
-                            return {
-                                ...budget,
-                                allocations: [
-                                    ...(budget.allocations || []), // Use existing allocations, or default to an empty array if undefined
-                                    {
-                                        budgetCategory: budgetId, // Add only the budget ID as the budgetCategory
-                                    },
-                                ],
-                            };
-                        }
-                        return budget; // Return unchanged budget if id doesn't match
-                    }),
-                })),
+            // createBudgetCategory: (budgetId: string) =>
+            //     set((state) => ({
+            //         budgets: state.budgets.map((budget) => {
+            //             // Match the budget by its id
+            //             if (budget.id === budgetId) {
+            //                 return {
+            //                     ...budget,
+            //                     allocations: [
+            //                         ...(budget.allocations || []), // Use existing allocations, or default to an empty array if undefined
+            //                         {
+            //                             budgetCategory: budgetId, // Add only the budget ID as the budgetCategory
+            //                         },
+            //                     ],
+            //                 };
+            //             }
+            //             return budget; // Return unchanged budget if id doesn't match
+            //         }),
+            //     })),
 
 
 
-            createAllocation: (budgetId: string, budgetCategory: string, color: string) => {
-                const newAllocation: IAllocation = {
-                    budgetCategory,
-                    amount: 0, // Default amount
-                    color: '', // Use provided color
-                    percentage: 0, // Default percentage
-                    subAllocations: [] // Default empty subAllocations
-                };
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? { ...budget, allocations: [...(budget.allocations || []), newAllocation] }
-                            : budget
-                    ),
-                }));
-            },
+            // createAllocation: (budgetId: string, budgetCategory: string, color: string) => {
+            //     const newAllocation: IAllocation = {
+            //         budgetCategory,
+            //         amount: 0, // Default amount
+            //         color: '', // Use provided color
+            //         percentage: 0, // Default percentage
+            //         subAllocations: [] // Default empty subAllocations
+            //     };
+            //     set((state) => ({
+            //         budgets: state.budgets.map((budget) =>
+            //             budget.id === budgetId
+            //                 ? { ...budget, allocations: [...(budget.allocations || []), newAllocation] }
+            //                 : budget
+            //         ),
+            //     }));
+            // },
 
             addBudget: (budget: IBudget) =>
                 set((state) => ({
@@ -177,15 +177,19 @@ export const useBudgetStore = create<BudgetState>()(
                     subAllocations: updatedSubAllocations
                 };
 
+                console.log('updatedAllocation', updatedAllocation);
+                
+                
+
                 set((state) => ({
                     budgets: state.budgets.map((budget) =>
                         budget.id === budgetId
                             ? {
                     ...budget,
                    allocations: budget.allocations 
-                        ? budget.allocations.some(allocation => allocation.budgetCategory === newAllocation.budgetCategory)
+                        ? budget.allocations.some(allocation => allocation?.budgetCategory?.uid === newAllocation?.budgetCategory?.uid)
                             ? budget.allocations.map(allocation => 
-                                allocation.budgetCategory === newAllocation.budgetCategory 
+                                allocation?.budgetCategory.uid === newAllocation?.budgetCategory?.uid
                                     ? updatedAllocation 
                                     : allocation
                             )
@@ -211,19 +215,19 @@ export const useBudgetStore = create<BudgetState>()(
                     ),
                 })),
 
-            deleteAllocationFromBudget: (budgetId: string, category: string) =>
-                set((state) => ({
-                    budgets: state.budgets.map((budget) =>
-                        budget.id === budgetId
-                            ? {
-                                ...budget,
-                                allocations: budget.allocations?.filter(
-                                    (allocation) => allocation.budgetCategory !== category
-                                ) || [],
-                            }
-                            : budget
-                    ),
-                })),
+            // deleteAllocationFromBudget: (budgetId: string, category: string) =>
+            //     set((state) => ({
+            //         budgets: state.budgets.map((budget) =>
+            //             budget.id === budgetId
+            //                 ? {
+            //                     ...budget,
+            //                     allocations: budget.allocations?.filter(
+            //                         (allocation) => allocation.budgetCategory !== category
+            //                     ) || [],
+            //                 }
+            //                 : budget
+            //         ),
+            //     })),
 
             clearBudgets: () => set({ budgets: [] }),
 

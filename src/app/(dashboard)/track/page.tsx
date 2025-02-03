@@ -300,6 +300,19 @@ export default function Page() {
     showSyncModal && handleSyncTransaction();
   }, [showSyncModal]);
 
+
+  // hide <body/> scroll bar when showSyncDataModal modal is open
+    useEffect(() => {
+      if (showSyncDataModal) {        
+        window.document.body.style.overflow = 'hidden';
+        window.document.body.style.height = '100vh';
+
+      } else {
+        window.document.body.style.overflow = 'auto';
+        window.document.body.style.height = 'auto';
+      }
+    }, [showSyncDataModal]);
+
   const AssignExpense = (transactionId: string) => {
     try {
       setTransactionId(transactionId);
@@ -1275,7 +1288,7 @@ export default function Page() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="h-[100vh] w-[100vw] max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+          className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
         >
           <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
             <div className=" pt-[72px] px-[24px]">
@@ -1360,7 +1373,7 @@ export default function Page() {
                   )}
 
                   {currentView === 'syncedData' && (
-                    <div className="px-6 py-4 h-[calc(100%-331.3px)] overflow-y-scroll space-y-4">
+                    <div className="px-6 py-4 h-full space-y-4">
                       {transactions.map((transaction, index) => (
                         <div
                           key={transaction.uid}
