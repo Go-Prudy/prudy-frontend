@@ -31,7 +31,7 @@ export default function RootLayout({
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-W9FRXW3P');`}
         </Script>
-        <Script id='tawk-script' strategy="afterInteractive">
+        <Script id="tawk-script" strategy="afterInteractive">
           {`
             var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
             (function(){
@@ -42,6 +42,21 @@ export default function RootLayout({
             s1.setAttribute('crossorigin','*');
             s0.parentNode.insertBefore(s1,s0);
             })();
+          `}
+        </Script>
+
+        {/* <!-- Google tag (gtag.js) --> */}
+        <Script
+          id="google-analytics-script"
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-PJ5CK088G0"
+        ></Script>
+        <Script id="google-analytics-script">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-PJ5CK088G0');
           `}
         </Script>
       </body>
