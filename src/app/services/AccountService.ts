@@ -133,6 +133,7 @@ export const syncAccountTransactionsApi = async (
         // toast.success(response.data?.message)
         return response.data.data; // Assuming the synced transaction data is in `data`
     } catch (error: any) {
+        toast.error('Failed to sync transactions');        
         console.error("Error syncing account transactions:", error);
 
     }

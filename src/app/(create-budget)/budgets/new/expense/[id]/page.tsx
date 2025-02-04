@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef, useState, use } from 'react';
+import React, { useEffect, useRef, useState, use, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
 import { BsArrowRight, BsPlus } from 'react-icons/bs';
@@ -9,11 +9,8 @@ import noBudgetImg from '/public/images/List 2.webp'
 import Image from 'next/image';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import { useRouter } from 'next/navigation';
-import warninglogo from '/public/images/warn.gif'
-import Successlogo from '/public/images/success.gif'
 import { useBudgetStore } from '@/app/store/Store';
 import { IAllocation, IBudget, ICreateCategory, IExpense, ISubAllocation } from '@/app/Types';
-import { Budgets } from '@/app/data/DummyData';
 
 import DeleteSuccessModal from '@/components/DeleteSuccessModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
@@ -30,7 +27,7 @@ const Page = (props: { params: { id: string } }) => {
     const currentBudget = all_Budgets?.find((b) => b.id === budgetId);
 
     interface BudgetAllocation {
-        uid: string;  // UUID as a string
+        budgetCategory: { uid: string; name:string };  // UUID as a string
         amount: number;          // Amount allocated
         percentage: number;      // Percentage allocation (could be 0-1 range, i.e., 19% = 0.19)
         subAllocations: SubAllocation[];  // Array of sub-allocations, if any
@@ -60,7 +57,7 @@ const Page = (props: { params: { id: string } }) => {
 
     const [allocations, setAllocations] = useState<IAllocation[]>([])
     const [previousSubAllocations, setPreviousSubAllocations] = useState<ISubAllocation[]>([]);
-    const { addAllocationToBudget, createBudgetCategory } = useBudgetStore();
+    const { addAllocationToBudget } = useBudgetStore();
     const [lastBudget, setLastBudget] = useState<IBudget | IPreviousBudget | null>(null);
     const [categoryName, setCategoryName] = useState<string>('')
     const [allDisplayedBudgets, setAllDisplayedBudgets] = useState<BudgetAllocation[]>([])
@@ -81,10 +78,6 @@ const Page = (props: { params: { id: string } }) => {
 
     const queryClient = useQueryClient();
 
-
-
-
-
     useEffect(() => {
         const fetchedLastBudget = getLastBudget();
         if (fetchedLastBudget) {
@@ -93,38 +86,60 @@ const Page = (props: { params: { id: string } }) => {
         } else {
             setLastBudget(null);
         }
-        // console.log(fetchedLastBudget);
     }, [getLastBudget, bluredData]);
 
-    const calculateIncomeExpenseStats = (lastBudget: any) => {
-        // Calculate total income
-        const income = lastBudget?.incomes?.reduce((total: number, income: any) => total + income.amount, 0) || 0;
+    const [budgetStats, setBudgetStats] = useState({
+      income: 0,
+      expense: 0,
+      incomeLeft: 0,
+      percentageIncomeUsed: 0,
+      percentageIncomeLeft: 100,
+    });
 
-        // Calculate total expense
-        const expense = lastBudget?.allocations?.reduce((total: number, allocation: any) => total + allocation.amount, 0) || 0;
+  const calculateIncomeExpenseStats =  useCallback((lastBudget:any) => {
+             const income =
+               lastBudget?.incomes?.reduce(
+                 (total: number, income: any) => total + income.amount,
+                 0,
+               ) || 0;
 
-        // Calculate income left
-        const incomeLeft = income - expense;
+             // Calculate total expense
+             const expense =
+               lastBudget?.allocations?.reduce(
+                 (total: number, allocation: any) => total + allocation.amount,
+                 0,
+               ) || 0;
 
-        // Calculate percentage of income used
-        const percentageIncomeUsed = income > 0 ? Math.min((expense / income) * 100, 100) : 0;
+             // Calculate income left
+            const incomeLeft = (income - expense);
 
-        // Calculate percentage of income left
-        const percentageIncomeLeft = 100 - percentageIncomeUsed;
+             // Calculate percentage of income used
+             const percentageIncomeUsed =
+               income > 0 ? Math.min((expense / income) * 100, 100) : 0;
 
-        // Debugging logs
-        // console.log("Last Budget:", lastBudget);
-        // console.log("Income:", income);
-        // console.log("Expense:", expense);
-        // console.log("Income Left:", incomeLeft);
-        // console.log("Percentage of Income Used:", percentageIncomeUsed);
-        // console.log("Percentage of Income Left:", percentageIncomeLeft);
+             // Calculate percentage of income left
+             const percentageIncomeLeft = 100 - percentageIncomeUsed;
+        
+ return {
+   income,
+   expense,
+   incomeLeft,
+   percentageIncomeUsed,
+   percentageIncomeLeft,
+ };
+        
+  }, []);
 
-        return { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft };
-    };
+  useEffect(() => {
+      const stats = calculateIncomeExpenseStats(lastBudget);
+      console.log('stats', stats);
+      
+    setBudgetStats(stats);
+  }, [lastBudget]);
+    
 
-    const { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft } =
-        calculateIncomeExpenseStats(lastBudget);
+    // const { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft } =
+    //     calculateIncomeExpenseStats(lastBudget);
 
     // useEffect(() => {
     //     const newData = {
@@ -161,9 +176,6 @@ const Page = (props: { params: { id: string } }) => {
     };
 
 
-
-
-
     const handleDeleteOfCategory = (id: string) => {
         try {
             setShowDeleteModal(!showDeleteModal)
@@ -171,7 +183,6 @@ const Page = (props: { params: { id: string } }) => {
             console.log(error);
         }
     }
-
 
     const handleDeleteCategoryById = (id: string) => {
         try {
@@ -183,29 +194,58 @@ const Page = (props: { params: { id: string } }) => {
         }
     }
 
-
-
-    const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const enteredAmount = parseFloat(e.target.value.replace(/,/g, "")) || 0;  // Remove commas for parsing
-        const cappedAmount = Math.min(enteredAmount, incomeLeft);  // Cap the amount to not exceed income
-        const percentage = incomeLeft > 0 ? (cappedAmount / incomeLeft) * 100 : 0;
-
-        // TODO: update income as entered amount is updating
-        if (enteredAmount > income) {
-            toast.error(`Your expense exceeds your total income for ${lastBudget?.name}`);
+const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const enteredAmount = parseFloat(e.target.value.replace(/,/g, "")) || 0;
+    const previousAmount = selectedBudget.amount || 0;
+    const isReducingAmount = enteredAmount < previousAmount;
+    const currentIncome = budgetStats?.income
+    let newIncomeLeft
+    
+    // Calculate the current expense total - if the budget category is the same as the selected budget category, use entered amount, otherwise use the original amount
+    const currentExpense =
+    lastBudget?.allocations?.reduce((total: number, allocation: any) => {
+        if (allocation?.budgetCategory?.uid === selectedBudget?.budgetCategory?.uid) {
+            return total + enteredAmount; 
         }
-        // Update the selected budget's amount and percentage
+        return total + allocation.amount;
+    }, 0) || 0;
+
+
+    // if entered amount < previous amount ,re-calculate new income left
+    if (isReducingAmount) {
+        newIncomeLeft = currentIncome - currentExpense;
+    } else { 
+        newIncomeLeft = budgetStats.incomeLeft;
+    }
+       
+  // Allow changes if reducing amount or if new amount is within limits
+    if ( enteredAmount <= newIncomeLeft) {
+        const percentage = newIncomeLeft > 0 ? (enteredAmount / newIncomeLeft) * 100 : 0;
+
         setSelectedBudget((prev: any) => ({
             ...prev,
-            amount: cappedAmount,
-            percentage: Math.min(percentage, 100), // Cap the percentage at 100
+            amount: enteredAmount,
+            percentage: Math.min(percentage, 100),
         }));
+
         setSingleBudget((prev: any) => ({
             ...prev,
-            amount: cappedAmount,
-            percentage: Math.min(percentage, 100), // Cap the percentage at 100
+            amount: enteredAmount,
+            percentage: Math.min(percentage, 100),
         }));
-    };
+
+        setBudgetStats({
+            income: currentIncome,
+            expense: currentExpense,
+            incomeLeft: newIncomeLeft,
+            percentageIncomeUsed: (currentExpense / currentIncome) * 100,
+            percentageIncomeLeft: 100 - (currentExpense / currentIncome) * 100,
+        });
+    } else {
+        toast.error(`Your expense exceeds your total income for ${lastBudget?.name}`);
+    }
+};
+
 
     const handleBlur = async (index: number) => {
         const subAllocation = selectedBudget?.subAllocations[index];
@@ -224,7 +264,7 @@ const Page = (props: { params: { id: string } }) => {
         ) {
             const data = {
                 amount: subAllocation.amount,
-                budgetCategoryId: selectedBudget?.uid,
+                budgetCategoryId: selectedBudget?.budgetCategory?.uid,
                 name: subAllocation.subCategory, // Pass the subCategory name to create it
                 date: getCurrentDate(),
             };
@@ -246,9 +286,10 @@ const Page = (props: { params: { id: string } }) => {
 
 
                     if (selectedBudget?.amount > 0) {
-                        try {
+                        console.log(data);
+                        
+                        try {                           
                             const res = await createSubCategoryMutation.mutateAsync(data);
-                            // console.log("SubCategory Response:", res.data);
 
                             let updatedSubAllocations: any[] = [];
 
@@ -329,7 +370,7 @@ const Page = (props: { params: { id: string } }) => {
                             );
 
                             const percentage = Math.round(
-                                (selectedBudget.amount / incomeLeft) * 100 * 100
+                                (selectedBudget.amount / budgetStats?.incomeLeft) * 100 * 100
                             ) / 100;
 
                             const newAllocation = {
@@ -343,7 +384,7 @@ const Page = (props: { params: { id: string } }) => {
                             setAllocations((prevAllocations) => [
                                 ...prevAllocations.filter(
                                     (alloc) =>
-                                        alloc.budgetCategory !== newAllocation.budgetCategory
+                                        alloc?.budgetCategory?.uid !== newAllocation?.budgetCategory?.uid
                                 ),
                                 newAllocation,
                             ]);
@@ -401,19 +442,19 @@ const Page = (props: { params: { id: string } }) => {
     };
 
     // Validate amount to ensure it does not exceed total income
-    useEffect(() => {
-        if (selectedBudget?.amount > income) {
-            alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
-            setSelectedBudget((prev: any) => ({
-                ...prev,
-                amount: income,
-            }));
-            setSingleBudget((prev: any) => ({
-                ...prev,
-                amount: income,
-            }));
-        }
-    }, [selectedBudget?.amount, income]);
+    // useEffect(() => {
+    //     if (selectedBudget?.amount > income) {
+    //         alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
+    //         setSelectedBudget((prev: any) => ({
+    //             ...prev,
+    //             amount: income,
+    //         }));
+    //         setSingleBudget((prev: any) => ({
+    //             ...prev,
+    //             amount: income,
+    //         }));
+    //     }
+    // }, [selectedBudget?.amount, income]);
 
 
 
@@ -436,21 +477,6 @@ const Page = (props: { params: { id: string } }) => {
         }
     }, [selectedBudget]);
 
-    useEffect(() => {
-        // console.log(selectedBudget);
-
-        if (selectedBudget?.amount > income) {
-            alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
-            setSelectedBudget((prev: any) => ({
-                ...prev,
-                amount: income,
-            }));
-            setSingleBudget((prev: any) => ({
-                ...prev,
-                amount: income,
-            }));
-        }
-    }, [selectedBudget?.amount, income]);
 
 
 
@@ -508,13 +534,12 @@ const Page = (props: { params: { id: string } }) => {
     useEffect(() => {
         if (selectedBudget && !hasSelectedBudget.current) {
             // console.log(selectedBudget);
-            // console.log(allDisplayedBudgets);
-
             if (allDisplayedBudgets.length > 0) {
                 // Find the matching budget in allDisplayedBudgets
                 const matchingBudget = allDisplayedBudgets.find(
-                    (budget) => budget.uid === selectedBudget.uid
-                );
+                  (budget) =>
+                    budget?.budgetCategory?.uid === selectedBudget?.budgetCategory?.uid,
+                );                
 
                 if (matchingBudget) {
                     // Replace subAllocations of selectedBudget with the matching budget's subAllocations
@@ -536,7 +561,7 @@ const Page = (props: { params: { id: string } }) => {
         }
     }, [selectedBudget]);
 
-    const handleBudgetClick = (budget: any) => {
+    const handleBudgetClick = (budget: any) => {        
       setShowSelectedBudget(!showSelectedBudget);
             setSelectedBudget(budget);
             setSingleBudget(budget);
@@ -559,8 +584,6 @@ const Page = (props: { params: { id: string } }) => {
         enabled: !!authenticatedUser?.token,
         refetchOnWindowFocus: true,
     });
-
-    // console.log(budgetCategoriesData);
 
        const [budgetCategoriesArray, setBudgetCategoriesArray] =
         useState(budgetCategoriesData);
@@ -627,7 +650,7 @@ const Page = (props: { params: { id: string } }) => {
        };
 
 
-    const handleSaveCategory = async () => {
+    const handleSaveCategory = async () => {        
         
         const totalSubAllocationAmount = Array.isArray(selectedBudget?.subAllocations)
             ? selectedBudget.subAllocations.reduce(
@@ -635,7 +658,6 @@ const Page = (props: { params: { id: string } }) => {
                 0
             )
             : 0;
-        // console.log(selectedBudget?.amount > totalSubAllocationAmount);
 
         if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
             alert("Your expense is greater than your current budget");
@@ -653,63 +675,43 @@ const Page = (props: { params: { id: string } }) => {
 
 
             const newData: BudgetAllocation = {
-                uid: selectedBudget?.uid,
-                amount: selectedBudget?.amount,
-                percentage: (selectedBudget?.amount / incomeLeft) * 100,
-                subAllocations: selectedBudget.subAllocations
+              budgetCategory: selectedBudget?.budgetCategory,
+              amount: selectedBudget?.amount,
+              percentage: (selectedBudget?.amount / budgetStats?.incomeLeft) * 100,
+              subAllocations: selectedBudget.subAllocations,
             };
+            
 
-            const updatedBudgets = allDisplayedBudgets.some(budget => budget.uid === newData.uid)
+            const updatedBudgets = allDisplayedBudgets.some(budget => budget?.budgetCategory?.uid === newData?.budgetCategory?.uid)
                 ? allDisplayedBudgets.map(budget =>
-                    budget.uid === newData.uid ? newData : budget
+                    budget?.budgetCategory?.uid === newData?.budgetCategory?.uid ? newData : budget
                 )
-                : [...allDisplayedBudgets, newData];   
+                : [...allDisplayedBudgets, newData];            
 
             setAllDisplayedBudgets(updatedBudgets);
 
             try {
-                if (selectedBudget?.amount === undefined || selectedBudget.amount <= 0) {
-                    alert("Please add a valid amount");
-                    return;
-                }
+                const percentage =
+                  Math.round(
+                    (selectedBudget.amount / budgetStats?.incomeLeft) * 100 * 100,
+                  ) / 100;
 
-                                // Filter out invalid subAllocations
-                const validSubAllocations = selectedBudget.subAllocations?.filter(
-                    (sub: any) => sub.subCategory && sub.amount > 0
-                ) || [];
-
-                // console.log(singleBudget.subAllocations);
-
-                const SingleValidSubAllocations = singleBudget.subAllocations?.filter(
-                    (sub: any) => sub.subCategory && sub.amount > 0
-                ) || [];
-
-                const percentage = Math.round(
-                    (selectedBudget.amount / incomeLeft) * 100 * 100
-                ) / 100;
-
-
-                const updatedSubAllocations = bluredData.map(({ name, ...rest }) => rest);
 
                 const newAllocation: any = {
-                    budgetCategory: selectedBudget.uid,
-                    amount: selectedBudget.amount,
-                    percentage,
+                  budgetCategory: selectedBudget?.budgetCategory,
+                  amount: selectedBudget.amount,
+                  percentage,
                     subAllocations: bluredData,
                 };
-
-
-                // console.log("Validated Allocation:", bluredData);
+                
 
                 const fetchedLastBudget = getLastBudget();
-                if (fetchedLastBudget) {
+                if (fetchedLastBudget) {                    
                     setLastBudget(fetchedLastBudget);
 
                 } else {
                     setLastBudget(lastBudget);
                 }
-                // Add the new allocation to the budget using your function
-                // console.log(newAllocation);
 
                 addAllocationToBudget(budgetId, newAllocation);
 
@@ -733,7 +735,7 @@ const Page = (props: { params: { id: string } }) => {
     }, [selectedBudget]);
 
 
-    // Mutations
+    // Create new budget mutation
     const CreateBudgetMutation = useMutation({
         mutationFn: (data: any) => {
             if (authenticatedUser) {
@@ -768,24 +770,21 @@ const Page = (props: { params: { id: string } }) => {
 
 
 
+    // Function to handle the creation of a new budget
     const handleCreateBudget = async () => {
         try {
-            // console.log(currentBudget);
             const { id, budgetType, ...rest } = currentBudget || {};
             const newData: any = { ...rest, allocations: lastBudget?.allocations || [] }
-            // console.log(newData);
 
             const FilteredData = {
                 ...newData, // Copy over the non-allocations data
                 allocations: newData.allocations.map((allocation: any) => ({
-                    ...allocation,
+                    ...allocation,budgetCategory:allocation?.budgetCategory?.uid,
                     subAllocations: allocation.subAllocations
                         .map(({ subCategory, amount }: any) => ({ subCategory, amount })) // Map to only include subCategory and amount
                         .filter((sub: any) => sub.subCategory && sub.amount) // Ensure we only keep valid subAllocations
                 }))
             };
-
-            // console.log(FilteredData);
 
 
             const res = await CreateBudgetMutation.mutateAsync(FilteredData)
@@ -820,7 +819,7 @@ const Page = (props: { params: { id: string } }) => {
                 </div>
                 <p className='mt-[24px] mb-[16px] font-[500] text-[20px]'>Set your Expenses</p>
                 <div className='bg-[#F7F7F9] rounded-[20px] p-[16px]'>
-                    <h1 className='text-[#131313] font-[500] leading-[24px]'>  ₦ {incomeLeft.toLocaleString()}
+                    <h1 className='text-[#131313] font-[500] leading-[24px]'>  ₦ {budgetStats?.incomeLeft.toLocaleString()}
                         <span className=' text-[#575757] text-[12px] font-[400] leading-[16px] mx-[8px]'>left of income</span>
                     </h1>
 
@@ -828,13 +827,13 @@ const Page = (props: { params: { id: string } }) => {
                         {/* Progress Bar Background (remaining part) */}
                         <div
                             className="bg-white rounded-[10px] h-[8px] absolute top-0 left-0"
-                            style={{ width: `${percentageIncomeUsed}%` }} // Remaining part
+                            style={{ width: `${budgetStats?.percentageIncomeUsed}%` }} // Remaining part
                         ></div>
 
                         {/* Progress Bar Foreground (filled part) */}
                         <div
                             className="bg-[#FB8417] rounded-[10px] h-[8px] relative"
-                            style={{ width: `${percentageIncomeLeft}%` }} // Used part
+                            style={{ width: `${budgetStats?.percentageIncomeLeft}%` }} // Used part
                         ></div>
                     </div>
                 </div>
@@ -892,16 +891,24 @@ const Page = (props: { params: { id: string } }) => {
                                     {budgetCategoriesArray.map((budget: any) => {
                                         // Find the corresponding allocation for this budget using the uid
                                         const allocation = lastBudget?.allocations?.find(
-                                          (allocation: any) => allocation.budgetCategory.uid? allocation.budgetCategory.uid === budget.uid: allocation.budgetCategory ===budget.uid,
-                                        )  
+                                          (allocation: any) => allocation?.budgetCategory?.uid? allocation?.budgetCategory?.uid === budget.uid: allocation?.budgetCategory ===budget.uid,
+                                        )                                          
 
                                         // If an allocation is found, use its amount; otherwise, use 0
                                         const totalAmount = allocation?.amount || 0;
 
+                                        const notYetAllocated = {
+                                            amount: 0,
+                                            budgetCategory:  { uid: budget.uid, name: budget.name },
+                                            color: budget?.color,
+                                            percentage: 0,
+                                            subAllocations:  []
+                                        }
+
                                         return (
                                             <ul key={budget.uid} className="budget-list grid grid-cols-1 gap-[16px] w-full">
                                                 <li
-                                                    onClick={() => handleBudgetClick(allocation??budget)}
+                                                    onClick={() => handleBudgetClick(allocation??notYetAllocated)}
                                                     className="bg-white border border-[#EFEFF0] p-[12px] rounded-[20px] flex flex-col gap-[8px]"
                                                 >
                                                     <div
@@ -977,10 +984,10 @@ const Page = (props: { params: { id: string } }) => {
                                         type="text"
                                         name="percentage"
                                         value={
-                                            selectedBudget && income
-                                                ? isNaN((selectedBudget.amount / income) * 100)
+                                            selectedBudget && budgetStats?.income
+                                                ? isNaN((selectedBudget.amount / budgetStats?.income) * 100)
                                                     ? '0'
-                                                    : ((selectedBudget.amount / income) * 100).toFixed(2)
+                                                    : ((selectedBudget.amount / budgetStats?.income) * 100).toFixed(2)
                                                 : '0'
                                         }
                                         readOnly

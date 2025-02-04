@@ -24,7 +24,7 @@ export interface ManualData {
 
 
 export interface IAllocation {
-  budgetCategory: string; // Category like Housing, Transportation
+  budgetCategory: { uid: string; name:string}; // Category like Housing, Transportation
   amount?: number;         // Total amount for the category
   color?: string; // Add this field
   percentage?: number;     // Optional percentage representation

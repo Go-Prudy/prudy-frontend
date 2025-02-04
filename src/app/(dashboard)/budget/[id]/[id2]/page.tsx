@@ -24,8 +24,9 @@ const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('en-US', options).replace(/(\d{1,2})(st|nd|rd|th)/, '$1');
 };
 
-const Page = (props: { params: Promise<{ id: string; id2: string }> }) => {
-    const params = use(props.params);
+const Page = (props: { params: { id: string; id2: string } }) => {
+    const params = props.params; 
+    
     const queryClient = useQueryClient();
     const { authenticatedUser } = useAuthentication();
 

@@ -199,6 +199,7 @@ export const getBudgetDistributionApi = async (token: string, budgetId: string) 
 
 // Function to Create Budget
 export const createBudgetApi = async (data: any, token: string) => {
+   
 
     try {
         const response = await api.post('budgets', data, {
