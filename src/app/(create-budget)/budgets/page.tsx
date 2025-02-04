@@ -50,17 +50,17 @@ const BudgetPage = () => {
     const { previousBudget, setPreviousBudget, clearPreviousBudget: clearBudget } = useBudgetStore()
     const [ localPreviousBudget, setLocalPreviousBudget ] = useState<IPreviousBudget | null>(null)
 
-    const hasFreeTrialCookie = Cookies.get("hasFreeTrial");
+    // const hasFreeTrialCookie = Cookies.get("hasFreeTrial");
 
-    const hasFreeTrial = hasFreeTrialCookie
-        ? JSON.parse(hasFreeTrialCookie)
-        : null;
-    useEffect(() => {
-        if (hasFreeTrial === true) {
-            Cookies.set("hasFreeTrial", "false", { expires: 365 * 100, secure: true });
-            navigate.push('/subscription');
-        }
-    }, [hasFreeTrial])
+    // const hasFreeTrial = hasFreeTrialCookie
+    //     ? JSON.parse(hasFreeTrialCookie)
+    //     : null;
+    // useEffect(() => {
+    //     if (hasFreeTrial === true) {
+    //         Cookies.set("hasFreeTrial", "false", { expires: 365 * 100, secure: true });
+    //         navigate.push('/subscription');
+    //     }
+    // }, [hasFreeTrial])
 
     useEffect(() => {
         if (getPendingInvitesApiData) {
