@@ -46,7 +46,7 @@ const Page = ({params}: { params: { id: string } }) => {
     const [showNewBudgetCategory, setShowNewBudgetCategory] = useState<boolean>(false)
     const [showSucces, setShowSuccess] = useState<boolean>(false)
     const [showInvite, setShowInvite] = useState<boolean>(false)
-    const [allBudgets, setAllBudgets] = useState<IBudget[]>(Budgets || [])
+    const [allBudgets, setAllBudgets] = useState<IBudget[]>([])
     const [showSelectedBudget, setShowSelectedBudget] = useState<boolean>(false)
     const [showRecordModal, setShowRecordModal] = useState<boolean>(false)
     const [collaboratorEmail, setCollaboratorEmail] = useState('');

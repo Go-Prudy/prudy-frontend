@@ -177,7 +177,7 @@ export const useBudgetStore = create<BudgetState>()(
                     subAllocations: updatedSubAllocations
                 };
 
-                console.log('updatedAllocation', updatedAllocation);
+                // console.log('updatedAllocation', updatedAllocation);
                 
                 
 
