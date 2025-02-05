@@ -48,10 +48,11 @@ import {
   cn,
   CircularProgress,
   Progress,
+  Skeleton,
 } from '@nextui-org/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, set } from 'date-fns';
 import Scanner from '../../../components/scanFeature';
 import { AssignCategoryToTransactionApi } from '@/app/services/TransactionService';
 import { IAddManualInput } from '@/app/Types';
@@ -96,13 +97,6 @@ export default function Page() {
     next?: { page: number }; // Information about the next page
   }
 
-  interface FetchAccountTransactionsApiResponse {
-    token: string;
-    accountId: string;
-    limit: number;
-    page: number;
-  }
-
   // Create the array of card items
   const cardItems: CardItem[] = [
     {
@@ -144,24 +138,6 @@ export default function Page() {
     currency: string;
   }
 
-  interface IAccount {
-    createdAt: string; // ISO string representation of the creation date
-    updatedAt: string; // ISO string representation of the last update date
-    deletedAt: string | null; // Nullable field for deletion timestamp
-    id: number; // Unique identifier for the account
-    uid: string; // Universally unique identifier
-    providerAccountId: string; // Provider-specific account ID
-    accountName: string; // Name of the account holder
-    accountNumber: string; // Account number
-    accountType: 'SAVINGS_ACCOUNT' | 'CURRENT_ACCOUNT' | 'OTHER'; // Account type
-    accountBalance: number; // Account balance
-    accountBvn: string; // Bank Verification Number (optional)
-    accountStatus: 'AVAILABLE' | 'FROZEN' | 'CLOSED'; // Status of the account
-    institutionName: string; // Name of the financial institution
-    institutionCode: string; // Institution code (e.g., bank code)
-    institutionType: 'PERSONAL_BANKING' | 'CORPORATE_BANKING' | 'OTHER'; // Type of institution
-  }
-
   interface Category {
     id: number;
     name: string;
@@ -171,7 +147,7 @@ export default function Page() {
     selected: boolean;
   }
 
-  const navigation = useRouter();
+  const { authenticatedUser } = useAuthentication();
 
   const lightenColor = (hex: string, percent: number): string => {
     const hexToRgb = (hex: string) => {
@@ -197,25 +173,12 @@ export default function Page() {
   const [bankData, setBankData] = useState<Bank[]>(bank_data);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSyncDataModal, setShowSyncDataModal] = useState(false);
-  const [selectedBankAccount, setSelectedBankAccount] = useState<IAccount>({
-    createdAt: '',
-    updatedAt: '',
-    deletedAt: null,
-    id: 0,
-    uid: '',
-    providerAccountId: '',
-    accountName: '',
-    accountNumber: '',
-    accountType: 'SAVINGS_ACCOUNT',
-    accountBalance: 0,
-    accountBvn: '',
-    accountStatus: 'AVAILABLE',
-    institutionName: '',
-    institutionCode: '',
-    institutionType: 'PERSONAL_BANKING',
-  });
+  const [showAccountProcessingModal, setShowAccountProcessingModal] = useState(false);
+
   const [showCategories, setShowCategories] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+  const [accountId, setAccountId] = useState<string>('');
+
   const [showSyncTransactionFirstModal, setShowSyncTransactionFirstModal] = useState<any>(
     bankData[0],
   );
@@ -300,18 +263,30 @@ export default function Page() {
     showSyncModal && handleSyncTransaction();
   }, [showSyncModal]);
 
-
   // hide <body/> scroll bar when showSyncDataModal modal is open
-    useEffect(() => {
-      if (showSyncDataModal) {        
-        window.document.body.style.overflow = 'hidden';
-        window.document.body.style.height = '100vh';
+  useEffect(() => {
+    if (showSyncDataModal) {
+      window.document.body.style.overflow = 'hidden';
+      window.document.body.style.height = '100vh';
+    } else {
+      window.document.body.style.overflow = 'auto';
+      window.document.body.style.height = 'auto';
+    }
+  }, [showSyncDataModal]);
 
-      } else {
-        window.document.body.style.overflow = 'auto';
-        window.document.body.style.height = 'auto';
-      }
-    }, [showSyncDataModal]);
+  // query to fetch account information with account id
+  const {
+    data: selectedBankAccount = {},
+    isLoading: selectedBankAccountLoading,
+    isPending: selectedBankAccountPending,
+    error: selectedBankAccountError,
+  } = useQuery({
+    queryKey: ['getSelectedAccountInfo', accountId],
+    queryFn: () => fetchAccountInfoApi(authenticatedUser?.token ?? '', accountId),
+    enabled: !!authenticatedUser?.token && showSyncDataModal,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
   const AssignExpense = (transactionId: string) => {
     try {
@@ -329,13 +304,14 @@ export default function Page() {
   // };
 
   const handleSyncTransactions = async () => {
+    setShowAccountProcessingModal(false);
     // Show loader when syncing starts
     setCurrentView('loading');
     setIsSyncing(true); // Indicate syncing state
 
     try {
       // Manually trigger the fetch (queryFn)
-      await refetch();
+      await refetchAccountTransactions();
 
       // Simulate a 2-second delay after fetching
       setTimeout(() => {
@@ -348,8 +324,6 @@ export default function Page() {
       setIsSyncing(false); // Stop syncing in case of error
     }
   };
-
-  const { authenticatedUser } = useAuthentication();
 
   const {
     data: budgets = [],
@@ -443,13 +417,11 @@ export default function Page() {
     }
   }
 
-  const accountId = selectedBankAccount.uid || ''; // Replace with actual account ID
-
   const {
     data: syncAccountTransactions = [],
     isLoading: syncAccountTransactionsisLoading,
     isError: syncAccountTransactionsisError,
-    refetch,
+    refetch: refetchAccountTransactions,
   } = useQuery({
     queryKey: ['accountInfo', accountId],
     queryFn: () => syncAccountTransactionsApi(authenticatedUser?.token ?? '', accountId),
@@ -551,7 +523,8 @@ export default function Page() {
 
   const handleBankSelect = (index: any) => {
     setSelectedBankIndex(index);
-    setSelectedBankAccount(accounts[index]);
+    // set accountId instead
+    setAccountId(accounts[index].uid);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -628,31 +601,6 @@ export default function Page() {
       }));
     }
   };
-  const {
-    mutate: recordExpense,
-    isError: isErrorRecordExpense,
-    isSuccess,
-    error: errorRecordExpense,
-  } = useMutation({
-    mutationFn: (expenseData: any) =>
-      RecordExpenseApi(
-        selectedBudget.uid ?? '', // budgetId
-        selectedBudget.uid ?? '', // budgetCategoryId
-        expenseData,
-        authenticatedUser?.token ?? '',
-      ),
-    onSuccess: (data) => {
-      setManualData({
-        itemName: '',
-        amount: 0,
-        category: '',
-        date: '',
-      });
-    },
-    onError: (error) => {
-      console.error('Error recording expense:', error);
-    },
-  });
 
   const addManualMutation = useMutation({
     mutationFn: async (data) =>
@@ -816,6 +764,26 @@ export default function Page() {
     );
   };
 
+  // account processing timer
+  const [timeLeft, setTimeLeft] = useState<number>(30);
+  useEffect(() => {
+    if (showAccountProcessingModal) {
+      if (timeLeft <= 0) return;
+
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    } else setTimeLeft(30);
+  }, [timeLeft, showAccountProcessingModal]);
+
+  const formatTime = (seconds: number): Date => {
+    const date = new Date(0);
+    date.setSeconds(seconds);
+    return date;
+  };
+
   return (
     <div className="bg-white min-h-[100vh] w-[100vw] relative max-w-[500px] h-full">
       <BudgetPageHeader headerType="dashboard" title={'Track expenses'} />
@@ -883,7 +851,8 @@ export default function Page() {
                           <div
                             onClick={() => {
                               setShowSyncDataModal(true);
-                              setSelectedBankAccount(account);
+                              // set accountId here instead
+                              setAccountId(account.uid);
                             }}
                             key={account.id}
                             className="flex px-[16px] relative border-[1px] py-[12px] rounded-[16px] border-[#EFEFF0] bg-[#F7F7F9] w-full justify-between"
@@ -985,7 +954,9 @@ export default function Page() {
                 onClick={() => {
                   if (accounts.length === 1) {
                     setShowSyncDataModal(true);
-                    setSelectedBankAccount(accounts[0]);
+
+                    // set accountId here instead
+                    setAccountId(accounts[0].uid);
                   } else {
                     setShowSyncTransactionFirstModal(!showSyncTransactionFirstModal);
                   }
@@ -1269,15 +1240,70 @@ export default function Page() {
             <button
               disabled={isGetAllAccountPending}
               onClick={() => {
-                selectedBankAccount.accountName
-                  ? setShowSyncDataModal(true)
-                  : alert('Select a bank account');
+                // use accountId here instead
+
+                accountId ? setShowSyncDataModal(true) : alert('Select a bank account');
               }}
               type="submit"
               className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
             >
               Proceed
             </button>
+          </div>
+        </motion.div>
+      )}
+
+      {showAccountProcessingModal && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[100]  bottom-0 fixed bg-[#1c1c1c73]"
+        >
+          <div className=" bg-white p-[24px] w-full space-y-2 rounded-[40px]">
+            <div className="cursor-pointer ml-auto w-fit">
+              <BsX
+                size={28}
+                onClick={() => setShowAccountProcessingModal(false)}
+                className=" bg-[#F7F7F9] rounded-[8px]"
+              />
+            </div>
+            <Image
+              src="/images/processing.gif"
+              width={100}
+              height={100}
+              alt=""
+              className="w-[100px] mx-auto"
+            />
+
+            <h1 className="text-center text-[20px] font-[500]">Account Processing</h1>
+
+            <h1 className="font-[400] leading-[24px] text-base text-center text-[#575757]">
+              Your account status will be available in a few seconds
+            </h1>
+            <div className="w-fit mx-auto">
+              <span className="h-[22px] p-1 bg-[#eef4fd] rounded p-px text-center text-[#3172dd] text-sm font-normal leading-[14px]">
+                {format(formatTime(timeLeft), 'mm')}
+              </span>{' '}
+              :{' '}
+              <span className="h-[22px] p-1 bg-[#eef4fd] rounded p-px text-center text-[#3172dd] text-sm font-normal leading-[14px]">
+                {format(formatTime(timeLeft), 'ss')}
+              </span>
+            </div>
+
+            {timeLeft === 0 && (
+              <button
+                disabled={syncAccountTransactionsisLoading}
+                onClick={handleSyncTransactions}
+                type="submit"
+                className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+              >
+                {syncAccountTransactionsisLoading
+                  ? 'Syncing...'
+                  : 'Sync Transactions Now'}
+              </button>
+            )}
           </div>
         </motion.div>
       )}
@@ -1291,34 +1317,53 @@ export default function Page() {
           className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
         >
           <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
-            <div className=" pt-[72px] px-[24px]">
-              <button
-                onClick={() => setShowSyncDataModal(!showSyncDataModal)}
-                className=" grid place-content-center top-[24px] bg-[#7CD741] absolute right-[24px] size-[36px] rounded-full  "
-              >
-                <BsX size={'24px'} />
-              </button>
-              <div className="  w-full   gap-[16px] p-[8px] rounded-[20px] ">
-                <h1 className="  uppercase mb-[12px] text-[12px] font-[400] ">
-                  {selectedBankAccount.institutionName}
-                </h1>
-                <div className=" flex justify-between">
-                  <h1>{selectedBankAccount.accountName}</h1>
-                  <h1>{selectedBankAccount.accountNumber}</h1>
-                </div>
-                <div className=" border-[#5EB325] border rounded-[8px] mt-[12px] bg-[#4A9F11] p-[8px] ">
-                  <h1 className=" text-[12px] ">Available balance</h1>
-                  <div className=" flex justify-between w-full">
-                    <h1 className="font-[700] aeonik mt-[8px] ">
-                      {showBalance ? (
-                        <> ₦ {selectedBankAccount.accountBalance}</>
+            <div className="pt-6 px-6">
+              <div className="space-y-4 w-full gap-[16px] p-[8px] rounded-[20px] ">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2 items-center">
+                    <Image
+                      src={selectedBankAccount.institutionLogo}
+                      width={36}
+                      height={36}
+                      alt={selectedBankAccount.institutionName}
+                      className="w-9 rounded-[32px] bg-white border border-white"
+                    />
+                    <h1 className="uppercase text-[12px] font-[400]">
+                      {selectedBankAccountLoading ? (
+                        <Skeleton className="w-1/2 h-5 opacity-30 rounded-sm" />
                       ) : (
-                        '  ₦ *******'
+                        selectedBankAccount.institutionName
                       )}
                     </h1>
+                  </div>
+                  <button
+                    onClick={() => setShowSyncDataModal(!showSyncDataModal)}
+                    className=" grid place-content-center top-[24px] bg-[#7CD741] size-[36px] rounded-full  "
+                  >
+                    <BsX size={'24px'} />
+                  </button>
+                </div>
+                <div className="flex justify-between text-base font-medium">
+                  <h6>{selectedBankAccount.accountName}</h6>
+                  <h6>{selectedBankAccount.accountNumber}</h6>
+                </div>
+                <div className="bg-[#FAFAFA] rounded-[12px] p-2 space-y-2">
+                  <p className="text-[12px] text-[#575757]">Current balance</p>
+                  <div className="flex items-center justify-between w-full">
+                    {selectedBankAccountLoading ? (
+                      <Skeleton className="w-1/2 h-5 opacity-30 rounded-sm" />
+                    ) : (
+                      <h1 className="font-[700] aeonik mt-[8px] text-[#242424]">
+                        {showBalance ? (
+                          <>₦ {selectedBankAccount.accountBalance}</>
+                        ) : (
+                          '  ₦ *******'
+                        )}
+                      </h1>
+                    )}
                     <button
                       onClick={toggleBalanceVisibility}
-                      className=" bg-[#368B00] text-[10px] py-[4px] px-[8px] rounded-[12px] "
+                      className=" bg-[#E7E7EA] text-[#2D2D2D] text-[10px] h-6 px-2 rounded-[12px] "
                     >
                       {showBalance ? 'Hide balance' : 'Show balance'}
                     </button>
@@ -1327,98 +1372,118 @@ export default function Page() {
               </div>
             </div>
             <div className="bg-white h-full w-full">
-              <h1 className="px-6 my-4 text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">
-                Click on the transaction to assign it to the right category
-              </h1>
-
-              <div className="h-full w-full space-y-4">
-                <div className="flex px-6 w-full items-center justify-between">
-                  <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">
-                    Latest transactions
+              {selectedBankAccountLoading ? (
+                <>
+                  <Skeleton className="w-[80%] mx-auto h-5 mt-7 opacity-30 rounded-sm" />
+                  <Skeleton className="w-[80%] mx-auto h-20 mt-7 opacity-30 rounded-sm" />
+                </>
+              ) : (
+                <>
+                  <h1 className="px-6 my-4 text-center mx-auto w-full text-[#828282] text-[13px] leading-[20px]">
+                    Click on the transaction to assign it to the right category
                   </h1>
-                  <button
-                    onClick={handleSyncTransactions}
-                    className="bg-[#EFEFF0] font-[500] text-[12px] text-[#2D2D2D] py-[4px] px-[8px] rounded-[32px]"
-                    disabled={isSyncing} // Disable button while syncing
-                  >
-                    {isSyncing ? 'Syncing...' : 'Sync Latest'}
-                  </button>
-                </div>
-                <div className="bg-[#F7F7F9] h-full w-full">
-                  {/* Conditional Rendering based on currentView state */}
-                  {currentView === 'loading' && (
-                    <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
-                      <motion.div
-                        initial={{ opacity: 0, y: 90 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex flex-col items-center justify-center w-full"
-                      >
-                        <Image
-                          width={1000}
-                          height={1000}
-                          src={lunch}
-                          alt="loading"
-                          className="h-[141.27px] w-[126.52px]"
-                        />
-                      </motion.div>
-                      <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">
-                        Yaay! 😎
+
+                  <div className="h-full w-full space-y-4">
+                    <div className="flex px-6 w-full items-center justify-between">
+                      <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">
+                        Latest transactions
                       </h1>
-                      <h1 className="text-[#828282] text-[16px] leading-[19.2px]">
-                        You’re all synced up
-                      </h1>
-                    </div>
-                  )}
-
-                  {currentView === 'syncedData' && (
-                    <div className="px-6 py-4 h-full space-y-4">
-                      {transactions.map((transaction, index) => (
-                        <div
-                          key={transaction.uid}
-                          onClick={() => AssignExpense(transaction.uid)}
-                          className={`flex justify-between items-center ${
-                            index !== transactions.length - 1
-                              ? 'border-b border-b-[#E7E7EA]'
-                              : ''
-                          } pb-2`}
-                        >
-                          <div>
-                            <p className="font-[500] text-[14px] text-[#2d2d2d]">
-                              {transaction.narration}
-                            </p>
-                            <p className="text-[#575757] flex gap-3  text-[12px]">
-                              {formatDateTime(transaction.date)}
-                            </p>
-                          </div>
-                          <div className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap">
-                            ₦ {transaction.amount.toLocaleString()}
-                          </div>
-                        </div>
-                      ))}
-
-                      {isFetchingNextPage && (
-                        <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>
-                      )}
-
                       <button
-                        onClick={() => fetchNextPage()}
-                        disabled={!hasNextPage || isFetchingNextPage}
-                        className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
+                        onClick={() => {
+                          // TODO: if accountStatus	 is 'PROCESSING', show modal else sync account
+                          if (selectedBankAccount?.accountStatus === 'PROCESSING') {
+                            console.log('check account status');
+
+                            setShowAccountProcessingModal(true);
+                          } else {
+                            handleSyncTransactions();
+                          }
+                        }}
+                        className="bg-[#EFEFF0] font-[500] text-[12px] text-[#2D2D2D] py-[4px] px-[8px] rounded-[32px]"
+                        disabled={isSyncing} // Disable button while syncing
                       >
-                        {isLoadingfetchAccountTransactions
-                          ? 'Loading...'
-                          : isFetchingNextPage
-                            ? 'Loading...'
-                            : hasNextPage
-                              ? 'Load More'
-                              : 'No More Data'}
+                        {isSyncing ? 'Syncing...' : 'Sync Latest'}
                       </button>
                     </div>
-                  )}
-                </div>
-              </div>
+                    <div className="bg-[#F7F7F9] h-full w-full">
+                      {/* Conditional Rendering based on currentView state */}
+                      {currentView === 'loading' && (
+                        <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
+                          <motion.div
+                            initial={{ opacity: 0, y: 90 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col items-center justify-center w-full"
+                          >
+                            <Image
+                              width={1000}
+                              height={1000}
+                              src={lunch}
+                              alt="loading"
+                              className="h-[141.27px] w-[126.52px]"
+                            />
+                          </motion.div>
+                          <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">
+                            Yaay! 😎
+                          </h1>
+                          <h1 className="text-[#828282] text-[16px] leading-[19.2px]">
+                            You’re all synced up
+                          </h1>
+                        </div>
+                      )}
+
+                      {currentView === 'syncedData' && (
+                        <div className="px-6 py-4 h-full space-y-4">
+                          {transactions.map((transaction, index) => (
+                            <div
+                              key={transaction.uid}
+                              onClick={() => AssignExpense(transaction.uid)}
+                              className={`flex justify-between items-center ${
+                                index !== transactions.length - 1
+                                  ? 'border-b border-b-[#E7E7EA]'
+                                  : ''
+                              } pb-2`}
+                            >
+                              <div>
+                                <p className="font-[500] text-[14px] text-[#2d2d2d]">
+                                  {transaction.narration}
+                                </p>
+                                <p className="text-[#575757] flex gap-3  text-[12px]">
+                                  {formatDateTime(transaction.date)}
+                                </p>
+                              </div>
+                              <div className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap">
+                                ₦ {transaction.amount.toLocaleString()}
+                              </div>
+                            </div>
+                          ))}
+
+                          {isFetchingNextPage && (
+                            <p className=" text-[#66C227] mx-auto w-full">
+                              Loading more...
+                            </p>
+                          )}
+
+                          <button
+                            onClick={() => fetchNextPage()}
+                            disabled={!hasNextPage || isFetchingNextPage}
+                            className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
+                          >
+                            {isLoadingfetchAccountTransactions
+                              ? 'Loading...'
+                              : isFetchingNextPage
+                                ? 'Loading...'
+                                : hasNextPage
+                                  ? 'Load More'
+                                  : 'No More Data'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </motion.div>

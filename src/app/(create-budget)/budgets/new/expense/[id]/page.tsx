@@ -132,7 +132,7 @@ const Page = (props: { params: { id: string } }) => {
 
   useEffect(() => {
       const stats = calculateIncomeExpenseStats(lastBudget);
-      console.log('stats', stats);
+    //   console.log('stats', stats);
       
     setBudgetStats(stats);
   }, [lastBudget]);
@@ -286,7 +286,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
 
 
                     if (selectedBudget?.amount > 0) {
-                        console.log(data);
+                        // console.log(data);
                         
                         try {                           
                             const res = await createSubCategoryMutation.mutateAsync(data);
@@ -586,38 +586,36 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
     });
 
        const [budgetCategoriesArray, setBudgetCategoriesArray] =
-        useState(budgetCategoriesData);
+         useState(budgetCategoriesData);
     
     useEffect(() => {
-        if (budgetCategoriesData) {            
-          setBudgetCategoriesArray(budgetCategoriesData);
-      }
-    }, [budgetCategoriesArray])
-    
-    
-    const [createCategoryLoading,setCreateCategoryLoading] = useState<boolean>(false)
-    
-    useEffect(() => {
-      
-        if (lastBudget && lastBudget.allocations && lastBudget.allocations.length > 0) {
-            const allocationMap: Record<string, IPreviousBudgetAllocation> = {};
-            // create hashmap
-            (lastBudget.allocations as IPreviousBudgetAllocation[]).forEach((a) => {
-                allocationMap[a.budgetCategory] = a;
-            });            
+  if (budgetCategoriesData.length > 0) {
+    setBudgetCategoriesArray([...budgetCategoriesData]);
+  }
+}, [budgetCategoriesData])
 
-            const updatedBudgetCategoriesArray = budgetCategoriesArray.map((bc:any) => {
-                const allocation = allocationMap[bc.name];
-                return {
-                    ...bc,
-                    amount: allocation?.amount || 0,
-                    subAllocations: allocation?.subAllocations || [],
-                };
-            })
-            setBudgetCategoriesArray(updatedBudgetCategoriesArray);
-        }
+    useEffect(() => {
+    
+  if (budgetCategoriesArray.length > 0  && lastBudget?.allocations && lastBudget?.allocations?.length > 0) {
+    const allocationMap: Record<string, IPreviousBudgetAllocation> = {};
+    // create hashmap
+    (lastBudget?.allocations as IPreviousBudgetAllocation[]).forEach((a) => {
+      allocationMap[a.budgetCategory] = a;
+    });
+
+      const updatedBudgetCategoriesArray = budgetCategoriesArray.map((bc:any) => {
+          return {
+              ...bc,
+              amount: allocationMap[bc.name]?.amount || 0,
+              subAllocations: allocationMap[bc.name]?.subAllocations || [],
+             };
+          })
+    setBudgetCategoriesArray(updatedBudgetCategoriesArray);
+  }
     }
-, [budgetCategoriesData, lastBudget]);
+, [lastBudget]);
+
+    const [createCategoryLoading,setCreateCategoryLoading] = useState<boolean>(false)
 
     
        const handleSubmit = async () => {
@@ -786,6 +784,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
                 }))
             };
 
+            // console.log(FilteredData);
 
             const res = await CreateBudgetMutation.mutateAsync(FilteredData)
             // console.log(res);
