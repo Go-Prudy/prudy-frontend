@@ -1317,7 +1317,7 @@ export default function Page() {
           className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
         >
           <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
-            <div className="pt-6 px-6">
+            <div className="pt-[70px] px-6">
               <div className="space-y-4 w-full gap-[16px] p-[8px] rounded-[20px] ">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2 items-center">
