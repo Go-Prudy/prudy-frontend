@@ -1,6 +1,5 @@
 'use client';
 import Header from '@/components/header';
-import Input from '@/components/input';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -11,18 +10,27 @@ import { toast } from 'react-hot-toast';
 import { ISignupForm } from '@/app/Types';
 import { CircularProgress } from '@nextui-org/react';
 import Cookies from 'js-cookie';
+import OtpInput from '@/components/OtpInput';
 
 const Page = () => {
-  const [password, setPassword] = useState<string>('');
+  const passCodeLength = 6;
+
+  const [password, setPassword] = useState<string[]>(Array(passCodeLength).fill(''));
+  const [focusedPasswordInput, setFocusedPasswordInput] = React.useState<number | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string[]>(
+    Array(passCodeLength).fill(''),
+  );
+  const [focusedConfirmPasswordInput, setFocusedConfirmPasswordInput] = React.useState<
+    number | null
+  >(null);
   const [error, setError] = useState<string>('');
   const { signup, form, login, authenticatedUser } = useAuthentication();
   const navigate = useRouter();
 
   const hasFreeTrialCookie = Cookies.get('hasFreeTrial');
-
-  const hasFreeTrial = hasFreeTrialCookie ? JSON.parse(hasFreeTrialCookie) : null;
 
   const setPasscodeMutation = useMutation({
     mutationFn: async (data: ISignupForm) => {
@@ -79,12 +87,15 @@ const Page = () => {
       setError('Password must be at least 6 characters long');
       return;
     }
-    const newData: any = { ...form, pin: password, confirmPin: confirmPassword };
-
+    const newData: any = {
+      ...form,
+      pin: password.join('').toString(),
+      confirmPin: confirmPassword.join('').toString(),
+    };
     setPasscodeMutation.mutateAsync(newData);
 
     // Validate if passwords match
-    if (password !== confirmPassword) {
+    if (password.join('').toString() !== confirmPassword.join('').toString()) {
       setError('Passwords do not match');
       return;
     }
@@ -108,22 +119,44 @@ const Page = () => {
           </p>
         </div>
         <form onSubmit={handleSubmit}>
-          <Input
-            label="Passcode"
-            inputName="Passcode"
-            inputType="password"
-            maxLength={6}
-            placeholder="Enter your passcode"
-            onChange={(value) => setPassword(value)}
-          />
-          <Input
+          <p className='mb-4 text-sm text-[#828282]'>Enter Passcode</p>
+          <div className="flex items-center gap-2 mb-6">
+            {Array.from({ length: passCodeLength }).map((_, index) => (
+              <OtpInput
+                key={index}
+                index={index}
+                otpValues={password}
+                setOtpValues={setPassword}
+                inputLength={passCodeLength}
+                focusedInput={focusedPasswordInput}
+                setFocusedInput={setFocusedPasswordInput}
+              />
+            ))}
+          </div>
+          <p className='mb-4 text-sm text-[#828282]'>Confirm Passcode</p>
+          <div className="flex items-center gap-2 mb-6">
+            {Array.from({ length: passCodeLength }).map((_, index) => (
+              <OtpInput
+                key={index}
+                index={index}
+                otpValues={confirmPassword}
+                setOtpValues={setConfirmPassword}
+                inputLength={passCodeLength}
+                focusedInput={focusedConfirmPasswordInput}
+                setFocusedInput={setFocusedConfirmPasswordInput}
+              />
+            ))}
+          </div>
+
+          {/* <Input
             label="Confirm passcode"
             inputName="Confirm your passcode"
             inputType="password"
             maxLength={6}
             placeholder="Confirm your passcode"
             onChange={(value) => setConfirmPassword(value)}
-          />
+          /> */}
+          <div className="flex items-center gap-2 mb-6 justify-between"></div>
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <div className="m-0 mt-[38px] flex w-full items-center bg-white rounded-t-3xl">
             <button

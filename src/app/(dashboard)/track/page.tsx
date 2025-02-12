@@ -13,6 +13,7 @@ import scan from '/public/images/scan.png';
 import lunch from '/public/images/Launch.png';
 import mono1 from '/public/images/mono1.png';
 import addManual from '/public/images/addManually.png';
+import processingGif from '/public/images/processing.gif';
 import {
   BsCheck,
   BsChevronRight,
@@ -410,11 +411,7 @@ export default function Page() {
     }
 
     // Format based on the presence of time
-    if (hasTime) {
-      return format(dateObject, 'MMMM do | hh:mma'); // Include both date and time
-    } else {
-      return format(dateObject, 'MMMM do'); // Include only the date
-    }
+    return format(dateObject, 'MMMM do'); // Include only the date
   }
 
   const {
@@ -1135,6 +1132,7 @@ export default function Page() {
                   type="date"
                   value={manualData.date}
                   onChange={handleInputChange}
+                  max={new Date().toISOString().split('T')[0]}
                 />
               </label>
             </div>
@@ -1270,7 +1268,7 @@ export default function Page() {
               />
             </div>
             <Image
-              src="/images/processing.gif"
+              src={processingGif}
               width={100}
               height={100}
               alt=""
@@ -1314,7 +1312,7 @@ export default function Page() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed bg-[#1c1c1c73]"
+          className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed "
         >
           <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
             <div className="pt-[90px] px-6">
@@ -1371,7 +1369,7 @@ export default function Page() {
                 </div>
               </div>
             </div>
-            <div className="bg-white h-full w-full">
+            <div className="bg-white h-auto w-full">
               {selectedBankAccountLoading ? (
                 <>
                   <Skeleton className="w-[80%] mx-auto h-5 mt-7 opacity-30 rounded-sm" />
@@ -1383,7 +1381,7 @@ export default function Page() {
                     Click on the transaction to assign it to the right category
                   </h1>
 
-                  <div className="h-full w-full space-y-4">
+                  <div className="h-auto w-full space-y-4">
                     <div className="flex px-6 w-full items-center justify-between">
                       <h1 className=" text-[#2d2d2d] font-[500] leading-[19.2px]">
                         Latest transactions
