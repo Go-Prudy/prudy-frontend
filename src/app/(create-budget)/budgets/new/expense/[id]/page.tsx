@@ -56,7 +56,6 @@ const Page = (props: { params: { id: string } }) => {
     const spanRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
     const [allocations, setAllocations] = useState<IAllocation[]>([])
-    const [previousSubAllocations, setPreviousSubAllocations] = useState<ISubAllocation[]>([]);
     const { addAllocationToBudget } = useBudgetStore();
     const [lastBudget, setLastBudget] = useState<IBudget | IPreviousBudget | null>(null);
     const [categoryName, setCategoryName] = useState<string>('')
@@ -257,149 +256,149 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
 
         // Check if subAllocation exists and is valid
         if (
-            subAllocation?.subCategory &&
-            subAllocation.amount !== undefined &&
-            subAllocation.subCategory.trim().length > 0 &&
-            subAllocation.amount > 0
+          subAllocation?.subCategory &&
+          subAllocation.amount !== undefined &&
+          subAllocation.subCategory.trim().length > 0 &&
+          subAllocation.amount > 0
         ) {
-            const data = {
-                amount: subAllocation.amount,
-                budgetCategoryId: selectedBudget?.budgetCategory?.uid,
-                name: subAllocation.subCategory, // Pass the subCategory name to create it
-                date: getCurrentDate(),
-            };
+          const data = {
+            amount: subAllocation.amount,
+            budgetCategoryId: selectedBudget?.budgetCategory?.uid,
+            name: subAllocation.subCategory, // Pass the subCategory name to create it
+            date: getCurrentDate(),
+          };
 
-            // Calculate the total subAllocation amount safely
-            const totalSubAllocationAmount = Array.isArray(selectedBudget?.subAllocations)
-                ? selectedBudget.subAllocations.reduce(
-                    (sum: any, allocation: any) => sum + allocation.amount,
-                    0
-                )
-                : 0;
+          // Calculate the total subAllocation amount safely
+          const totalSubAllocationAmount = Array.isArray(selectedBudget?.subAllocations)
+            ? selectedBudget.subAllocations.reduce(
+                (sum: any, allocation: any) => sum + allocation.amount,
+                0
+              )
+            : 0;
 
-            if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
-                alert("Your expense is greater than your current budget");
+          if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
+            alert("Your expense is greater than your current budget");
+          } else {
+            if (createSubCategoryMutation.isPending) {
+              alert('saving....')
             } else {
-                if (createSubCategoryMutation.isPending) {
-                    alert('saving....')
-                } else {
 
 
-                    if (selectedBudget?.amount > 0) {
-                        // console.log(data);
-                        
-                        try {                           
-                            const res = await createSubCategoryMutation.mutateAsync(data);
+              if (selectedBudget?.amount > 0) {
+                // console.log(data);
 
-                            let updatedSubAllocations: any[] = [];
+                try {
+                  const res = await createSubCategoryMutation.mutateAsync(data);
 
-                            // Create a new subAllocation
-                            const newSubAllocation = {
-                                subCategory: res.data.uid,
-                                name: subAllocation.subCategory,
-                                amount: subAllocation.amount,
-                            };
+                  let updatedSubAllocations: any[] = [];
 
-                            // Check if the subCategory already exists
-                            const existingSubAllocation = updatedSubAllocations.find(
-                                (sub) => sub.subCategory === res.data.uid
-                            );
+                  // Create a new subAllocation
+                  const newSubAllocation = {
+                    subCategory: res.data.uid,
+                    name: subAllocation.subCategory,
+                    amount: subAllocation.amount,
+                  };
 
-                            if (existingSubAllocation) {
-                                // console.log("Updating existing allocation");
+                  // Check if the subCategory already exists
+                  const existingSubAllocation = updatedSubAllocations.find(
+                    (sub) => sub.subCategory === res.data.uid
+                  );
 
-                                updatedSubAllocations = updatedSubAllocations.map((sub) =>
-                                    sub.subCategory === res.data.uid ? newSubAllocation : sub
-                                );
-                            } else {
-                                // console.log("Adding new allocation");
+                  if (existingSubAllocation) {
+                    // console.log("Updating existing allocation");
 
-                                updatedSubAllocations.push(newSubAllocation);
+                    updatedSubAllocations = updatedSubAllocations.map((sub) =>
+                      sub.subCategory === res.data.uid ? newSubAllocation : sub
+                    );
+                  } else {
+                    // console.log("Adding new allocation");
 
-                                // Find the existing allocations and subAllocations
-                                const foundBudget = lastBudget
-                                // console.log(foundBudget);
+                    updatedSubAllocations.push(newSubAllocation);
 
+                    // Find the existing allocations and subAllocations
+                    const foundBudget = lastBudget
+                      // console.log(foundBudget);
+                      
 
-                                const existingSubAllocations =
-                                    foundBudget?.allocations?.find(
-                                        (b) => b.budgetCategory === selectedBudget.uid
-                                    )?.subAllocations || [];
+                    const existingSubAllocations =
+                      foundBudget?.allocations?.find(
+                        (b) => b.budgetCategory === selectedBudget.uid
+                      )?.subAllocations || [];
 
-                                // Check if the entry already exists in bluredData
-                                const entryExists = bluredData.some(
-                                    (entry: any) =>
-                                        entry.subCategory === res.data.uid &&
-                                        entry.amount === subAllocation.amount
-                                );
+                    // Check if the entry already exists in bluredData
+                    const entryExists = bluredData.some(
+                      (entry: any) =>
+                        entry.subCategory === res.data.uid &&
+                        entry.amount === subAllocation.amount
+                    );
 
-                                if (!entryExists) {
-                                    // console.log(existingSubAllocations);
+                    if (!entryExists) {
+                      // console.log(existingSubAllocations);
 
-                                    setBluredData((prevData: any[]) => {
-                                        const lastIndex = prevData.length - 1;
+                      setBluredData((prevData: any[]) => {
+                        const lastIndex = prevData.length - 1;
 
-                                        // Check the last item first
-                                        if (prevData[lastIndex]?.name === newSubAllocation.name) {
-                                            const updatedData = [...prevData];
-                                            updatedData[lastIndex] = newSubAllocation; // Replace last item
-                                            return updatedData;
-                                        }
-
-                                        // If not the last item, check the entire array
-                                        const existingIndex = prevData.findIndex(
-                                            (item) => item.name === newSubAllocation.name
-                                        );
-
-                                        if (existingIndex !== -1) {
-                                            // Replace the existing item
-                                            const updatedData = [...prevData];
-                                            updatedData[existingIndex] = newSubAllocation;
-                                            return updatedData;
-                                        }
-
-                                        // If not found, append the new sub-allocation
-                                        return [...prevData, ...existingSubAllocations, newSubAllocation];
-                                    });
-                                }
-                            }
-
-                            // Remove invalid allocations
-                            updatedSubAllocations = updatedSubAllocations.filter(
-                                (sub) => sub.subCategory && sub.amount > 0
-                            );
-
-                            const percentage = Math.round(
-                                (selectedBudget.amount / budgetStats?.incomeLeft) * 100 * 100
-                            ) / 100;
-
-                            const newAllocation = {
-                                budgetCategory: selectedBudget.uid,
-                                amount: selectedBudget.amount,
-                                percentage,
-                                subAllocations: updatedSubAllocations,
-                            };
-
-                            setSingleBudget(newAllocation);
-                            setAllocations((prevAllocations) => [
-                                ...prevAllocations.filter(
-                                    (alloc) =>
-                                        alloc?.budgetCategory?.uid !== newAllocation?.budgetCategory?.uid
-                                ),
-                                newAllocation,
-                            ]);
-
-                            // console.log("Updated SubAllocations:", updatedSubAllocations);
-                        } catch (error) {
-                            console.error("Error creating subcategory:", error);
+                        // Check the last item first
+                        if (prevData[lastIndex]?.name === newSubAllocation.name) {
+                          const updatedData = [...prevData];
+                          updatedData[lastIndex] = newSubAllocation; // Replace last item
+                          return updatedData;
                         }
-                    } else {
-                        alert("Please enter a valid amount for this category");
+
+                        // If not the last item, check the entire array
+                        const existingIndex = prevData.findIndex(
+                          (item) => item.name === newSubAllocation.name
+                        );
+
+                        if (existingIndex !== -1) {
+                          // Replace the existing item
+                          const updatedData = [...prevData];
+                          updatedData[existingIndex] = newSubAllocation;
+                          return updatedData;
+                        }
+
+                        // If not found, append the new sub-allocation
+                        return [...prevData, ...existingSubAllocations, newSubAllocation];
+                      });
                     }
+                  }
+
+                  // Remove invalid allocations
+                  updatedSubAllocations = updatedSubAllocations.filter(
+                    (sub) => sub.subCategory && sub.amount > 0
+                  );
+
+                  const percentage = Math.round(
+                      (selectedBudget.amount / budgetStats?.incomeLeft) * 100 * 100
+                    ) / 100;
+
+                  const newAllocation = {
+                    budgetCategory: selectedBudget.uid,
+                    amount: selectedBudget.amount,
+                    percentage,
+                    subAllocations: updatedSubAllocations,
+                  };
+
+                  setSingleBudget(newAllocation);
+                  setAllocations((prevAllocations) => [
+                    ...prevAllocations.filter(
+                      (alloc) =>
+                        alloc?.budgetCategory?.uid !== newAllocation?.budgetCategory?.uid
+                    ),
+                    newAllocation,
+                  ]);
+
+                  // console.log("Updated SubAllocations:", updatedSubAllocations);
+                } catch (error) {
+                  console.error("Error creating subcategory:", error);
                 }
+              } else {
+                alert("Please enter a valid amount for this category");
+              }
             }
+          }
         } else {
-            // console.log("Both category and amount are required before blurring.");
+          // console.log("Both category and amount are required before blurring.");
         }
 
         setFocusedIndex(null); // Reset focus tracking
@@ -426,8 +425,8 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
 
         // Create a new sub-allocation with default values
         const newSubAllocation: ISubAllocation = {
-            subCategory: '',
-            amount: 0,
+          subCategory: '',
+          amount: 0,
         };
 
         // Update the selected budget with the new sub-allocation
@@ -497,7 +496,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
             // Check if the parsed value is a valid number
             if (newValue !== '' && isNaN(newValue as number)) return; // Exit if not a valid number
         } else {
-            newValue = value; // For 'subCategory', use the value as-is
+          newValue = value; // For 'subCategory', use the value as-is
         }
 
 
@@ -519,7 +518,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
             setSelectedBudget((prevBudget: IBudget) => ({
                 ...prevBudget,
                 subAllocations: updatedSubAllocations
-            }));
+            }));     
             setSingleBudget((prevBudget: IBudget) => ({
                 ...prevBudget,
                 subAllocations: updatedSubAllocations
@@ -561,9 +560,9 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
         }
     }, [selectedBudget]);
 
-    const handleBudgetClick = (budget: any) => {        
+    const handleBudgetClick = (budget: any) => { 
       setShowSelectedBudget(!showSelectedBudget);
-            setSelectedBudget(budget);
+        setSelectedBudget(budget);
             setSingleBudget(budget);
             hasSelectedBudget.current = false; // Reset the ref each time a new budget is selected
 
@@ -658,13 +657,10 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
             : 0;
 
         if (totalSubAllocationAmount > (selectedBudget?.amount || 0)) {
-            alert("Your expense is greater than your current budget");
+            toast.error("Your sub category amount is greater than your category budget");
         }
 
 
-        // else if (selectedBudget?.amount > totalSubAllocationAmount) {
-        //     alert("your budgets are less than your assinged amount for this category");
-        // }
         else if (createSubCategoryMutation.isPending) {
             alert("savinng expense ....");
         }
@@ -723,15 +719,6 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
             }
         }
     };
-
-
-    // To initialize previousSubAllocations when component mounts or selectedBudget is first set
-    useEffect(() => {
-        if (selectedBudget) {
-            setPreviousSubAllocations(selectedBudget.subAllocations);
-        }
-    }, [selectedBudget]);
-
 
     // Create new budget mutation
     const CreateBudgetMutation = useMutation({
@@ -996,7 +983,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
 
 
                             <div className='mt-[24px] h-[30vh] overflow-y-scroll p-[16px] bg-[#F7F7F9] border border-[#E7E7EA] rounded-[16px] w-full'>
-                                {selectedBudget?.subAllocations?.map((eachSubAllocation: any, index: number) => (
+                                    {selectedBudget?.subAllocations?.map((eachSubAllocation: any, index: number) => (
                                     <button
                                         type='button'
                                         key={index} // Unique key for each item
