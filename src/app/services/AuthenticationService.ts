@@ -140,7 +140,7 @@ export const fetchUserProfile = async () => {
 };
 
 export const getGoogleUrl = () => {
-  const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+  const rootUrl = 'https://beta-api.goprudy.com/api/v1/auth/google';
 
   const options = {
     redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_REDIRECT_URL!,
