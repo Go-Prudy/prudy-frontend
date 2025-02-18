@@ -37,7 +37,7 @@ export default function Page() {
   const toolItems: ToolItem[] = [
     { title: 'Budget Categories', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={budgetIcon} />, category: 'TOOLS', link: '/budgets/categories' },
     { title: 'Reminders', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={reminderIcon} />, category: 'TOOLS', link: '/reminders' },
-    { title: 'Subscription', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={subscriptionIcon} />, category: 'TOOLS', link: '/subscription' },
+    // { title: 'Subscription', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={subscriptionIcon} />, category: 'TOOLS', link: '/subscription' },
     { title: 'Reports', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={reportIcon} />, category: 'TOOLS', link: '/reports' },
     { title: 'FAQs', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={faqIcon} />, category: 'TOOLS', link: '/faqs' },
     { title: 'Passcode Settings', icon: <Image className=" w-[20px] h-[20px]" width={1000} height={1000} alt="icon" src={passcodeIcon} />, category: 'SETTINGS', link: '/settings/passcode' },
@@ -116,7 +116,7 @@ export default function Page() {
     staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
   });
 
-  console.log(usersubscription);
+  // console.log(usersubscription);
 
 
   useEffect(() => {
@@ -196,7 +196,7 @@ export default function Page() {
                           //  console.log(usersubscription?.plan?.uid);
 
                            if (!usersubscription?.plan?.uid && !settingsData?.hasFreeTrial) {
-                             navigation.push("/subscription/" + usersubscription?.plan?.uid)
+                            //  navigation.push("/subscription/" + usersubscription?.plan?.uid)
                            } else {
                              navigation.push(item.link)
                           }

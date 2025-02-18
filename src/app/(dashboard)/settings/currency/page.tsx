@@ -145,7 +145,7 @@ const Page = () => {
             <div className=' px-[24px]'>
                 <div className=' bg-[#F7F7F9] mt-[16px]  p-[8px] rounded-[12px]  border flex gap-[8px] border-[#EFEFF0] '>
                     <button onClick={() => setCurrentState(false)} className={`${!currentState ? 'bg-white' : 'bg-none'} text-center w-full py-[8px] rounded-[8px] `}>Currency</button>
-                    <button onClick={() => setCurrentState(true)} className={`${currentState ? 'bg-white' : 'bg-none'} text-center w-full py-[8px] rounded-[8px] `}>Data settings</button>
+                    {/* <button onClick={() => setCurrentState(true)} className={`${currentState ? 'bg-white' : 'bg-none'} text-center w-full py-[8px] rounded-[8px] `}>Data settings</button> */}
                 </div>
 
                 {currentState === false && <>

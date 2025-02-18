@@ -11,7 +11,7 @@ import gt from '/public/images/gt.png';
 import sync from '/public/images/sync.png';
 import scan from '/public/images/scan.png';
 import lunch from '/public/images/Launch.png';
-import mono1 from '/public/images/mono1.png';
+import emptyState from '/public/images/empty-transaction.png';
 import addManual from '/public/images/addManually.png';
 import processingGif from '/public/images/processing.gif';
 import {
@@ -73,6 +73,19 @@ const bank_data: Bank[] = [
   // { name: 'Kuda Bank', balance: 450000, logo: kuda, user: 'Ayomide Asekun', number: '0248356709' },
   // { name: 'GT Bank', balance: 450000, logo: gt, user: 'Ayomide Asekun', number: '0248356709' },
 ];
+
+const ImportantNote = ({ className }: { className: string }) => (
+  <div className={className}>
+    <div className="bg-[#ECF7E2] p-3 rounded-[12px] text-sm space-y-2">
+      <p className="font-bold text-[#487922]">Important Note</p>
+      <p className="text-[#575757]">
+        Kindly note that GoPrudy does not have access to view your password or withdraw
+        from your account. Your transaction details are encrypted and visible to you
+        alone.
+      </p>
+    </div>
+  </div>
+);
 
 export default function Page() {
   // Define the type for the array items
@@ -833,7 +846,7 @@ export default function Page() {
               <>
                 {connectedAccounts.length > 0 ? (
                   <>
-                    <div className="   w-full  mt-[19px]   rounded-t-[24px] gap-[24px] grid grid-cols-2  ">
+                    <div className="   w-full  mt-[19px]   rounded-t-[24px] gap-[16px] grid grid-cols-2  ">
                       {/* Show loading state */}
 
                       {/* Show error state */}
@@ -898,6 +911,7 @@ export default function Page() {
                           </div>
                         ))}
                     </div>
+                    <ImportantNote className="pt-6" />
                   </>
                 ) : (
                   <>
@@ -926,6 +940,7 @@ export default function Page() {
                         )}
                       </button>
                     </div>
+                    <ImportantNote className="pb-6" />
                     <p className=" text-[14px] leading-[16.8px]">
                       {' '}
                       By continuing you agree to our{' '}
@@ -939,6 +954,8 @@ export default function Page() {
             )}
           </div>
         </div>
+
+        {/* important note */}
 
         {accounts ? (
           <div className="  pb-[106px] border-t-[4px] border-t-[#F7F7F9]  pt-[24px] px-[24px] ">
@@ -1314,8 +1331,8 @@ export default function Page() {
           transition={{ duration: 0.3 }}
           className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed "
         >
-          <div className="h-full text-[white] relative flex bg-gradient-to-tl from-[#66C227] to-[#2A860A] w-full   flex-col gap-[16px] ">
-            <div className="pt-[90px] px-6">
+          <div className="h-full text-[white] relative flex bg-white w-full flex-col gap-[16px] ">
+            <div className="pt-[70px] pb-2 px-6 bg-gradient-to-tl from-[#66C227] to-[#2A860A]">
               <div className="space-y-4 w-full gap-[16px] p-[8px] rounded-[20px] ">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2 items-center">
@@ -1422,60 +1439,93 @@ export default function Page() {
                               className="h-[141.27px] w-[126.52px]"
                             />
                           </motion.div>
-                          <h1 className="font-[500] text-[24px] text-[#2d2d2d] leading-[28.8px]">
-                            Yaay! 😎
-                          </h1>
-                          <h1 className="text-[#828282] text-[16px] leading-[19.2px]">
-                            You’re all synced up
-                          </h1>
                         </div>
                       )}
 
                       {currentView === 'syncedData' && (
                         <div className="px-6 py-4 h-full space-y-4">
-                          {transactions.map((transaction, index) => (
-                            <div
-                              key={transaction.uid}
-                              onClick={() => AssignExpense(transaction.uid)}
-                              className={`flex justify-between items-center ${
-                                index !== transactions.length - 1
-                                  ? 'border-b border-b-[#E7E7EA]'
-                                  : ''
-                              } pb-2`}
-                            >
-                              <div>
-                                <p className="font-[500] text-[14px] text-[#2d2d2d]">
-                                  {transaction.narration}
-                                </p>
-                                <p className="text-[#575757] flex gap-3  text-[12px]">
-                                  {formatDateTime(transaction.date)}
-                                </p>
-                              </div>
-                              <div className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap">
-                                ₦ {transaction.amount.toLocaleString()}
-                              </div>
+                          {transactions.length > 0 ? (
+                            transactions.map((transaction, index) => (
+                              <>
+                                {' '}
+                                <div
+                                  key={transaction.uid}
+                                  onClick={() => AssignExpense(transaction.uid)}
+                                  className={`flex justify-between items-center ${
+                                    index !== transactions.length - 1
+                                      ? 'border-b border-b-[#E7E7EA]'
+                                      : ''
+                                  } pb-2`}
+                                >
+                                  <div>
+                                    <p className="font-[500] text-[14px] text-[#2d2d2d]">
+                                      {transaction.narration}
+                                    </p>
+                                    <p className="text-[#575757] flex gap-3  text-[12px]">
+                                      {formatDateTime(transaction.date)}
+                                    </p>
+                                  </div>
+                                  <div className="font-[500] text-[14px] text-[#2d2d2d] whitespace-nowrap">
+                                    ₦ {transaction.amount.toLocaleString()}
+                                  </div>
+                                </div>
+                                {isFetchingNextPage && (
+                                  <p className=" text-[#66C227] mx-auto w-full">
+                                    Loading more...
+                                  </p>
+                                )}
+                                <button
+                                  onClick={() => fetchNextPage()}
+                                  disabled={!hasNextPage || isFetchingNextPage}
+                                  className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
+                                >
+                                  {isLoadingfetchAccountTransactions
+                                    ? 'Loading...'
+                                    : isFetchingNextPage
+                                      ? 'Loading...'
+                                      : hasNextPage
+                                        ? 'Load More'
+                                        : 'No More Data'}
+                                </button>
+                              </>
+                            ))
+                          ) : (
+                            <div className="flex flex-col items-center justify-center gap-4 text-center">
+                              <Image
+                                width={78}
+                                height={56}
+                                src={emptyState}
+                                alt=""
+                                className="h-[141.27px] w-[126.52px]"
+                              />
+                              <h1 className="font-[500] text-[20px] text-[#2d2d2d] leading-[24px]">
+                                Yaay! You made it here 😎
+                              </h1>
+                              <p className="text-[#575757] text-sm">
+                                This page is empty because you have not synced your
+                                transactions yet. Click the button below to sync them now.
+                              </p>
+
+                              <button
+                                onClick={() => {
+                                  // TODO: if accountStatus	 is 'PROCESSING', show modal else sync account
+                                  if (
+                                    selectedBankAccount?.accountStatus === 'PROCESSING'
+                                  ) {
+                                    console.log('check account status');
+
+                                    setShowAccountProcessingModal(true);
+                                  } else {
+                                    handleSyncTransactions();
+                                  }
+                                }}
+                                className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+                                disabled={isSyncing} // Disable button while syncing
+                              >
+                                {isSyncing ? 'Syncing...' : 'Sync transactions now'}
+                              </button>
                             </div>
-                          ))}
-
-                          {isFetchingNextPage && (
-                            <p className=" text-[#66C227] mx-auto w-full">
-                              Loading more...
-                            </p>
                           )}
-
-                          <button
-                            onClick={() => fetchNextPage()}
-                            disabled={!hasNextPage || isFetchingNextPage}
-                            className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
-                          >
-                            {isLoadingfetchAccountTransactions
-                              ? 'Loading...'
-                              : isFetchingNextPage
-                                ? 'Loading...'
-                                : hasNextPage
-                                  ? 'Load More'
-                                  : 'No More Data'}
-                          </button>
                         </div>
                       )}
                     </div>
