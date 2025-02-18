@@ -1445,9 +1445,8 @@ export default function Page() {
                       {currentView === 'syncedData' && (
                         <div className="px-6 py-4 h-full space-y-4">
                           {transactions.length > 0 ? (
-                            transactions.map((transaction, index) => (
-                              <>
-                                {' '}
+                            <>
+                              {transactions.map((transaction, index) => (
                                 <div
                                   key={transaction.uid}
                                   onClick={() => AssignExpense(transaction.uid)}
@@ -1469,26 +1468,26 @@ export default function Page() {
                                     ₦ {transaction.amount.toLocaleString()}
                                   </div>
                                 </div>
-                                {isFetchingNextPage && (
-                                  <p className=" text-[#66C227] mx-auto w-full">
-                                    Loading more...
-                                  </p>
-                                )}
-                                <button
-                                  onClick={() => fetchNextPage()}
-                                  disabled={!hasNextPage || isFetchingNextPage}
-                                  className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
-                                >
-                                  {isLoadingfetchAccountTransactions
+                              ))}
+                              {isFetchingNextPage && (
+                                <p className=" text-[#66C227] mx-auto w-full">
+                                  Loading more...
+                                </p>
+                              )}
+                              <button
+                                onClick={() => fetchNextPage()}
+                                disabled={!hasNextPage || isFetchingNextPage}
+                                className="mt-8 bg-[#66C227]  flex justify-center items-center mx-auto text-white p-2 rounded disabled:opacity-50"
+                              >
+                                {isLoadingfetchAccountTransactions
+                                  ? 'Loading...'
+                                  : isFetchingNextPage
                                     ? 'Loading...'
-                                    : isFetchingNextPage
-                                      ? 'Loading...'
-                                      : hasNextPage
-                                        ? 'Load More'
-                                        : 'No More Data'}
-                                </button>
-                              </>
-                            ))
+                                    : hasNextPage
+                                      ? 'Load More'
+                                      : 'No More Data'}
+                              </button>
+                            </>
                           ) : (
                             <div className="flex flex-col items-center justify-center gap-4 text-center">
                               <Image
