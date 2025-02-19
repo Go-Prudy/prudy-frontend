@@ -194,7 +194,7 @@ const Page = (props: { params: { id: string } }) => {
     }
 
 const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const enteredAmount = parseFloat(e.target.value.replace(/,/g, "")) || 0;
+    const enteredAmount = parseFloat(e.target.value.replace(/[₦,\s]/g, '')) || 0;     
     const previousAmount = selectedBudget.amount || 0;
     const isReducingAmount = enteredAmount < previousAmount;
     const currentIncome = budgetStats?.income
@@ -290,7 +290,9 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
                 try {
                   const res = await createSubCategoryMutation.mutateAsync(data);
 
-                  let updatedSubAllocations: any[] = [];
+                    let updatedSubAllocations: any[] = [];
+                    console.log('sub allocation res',res);
+                    
 
                   // Create a new subAllocation
                   const newSubAllocation = {
@@ -675,6 +677,7 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
               subAllocations: selectedBudget.subAllocations,
             };
             
+            
 
             const updatedBudgets = allDisplayedBudgets.some(budget => budget?.budgetCategory?.uid === newData?.budgetCategory?.uid)
                 ? allDisplayedBudgets.map(budget =>
@@ -686,9 +689,9 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
 
             try {
                 const percentage =
-                  Math.round(
-                    (selectedBudget.amount / budgetStats?.incomeLeft) * 100 * 100,
-                  ) / 100;
+                 ( Math.round(
+                    (selectedBudget.amount / budgetStats?.income) * 100 * 100,
+                  ) / 100);
 
 
                 const newAllocation: any = {
@@ -698,7 +701,10 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
                     subAllocations: bluredData,
                 };
                 
+                
 
+                // why fetch last budget???
+                // TODO: figure out why we need to fetch last budget
                 const fetchedLastBudget = getLastBudget();
                 if (fetchedLastBudget) {                    
                     setLastBudget(fetchedLastBudget);
@@ -955,26 +961,24 @@ const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>
                                 <div className='py-[12px]'>
                                     <h1 className=' text-[#828282] text-[12px] leading-[14.4px] '>Amount</h1>
                                     <input
-                                        value={selectedBudget?.amount?.toLocaleString()}
-                                        className=' bg-transparent mt-[4px]'
+                                        value={`₦ ${selectedBudget?.amount?.toLocaleString()}`}
+                                        className='w-[95%] bg-transparent mt-[4px]'
                                         type="text"
                                         name="amount"
                                         placeholder='enter amount'
                                         onChange={handleBudgetCategoryAmountChange}
                                     />
                                 </div>
-                                <div className='py-[12px] w-[90%] border-l px-[16px] border-l-[#E7E7EA]'>
-                                    <h1 className=' text-[#828282] text-[12px] leading-[14.4px] '>Percentage</h1>
+                                <div className='py-[12px] border-l pl-[16px] border-l-[#E7E7EA]'>
+                                    <h1 className='text-[#828282] text-[12px] leading-[14.4px] '>Percentage</h1>
                                     <input
-                                        className='bg-transparent mt-[4px]'
+                                        className='w-[95%] bg-transparent mt-[4px]'
                                         type="text"
                                         name="percentage"
                                         value={
                                             selectedBudget && budgetStats?.income
-                                                ? isNaN((selectedBudget.amount / budgetStats?.income) * 100)
-                                                    ? '0'
-                                                    : ((selectedBudget.amount / budgetStats?.income) * 100).toFixed(2)
-                                                : '0'
+                                                ? `${((selectedBudget.amount / budgetStats?.income) * 100).toFixed(1)}%`
+                                                : '0%'
                                         }
                                         readOnly
                                     />

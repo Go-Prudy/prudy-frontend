@@ -111,7 +111,7 @@ const CreateBudget = ({ setShow, show, fetchPreviousBudget,previousBudget, clear
             addBudget(budgetData as unknown as IBudget);
         }
         navigate.push(`/budgets/new/income/${budgetData?.id}`);
-        setShow(false);
+        // setShow(false);
     };
 
     // Custom Radio button implementation

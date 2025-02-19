@@ -162,7 +162,7 @@ export default function Page() {
                                     />
                                 ) :
                                     <Image
-                                        alt='premium'
+                                        alt='free'
                                         width={1000}
                                         height={1000}
                                         src={trialIcon} />
@@ -195,11 +195,11 @@ export default function Page() {
                           console.log(item);
                           //  console.log(usersubscription?.plan?.uid);
 
-                           if (!usersubscription?.plan?.uid && !settingsData?.hasFreeTrial) {
+                          //  if (!usersubscription?.plan?.uid && !settingsData?.hasFreeTrial) {
                             //  navigation.push("/subscription/" + usersubscription?.plan?.uid)
-                           } else {
+                          //  } else {
                              navigation.push(item.link)
-                          }
+                          // }
                         }
 
                         }
