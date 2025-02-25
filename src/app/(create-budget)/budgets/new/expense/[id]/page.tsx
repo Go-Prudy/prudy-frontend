@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, use, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/header';
-import { BsArrowRight, BsPlus } from 'react-icons/bs';
+import { BsArrowLeft, BsArrowRight, BsPlus } from 'react-icons/bs';
 import moneyIcon from '/public/images/money.png';
 import noBudgetImg from '/public/images/List 2.webp';
 
@@ -778,11 +778,12 @@ const Page = (props: { params: { id: string } }) => {
         title="Create new budget"
       />
       <div className="mt-[39.5px]  px-[24px] w-full">
-        <div className="flex gap-[8px]">
-          <div className="bg-[#66C227] rounded-[10px] h-[8px] w-full"></div>
-          <div className="bg-[#66C227] rounded-[10px] h-[8px] w-full"></div>
+        <div className="flex gap-[8px] justify-between items-center">
+          <p className="mt-[24px] mb-[16px] font-[500] text-[20px]">Set your Expenses</p>
+          <div className="bg-white border-[6px] border-[#66C227] rounded-full h-[42px] w-[42px] flex items-center justify-center">
+            <span className="text-[#2D2D2D] text-[12px] font-[700]">2/2</span>
+          </div>
         </div>
-        <p className="mt-[24px] mb-[16px] font-[500] text-[20px]">Set your Expenses</p>
         <div className="bg-[#F7F7F9] rounded-[20px] p-[16px]">
           <h1 className="text-[#131313] font-[500] leading-[24px]">
             {' '}
@@ -1165,7 +1166,14 @@ const Page = (props: { params: { id: string } }) => {
         </motion.div>
       )}
       <div className="p-[24px] fixed max-w-[500px] z-10 bg-[#ffffffaa] backdrop-blur-lg bottom-0 w-full border-t-[2px] border-t-[#EFF0F6]">
-        <div className="w-full">
+        <div className="w-full flex items-center gap-4">
+          <button
+            onClick={() => navigate.push(`/budgets/new/income/${budgetId}`)}
+            className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-[#E7E7EA] text-black flex items-center justify-center gap-[8px] font-[500]"
+          >
+            <BsArrowLeft />
+            Previous
+          </button>
           <button
             onClick={() => handleCreateBudget()}
             className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
