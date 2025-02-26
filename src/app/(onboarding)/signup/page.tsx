@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import Header from '@/components/header';
 import GoogleLogo from '@/icons/google-logo';
 import Link from 'next/link';
@@ -10,7 +10,13 @@ import { motion } from 'framer-motion';
 import { useAuthentication } from '@/app/store/AuthStore';
 import api from '../../../utils/axiosInstance';
 import { useMutation } from '@tanstack/react-query';
-import { getGoogleUrl, sendOtp, validateUserEmailOnSignup, signupUser, signUpWithGoogle } from '@/app/services/AuthenticationService';
+import {
+  getGoogleUrl,
+  sendOtp,
+  validateUserEmailOnSignup,
+  signupUser,
+  signUpWithGoogle,
+} from '@/app/services/AuthenticationService';
 import { IOtpResponse, ValidateEmailResponse } from '@/app/Types';
 import toast from 'react-hot-toast';
 
@@ -22,7 +28,7 @@ const Page = () => {
   const [checked, setChecked] = useState<boolean>(false);
   const { signup } = useAuthentication();
   const [loading, setIsLoading] = useState(false);
-  const navigate = useRouter()
+  const navigate = useRouter();
   // Create a ref for the form
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -31,7 +37,11 @@ const Page = () => {
   };
 
   // React Query mutation for sending OTP
-  const otpMutation = useMutation<IOtpResponse, Error, { email: string; phoneNumber: string }>({
+  const otpMutation = useMutation<
+    IOtpResponse,
+    Error,
+    { email: string; phoneNumber: string }
+  >({
     mutationFn: (otpFormData) => sendOtp(otpFormData),
     onSuccess: (data: IOtpResponse) => {
       if (data?.success) {
@@ -57,7 +67,8 @@ const Page = () => {
     Error,
     { email: string; phoneNumber: string }
   >({
-    mutationFn: (formData) => validateUserEmailOnSignup(formData.email,formData.phoneNumber),
+    mutationFn: (formData) =>
+      validateUserEmailOnSignup(formData.email, formData.phoneNumber),
     onMutate: (formData) => {
       return { formData };
     },
@@ -65,7 +76,7 @@ const Page = () => {
       if (data?.success) {
         if (data.data.taken) {
           console.log('Email is already taken', data.message);
-          
+
           toast.error(data.message);
         }
       }
@@ -81,8 +92,8 @@ const Page = () => {
     const otpFormData = {
       email,
       phoneNumber,
-      type: "signup",
-      channel: "email",
+      type: 'signup',
+      channel: 'email',
     };
 
     const formData = {
@@ -95,20 +106,24 @@ const Page = () => {
     try {
       setIsLoading(true);
 
-      const validateEmailResponse = await validateEmailMutation.mutateAsync(otpFormData)
+      const validateEmailResponse = await validateEmailMutation.mutateAsync(otpFormData);
       if (validateEmailResponse?.success) {
-        const otpResponse = await otpMutation.mutateAsync(otpFormData)
+        const otpResponse = await otpMutation.mutateAsync(otpFormData);
         // console.log(otpResponse);
         if (otpResponse?.success) {
           const reference = otpResponse.data.reference;
-          const newFormData = { ...formData, registeredWith: 'form', otpReference: reference }
+          const newFormData = {
+            ...formData,
+            registeredWith: 'form',
+            otpReference: reference,
+          };
           // Store form data using Zustand store
           signup(newFormData);
-          navigate.push('/signup/verify')
+          navigate.push('/signup/verify');
         }
       }
     } catch (error) {
-      setIsLoading(false)
+      setIsLoading(false);
       console.error('Error during sign-up:', error);
     } finally {
       setIsLoading(false);
@@ -116,8 +131,6 @@ const Page = () => {
     // console.log({ firstName, lastName, email, phoneNumber, checked });
     signup(formData);
   };
-
-
 
   const handleProceedClick = () => {
     if (formRef.current) {
@@ -127,13 +140,13 @@ const Page = () => {
 
   const handleGoogle = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       window.location.href = getGoogleUrl();
     } catch (error) {
-      setIsLoading(false)
+      setIsLoading(false);
       console.log(error);
     }
-  }
+  };
 
   return (
     <motion.div
@@ -141,10 +154,11 @@ const Page = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-[500px] min-h-[100vh]">
+      className="max-w-[500px] min-h-[100vh]"
+    >
       <Header link={'/'} title="Create account" />
       <div className="px-6 py-10">
-        <div className="w-full">
+        {/* <div className="w-full">
           <p className="mb-6 font-[500] text-[20px] leading-[28px] text-[#2D2D2D]">
             Sign up with...
           </p>
@@ -155,13 +169,13 @@ const Page = () => {
             <GoogleLogo scale={24} />
             <p className='text-[12px] leading-[14.4px]'>Google</p>
           </button>
-        </div>
-
+        </div> */}
+        {/* 
         <div className='flex justify-between gap-[10px] my-[24px] items-center w-full'>
           <span className='flex-1 border border-[#E7E7EA]'></span>
           or
           <span className='flex-1 border border-[#E7E7EA]'></span>
-        </div>
+        </div> */}
 
         {/* Add ref to the form */}
         <form onSubmit={handleSubmit} ref={formRef}>
@@ -207,7 +221,8 @@ const Page = () => {
                 onChange={handleChange}
               />
               <div
-                className={`w-6 h-6 flex items-center justify-center border-2 rounded ${checked ? 'bg-[#66C227] border-[#66C227]' : 'bg-white border-gray-300'
+                className={`w-6 h-6 flex items-center justify-center border-2 rounded ${
+                  checked ? 'bg-[#66C227] border-[#66C227]' : 'bg-white border-gray-300'
                 }`}
               >
                 {checked && (
