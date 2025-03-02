@@ -32,6 +32,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircularProgress } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 import { IPreviousBudget, IPreviousBudgetAllocation } from '@/app/types/budget';
+import { formatCategoryNumber, formatNumber } from '@/utils/functions';
 
 const Page = (props: { params: { id: string } }) => {
   const budgetId = props.params.id;
@@ -105,27 +106,35 @@ const Page = (props: { params: { id: string } }) => {
   });
 
   const calculateIncomeExpenseStats = useCallback((lastBudget: any) => {
-    const income =
-      lastBudget?.incomes?.reduce(
-        (total: number, income: any) => total + income.amount,
-        0,
-      ) || 0;
+    console.log(lastBudget);
 
+    const income = lastBudget?.incomes?.reduce(
+      (total: number, income: any) => total + Number(income.amount),
+      0,
+    );
     // Calculate total expense
-    const expense =
-      lastBudget?.allocations?.reduce(
-        (total: number, allocation: any) => total + allocation.amount,
-        0,
-      ) || 0;
+    const expense = lastBudget?.allocations?.reduce(
+      (total: number, allocation: any) => total + Number(allocation.amount),
+      0,
+    );
+    console.log(expense);
 
     // Calculate income left
-    const incomeLeft = income - expense;
+    const incomeLeft = parseFloat((income - expense).toFixed(2));
 
     // Calculate percentage of income used
-    const percentageIncomeUsed = income > 0 ? Math.min((expense / income) * 100, 100) : 0;
+    const percentageIncomeUsed =
+      income > 0 ? parseFloat(((expense / income) * 100).toFixed(2)) : 0;
 
     // Calculate percentage of income left
     const percentageIncomeLeft = 100 - percentageIncomeUsed;
+
+    console.log(`
+      income:${income}
+      expense:${expense}
+      incomeLeft:${incomeLeft}
+      percentageIncomeUsed:${percentageIncomeUsed}
+      percentageIncomeLeft:${percentageIncomeLeft}`);
 
     return {
       income,
@@ -137,43 +146,10 @@ const Page = (props: { params: { id: string } }) => {
   }, []);
 
   useEffect(() => {
+    console.log('=========USEEFFECT=====');
     const stats = calculateIncomeExpenseStats(lastBudget);
-    //   console.log('stats', stats);
-
     setBudgetStats(stats);
   }, [lastBudget]);
-
-  // const { income, expense, incomeLeft, percentageIncomeUsed, percentageIncomeLeft } =
-  //     calculateIncomeExpenseStats(lastBudget);
-
-  // useEffect(() => {
-  //     const newData = {
-  //         uid: selectedBudget?.uid,
-  //         amount: selectedBudget?.amount,
-  //         percentage: selectedBudget?.amount / incomeLeft * 100,
-  //         subAllocations: []
-  //     }
-
-  //     console.log(selectedBudget);
-
-  // }, [selectedBudget]);
-
-  // const formatNumber = (num: number) => {
-  //     return num.toLocaleString();
-  // };
-
-  // const parseNumber = (value: string) => {
-  //     // Remove commas before parsing
-  //     return parseFloat(value.replace(/,/g, '')) || 0;
-  // };
-
-  // const getInputWidth = (index: number) => {
-  //     if (spanRefs.current[index]) {
-  //         // Calculate width but cap it at 100px
-  //         return `${Math.min(spanRefs.current[index]!.offsetWidth + 30, 140)}px`;
-  //     }
-  //     return '50px'; // Default minimum width
-  // };
 
   const handleClose = () => {
     setShowSelectedBudget(false);
@@ -196,43 +172,58 @@ const Page = (props: { params: { id: string } }) => {
     }
   };
 
-  const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const enteredAmount = parseFloat(e.target.value.replace(/[₦,\s]/g, '')) || 0;
+  const handleBudgetCategoryPercentageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    // no need to calculate percentage,
+    // assign default values,
+    const enteredPercentage =
+      Number(parseFloat(e.target.value.replace(/[₦,\s%]/g, '')).toFixed(2)) || 0;
+    const calculatedAmount = parseFloat(
+      ((enteredPercentage / 100) * budgetStats.income).toFixed(2),
+    );
+
+    console.log('percentage and amount:', enteredPercentage, calculatedAmount);
+
     const previousAmount = selectedBudget.amount || 0;
-    const isReducingAmount = enteredAmount < previousAmount;
+    const isReducingAmount = calculatedAmount < previousAmount;
     const currentIncome = budgetStats?.income;
-    let newIncomeLeft;
+    let newIncomeLeft = 0;
 
     // Calculate the current expense total - if the budget category is the same as the selected budget category, use entered amount, otherwise use the original amount
-    const currentExpense =
+    const currentExpenseNum =
       lastBudget?.allocations?.reduce((total: number, allocation: any) => {
         if (allocation?.budgetCategory?.uid === selectedBudget?.budgetCategory?.uid) {
-          return total + enteredAmount;
+          return total + calculatedAmount;
         }
-        return total + allocation.amount;
+        return total + parseFloat(allocation.amount);
       }, 0) || 0;
 
+    const currentExpense = parseFloat(currentExpenseNum.toString()) || 0;
+
     // if entered amount < previous amount ,re-calculate new income left
+    console.log('isReducingAmount', isReducingAmount);
     if (isReducingAmount) {
       newIncomeLeft = currentIncome - currentExpense;
+      console.log('newIncomeLeft as amount it reducing', newIncomeLeft);
     } else {
       newIncomeLeft = budgetStats.incomeLeft;
     }
 
-    // Allow changes if reducing amount or if new amount is within limits
-    if (enteredAmount <= newIncomeLeft) {
-      const percentage = newIncomeLeft > 0 ? (enteredAmount / newIncomeLeft) * 100 : 0;
+    console.log('amount and imcome left:', calculatedAmount, newIncomeLeft);
 
+    // Allow changes if reducing amount or if new amount is within limits
+    if (calculatedAmount <= newIncomeLeft) {
       setSelectedBudget((prev: any) => ({
         ...prev,
-        amount: enteredAmount,
-        percentage: Math.min(percentage, 100),
+        amount: calculatedAmount,
+        percentage: enteredPercentage,
       }));
 
       setSingleBudget((prev: any) => ({
         ...prev,
-        amount: enteredAmount,
-        percentage: Math.min(percentage, 100),
+        amount: calculatedAmount,
+        percentage: enteredPercentage,
       }));
 
       setBudgetStats({
@@ -241,6 +232,80 @@ const Page = (props: { params: { id: string } }) => {
         incomeLeft: newIncomeLeft,
         percentageIncomeUsed: (currentExpense / currentIncome) * 100,
         percentageIncomeLeft: 100 - (currentExpense / currentIncome) * 100,
+      });
+    } else {
+      toast.error(`Your expense exceeds your total income for ${lastBudget?.name}`);
+    }
+  };
+
+  const handleBudgetCategoryAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let enteredAmount = e.target.value.replace(/[₦,\s]/g, '');
+    const enteredAmountNum = parseFloat(parseFloat(enteredAmount).toFixed(2)) || 0;
+
+    console.log('entered amount and entered num:', enteredAmount, enteredAmountNum);
+
+    const previousAmount = selectedBudget.amount || 0;
+    const isReducingAmount = enteredAmountNum < previousAmount;
+    const currentIncome = budgetStats?.income;
+    let newIncomeLeft;
+
+    // Calculate the current expense total - if the budget category is the same as the selected budget category, use entered amount, otherwise use the original amount
+    const currentExpenseNum =
+      lastBudget?.allocations?.reduce((total: number, allocation: any) => {
+        if (allocation?.budgetCategory?.uid === selectedBudget?.budgetCategory?.uid) {
+          return total + enteredAmountNum;
+        }
+        return total + parseFloat(allocation.amount);
+      }, 0) || 0;
+
+    console.log(currentExpenseNum);
+
+    const currentExpense =
+      parseFloat(parseFloat(currentExpenseNum.toString()).toFixed(2)) || 0;
+
+    console.log('isReducingAmount', isReducingAmount);
+    // if entered amount < previous amount ,re-calculate new income left
+    if (isReducingAmount) {
+      newIncomeLeft = parseFloat((currentIncome - currentExpense).toFixed(2));
+      console.log(
+        'newIncomeLeft as amount it reducing',
+        currentIncome,
+        currentExpense,
+        newIncomeLeft,
+      );
+    } else {
+      newIncomeLeft = budgetStats.incomeLeft;
+    }
+
+    // Allow changes if reducing amount or if new amount is within limits
+    if (enteredAmountNum < newIncomeLeft) {
+      const percentage = ((enteredAmountNum / budgetStats.income) * 100).toFixed(2);
+      console.log(`income: ${budgetStats.income}
+enteredAmountNum: ${enteredAmountNum}
+amount/income: ${enteredAmountNum / budgetStats.income}
+percentage: ${percentage}`);
+
+      setSelectedBudget((prev: any) => ({
+        ...prev,
+        amount: enteredAmount,
+        percentage: percentage,
+      }));
+      setSingleBudget((prev: any) => ({
+        ...prev,
+        amount: enteredAmount,
+        percentage: percentage,
+      }));
+
+      setBudgetStats({
+        income: currentIncome,
+        expense: currentExpense,
+        incomeLeft: newIncomeLeft,
+        percentageIncomeUsed: parseFloat(
+          ((currentExpense / currentIncome) * 100).toFixed(2),
+        ),
+        percentageIncomeLeft: parseFloat(
+          (100 - (currentExpense / currentIncome) * 100).toFixed(2),
+        ),
       });
     } else {
       toast.error(`Your expense exceeds your total income for ${lastBudget?.name}`);
@@ -563,12 +628,7 @@ const Page = (props: { params: { id: string } }) => {
     hasSelectedBudget.current = false; // Reset the ref each time a new budget is selected
   };
 
-  const {
-    data: budgetCategoriesData = [],
-    status: fetchStatus,
-    isError,
-    error,
-  } = useQuery({
+  const { data: budgetCategoriesData = [], status: fetchStatus } = useQuery({
     queryKey: ['allBudgetCategoriesData'],
     queryFn: () => getAllBudgetCategoriesApi(authenticatedUser?.token ?? ''),
     enabled: !!authenticatedUser?.token,
@@ -684,6 +744,8 @@ const Page = (props: { params: { id: string } }) => {
         // why fetch last budget???
         // TODO: figure out why we need to fetch last budget
         const fetchedLastBudget = getLastBudget();
+        console.log('fetchedLastBudget', fetchedLastBudget);
+
         if (fetchedLastBudget) {
           setLastBudget(fetchedLastBudget);
         } else {
@@ -751,7 +813,7 @@ const Page = (props: { params: { id: string } }) => {
         })),
       };
 
-      // console.log(FilteredData);
+      console.log('FilteredData:', FilteredData);
 
       const res = await CreateBudgetMutation.mutateAsync(FilteredData);
       // console.log(res);
@@ -786,7 +848,6 @@ const Page = (props: { params: { id: string } }) => {
         </div>
         <div className="bg-[#F7F7F9] rounded-[20px] p-[16px]">
           <h1 className="text-[#131313] font-[500] leading-[24px]">
-            {' '}
             ₦ {budgetStats?.incomeLeft.toLocaleString()}
             <span className=" text-[#575757] text-[12px] font-[400] leading-[16px] mx-[8px]">
               left of income
@@ -967,12 +1028,14 @@ const Page = (props: { params: { id: string } }) => {
                     Amount
                   </h1>
                   <input
-                    value={`₦ ${selectedBudget?.amount?.toLocaleString()}`}
+                    value={`₦ ${formatCategoryNumber(selectedBudget?.amount?.toString() || '0')}`}
                     className="w-[95%] bg-transparent mt-[4px]"
                     type="text"
                     name="amount"
                     placeholder="enter amount"
                     onChange={handleBudgetCategoryAmountChange}
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
                   />
                 </div>
                 <div className="py-[12px] border-l pl-[16px] border-l-[#E7E7EA]">
@@ -983,12 +1046,10 @@ const Page = (props: { params: { id: string } }) => {
                     className="w-[95%] bg-transparent mt-[4px]"
                     type="text"
                     name="percentage"
-                    value={
-                      selectedBudget && budgetStats?.income
-                        ? `${((selectedBudget.amount / budgetStats?.income) * 100).toFixed(1)}%`
-                        : '0%'
-                    }
-                    readOnly
+                    value={selectedBudget.percentage}
+                    onChange={handleBudgetCategoryPercentageChange}
+
+                    // readOnly
                   />
                 </div>
               </div>
