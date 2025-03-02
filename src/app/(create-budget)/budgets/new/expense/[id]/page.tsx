@@ -956,12 +956,12 @@ const Page = (props: { params: { id: string } }) => {
             close={true}
             onClose={handleClose}
           >
-            <form action="" className="w-full  " method="post">
+            <form action="" className="w-full mt-6" method="post">
               <h1 className=" font-[500] leading-[20px]">
                 Assign amount/percentage of income for this category
               </h1>
 
-              <div className="px-[16px] bg-[#F7F7F9] mt-[8px] border border-[#E7E7EA] rounded-[16px] grid grid-cols-2 w-full">
+              <div className="px-[16px] bg-[#F7F7F9] mt-[8px] border border-[#E7E7EA] rounded-[16px] grid grid-cols-2 w-full mb-6">
                 <div className="py-[12px]">
                   <h1 className=" text-[#828282] text-[12px] leading-[14.4px] ">
                     Amount
@@ -993,79 +993,83 @@ const Page = (props: { params: { id: string } }) => {
                 </div>
               </div>
 
-              <div className="mt-[24px] h-[30vh] overflow-y-scroll p-[16px] bg-[#F7F7F9] border border-[#E7E7EA] rounded-[16px] w-full">
-                {selectedBudget?.subAllocations?.map(
-                  (eachSubAllocation: any, index: number) => (
-                    <button
-                      type="button"
-                      key={index} // Unique key for each item
-                      className="flex hover:shadow-sm hover:p-[8px] hover:rounded-md hover:font-semibold hover:bg-[#0a0a0a09] transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
-                    >
-                      <div className="flex gap-[4px] w-full">
-                        <div
-                          style={{ backgroundColor: selectedBudget?.color }}
-                          className="grid place-content-center rounded-[16px] text-white size-[28px]"
-                        >
-                          <Image
-                            src={moneyIcon}
-                            className="size-[12px]"
-                            alt={'icon'}
-                            width={1000}
-                            height={1000}
-                          />
-                        </div>
-                        <div className="text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block">
-                          <input
-                            value={eachSubAllocation.subCategory || ''}
-                            onChange={(e) =>
-                              handleAllocationChange(index, 'subCategory', e.target.value)
-                            }
-                            placeholder="Category"
-                            className="bg-transparent w-full text-ellipsis overflow-hidden whitespace-nowrap"
-                            onBlur={() => handleBlur(index)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <div className="bg-white rounded-[8px] py-[4px] px-[8px] flex justify-center items-center gap-[0px]">
-                          ₦
-                          <div className="relative inline-block w-full">
-                            <input
-                              value={
-                                eachSubAllocation.amount
-                                  ? eachSubAllocation.amount.toLocaleString('en-US')
-                                  : ''
-                              }
-                              onBlur={() => handleBlur(index)}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                const value = e.target.value;
-                                const numericValue = value.replace(/[^0-9.]/g, ''); // Keep only numbers and decimal point
-                                const cleanedValue = numericValue.replace(
-                                  /(\..*)\..*/g,
-                                  '$1',
-                                ); // Allow only one decimal point
-                                const finalValue =
-                                  cleanedValue === ''
-                                    ? ''
-                                    : parseFloat(cleanedValue).toString();
-                                handleAllocationChange(index, 'amount', finalValue);
-                              }}
-                              type="text" // Change to text to allow formatted input
-                              inputMode="decimal"
-                              pattern="[0-9]*[.,]?[0-9]*"
-                              onWheel={(e) => e.currentTarget.blur()}
-                              className="px-1 py-1 outline-none rounded focus:outline-none transition-all duration-200"
-                              style={{ width: '140px', maxWidth: '140px' }}
+              {/* <div className="mt-[24px] h-[30vh] overflow-y-auto p-[16px] bg-[#F7F7F9] border border-[#E7E7EA] rounded-[16px] w-full"> */}
+                <>
+                  {/*selectedBudget?.subAllocations?.map(
+                    (eachSubAllocation: any, index: number) => (
+                      <button
+                        type="button"
+                        key={index}
+                        className="flex hover:shadow-sm hover:p-[8px] hover:rounded-md hover:font-semibold hover:bg-[#0a0a0a09] transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
+                      >
+                         <div className="flex gap-[4px] w-full">
+                          <div
+                            style={{ backgroundColor: selectedBudget?.color }}
+                            className="grid place-content-center rounded-[16px] text-white size-[28px]"
+                          >
+                            <Image
+                              src={moneyIcon}
+                              className="size-[12px]"
+                              alt={'icon'}
+                              width={1000}
+                              height={1000}
                             />
                           </div>
+                          <div className="text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block">
+                            <input
+                              value={eachSubAllocation.subCategory || ''}
+                              onChange={(e) =>
+                                handleAllocationChange(
+                                  index,
+                                  'subCategory',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Category"
+                              className="bg-transparent w-full text-ellipsis overflow-hidden whitespace-nowrap"
+                              onBlur={() => handleBlur(index)}
+                            />
+                          </div>
+                        </div> 
+                        <div className="flex items-start">
+                          <div className="bg-white rounded-[8px] py-[4px] px-[8px] flex justify-center items-center gap-[0px]">
+                            ₦
+                            <div className="relative inline-block w-full">
+                              <input
+                                value={
+                                  eachSubAllocation.amount
+                                    ? eachSubAllocation.amount.toLocaleString('en-US')
+                                    : ''
+                                }
+                                onBlur={() => handleBlur(index)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  const value = e.target.value;
+                                  const numericValue = value.replace(/[^0-9.]/g, '');
+                                  // removed something from the regex
+                                  const cleanedValue = numericValue.replace(/(\..*)\..g, '$1', );
+                                  const finalValue =
+                                    cleanedValue === ''
+                                      ? ''
+                                      : parseFloat(cleanedValue).toString();
+                                  handleAllocationChange(index, 'amount', finalValue);
+                                }}
+                                type="text"
+                                inputMode="decimal"
+                                pattern="[0-9]*[.,]?[0-9]*"
+                                onWheel={(e) => e.currentTarget.blur()}
+                                className="px-1 py-1 outline-none rounded focus:outline-none transition-all duration-200"
+                                style={{ width: '140px', maxWidth: '140px' }}
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ),
-                )}
+                      </button>
+                    ),
+                  )*/}
+                </>
 
-                <button
-                  onClick={addSubAllocation} // Call addSubAllocation when clicked
+                {/* <button
+                  onClick={addSubAllocation}
                   type="button"
                   className="flex hover:scale-110 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center gap-[8px]"
                 >
@@ -1078,8 +1082,8 @@ const Page = (props: { params: { id: string } }) => {
                   <div className="text-[#514F6E] text-[14px] font-[500]">
                     Add Another{' '}
                   </div>
-                </button>
-              </div>
+                </button> */}
+              {/* </div> */}
             </form>
           </BottomDrawer>
         </motion.div>
