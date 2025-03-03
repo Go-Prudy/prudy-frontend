@@ -106,8 +106,6 @@ const Page = (props: { params: { id: string } }) => {
   });
 
   const calculateIncomeExpenseStats = useCallback((lastBudget: any) => {
-    console.log(lastBudget);
-
     const income = lastBudget?.incomes?.reduce(
       (total: number, income: any) => total + Number(income.amount),
       0,
@@ -117,7 +115,6 @@ const Page = (props: { params: { id: string } }) => {
       (total: number, allocation: any) => total + Number(allocation.amount),
       0,
     );
-    console.log(expense);
 
     // Calculate income left
     const incomeLeft = parseFloat((income - expense).toFixed(2));
@@ -129,13 +126,6 @@ const Page = (props: { params: { id: string } }) => {
     // Calculate percentage of income left
     const percentageIncomeLeft = 100 - percentageIncomeUsed;
 
-    console.log(`
-      income:${income}
-      expense:${expense}
-      incomeLeft:${incomeLeft}
-      percentageIncomeUsed:${percentageIncomeUsed}
-      percentageIncomeLeft:${percentageIncomeLeft}`);
-
     return {
       income,
       expense,
@@ -146,7 +136,6 @@ const Page = (props: { params: { id: string } }) => {
   }, []);
 
   useEffect(() => {
-    console.log('=========USEEFFECT=====');
     const stats = calculateIncomeExpenseStats(lastBudget);
     setBudgetStats(stats);
   }, [lastBudget]);
@@ -183,7 +172,7 @@ const Page = (props: { params: { id: string } }) => {
       ((enteredPercentage / 100) * budgetStats.income).toFixed(2),
     );
 
-    console.log('percentage and amount:', enteredPercentage, calculatedAmount);
+    // console.log('percentage and amount:', enteredPercentage, calculatedAmount);
 
     const previousAmount = selectedBudget.amount || 0;
     const isReducingAmount = calculatedAmount < previousAmount;
@@ -202,15 +191,11 @@ const Page = (props: { params: { id: string } }) => {
     const currentExpense = parseFloat(currentExpenseNum.toString()) || 0;
 
     // if entered amount < previous amount ,re-calculate new income left
-    console.log('isReducingAmount', isReducingAmount);
     if (isReducingAmount) {
       newIncomeLeft = currentIncome - currentExpense;
-      console.log('newIncomeLeft as amount it reducing', newIncomeLeft);
     } else {
       newIncomeLeft = budgetStats.incomeLeft;
     }
-
-    console.log('amount and imcome left:', calculatedAmount, newIncomeLeft);
 
     // Allow changes if reducing amount or if new amount is within limits
     if (calculatedAmount <= newIncomeLeft) {
@@ -242,8 +227,6 @@ const Page = (props: { params: { id: string } }) => {
     let enteredAmount = e.target.value.replace(/[₦,\s]/g, '');
     const enteredAmountNum = parseFloat(parseFloat(enteredAmount).toFixed(2)) || 0;
 
-    console.log('entered amount and entered num:', enteredAmount, enteredAmountNum);
-
     const previousAmount = selectedBudget.amount || 0;
     const isReducingAmount = enteredAmountNum < previousAmount;
     const currentIncome = budgetStats?.income;
@@ -258,32 +241,19 @@ const Page = (props: { params: { id: string } }) => {
         return total + parseFloat(allocation.amount);
       }, 0) || 0;
 
-    console.log(currentExpenseNum);
-
     const currentExpense =
       parseFloat(parseFloat(currentExpenseNum.toString()).toFixed(2)) || 0;
 
-    console.log('isReducingAmount', isReducingAmount);
     // if entered amount < previous amount ,re-calculate new income left
     if (isReducingAmount) {
       newIncomeLeft = parseFloat((currentIncome - currentExpense).toFixed(2));
-      console.log(
-        'newIncomeLeft as amount it reducing',
-        currentIncome,
-        currentExpense,
-        newIncomeLeft,
-      );
     } else {
       newIncomeLeft = budgetStats.incomeLeft;
     }
 
     // Allow changes if reducing amount or if new amount is within limits
-    if (enteredAmountNum < newIncomeLeft) {
+    if (enteredAmountNum <= newIncomeLeft) {
       const percentage = ((enteredAmountNum / budgetStats.income) * 100).toFixed(2);
-      console.log(`income: ${budgetStats.income}
-enteredAmountNum: ${enteredAmountNum}
-amount/income: ${enteredAmountNum / budgetStats.income}
-percentage: ${percentage}`);
 
       setSelectedBudget((prev: any) => ({
         ...prev,
@@ -349,13 +319,11 @@ percentage: ${percentage}`);
           alert('saving....');
         } else {
           if (selectedBudget?.amount > 0) {
-            // console.log(data);
-
             try {
               const res = await createSubCategoryMutation.mutateAsync(data);
 
               let updatedSubAllocations: any[] = [];
-              console.log('sub allocation res', res);
+              // console.log('sub allocation res', res);
 
               // Create a new subAllocation
               const newSubAllocation = {
@@ -502,21 +470,6 @@ percentage: ${percentage}`);
       subAllocations: [...(selectedBudget.subAllocations || []), newSubAllocation],
     });
   };
-
-  // Validate amount to ensure it does not exceed total income
-  // useEffect(() => {
-  //     if (selectedBudget?.amount > income) {
-  //         alert(`Your expense is higher than your total income for ${lastBudget?.name}`);
-  //         setSelectedBudget((prev: any) => ({
-  //             ...prev,
-  //             amount: income,
-  //         }));
-  //         setSingleBudget((prev: any) => ({
-  //             ...prev,
-  //             amount: income,
-  //         }));
-  //     }
-  // }, [selectedBudget?.amount, income]);
 
   useEffect(() => {
     if (
@@ -744,8 +697,6 @@ percentage: ${percentage}`);
         // why fetch last budget???
         // TODO: figure out why we need to fetch last budget
         const fetchedLastBudget = getLastBudget();
-        console.log('fetchedLastBudget', fetchedLastBudget);
-
         if (fetchedLastBudget) {
           setLastBudget(fetchedLastBudget);
         } else {
@@ -806,14 +757,13 @@ percentage: ${percentage}`);
         ...newData, // Copy over the non-allocations data
         allocations: newData.allocations.map((allocation: any) => ({
           ...allocation,
+          amount: parseFloat(allocation?.amount),
           budgetCategory: allocation?.budgetCategory?.uid,
           subAllocations: allocation.subAllocations
             .map(({ subCategory, amount }: any) => ({ subCategory, amount })) // Map to only include subCategory and amount
             .filter((sub: any) => sub.subCategory && sub.amount), // Ensure we only keep valid subAllocations
         })),
       };
-
-      console.log('FilteredData:', FilteredData);
 
       const res = await CreateBudgetMutation.mutateAsync(FilteredData);
       // console.log(res);
@@ -1017,12 +967,12 @@ percentage: ${percentage}`);
             close={true}
             onClose={handleClose}
           >
-            <form action="" className="w-full  " method="post">
+            <form action="" className="w-full mt-6" method="post">
               <h1 className=" font-[500] leading-[20px]">
                 Assign amount/percentage of income for this category
               </h1>
 
-              <div className="px-[16px] bg-[#F7F7F9] mt-[8px] border border-[#E7E7EA] rounded-[16px] grid grid-cols-2 w-full">
+              <div className="px-[16px] bg-[#F7F7F9] mt-[8px] border border-[#E7E7EA] rounded-[16px] grid grid-cols-2 w-full mb-6">
                 <div className="py-[12px]">
                   <h1 className=" text-[#828282] text-[12px] leading-[14.4px] ">
                     Amount
@@ -1054,79 +1004,83 @@ percentage: ${percentage}`);
                 </div>
               </div>
 
-              <div className="mt-[24px] h-[30vh] overflow-y-scroll p-[16px] bg-[#F7F7F9] border border-[#E7E7EA] rounded-[16px] w-full">
-                {selectedBudget?.subAllocations?.map(
-                  (eachSubAllocation: any, index: number) => (
-                    <button
-                      type="button"
-                      key={index} // Unique key for each item
-                      className="flex hover:shadow-sm hover:p-[8px] hover:rounded-md hover:font-semibold hover:bg-[#0a0a0a09] transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
-                    >
-                      <div className="flex gap-[4px] w-full">
-                        <div
-                          style={{ backgroundColor: selectedBudget?.color }}
-                          className="grid place-content-center rounded-[16px] text-white size-[28px]"
-                        >
-                          <Image
-                            src={moneyIcon}
-                            className="size-[12px]"
-                            alt={'icon'}
-                            width={1000}
-                            height={1000}
-                          />
-                        </div>
-                        <div className="text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block">
-                          <input
-                            value={eachSubAllocation.subCategory || ''}
-                            onChange={(e) =>
-                              handleAllocationChange(index, 'subCategory', e.target.value)
-                            }
-                            placeholder="Category"
-                            className="bg-transparent w-full text-ellipsis overflow-hidden whitespace-nowrap"
-                            onBlur={() => handleBlur(index)}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <div className="bg-white rounded-[8px] py-[4px] px-[8px] flex justify-center items-center gap-[0px]">
-                          ₦
-                          <div className="relative inline-block w-full">
-                            <input
-                              value={
-                                eachSubAllocation.amount
-                                  ? eachSubAllocation.amount.toLocaleString('en-US')
-                                  : ''
-                              }
-                              onBlur={() => handleBlur(index)}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                const value = e.target.value;
-                                const numericValue = value.replace(/[^0-9.]/g, ''); // Keep only numbers and decimal point
-                                const cleanedValue = numericValue.replace(
-                                  /(\..*)\..*/g,
-                                  '$1',
-                                ); // Allow only one decimal point
-                                const finalValue =
-                                  cleanedValue === ''
-                                    ? ''
-                                    : parseFloat(cleanedValue).toString();
-                                handleAllocationChange(index, 'amount', finalValue);
-                              }}
-                              type="text" // Change to text to allow formatted input
-                              inputMode="decimal"
-                              pattern="[0-9]*[.,]?[0-9]*"
-                              onWheel={(e) => e.currentTarget.blur()}
-                              className="px-1 py-1 outline-none rounded focus:outline-none transition-all duration-200"
-                              style={{ width: '140px', maxWidth: '140px' }}
+              {/* <div className="mt-[24px] h-[30vh] overflow-y-auto p-[16px] bg-[#F7F7F9] border border-[#E7E7EA] rounded-[16px] w-full"> */}
+              <>
+                {/*selectedBudget?.subAllocations?.map(
+                    (eachSubAllocation: any, index: number) => (
+                      <button
+                        type="button"
+                        key={index}
+                        className="flex hover:shadow-sm hover:p-[8px] hover:rounded-md hover:font-semibold hover:bg-[#0a0a0a09] transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
+                      >
+                         <div className="flex gap-[4px] w-full">
+                          <div
+                            style={{ backgroundColor: selectedBudget?.color }}
+                            className="grid place-content-center rounded-[16px] text-white size-[28px]"
+                          >
+                            <Image
+                              src={moneyIcon}
+                              className="size-[12px]"
+                              alt={'icon'}
+                              width={1000}
+                              height={1000}
                             />
                           </div>
+                          <div className="text-[#514F6E] min-w-[100px] w-[80px] text-[14px] font-[500] inline-block">
+                            <input
+                              value={eachSubAllocation.subCategory || ''}
+                              onChange={(e) =>
+                                handleAllocationChange(
+                                  index,
+                                  'subCategory',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Category"
+                              className="bg-transparent w-full text-ellipsis overflow-hidden whitespace-nowrap"
+                              onBlur={() => handleBlur(index)}
+                            />
+                          </div>
+                        </div> 
+                        <div className="flex items-start">
+                          <div className="bg-white rounded-[8px] py-[4px] px-[8px] flex justify-center items-center gap-[0px]">
+                            ₦
+                            <div className="relative inline-block w-full">
+                              <input
+                                value={
+                                  eachSubAllocation.amount
+                                    ? eachSubAllocation.amount.toLocaleString('en-US')
+                                    : ''
+                                }
+                                onBlur={() => handleBlur(index)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  const value = e.target.value;
+                                  const numericValue = value.replace(/[^0-9.]/g, '');
+                                  // removed something from the regex
+                                  const cleanedValue = numericValue.replace(/(\..*)\..g, '$1', );
+                                  const finalValue =
+                                    cleanedValue === ''
+                                      ? ''
+                                      : parseFloat(cleanedValue).toString();
+                                  handleAllocationChange(index, 'amount', finalValue);
+                                }}
+                                type="text"
+                                inputMode="decimal"
+                                pattern="[0-9]*[.,]?[0-9]*"
+                                onWheel={(e) => e.currentTarget.blur()}
+                                className="px-1 py-1 outline-none rounded focus:outline-none transition-all duration-200"
+                                style={{ width: '140px', maxWidth: '140px' }}
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ),
-                )}
+                      </button>
+                    ),
+                  )*/}
+              </>
 
-                <button
-                  onClick={addSubAllocation} // Call addSubAllocation when clicked
+              {/* <button
+                  onClick={addSubAllocation}
                   type="button"
                   className="flex hover:scale-110 transition-all ease-in border-t-[1px] border-t-[#EFF0F6] mt-[10px] items-center gap-[8px]"
                 >
@@ -1139,8 +1093,8 @@ percentage: ${percentage}`);
                   <div className="text-[#514F6E] text-[14px] font-[500]">
                     Add Another{' '}
                   </div>
-                </button>
-              </div>
+                </button> */}
+              {/* </div> */}
             </form>
           </BottomDrawer>
         </motion.div>

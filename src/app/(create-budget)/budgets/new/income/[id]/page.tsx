@@ -65,16 +65,12 @@ const Page = ({ params }: { params: { id: string } }) => {
 
       return; // Prevent adding a new income
     }
-    console.log('allIncomes', allIncomes);
-    // loop through allIncomes and update the budget's incomes array and change amount parseFloat(amount)
     const updatedIncomes = allIncomes.map((income) => ({
       name: income.name,
       amount: parseFloat(income.amount.toString()),
     }));
 
-    console.log('updatedIncomes', updatedIncomes);
-
-    addIncomeToBudget(budgetId, allIncomes);
+    addIncomeToBudget(budgetId, updatedIncomes);
     navigate.push(`/budgets/new/expense/${budgetId}`);
   };
 
