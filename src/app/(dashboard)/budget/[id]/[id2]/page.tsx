@@ -320,7 +320,7 @@ const Page = (props: { params: { id: string; id2: string } }) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="fixed h-[100vh] top-0 w-full z-[40] bg-[#1c1c1c73]"
+                    className="fixed h-[100vh] bottom-0 w-full z-[40] bg-[#1c1c1c73]"
                 >
                     <div className=' '>
                         <BottomDrawer

@@ -1329,7 +1329,7 @@ export default function Page() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] bottom-0 fixed "
+          className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] top-0 fixed "
         >
           <div className="h-full text-[white] relative flex bg-white w-full flex-col gap-[16px] ">
             <div className="pt-[70px] pb-2 px-6 bg-gradient-to-tl from-[#66C227] to-[#2A860A]">
