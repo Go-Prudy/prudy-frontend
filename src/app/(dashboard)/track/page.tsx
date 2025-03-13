@@ -32,6 +32,7 @@ import {
   getActiveBudgetCategoriesApi,
   GetAllBudgetsApi,
   getSingleBudgetApi,
+  reauthorizeAccountApi,
   RecordExpenseApi,
 } from '@/app/services/BudgetService';
 import {
@@ -188,6 +189,7 @@ export default function Page() {
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSyncDataModal, setShowSyncDataModal] = useState(false);
   const [showAccountProcessingModal, setShowAccountProcessingModal] = useState(false);
+  const [showReauthorizeAccountModal, setShowReauthorizeAccountModal] = useState(false);
 
   const [showCategories, setShowCategories] = useState(false);
   const [transactionId, setTransactionId] = useState('');
@@ -447,6 +449,19 @@ export default function Page() {
       getSingleBudgetApi(authenticatedUser?.token ?? '', selectedBudget?.uid),
     enabled: !!authenticatedUser?.token && !!selectedBudget?.uid,
     refetchOnWindowFocus: true, // This should be directly in the options object.
+  });
+
+  // re-authorize account
+  const handleReauthorizeAccount = useMutation({
+    mutationFn: async (id: string) =>
+      reauthorizeAccountApi(authenticatedUser?.token ?? '', id ?? ''),
+    onSuccess: (data) => {      
+      window.location.href = data.data.url;
+      setShowReauthorizeAccountModal(false);
+    },
+    onError: (error) => {
+      console.error('Error reauthorizing account:', error);
+    },
   });
 
   // Fetch active categories for the selected budget
@@ -1319,6 +1334,44 @@ export default function Page() {
                   : 'Sync Transactions Now'}
               </button>
             )}
+          </div>
+        </motion.div>
+      )}
+
+      {(selectedBankAccount.reauthRequired || showReauthorizeAccountModal) && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[100]  bottom-0 fixed bg-[#1c1c1c73]"
+        >
+          <div className=" bg-white p-[24px] w-full space-y-2 rounded-[40px]">
+            <div className="cursor-pointer ml-auto w-fit">
+              <BsX
+                size={28}
+                onClick={() => setShowReauthorizeAccountModal(false)}
+                className=" bg-[#F7F7F9] rounded-[8px]"
+              />
+            </div>
+
+            <h1 className="text-center text-[20px] font-[500]">
+              Re-Authorization Required
+            </h1>
+
+            <h1 className="font-[400] leading-[24px] text-base text-center text-[#575757]">
+              To keep your accounts safe and your transactions sync running smoothly,
+              kindly re-authorize your bank account.{' '}
+            </h1>
+
+            <button
+              disabled={handleReauthorizeAccount.isPending}
+              onClick={() => handleReauthorizeAccount.mutate(selectedBankAccount.uid)}
+              type="submit"
+              className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+            >
+              {handleReauthorizeAccount.isPending ? 'Re-authorizing...' : 'Proceed'}
+            </button>
           </div>
         </motion.div>
       )}

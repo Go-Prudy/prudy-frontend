@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Header from '@/components/header';
 // import { toast } from 'react-toastify';
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import { BsArrowLeft, BsArrowRight, BsPlus } from 'react-icons/bs';
+import { BsArrowLeft, BsArrowRight, BsThreeDotsVertical } from 'react-icons/bs';
 // import moneyIcon from '/public/images/money.png';
 import addAnotherIcon from '/public/images/icons/add.svg';
 import moneyIcon from '/public/images/icons/money.svg';
@@ -26,6 +26,8 @@ const Page = ({ params }: { params: { id: string } }) => {
   const budget = budgets.find((b) => b.id === budgetId);
 
   const [allIncomes, setIncomes] = useState<Income[]>(previousBudget?.incomes ?? []);
+  const [popupPosition, setPopupPosition] = useState({ top: 0 });
+  const [selectedIncomeIndex, setSelectedIncomeIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (budget?.incomes?.length) {
@@ -92,12 +94,46 @@ const Page = ({ params }: { params: { id: string } }) => {
     setIncomes(updatedIncomes);
   };
 
+  const handleDeleteIncome = (incomeIndex: number) => {
+    const remainingIncomes = allIncomes.filter((_, index) => index !== incomeIndex);
+    setIncomes(remainingIncomes);
+    setSelectedIncomeIndex(null);
+  };
+
+  const handleDotsClick = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Get the button's position
+    const button = e.currentTarget as HTMLElement;
+    const rect = button.getBoundingClientRect();
+    setPopupPosition({
+      top: rect.bottom - 210,
+    });
+
+    setSelectedIncomeIndex(index);
+  };
+
   const getInputWidth = (index: number) => {
     if (spanRefs.current[index]) {
       return `${Math.min(spanRefs.current[index]!.offsetWidth + 30, 140)}px`;
     }
     return '50px';
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        selectedIncomeIndex !== null &&
+        !(event.target as Element).closest('.dots-button, .delete-popup')
+      ) {
+        setSelectedIncomeIndex(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [selectedIncomeIndex]);
 
   return (
     <motion.div
@@ -130,57 +166,80 @@ const Page = ({ params }: { params: { id: string } }) => {
             Income Streams
           </h1>
           <hr className="fill-white" />
-          <div className="grid grid-cols-1 max-h-[calc(65vh-140px)] px-4 pt-2 pb-3 space-y-3">
+          <div className="relative grid grid-cols-1 max-h-[calc(65vh-140px)] px-4 pt-2 pb-3 space-y-3">
             <div className="overflow-y-auto overflow-x-hidden  max-h-[calc(65vh-140px)] ">
               {allIncomes.map((income, index) => (
-                <form
-                  key={index}
-                  className="flex z-[100] relative  transition-all ease-in mt-[8px] items-center justify-between w-full gap-[8px]"
-                >
-                  <div className="flex items-center gap-3 w-full">
-                    <Image src={moneyIcon} className="size-8" alt={'icon'} />
-                    <div className="text-[#514F6E] min-w-[140px] w-[80px] text-[14px] font-[500] inline-block">
-                      <input
-                        className="bg-transparent outline-[#66C227] px-2 w-full text-ellipsis overflow-hidden whitespace-nowrap"
-                        type="text"
-                        placeholder="Enter income name"
-                        onChange={(e) =>
-                          handleIncomeChange(index, 'name', e.target.value)
-                        }
-                        ref={(el) => {
-                          inputRefs.current[index] = el;
-                        }}
-                        value={income.name}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="bg-white rounded-[8px] py-[4px] px-[8px] items-center flex  gap-[0px]">
-                      <h2>₦</h2>
-                      <div className="relative inline-block w-full">
+                <form key={index} className={`relative mt-[8px]`}>
+                  <div className="flex transition-all ease-in items-center justify-between w-full gap-[8px]">
+                    <div className="flex items-center gap-3 w-full">
+                      <Image src={moneyIcon} className="size-8" alt={'icon'} />
+                      <div className="text-[#514F6E] min-w-[140px] w-[80px] text-[14px] font-[500] inline-block">
                         <input
-                          value={formatNumber(income.amount.toString())}
-                          onChange={(e) =>
-                            handleIncomeChange(index, 'amount', e.target.value)
-                          }
+                          className="bg-transparent outline-[#66C227] px-2 w-full text-ellipsis overflow-hidden whitespace-nowrap"
                           type="text"
-                          className="px-2 py-1 rounded focus:outline-none border-none focus:border-none transition-all duration-200"
-                          style={{ width: getInputWidth(index), maxWidth: '140px' }}
-                        />
-
-                        <span
+                          placeholder="Enter income name"
+                          onChange={(e) =>
+                            handleIncomeChange(index, 'name', e.target.value)
+                          }
                           ref={(el) => {
-                            spanRefs.current[index] = el;
+                            inputRefs.current[index] = el;
                           }}
-                          className="absolute invisible whitespace-pre"
-                        >
-                          {formatNumber(income.amount.toString())}
-                        </span>
+                          value={income.name}
+                        />
                       </div>
                     </div>
+                    <div className="flex items-start">
+                      <div className="bg-white rounded-[8px] py-[4px] px-[8px] items-center flex  gap-[0px]">
+                        <h2>₦</h2>
+                        <div className="relative inline-block w-full">
+                          <input
+                            value={formatNumber(income.amount.toString())}
+                            onChange={(e) =>
+                              handleIncomeChange(index, 'amount', e.target.value)
+                            }
+                            type="text"
+                            className="px-2 py-1 rounded focus:outline-none border-none focus:border-none transition-all duration-200"
+                            style={{ width: getInputWidth(index), maxWidth: '140px' }}
+                          />
+
+                          <span
+                            ref={(el) => {
+                              spanRefs.current[index] = el;
+                            }}
+                            className="absolute invisible whitespace-pre"
+                          >
+                            {formatNumber(income.amount.toString())}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className="dots-button"
+                      onClick={(e) => handleDotsClick(e, index)}
+                    >
+                      <BsThreeDotsVertical />
+                    </button>
                   </div>
                 </form>
               ))}
+              {selectedIncomeIndex !== null && (
+                <button
+                  className="absolute right-4 z-[100] bg-white border rounded-[8px] shadow-lg p-2 flex gap-1 delete-popup"
+                  style={{
+                    top: `${popupPosition.top}px`,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    handleDeleteIncome(selectedIncomeIndex);
+                  }}
+                >
+                  <span className="text-white text-base leading-[10px] grid place-content-center rounded-[5px] px-[6px] bg-[#F5365C]">
+                    -
+                  </span>
+                  <span className="text-sm"> Delete Income</span>
+                </button>
+              )}
             </div>
             <button
               onClick={handleAddIncome}

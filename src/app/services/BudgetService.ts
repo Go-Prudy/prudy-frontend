@@ -267,3 +267,20 @@ export const deleteBudgetApi = async (token: string, id: string) => {
     console.log(error);
   }
 };
+
+
+// re-authorize account
+export const reauthorizeAccountApi = async (token: string, id: string) => {
+  try {
+    const response = await api.post(`accounts/${id}/reauthorize`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+      },
+    });
+
+    return response.data; // Return response data upon success
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || 'An error occurred');
+    console.log(error);
+  }
+};
