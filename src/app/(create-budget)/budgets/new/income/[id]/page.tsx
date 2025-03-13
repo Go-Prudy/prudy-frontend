@@ -4,13 +4,7 @@ import { motion } from 'framer-motion';
 import Header from '@/components/header';
 // import { toast } from 'react-toastify';
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import {
-  BsArrowLeft,
-  BsArrowRight,
-  BsPlus,
-  BsThreeDots,
-  BsThreeDotsVertical,
-} from 'react-icons/bs';
+import { BsArrowLeft, BsArrowRight, BsThreeDotsVertical } from 'react-icons/bs';
 // import moneyIcon from '/public/images/money.png';
 import addAnotherIcon from '/public/images/icons/add.svg';
 import moneyIcon from '/public/images/icons/money.svg';
@@ -19,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import { Income } from '@/app/Types';
 import { useBudgetStore } from '@/app/store/Store';
 import { formatNumber } from '@/utils/functions';
-import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 
 interface BudgetDetailsProps {
   budgetId: string;
@@ -231,7 +224,7 @@ const Page = ({ params }: { params: { id: string } }) => {
               ))}
               {selectedIncomeIndex !== null && (
                 <button
-                  className="absolute right-4 z-[100] bg-white border rounded-[8px] shadow-lg p-2 flex gap-1 dots-button delete-popup"
+                  className="absolute right-4 z-[100] bg-white border rounded-[8px] shadow-lg p-2 flex gap-1 delete-popup"
                   style={{
                     top: `${popupPosition.top}px`,
                   }}
