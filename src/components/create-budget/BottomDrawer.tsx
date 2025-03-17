@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react'
 import { BsChevronLeft, BsX } from 'react-icons/bs';
 import { motion } from 'framer-motion';
+import cn from 'classnames';
 
 interface IProps {
     label: string;
@@ -14,9 +15,10 @@ interface IProps {
     onClose: () => void;
     show: boolean;
     removePadding?: boolean;
+    className?:string
 }
 
-const BottomDrawer: React.FC<IProps> = ({ label, padding, link, back, close, children, footer, onClose, removePadding, show }) => {
+const BottomDrawer: React.FC<IProps> = ({ label, padding, link, back, close, children, footer, onClose, removePadding, show,className }) => {
     const navigate = useRouter();
 
     if (!show) return null; // Render nothing if 'show' is false
@@ -27,7 +29,7 @@ const BottomDrawer: React.FC<IProps> = ({ label, padding, link, back, close, chi
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="bottom-drawer w-[100vw] max-w-[500px] z-[60] absolute bottom-0 bg-white rounded-t-[24px]"
+            className={cn("bottom-drawer w-[100vw] max-w-[500px] z-[60] absolute bottom-0 bg-white rounded-t-[24px]",className)}
         >
             <div className={`header bg-[#F7F7F9] px-[24px] py-[16px] rounded-t-[24px] flex justify-between items-center`}>
                 <button
