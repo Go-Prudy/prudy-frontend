@@ -14,6 +14,7 @@ import lunch from '/public/images/Launch.png';
 import emptyState from '/public/images/empty-transaction.png';
 import addManual from '/public/images/addManually.png';
 import processingGif from '/public/images/processing.gif';
+import successImg from '/public/images/success1.png';
 import {
   BsCheck,
   BsChevronRight,
@@ -51,14 +52,20 @@ import {
   CircularProgress,
   Progress,
   Skeleton,
+  Switch,
 } from '@nextui-org/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { format, parseISO, set } from 'date-fns';
 import Scanner from '../../../components/scanFeature';
-import { AssignCategoryToTransactionApi } from '@/app/services/TransactionService';
+import {
+  AssignCategoryToTransactionApi,
+  AssignSplitCategoryToTransactionApi,
+} from '@/app/services/TransactionService';
 import { IAddManualInput } from '@/app/Types';
 import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
+import { lightenColor } from '@/utils/functions';
+import SplitExpenseModal from './_modals/SplitExpenseModal';
 
 interface Bank {
   name: string;
@@ -87,6 +94,11 @@ const ImportantNote = ({ className }: { className: string }) => (
     </div>
   </div>
 );
+
+interface SplitCategory {
+  allocationId: string;
+  amount: string | number;
+}
 
 export default function Page() {
   // Define the type for the array items
@@ -164,27 +176,6 @@ export default function Page() {
 
   const { authenticatedUser } = useAuthentication();
 
-  const lightenColor = (hex: string, percent: number): string => {
-    const hexToRgb = (hex: string) => {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return { r, g, b };
-    };
-
-    const rgbToHex = (r: number, g: number, b: number) => {
-      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-    };
-
-    const { r, g, b } = hexToRgb(hex);
-
-    const newR = Math.min(255, Math.round(r + (255 - r) * percent));
-    const newG = Math.min(255, Math.round(g + (255 - g) * percent));
-    const newB = Math.min(255, Math.round(b + (255 - b) * percent));
-
-    return rgbToHex(newR, newG, newB);
-  };
-
   const [bankData, setBankData] = useState<Bank[]>(bank_data);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSyncDataModal, setShowSyncDataModal] = useState(false);
@@ -193,6 +184,7 @@ export default function Page() {
 
   const [showCategories, setShowCategories] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+  const [transactionDetails, setTransactionDetails] = useState<Transaction>();
   const [accountId, setAccountId] = useState<string>('');
 
   const [showSyncTransactionFirstModal, setShowSyncTransactionFirstModal] = useState<any>(
@@ -229,6 +221,11 @@ export default function Page() {
   const [connectedAccounts, setConnectedAccounts] = useState([]);
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [addManualModalTitle, setAddManualModalTitle] = useState<string>('Add Manual');
+  const [showSplitExapenseModal, setShowSplitExapenseModal] = useState<boolean>(false);
+  const [splitCategories, setSplitCategories] = useState<SplitCategory[]>([]); // Array of categories to split the expense into
+  const [showSplitSuccessModal, setShowSplitSuccessModal] = useState<boolean>(false);
+  const [showAssignExpenseSuccessModal, setShowAssignExpenseSuccessModal] =
+    useState<boolean>(false);
 
   // Toggle balance visibility
   const toggleBalanceVisibility = () => {
@@ -242,6 +239,18 @@ export default function Page() {
   // Function to handle category selection
   const handleSelectCategory = (id: any) => {
     setSelectedCategoryForTransaction(id);
+  };
+
+  const handleSelectSplitCategory = (id: string) => {
+    setSplitCategories((prev: SplitCategory[]) => {
+      const existingIndex = prev.findIndex((item) => item.allocationId === id);
+
+      if (existingIndex >= 0) {
+        return prev.filter((item) => item.allocationId !== id);
+      } else {
+        return [...prev, { allocationId: id, amount: 0 }];
+      }
+    });
   };
 
   // const handleAssign = () => {
@@ -304,11 +313,10 @@ export default function Page() {
     refetchOnMount: false,
   });
 
-  const AssignExpense = (transactionId: string) => {
-    try {
-      setTransactionId(transactionId);
-      setShowCategories(!showCategories);
-    } catch (error) {}
+  const AssignExpense = (transactionId: string, transaction: Transaction) => {
+    setTransactionId(transactionId);
+    setShowCategories(!showCategories);
+    setTransactionDetails(transaction);
   };
 
   // const abbreviateNumber = (num: number): string => {
@@ -455,7 +463,7 @@ export default function Page() {
   const handleReauthorizeAccount = useMutation({
     mutationFn: async (id: string) =>
       reauthorizeAccountApi(authenticatedUser?.token ?? '', id ?? ''),
-    onSuccess: (data) => {      
+    onSuccess: (data) => {
       window.location.href = data.data.url;
       setShowReauthorizeAccountModal(false);
     },
@@ -709,6 +717,7 @@ export default function Page() {
       setSelectedCategoryForTransaction(null);
       // Close the categories modal
       setShowCategories(false);
+      setShowAssignExpenseSuccessModal(true);
     },
     onError: (error, variables, context) => {
       console.error('Error assigning category:', error);
@@ -732,6 +741,77 @@ export default function Page() {
       transactionId: transactionId,
       budgetId: selectedBudget?.uid,
       categoryId: selectedCategoryForTransaction,
+    });
+  };
+
+  const assignSplitCategoryMutation = useMutation({
+    mutationFn: async (data: {
+      accountId: string;
+      transactionId: string;
+      budgetId: string;
+      categories: SplitCategory[];
+    }) =>
+      AssignSplitCategoryToTransactionApi(
+        data.accountId,
+        data.transactionId,
+        data.budgetId,
+        data.categories,
+        authenticatedUser?.token ?? '',
+      ),
+    onMutate: async (variables) => {
+      // Store previous transactions state for rollback if needed
+      const previousTransactions = transactions;
+
+      // Optimistically update the transactions state
+      setTransactions(
+        (prevTransactions) =>
+          prevTransactions.filter(
+            (transaction) => transaction.uid !== variables.transactionId,
+          ), // Remove the assigned transaction
+      );
+
+      // Return context with previous transactions for rollback
+      return { previousTransactions };
+    },
+    onSuccess: (data) => {
+      toast.success('Transaction updated with selected category!');
+      setSelectedCategoryForTransaction(null);
+      setSplitCategories([]);
+      // Close the categories modal
+      setShowSplitExapenseModal(false);
+      setShowSplitSuccessModal(true);
+    },
+    onError: (error, variables, context) => {
+      console.error('Error splitting category:', error);
+      toast.error('Failed to split category. Please try again.');
+
+      // Rollback to previous state if there's an error
+      if (context?.previousTransactions) {
+        setTransactions(context.previousTransactions);
+      }
+    },
+  });
+  const handleAssignSplitCategory = () => {
+
+    if (splitCategories.length === 0) {
+      toast.error('Please select a category');
+      return;
+    }
+
+    const processedCategories = splitCategories.map((category) => ({
+      ...category,
+      amount: parseFloat(category.amount.toString()),
+    }));
+    // .filter((category) => category.amount !== 0);
+
+    // console.log(processedCategories);
+    
+
+    assignSplitCategoryMutation.mutate({
+      accountId: accountId,
+      transactionId: transactionId,
+      budgetId: selectedBudget?.uid,
+      categories: processedCategories,
     });
   };
 
@@ -1502,7 +1582,9 @@ export default function Page() {
                               {transactions.map((transaction, index) => (
                                 <div
                                   key={transaction.uid}
-                                  onClick={() => AssignExpense(transaction.uid)}
+                                  onClick={() =>
+                                    AssignExpense(transaction.uid, transaction)
+                                  }
                                   className={`flex justify-between items-center ${
                                     index !== transactions.length - 1
                                       ? 'border-b border-b-[#E7E7EA]'
@@ -1589,6 +1671,101 @@ export default function Page() {
         </motion.div>
       )}
 
+      {showSplitExapenseModal && (
+        <SplitExpenseModal
+          setShowSplitExapenseModal={setShowSplitExapenseModal}
+          showSplitExapenseModal={showSplitExapenseModal}
+          handleAssignCategory={handleAssignSplitCategory}
+          isPending={assignSplitCategoryMutation.isPending}
+          transactionDetails={transactionDetails ?? null}
+          singleBudgetData={singleBudgetData}
+          handleSelectSplitCategory={handleSelectSplitCategory}
+          splitCategories={splitCategories}
+          setSplitCategories={setSplitCategories}
+          setShowCategories={setShowCategories}
+        />
+      )}
+
+      {showAssignExpenseSuccessModal && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[100]  bottom-0 fixed bg-[#1c1c1c73]"
+        >
+          <div className=" bg-white p-[24px] w-full space-y-2 rounded-[40px]">
+            <div className="cursor-pointer ml-auto w-fit">
+              <BsX
+                size={28}
+                onClick={() => setShowAssignExpenseSuccessModal(false)}
+                className=" bg-[#F7F7F9] rounded-[8px]"
+              />
+            </div>
+            <Image
+              src={successImg}
+              width={100}
+              height={100}
+              alt=""
+              className="w-[77px] mx-auto"
+            />
+
+            <h1 className="text-center text-[20px] font-[500]">
+              Assigned Successfully 🎉
+            </h1>
+
+            <p className=" text-base text-center text-[#707170]">
+              Your transaction has been successfully assigned to the category{' '}
+            </p>
+            <button
+              onClick={() => setShowAssignExpenseSuccessModal(false)}
+              className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+            >
+              Close
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {showSplitSuccessModal && (
+        <motion.div
+          initial={{ opacity: 0, y: 90 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="h-[100vh] w-[100vw] max-w-[500px] flex justify-center items-center p-[24px] z-[100]  bottom-0 fixed bg-[#1c1c1c73]"
+        >
+          <div className=" bg-white p-[24px] w-full space-y-2 rounded-[40px]">
+            <div className="cursor-pointer ml-auto w-fit">
+              <BsX
+                size={28}
+                onClick={() => setShowSplitSuccessModal(false)}
+                className=" bg-[#F7F7F9] rounded-[8px]"
+              />
+            </div>
+            <Image
+              src={successImg}
+              width={100}
+              height={100}
+              alt=""
+              className="w-[77px] mx-auto"
+            />
+
+            <h1 className="text-center text-[20px] font-[500]">Split Successful 🎉</h1>
+
+            <p className=" text-base text-center text-[#707170]">
+              Your transaction has been successfully split into the categories
+            </p>
+            <button
+              onClick={() => setShowSplitSuccessModal(false)}
+              className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
+            >
+              Close
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {showCategories && (
         <div className="h-[100vh] w-[100vw] max-w-[500px] z-[40] fixed bottom-0">
           {/* Dark background */}
@@ -1606,12 +1783,13 @@ export default function Page() {
             className="fixed bottom-0  w-full z-[50]"
           >
             <BottomDrawer
-              label={`Sync transactions`}
+              label={`Assign to Expense Category`}
               back={false}
               show={showCategories}
               close={true}
               padding={1}
               removePadding={false}
+              className="overflow-y-auto max-h-screen"
               footer={
                 <button
                   className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
@@ -1632,26 +1810,34 @@ export default function Page() {
               }
               onClose={() => setShowCategories(!showCategories)}
             >
-              <div className="bg-white  pt-4 pb-[32px] px-4   rounded-t-lg shadow-lg">
-                <h1 className="text-[16px] font-[500] text-[#514F6E] mb-[24px]">
-                  Select category
-                </h1>
+              <div className="px-4 pt-4 pb-2 space-y-4 bg-white">
+                <h1 className="text-base font-[500] text-[#2D2D2D]">Select category</h1>
 
-                <div className="grid grid-cols-3 max-h-[50vh]  overflow-y-scroll gap-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <p className="text-xs font-[500] text-[#575757]">
+                    Split to different categories
+                  </p>
+                  <Switch
+                    isSelected={showSplitExapenseModal}
+                    onChange={() => {
+                      setShowCategories(false);
+                      setShowSplitExapenseModal(true);
+                    }}
+                    size="sm"
+                    color="success"
+                  />
+                </div>
+                <div className="grid grid-cols-3 max-h-[50vh]  overflow-y-scroll gap-3">
                   {singleBudgetData?.budgetCategories?.map((category: any) => (
                     <div
                       key={category.uid}
-                      className={`relative p-[8px] w-[105.67px] h-[100px] border rounded-[20px] ${
-                        selectedCategoryForTransaction === category.uid
-                          ? 'border-blue-500'
-                          : 'border-gray-300'
-                      } cursor-pointer`}
+                      className={`relative p-[8px] w-full h-[100px] border rounded-[20px] cursor-pointer`}
                       onClick={() => handleSelectCategory(category.uid)}
                       style={{
                         backgroundColor:
                           selectedCategoryForTransaction === category.uid
                             ? lightenColor(category.color, 0.9)
-                            : 'transparent',
+                            : '#F7F7F9',
                         borderColor:
                           selectedCategoryForTransaction === category.uid
                             ? category.color
