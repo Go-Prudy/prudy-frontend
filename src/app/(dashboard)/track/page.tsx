@@ -1463,7 +1463,7 @@ export default function Page() {
           className="min-h-screen h-full w-full overflow-auto max-w-[500px] z-[40] top-0 fixed "
         >
           <div className="h-full text-[white] relative flex bg-white w-full flex-col gap-[16px]">
-            <div className="pt-10 pb-2 px-6 bg-gradient-to-tl from-[#66C227] to-[#2A860A]">
+            <div className="pt-6 pb-2 px-6 bg-gradient-to-tl from-[#66C227] to-[#2A860A]">
               <div className="space-y-4 w-full gap-[16px] p-[8px] rounded-[20px] ">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2 items-center">
@@ -1551,7 +1551,7 @@ export default function Page() {
                         {isSyncing ? 'Syncing...' : 'Sync Latest'}
                       </button>
                     </div>
-                    <div className="bg-[#F7F7F9] h-full w-full pb-10">
+                    <div className="bg-[#F7F7F9] h-full w-full pb-20">
                       {/* Conditional Rendering based on currentView state */}
                       {currentView === 'loading' && (
                         <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
