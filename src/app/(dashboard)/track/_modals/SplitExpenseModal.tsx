@@ -206,7 +206,7 @@ export default function SplitExpenseModal({
             <div className="grid grid-cols-2 max-h-[50vh]  overflow-y-scroll gap-3">
               {singleBudgetData?.budgetCategories?.map((category: any) => {
                 // const isSelected = splitCategories.some(
-                //   (item) => item.allocationId === category.uid,
+                //   (item) => item.allocationId === category.allocationId,
                 // );
 
                 return (
@@ -261,7 +261,7 @@ export default function SplitExpenseModal({
                         className="w-full text-sm bg-transparent focus:outline-none"
                         value={
                           splitCategories
-                            .find((item) => item.allocationId === category.uid)
+                            .find((item) => item.allocationId === category.allocationId)
                             ?.amount?.toString() || ''
                         }
                         placeholder="0.00"
@@ -269,7 +269,7 @@ export default function SplitExpenseModal({
                           // Only allow numbers and one decimal point
                           const value = e.target.value.replace(/,/g, '');
                           if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                            handleAmountChange(e, category.uid);
+                            handleAmountChange(e, category.allocationId);
                           }
                         }}
                       />
