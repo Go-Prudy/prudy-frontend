@@ -125,7 +125,7 @@ export default function SplitExpenseModal({
           close={true}
           padding={1}
           removePadding={false}
-          className="overflow-y-auto max-h-screen"
+          className="overflow-y-auto max-h-screen !relative"
           footer={
             <button
               className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"

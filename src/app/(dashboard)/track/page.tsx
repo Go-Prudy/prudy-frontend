@@ -792,7 +792,6 @@ export default function Page() {
     },
   });
   const handleAssignSplitCategory = () => {
-
     if (splitCategories.length === 0) {
       toast.error('Please select a category');
       return;
@@ -805,7 +804,6 @@ export default function Page() {
     // .filter((category) => category.amount !== 0);
 
     // console.log(processedCategories);
-    
 
     assignSplitCategoryMutation.mutate({
       accountId: accountId,
@@ -1486,7 +1484,7 @@ export default function Page() {
                   </div>
                   <button
                     onClick={() => setShowSyncDataModal(!showSyncDataModal)}
-                    className=" grid place-content-center top-[24px] bg-[#7CD741] size-[36px] rounded-full  "
+                    className="grid place-content-center top-[24px] bg-[#7CD741] size-[36px] rounded-full  "
                   >
                     <BsX size={'24px'} />
                   </button>
@@ -1553,7 +1551,7 @@ export default function Page() {
                         {isSyncing ? 'Syncing...' : 'Sync Latest'}
                       </button>
                     </div>
-                    <div className="bg-[#F7F7F9] h-full w-full">
+                    <div className="bg-[#F7F7F9] h-full w-full pb-7">
                       {/* Conditional Rendering based on currentView state */}
                       {currentView === 'loading' && (
                         <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
