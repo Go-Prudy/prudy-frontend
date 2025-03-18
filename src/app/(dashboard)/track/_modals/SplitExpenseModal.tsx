@@ -87,7 +87,7 @@ export default function SplitExpenseModal({
           return prev;
         });
 
-        const newTotal = otherCategoriesTotal + value;
+        const newTotal = otherCategoriesTotal + value;        
         setAmountDetails((prev) => ({
           ...prev,
           amountLeft: Number((amountToSplit - newTotal).toFixed(2)),
@@ -125,7 +125,7 @@ export default function SplitExpenseModal({
           close={true}
           padding={1}
           removePadding={false}
-          className="overflow-y-auto max-h-screen"
+          className="overflow-y-auto max-h-screen !relative"
           footer={
             <button
               className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
@@ -259,11 +259,11 @@ export default function SplitExpenseModal({
                         type="text"
                         inputMode="decimal"
                         className="w-full text-sm bg-transparent focus:outline-none"
-                        value={formatCategoryNumber(
+                        value={
                           splitCategories
                             .find((item) => item.allocationId === category.uid)
-                            ?.amount?.toString() || '',
-                        )}
+                            ?.amount?.toString() || ''
+                        }
                         placeholder="0.00"
                         onChange={(e) => {
                           // Only allow numbers and one decimal point
