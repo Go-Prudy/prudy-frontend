@@ -21,12 +21,12 @@ export default function Nav() {
           <Link href="/budget" className="flex flex-col items-center h-full gap-[2px]">
             <HomeIcon
               className={
-                pathname === '/budget' ? 'fill-lemonGreen-700' : 'fill-grayCaption'
+                pathname === '/budget' ? 'fill-lemonGreen-600' : 'fill-grayCaption'
               }
             />
             <span
               className={
-                pathname === '/budget' ? 'text-lemonGreen-700' : 'text-grayCaption'
+                pathname === '/budget' ? 'text-lemonGreen-600' : 'text-grayCaption'
               }
             >
               Budget
@@ -37,12 +37,12 @@ export default function Nav() {
           <Link href="/track" className="flex flex-col items-center h-full gap-[2px]">
             <NoteIcon
               className={
-                pathname === '/track' ? 'fill-lemonGreen-700' : 'fill-grayCaption'
+                pathname === '/track' ? 'fill-lemonGreen-600' : 'fill-grayCaption'
               }
             />
             <span
               className={
-                pathname === '/track' ? 'text-lemonGreen-700' : 'text-grayCaption'
+                pathname === '/track' ? 'text-lemonGreen-600' : 'text-grayCaption'
               }
             >
               Track
@@ -53,12 +53,12 @@ export default function Nav() {
           <Link href="/analytics" className="flex flex-col items-center h-full gap-[2px]">
             <ChartIcon
               className={
-                pathname === '/analytics' ? 'fill-lemonGreen-700' : 'fill-grayCaption'
+                pathname === '/analytics' ? 'fill-lemonGreen-600' : 'fill-grayCaption'
               }
             />
             <span
               className={
-                pathname === '/analytics' ? 'text-lemonGreen-700' : 'text-grayCaption'
+                pathname === '/analytics' ? 'text-lemonGreen-600' : 'text-grayCaption'
               }
             >
               analytics
@@ -69,12 +69,12 @@ export default function Nav() {
           <Link href="/profile" className="flex flex-col items-center h-full gap-[2px]">
             <UserIcon
               className={
-                pathname === '/profile' ? 'fill-lemonGreen-700' : 'fill-grayCaption'
+                pathname === '/profile' ? 'fill-lemonGreen-600' : 'fill-grayCaption'
               }
             />
             <span
               className={
-                pathname === '/profile' ? 'text-lemonGreen-700' : 'text-grayCaption'
+                pathname === '/profile' ? 'text-lemonGreen-600' : 'text-grayCaption'
               }
             >
               Profile

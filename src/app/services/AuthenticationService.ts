@@ -20,9 +20,9 @@ export const sendOtp = async (otpFormData: any) => {
 };
 
 // Validate Email on Signup
-export const validateUserEmailOnSignup = async (email: string, phoneNumber:string) => {
+export const validateUserEmailOnSignup = async (email: string,) => {
   try {
-    const response = await api.post('/auth/validate-credential', { email, phoneNumber });
+    const response = await api.post('/auth/validate-credential', { email,  });
     // console.log(response.data);
     // toast.success(response.data.message);
     return response.data;

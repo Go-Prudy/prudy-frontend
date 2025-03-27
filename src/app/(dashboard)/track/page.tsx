@@ -1330,7 +1330,7 @@ export default function Page() {
 
                         {/* Display Account Details */}
                         <div className="w-full flex">
-                          <h1 className="text-[14px] flex w-full text-base-black">
+                          <h1 className="text-[14px] flex w-full text-black-900">
                             {account.accountName} |
                             <span className="font-[500]"> {account.accountNumber}</span>
                           </h1>

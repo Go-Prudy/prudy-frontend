@@ -1,13 +1,12 @@
-import type { Config } from "tailwindcss";
-const { nextui } = require("@nextui-org/react");
+import type { Config } from 'tailwindcss';
+const { nextui } = require('@nextui-org/react');
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -17,17 +16,41 @@ const config: Config = {
         slideUp: 'slide-up  300ms cubic-bezier(0.87, 0, 0.13, 1)',
         slideDown: 'slide-down 300ms cubic-bezier(0.87, 0, 0.13, 1)',
       },
-      colors: ({ colors }) => ({
-        base: {
-          gray: '#2D2D2D',
-          black: '#121212'
+      colors: {
+        white: '#FFFFFF',
+        black: {
+          100: '',
+          800: '#2D2D2D',
+          900: '#121212',
+          950: '#000000',
         },
+        gray: {
+          300: '#707170',
+          400: '#828282',
+          600: '#575757',
+        },
+
         lemonGreen: {
-          500: '#8EF846',
-          600: '#90F24C',
-          700: '#66C227'
-        }
-      }),
+          50: '#E8FCD8',
+          400: '#78EF2C',
+          // 500: '#8EF846',
+          600: '#66C227',
+          900: '#33810A',
+          950: '#103003',
+        },
+
+        success: {
+          500: '#219653',
+        },
+      },
+      fontSize: {
+        // sm: [
+        //   '14px',
+        //   {
+        //     lineHeight: '22px',
+        //   },
+        // ],
+      },
       transitionDuration: {
         DEFAULT: '75ms',
       },
@@ -37,9 +60,14 @@ const config: Config = {
       fontFamily: {
         aeonik: ['var(--font-aeonik)'],
       },
+      backgroundImage: {
+        'app-gradient': 'linear-gradient(20.37deg, #66C227 15.2%, #2A860A 74.4%);',
+        'onboarding-overlay':
+          'linear-gradient(180deg, rgba(18, 18, 18, 0) 50%, rgba(15, 45, 0, 0.43) 179.64%)',
+      },
     },
   },
-  darkMode: "class",
+  darkMode: 'class',
   plugins: [nextui()],
 };
 export default config;
