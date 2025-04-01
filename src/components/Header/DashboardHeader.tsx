@@ -1,21 +1,34 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import Image from 'next/image';
-import { BsBell, BsPerson } from 'react-icons/bs';
+import Cookies from 'js-cookie';
+import Image, { StaticImageData } from 'next/image';
 import cn from 'classnames';
+import { ReactNode, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { usePathname } from 'next/navigation';
+import { BsBell, BsPerson } from 'react-icons/bs';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { IAuthenticatedUser } from '@/app/Types';
 import { fetchUserProfile } from '@/app/services/AuthenticationService';
-import { useQuery } from '@tanstack/react-query';
-import Cookies from 'js-cookie';
 
-interface BudgetPageHeaderProp {
+interface DashboardHeaderProp {
   title?: string;
-  headerType: 'budget' | 'dashboard';
+  type: 'budget' | 'dashboard' | 'home';
+  headerIcon: StaticImageData;
+  headerIconClass: string;
+  headerTitle?: string;
+  description?: string;
+  children?: ReactNode;
 }
 
-const BudgetPageHeader = ({ headerType, title }: BudgetPageHeaderProp) => {
+const DashboardHeader = ({
+  type,
+  title,
+  headerIcon,
+  headerIconClass,
+  headerTitle,
+  description,
+  children,
+}: DashboardHeaderProp) => {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState<boolean>(false);
   const { updateAuthenticatedUser, authenticatedUser } = useAuthentication();
@@ -83,7 +96,7 @@ const BudgetPageHeader = ({ headerType, title }: BudgetPageHeaderProp) => {
           scrolled ? 'scrolled-bg text-white' : 'bg-white',
         )}
       >
-        {headerType === 'budget' ? (
+        {type === 'home' ? (
           <div className="text-black-970 flex gap-2 items-start">
             <div
               className={`rounded-full ${!userData.profile.profilePhotoUrl ? 'p-1 border border-gray-600' : 'p-0'} `}
@@ -117,8 +130,24 @@ const BudgetPageHeader = ({ headerType, title }: BudgetPageHeaderProp) => {
           </div>
         )}
       </div>
+      <div className="px-6 pb-6 bg-header-gradient rounded-b-[32px]">
+        <div className="flex items-center gap-1">
+          <div className="space-y-1">
+            <h3 className="text-2xl font-bold">{headerTitle}</h3>
+            {description && <p className="text-black-800 text-sm">{description}</p>}
+          </div>
+          <Image
+            src={headerIcon}
+            width={135}
+            height={135}
+            alt="budget header icon"
+            className={headerIconClass}
+          />
+        </div>
+        {children}
+      </div>
     </>
   );
 };
 
-export default BudgetPageHeader;
+export default DashboardHeader;

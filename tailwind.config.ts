@@ -22,9 +22,11 @@ const config: Config = {
           100: '',
           800: '#2D2D2D',
           900: '#121212',
+          970: '#070D04',
           950: '#000000',
         },
         gray: {
+          100: '#F7F7F9',
           300: '#707170',
           400: '#828282',
           600: '#575757',
@@ -64,6 +66,8 @@ const config: Config = {
         'app-gradient': 'linear-gradient(20.37deg, #66C227 15.2%, #2A860A 74.4%);',
         'onboarding-overlay':
           'linear-gradient(180deg, rgba(18, 18, 18, 0) 50%, rgba(15, 45, 0, 0.43) 179.64%)',
+        'header-gradient':
+          'radial-gradient(316.4% 252.92% at 50% 263.33%, #C3FD99 20%, #FFFFFF 100%)',
       },
     },
   },

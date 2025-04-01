@@ -8,9 +8,9 @@ import Header from '@/components/header';
 import Input from '@/components/input';
 import Button from '@/components/button';
 import OtpInput from '@/components/OtpInput';
-import useForgotPassword from './useForgotPassword';
 import Success from '../_components/Success';
 import { emailSchema } from '@/utils/validationSchema';
+import useForgotPassword from './useForgotPassword';
 
 const VerifyOtpPage = () => {
   const {

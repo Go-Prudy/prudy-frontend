@@ -7,10 +7,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Button from '@/components/button';
 import OtpInput from '@/components/OtpInput';
 import Input from '@/components/input';
-import useLogin from './useLogin';
 import { emailSchema } from '@/utils/validationSchema';
 import GoogleLogo from '@/icons/google-logo';
 import loginImage from '/public/images/auth/login.png';
+import useLogin from './useLogin';
 
 
 const LoginPage = () => {

@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
 import pics from '/public/images/frame.webp';
+import budgetHeaderIcon from '/public/images/header/budget.png';
 import { BsPersonFill, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
 import noBudgetImg from '/public/images/List 2.webp';
 import Image from 'next/image';
@@ -23,6 +24,8 @@ import { IPreviousBudget } from '@/app/types/budget';
 import { useBudgetStore } from '@/app/store/Store';
 import BottomDrawer from '@/components/create-budget/BottomDrawer';
 import toast from 'react-hot-toast';
+import Button from '@/components/button';
+import DashboardHeader from '@/components/Header/DashboardHeader';
 const BudgetPage = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showInvites, setShowInvites] = useState(false);
@@ -248,56 +251,42 @@ const BudgetPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="  "
+      className="  mt-[72px]"
     >
-      <div className=" overscroll-none">
-        <div
-          className="relative  w-full max-w-[500px] overscroll-none bg-no-repeat bg-contain bg-top transition-all duration-300 ease-out min-h-screen"
-          style={{
-            backgroundImage: `url(${pics.src})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <BudgetPageHeader headerType="budget" />
-          <p className="px-6 pt-[136px] text-[32px] font-[700] text-white">
-            Take charge of your income, budget effectively and track your finances
-          </p>
-          <div className="px-6 w-full relative max-w-[500px] ">
-            {!scrolled ? (
-              <button
+      <div className="overscroll-none">
+        <div className="relative w-full max-w-[500px] overscroll-none bg-no-repeat bg-contain bg-top transition-all duration-300 ease-out min-h-screen">
+          <DashboardHeader
+            type="dashboard"
+            title="Budgets"
+            headerIcon={budgetHeaderIcon}
+            headerTitle="Budget smarter, Live better."
+            headerIconClass="mr-[-14px]"
+          >
+            <div className="flex gap-3 w-full">
+              <Button
                 onClick={() => {
                   clearBudget();
                   setCreateBudgetComponent(!createBudgetComponent);
                 }}
-                className="mt-[24px] w-full justify-center items-center text-center font-[500] bg-[#8EF846] px-[28px] py-[16px] rounded-[32px] flex gap-[8px]"
+                className="text-xs py-[10px] px-3 rounded-xl"
               >
-                <BsPlus size={30} />
-                Create budget
-              </button>
-            ) : (
-              <div className="z-[21] right-6 bottom-[240px] fixed w-fit">
-                <button
-                  onClick={() => {
-                    clearBudget();
-                    setCreateBudgetComponent(!createBudgetComponent);
-                  }}
-                  className=" top-[550px] mt-[24px] justify-center items-center text-center font-[500]  bg-[#8EF846]  p-[14px] w-fit rounded-[32px] flex gap-[8px]"
-                >
-                  <BsPlus size={30} />
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="bg-[#F7F7F9] mt-10 min-h-[389px] w-full rounded-t-[24px]">
+                Create New Budget
+              </Button>
+              <Button className="bg-white text-xs py-[10px] px-3 rounded-xl">
+                Duplicate Last Budget
+              </Button>
+            </div>
+          </DashboardHeader>
+
+          <div className="min-h-[400px] w-full">
             {isPending ? (
-              <div className="flex flex-col mb-[90px] gap-[24px] p-[24px]">
+              <div className="flex flex-col mb-[90px] gap-6 p-6">
                 {[...Array(3)].map((_, index) => (
                   <Skeleton key={index} className="h-[100px] w-full rounded-[20px]" />
                 ))}
               </div>
             ) : budgets?.length === 0 ? (
-              <div className="py-[65px] text-center flex-col gap-[8px] flex justify-center items-center px-[51px]">
+              <div className="py-[65px] text-center flex-col gap-2 flex justify-center items-center px-[51px]">
                 <Image
                   src={noBudgetImg.src}
                   width={1000}
@@ -313,7 +302,7 @@ const BudgetPage = () => {
                 </h1>
               </div>
             ) : (
-              <div className="flex flex-col pb-[90px] gap-[24px] p-[24px]">
+              <div className="flex flex-col pb-[90px] gap-6 p-6">
                 {budgets?.map((budget: any, index: any) => {
                   const totalBudgetIncome = Number(budget?.totalIncome) || 0;
                   const totalBudgetExpenses = Number(budget?.totalExpenses) || 0;
