@@ -755,21 +755,21 @@ const Page = (props: { params: { id: string } }) => {
 
       const FilteredData = {
         ...newData, // Copy over the non-allocations data
-        allocations: newData.allocations.map((allocation: any) => ({
-          ...allocation,
-          amount: parseFloat(allocation?.amount),
-          budgetCategory: allocation?.budgetCategory?.uid,
-          subAllocations: allocation.subAllocations
-            .map(({ subCategory, amount }: any) => ({ subCategory, amount })) // Map to only include subCategory and amount
-            .filter((sub: any) => sub.subCategory && sub.amount), // Ensure we only keep valid subAllocations
-        })),
+        allocations: newData.allocations
+          .filter((allocations: any) => allocations.amount && allocations.amount !== 0)
+          .map((allocation: any) => ({
+            ...allocation,
+            amount: parseFloat(allocation?.amount) || 0,
+            budgetCategory: allocation?.budgetCategory?.uid,
+            subAllocations: allocation.subAllocations
+              .map(({ subCategory, amount }: any) => ({ subCategory, amount })) // Map to only include subCategory and amount
+              .filter((sub: any) => sub.subCategory && sub.amount), // Ensure we only keep valid subAllocations
+          })),
       };
 
       const res = await CreateBudgetMutation.mutateAsync(FilteredData);
-      // console.log(res);
       setBluredData([]);
       if (res) {
-        // console.log(res);
         navigate.push('/budget/' + res.uid);
       }
     } catch (error) {
