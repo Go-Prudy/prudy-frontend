@@ -1,7 +1,7 @@
 'use client';
 import Header from '@/components/header';
 import OtpInput from '@/components/OtpInput';
-import Button from '@/components/button';
+import Button from '@/app/_components/button';
 import useSetPasscode from './useSetPasscode';
 
 const Page = () => {

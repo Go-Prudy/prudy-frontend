@@ -7,7 +7,7 @@ import moneyIcon from '/public/images/money.png';
 import noBudgetImg from '/public/images/List 2.webp';
 
 import Image from 'next/image';
-import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import BottomDrawer from '@/app/_components/drawers/BottomDrawer';
 import { useRouter } from 'next/navigation';
 import { useBudgetStore } from '@/app/store/Store';
 import {

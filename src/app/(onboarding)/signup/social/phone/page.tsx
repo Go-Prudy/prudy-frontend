@@ -1,6 +1,6 @@
 'use client';
 import Header from '@/components/header';
-import Input from '@/components/input';
+import Input from '@/app/_components/input';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';

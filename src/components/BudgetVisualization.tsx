@@ -1,15 +1,11 @@
 import React, { useEffect } from "react";
 import * as d3 from "d3";
+import { BudgetDistributionCategory } from "@/utils/types";
 
-interface BudgetCategory {
-  name: string;
-  percentage: number;
-  color: string;
-}
 
 interface BudgetVisualizationProps {
   totalBudget: number;
-  distributions: BudgetCategory[];
+  distributions: BudgetDistributionCategory[];
 }
 
 const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
@@ -27,7 +23,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .outerRadius(radius - 20)
       .padAngle(0.01);
 
-    const pieGenerator = d3.pie<BudgetCategory>().value((d) => d.percentage);
+    const pieGenerator = d3.pie<BudgetDistributionCategory>().value((d) => d.percentage);
 
     const pieData = pieGenerator(distributions);
 

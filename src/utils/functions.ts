@@ -34,3 +34,26 @@ export const lightenColor = (hex: string, percent: number): string => {
 
   return rgbToHex(newR, newG, newB);
 };
+
+// Function to generate a unique random color
+export const generateUniqueColors = (count: number): string[] => {
+  const colors = new Set<string>();
+
+  while (colors.size < count) {
+    const color = `#${Math.floor(Math.random() * 16777215)
+      .toString(16)
+      .padStart(6, '0')}`;
+    colors.add(color);
+  }
+
+  return Array.from(colors);
+};
+
+export const formatAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+  let value = e.target.value;
+  value = value.replace(/[^\d]/g, '');
+  if (value) {
+    value = '₦' + Number(value).toLocaleString();
+  }
+  e.target.value = value;
+};

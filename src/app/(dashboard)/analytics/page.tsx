@@ -1,5 +1,5 @@
 'use client';
-import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import BottomDrawer from '@/app/_components/drawers/BottomDrawer';
 import Header2 from '@/components/create-budget/Header2';
 import { useEffect, useState } from 'react';
 import { BsChevronDown, BsChevronRight } from 'react-icons/bs';

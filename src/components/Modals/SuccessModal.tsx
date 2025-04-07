@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import React from 'react';
 import Successlogo from '/public/images/success-gif.gif';
-import Button from '../button';
+import Button from '../../app/_components/button';
 
 interface IProps {
   showModal: boolean;

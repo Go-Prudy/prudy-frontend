@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import BottomDrawer from '@/app/_components/drawers/BottomDrawer';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Switch } from '@nextui-org/react';
@@ -87,7 +87,7 @@ export default function SplitExpenseModal({
           return prev;
         });
 
-        const newTotal = otherCategoriesTotal + value;        
+        const newTotal = otherCategoriesTotal + value;
         setAmountDetails((prev) => ({
           ...prev,
           amountLeft: Number((amountToSplit - newTotal).toFixed(2)),

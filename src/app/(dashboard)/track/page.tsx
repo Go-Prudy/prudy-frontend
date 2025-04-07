@@ -24,7 +24,7 @@ import {
 } from 'react-icons/bs';
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import BottomDrawer from '@/components/create-budget/BottomDrawer';
+import BottomDrawer from '@/app/_components/drawers/BottomDrawer';
 import { useRouter } from 'next/navigation';
 import Tesseract from 'tesseract.js';
 import { useMutation, useQuery } from '@tanstack/react-query';

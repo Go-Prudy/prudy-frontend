@@ -5,8 +5,8 @@ import { BsArrowRight } from 'react-icons/bs';
 import { useForm } from 'react-hook-form';
 import { signupSchema } from '@/utils/validationSchema';
 import Header from '@/components/header';
-import Input from '@/components/input';
-import Button from '@/components/button';
+import Input from '@/app/_components/input';
+import Button from '@/app/_components/button';
 import Checkbox from '@/components/checkbox';
 import useSignup from './useSignup';
 

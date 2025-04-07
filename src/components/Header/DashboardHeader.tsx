@@ -140,7 +140,7 @@ const DashboardHeader = ({
             src={headerIcon}
             width={135}
             height={135}
-            alt="budget header icon"
+            alt=""
             className={headerIconClass}
           />
         </div>

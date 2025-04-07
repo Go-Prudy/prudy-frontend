@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import SuccessModal from '@/components/Modals/SuccessModal';
 import Header from '@/components/header';
-import Button from '@/components/button';
+import Button from '@/app/_components/button';
 import OtpInput from '@/components/OtpInput';
 import Success from '../_components/Success';
 import useChangePasscode from './useChangePasscode';

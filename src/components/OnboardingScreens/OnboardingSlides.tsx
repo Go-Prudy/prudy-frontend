@@ -7,7 +7,7 @@ import slide4Image from '/public/images/onboarding/4.png';
 import slide5Image from '/public/images/onboarding/5.png';
 import Image from 'next/image';
 import { BsArrowLeft, BsArrowRight } from 'react-icons/bs';
-import Button from '../button';
+import Button from '../../app/_components/button';
 
 interface OnboardingSlidesProps {
   slide: number;

@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import cn from 'classnames';
 
 type InputProps = {
   label: string;
@@ -6,16 +7,20 @@ type InputProps = {
   placeholder: string;
   required?: boolean;
   disabled?: boolean;
+  error?: string;
   [key: string]: any;
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, inputName, placeholder, required = false, disabled, ...rest }, ref) => {
+  (
+    { label, inputName, placeholder, required = false, disabled, error, ...rest },
+    ref,
+  ) => {
     return (
-      <div className="relative w-full mb-4">
+      <div className="relative w-full">
         <label
           htmlFor={inputName}
-          className="absolute top-4 left-4 text-xs text-[#828282]"
+          className="absolute top-4 left-4 text-xs text-gray-500"
         >
           {label}
         </label>
@@ -25,10 +30,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputName}
           required={required}
           placeholder={placeholder}
-          className={`bg-[#F7F7F9] border outline-[#66C227] h-20 w-full px-4 rounded-[20px] pt-[20px] pb-2 ${disabled ? 'cursor-not-allowed bg-gray-200' : ''}`}
+          className={cn(
+            'bg-gray-100 text-gray-600 border outline-lemonGreen-600 h-20 w-full px-4 rounded-[20px] pt-5 pb-2',
+            disabled ? 'cursor-not-allowed bg-gray-200' : '',
+          )}
           disabled={disabled}
           {...rest}
         />
+        {error && <p className="text-xs text-red-500 mt-1 capitalize">{error}</p>}
       </div>
     );
   },

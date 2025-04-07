@@ -4,14 +4,13 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Button from '@/components/button';
+import Button from '@/app/_components/button';
 import OtpInput from '@/components/OtpInput';
-import Input from '@/components/input';
+import Input from '@/app/_components/input';
 import { emailSchema } from '@/utils/validationSchema';
 import GoogleLogo from '@/icons/google-logo';
 import loginImage from '/public/images/auth/login.png';
 import useLogin from './useLogin';
-
 
 const LoginPage = () => {
   const {
@@ -73,7 +72,7 @@ const LoginPage = () => {
           <Input
             label="Email address"
             inputName="email"
-            inputType="email"
+            type="email"
             placeholder="example@email.com"
             {...register('email')}
           />
@@ -99,7 +98,7 @@ const LoginPage = () => {
 
         <Button
           // use errors from react hook form
-          disabled={ passcode.length !== 6}
+          disabled={passcode.length !== 6}
           type="submit"
           loading={loginMutation.isPending}
         >
