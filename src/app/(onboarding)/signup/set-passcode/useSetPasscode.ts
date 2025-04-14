@@ -1,53 +1,37 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
-import { useAuthentication } from '@/app/store/AuthStore';
 import { signupUser } from '@/app/services/AuthenticationService';
 import { ISignupForm } from '@/app/Types';
+import { useSignupStore } from '@/app/store/useSignupStore';
 
 export default function useSetPasscode() {
-  const passCodeLength = 6;
-
-  const [password, setPassword] = useState<string[]>(Array(passCodeLength).fill(''));
+  const [error, setError] = useState<string>('');
+  const [password, setPassword] = useState<string[]>(Array(6).fill(''));
   const [focusedPasswordInput, setFocusedPasswordInput] = useState<number | null>(null);
-  const [confirmPassword, setConfirmPassword] = useState<string[]>(
-    Array(passCodeLength).fill(''),
-  );
+  const [confirmPassword, setConfirmPassword] = useState<string[]>(Array(6).fill(''));
   const [focusedConfirmPasswordInput, setFocusedConfirmPasswordInput] = useState<
     number | null
   >(null);
-  const [error, setError] = useState<string>('');
-  const { signup, form, login, authenticatedUser } = useAuthentication();
-  const navigate = useRouter();
 
-  const hasFreeTrialCookie = Cookies.get('hasFreeTrial');
+  const { form, updateForm ,signup} = useSignupStore();
 
   const setPasscodeMutation = useMutation({
     mutationFn: (data: ISignupForm) => {
-      signup(data);
+      updateForm(data);
       return signupUser(data);
     },
     onSuccess: (data: any) => {
       if (data?.success) {
-        const { success, message, ...rest } = data;
-        console.log(rest.data);
-        login(rest.data);
-        Cookies.set('token', rest.data.token, { expires: 7 });
+        // const { success, message, ...rest } = data;
+        console.log(data.data);
+        signup(data.data)
 
-        if (hasFreeTrialCookie) {
-          Cookies.set('hasFreeTrial', 'false', {
-            expires: 365 * 100,
-            secure: true,
-          });
-        } else {
-          Cookies.set('hasFreeTrial', rest.data.profile.hasFreeTrial, {
-            expires: 365 * 100,
-            secure: true,
-          });
-        }
-        navigate.push('/budgets');
+        Cookies.set('hasFreeTrial', data.data.profile.hasFreeTrial, {
+          expires: 365 * 100,
+          secure: true,
+        });
       }
     },
     onError: (error: any) => {
@@ -87,7 +71,7 @@ export default function useSetPasscode() {
     setFocusedConfirmPasswordInput,
     setPasscodeMutation,
     handleSubmit,
-    passCodeLength,
+    passCodeLength: 6,
     error,
   };
 }

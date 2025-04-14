@@ -18,7 +18,7 @@ const VerifyOtpPage = () => {
   } = useVerify();
   return (
     <div>
-      <Header link={'/signup'} title="Create account" />
+      <Header link={'/signup/verify'} title="Create account" isHeaderDark />
       <form
         id="otp-form"
         className="py-10 px-6 space-y-6"

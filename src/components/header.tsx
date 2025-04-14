@@ -2,19 +2,29 @@
 
 import ForwardArrow from '@/icons/forward-arrow';
 import Link from 'next/link';
+import cn from 'classnames';
 
 type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   title: string;
   link: string;
   childern?: React.ReactNode;
+  isHeaderDark?: boolean;
 };
 
-const Header = ({ title, link, childern }: HeaderProps) => {
+const Header = ({ title, link, childern, isHeaderDark = false }: HeaderProps) => {
   return (
-    <div className="relative flex w-full justify-between items-center px-6 py-3">
+    <div
+      className={cn(
+        'relative flex w-full justify-between items-center px-6 py-3',
+        isHeaderDark && 'bg-gray-100',
+      )}
+    >
       <Link
         href={link}
-        className="rounded-full w-10 h-10 bg-gray-100 inline-flex justify-center items-center"
+        className={cn(
+          'rounded-full w-10 h-10 inline-flex justify-center items-center',
+          isHeaderDark ? 'bg-white' : 'bg-gray-100',
+        )}
       >
         <ForwardArrow className="rotate-180" />
       </Link>

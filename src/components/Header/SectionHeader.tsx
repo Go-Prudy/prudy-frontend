@@ -1,7 +1,8 @@
 'use client';
 
+import { CircularProgress } from '@nextui-org/react';
 import Link from 'next/link';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 
 interface SectionHeaderProp {
   title: string;
@@ -10,7 +11,9 @@ interface SectionHeaderProp {
   isIconButton?: boolean;
   isCustomButton?: boolean;
   icon?: ReactNode;
-  linkText?: string;
+  buttonText?: string;
+  onClick?: () => void;
+  isLoading?: boolean;
 }
 
 const SectionHeader = ({
@@ -20,29 +23,37 @@ const SectionHeader = ({
   isIconButton,
   isCustomButton,
   icon,
-  linkText,
+  buttonText,
+  onClick,
+  isLoading,
 }: SectionHeaderProp) => {
   return (
     <div className="flex justify-between items-center">
       <h4 className="text-lg text-black-900">{title}</h4>
       {isCustomButton ? (
         customButton
-      ) : isIconButton ? (
+      ) : isIconButton && link ? (
         <Link
-          href={link ?? ''}
+          href={link}
           className="w-9 h-9 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full"
         >
           {icon}
         </Link>
       ) : (
-        link && (
-          <Link
-            href={link}
+        buttonText && (
+          <button
+            onClick={onClick}
             className="px-3 py-1.5 bg-lemonGreen-100 rounded-xl border border-gray-200 flex items-center gap-2 text-lemonGreen-950 text-xs font-medium"
           >
-            {icon && icon}
-            {linkText}
-          </Link>
+            {isLoading ? (
+              <CircularProgress size="sm" />
+            ) : (
+              <>
+                {icon && icon}
+                {buttonText}
+              </>
+            )}
+          </button>
         )
       )}
     </div>

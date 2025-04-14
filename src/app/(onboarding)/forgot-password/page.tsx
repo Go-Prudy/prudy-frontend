@@ -9,7 +9,7 @@ import Input from '@/app/_components/input';
 import Button from '@/app/_components/button';
 import OtpInput from '@/components/OtpInput';
 import Success from '../_components/Success';
-import { emailSchema } from '@/utils/validationSchema';
+import { emailSchema } from '@/app/utils/validationSchema';
 import useForgotPassword from './useForgotPassword';
 
 const VerifyOtpPage = () => {

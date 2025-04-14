@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
-import { useAuthentication } from '@/app/store/AuthStore';
-import { IForgotPassword } from '@/app/Types';
+import { IForgotPasswordForm } from '@/app/Types';
 import { forgotPassword as handleForgotPassword } from '@/app/services/AuthenticationService';
+import { useForgotPasswordStore } from '@/app/store/useForgotPasswordStore';
 
 export default function useChangePasscode() {
   const inputLength = 6;
@@ -20,17 +20,16 @@ export default function useChangePasscode() {
     null,
   );
 
-  const { ForgotPassword, ForgotPasswordForm } = useAuthentication();
+  const { form, updateForm } = useForgotPasswordStore();
 
   const forgotPasswordMutation = useMutation({
-    mutationFn: async (data: IForgotPassword) => {
+    mutationFn: async (data: IForgotPasswordForm) => {
       const result = await handleForgotPassword(data);
       return result;
     },
     onSuccess: (data: any) => {
       if (data?.success) {
-        ForgotPassword({
-          ...ForgotPasswordForm,
+        updateForm({
           pin: newPasscode.join('').toString(),
           confirmPin: confirmPasscode.join('').toString(),
         });
@@ -54,7 +53,7 @@ export default function useChangePasscode() {
     // Clear any previous errors
     setError('');
     forgotPasswordMutation.mutateAsync({
-      ...ForgotPasswordForm,
+      ...form,
       pin: newPasscode.join('').toString(),
       confirmPin: confirmPasscode.join('').toString(),
     });

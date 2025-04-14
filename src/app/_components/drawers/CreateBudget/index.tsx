@@ -6,7 +6,7 @@ import Input from '../../input';
 import { useRouter } from 'next/navigation';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { createBudgetSchema } from '@/utils/validationSchema';
+import { createBudgetSchema } from '@/app/utils/validationSchema';
 import Button from '../../button';
 import useCreateBudget from './useCreateBudget';
 

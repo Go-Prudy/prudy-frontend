@@ -2,8 +2,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormModal from '../FormModal';
 import Input from '../../input';
-import { addSubcategorySchema } from '@/utils/validationSchema';
-import { formatAmount } from '@/utils/functions';
+import { addSubcategorySchema } from '@/app/utils/validationSchema';
+import { formatAmount } from '@/app/utils/functions';
 import useAddSubCategory from './useAddSubCategory';
 
 type Props = {

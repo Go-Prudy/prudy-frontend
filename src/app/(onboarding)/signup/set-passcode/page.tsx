@@ -22,7 +22,7 @@ const Page = () => {
 
   return (
     <div>
-      <Header link={'/signup/verify'} title="Create account" />
+      <Header link={'/signup/verify'} title="Create account" isHeaderDark />
       <div className="px-6 py-10 space-y-6">
         <div className="w-full">
           <p className="font-[500] text-[20px] leading-[28px] text-[#2D2D2D]">
@@ -50,7 +50,7 @@ const Page = () => {
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
           <Button
-            disabled={!!error}
+            // disabled={!!error}
             type="submit"
             loading={setPasscodeMutation.isPending}
           >

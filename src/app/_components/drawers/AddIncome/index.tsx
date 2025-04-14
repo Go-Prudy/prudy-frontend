@@ -5,10 +5,10 @@ import BottomDrawer from '../BottomDrawer';
 import Input from '../../input';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { addIncomeSchema } from '@/utils/validationSchema';
+import { addIncomeSchema } from '@/app/utils/validationSchema';
 import Button from '../../button';
 import useAddIncome from './useAddIncome';
-import { formatAmount } from '@/utils/functions';
+import { formatAmount } from '@/app/utils/functions';
 
 interface Props {
   setShow: (i: boolean) => void;

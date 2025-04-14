@@ -4,7 +4,6 @@ import Input from '@/app/_components/input';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAuthentication } from '@/app/store/AuthStore';
 import { Button } from '@nextui-org/react';
 
 const Page = () => {
@@ -12,7 +11,6 @@ const Page = () => {
   const [phoneNumber, setPhoneNumber] = useState<string | number | any>('');
   const [error, setError] = useState<string>('');
 
-  const { signup, form } = useAuthentication();
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 

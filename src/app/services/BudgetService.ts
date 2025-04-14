@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast';
-import api from '../../utils/axiosInstance';
+import api from '../utils/axiosInstance';
 
 // Function to get all budgets categories
 export const getAllBudgetCategoriesApi = async (token: string) => {
@@ -267,7 +267,6 @@ export const deleteBudgetApi = async (token: string, id: string) => {
     console.log(error);
   }
 };
-
 
 // re-authorize account
 export const reauthorizeAccountApi = async (token: string, id: string) => {

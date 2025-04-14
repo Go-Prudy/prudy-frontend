@@ -9,7 +9,6 @@ import Link from 'next/link';
 import DashboardHeader from '@/components/Header/DashboardHeader';
 import SectionHeader from '@/components/Header/SectionHeader';
 import CreateBudgetDrawer from '@/app/_components/drawers/CreateBudget';
-import { useAuthentication } from '@/app/store/AuthStore';
 
 // import images
 import homeHeaderIcon from '/public/images/header/home.png';
@@ -18,6 +17,7 @@ import linkBankImage from '/public/images/quick-actions/2.png';
 import scanReceiptImage from '/public/images/quick-actions/3.png';
 import reviewExpenseImage from '/public/images/review-expense.png';
 import homeAnalyticsImage from '/public/images/home-analytics.png';
+import DashboardWrapper from '@/app/_components/dashboardWrapper';
 
 interface QuickActionType {
   id: string;
@@ -58,17 +58,15 @@ const quickActions: QuickActionType[] = [
 const HomePage = () => {
   const [showCreateBudgetModal, setShowCreateBudgetModal] = useState<boolean>(false);
 
-  const { authenticatedUser } = useAuthentication();
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 90 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className="mt-[90px]"
     >
-      <div className="relative">
+      <DashboardWrapper>
         <div className="relative w-full max-w-[500px] transition-all duration-300 ease-out min-h-screen">
           <DashboardHeader
             type="home"
@@ -87,7 +85,7 @@ const HomePage = () => {
                 // navigation
                 slidesPerView={2.13}
                 spaceBetween={20}
-                className="mySwiper"
+                className="w-full max-w-[84vw]"
               >
                 {quickActions.map((action) => (
                   <SwiperSlide
@@ -160,15 +158,13 @@ const HomePage = () => {
             </Link>
           </div>
         </div>
-
-        {/* create budget modal */}
-        {showCreateBudgetModal && (
-          <CreateBudgetDrawer
-            show={showCreateBudgetModal}
-            setShow={setShowCreateBudgetModal}
-          />
-        )}
-      </div>
+      </DashboardWrapper>
+      {showCreateBudgetModal && (
+        <CreateBudgetDrawer
+          show={showCreateBudgetModal}
+          setShow={setShowCreateBudgetModal}
+        />
+      )}
     </motion.div>
   );
 };

@@ -6,7 +6,7 @@ import Input from '../../input';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import useCreateCategory from './useCreateCategory';
-import { createCategorySchema } from '@/utils/validationSchema';
+import { createCategorySchema } from '@/app/utils/validationSchema';
 
 type Props = {
   setShow: (i: boolean) => void;

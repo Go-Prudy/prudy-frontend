@@ -1,28 +1,25 @@
 import toast from 'react-hot-toast';
-import Cookies from "js-cookie"
-import api from "../../utils/axiosInstance";
-import { IForgotPassword, ILoginForm, IOtpResponse, ISignupForm } from "../Types";
-
+import Cookies from 'js-cookie';
+import api from '../utils/axiosInstance';
+import { IForgotPassword, ILoginForm, IOtpResponse, ISignupForm } from '../Types';
 
 // Function to send OTP with SIGNUP
 export const sendOtp = async (otpFormData: any) => {
-  
   try {
     const response = await api.post('/auth/otp', otpFormData);
     // console.log(response.data);
     toast.success(response.data.message);
-    return response.data
+    return response.data;
   } catch (error: any) {
     toast.error(error?.response?.data?.message);
     console.log(error);
-
   }
 };
 
 // Validate Email on Signup
-export const validateUserEmailOnSignup = async (email: string,) => {
+export const validateUserEmailOnSignup = async (email: string) => {
   try {
-    const response = await api.post('/auth/validate-credential', { email,  });
+    const response = await api.post('/auth/validate-credential', { email });
     // console.log(response.data);
     // toast.success(response.data.message);
     return response.data;
@@ -39,15 +36,12 @@ export const verifyOtp = async (otpFormData: any) => {
     toast.success(response.data.message);
     // console.log(response.data);
 
-    return response.data
-
+    return response.data;
   } catch (error: any) {
     console.log(error.response.data.message);
 
     toast.error(error?.response?.data?.message);
-
   }
-
 };
 
 // Function to signup with OTP reference
@@ -64,8 +58,6 @@ export const signupUser = async (formData: ISignupForm) => {
   }
 };
 
-
-
 export const loginUser = async (formData: ILoginForm) => {
   try {
     const response = await api.post('/auth/login', formData);
@@ -78,7 +70,6 @@ export const loginUser = async (formData: ILoginForm) => {
     toast.error(error?.response?.data?.message);
   }
 };
-
 
 export const signUpWithGoogle = async () => {
   try {
@@ -104,9 +95,6 @@ export const loginWithGoogle = async () => {
   }
 };
 
-
-
-
 export const forgotPassword = async (data: IForgotPassword) => {
   try {
     console.log(data);
@@ -123,11 +111,11 @@ export const forgotPassword = async (data: IForgotPassword) => {
 
 export const fetchUserProfile = async () => {
   try {
-    const token = Cookies.get("token")
+    const token = Cookies.get('token');
     const response = await api.get('/settings/profile', {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     // toast.success(response.data.message);
     // console.log(response.data);
@@ -155,6 +143,4 @@ export const getGoogleUrl = () => {
 
   const qs = new URLSearchParams(options).toString();
   return `${rootUrl}?${qs}`;
-}
-
-
+};

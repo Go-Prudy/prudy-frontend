@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { sendOtp, verifyOtp } from '@/app/services/AuthenticationService';
 import { IVerifyOtpResponse } from '@/app/Types';
-import { useAuthentication } from '@/app/store/AuthStore';
+import { useForgotPasswordStore } from '@/app/store/useForgotPasswordStore';
+import { useOtpTimer } from '@/app/_hooks/useOtpTimer';
 
 export default function useForgotPassword() {
   const inputLength = 6;
@@ -12,8 +13,8 @@ export default function useForgotPassword() {
   const [step, setStep] = useState<number>(1);
   const navigate = useRouter();
 
-  const { timeLeft, tick, startTimer, canResend, ForgotPassword, ForgotPasswordForm } =
-    useAuthentication();
+  const { form, updateForm } = useForgotPasswordStore();
+  const { timeLeft, canResend, startTimer } = useOtpTimer();
 
   // React Query mutation for sending OTP
   const sendOtpMutation = useMutation({
@@ -29,10 +30,9 @@ export default function useForgotPassword() {
     onSuccess: (data: any, _values, context) => {
       if (data?.success) {
         const { success, message, ...rest } = data;
-        ForgotPassword({
-          ...ForgotPasswordForm,
+        updateForm({
           email: context?.email,
-          otpRef: rest.data.reference,
+          otpReference: rest.data.reference,
         });
         if (context?.isResendOtp) {
           startTimer();
@@ -61,12 +61,11 @@ export default function useForgotPassword() {
   const onSubmitOtp = async () => {
     const otp = otpValues.join('');
 
-    const verifyOtpData = {
-      reference: ForgotPasswordForm.otpRef,
-      email: ForgotPasswordForm.email,
+    await verifyOtpMutation.mutateAsync({
+      reference: form.otpReference,
+      email: form.email,
       code: otp.toString(),
-    };
-    await verifyOtpMutation.mutateAsync(verifyOtpData);
+    });
   };
 
   const handleResendOtp = async (e: React.FormEvent, email: string) => {
@@ -85,15 +84,6 @@ export default function useForgotPassword() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otpValues]);
-
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const interval = setInterval(() => {
-        tick();
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [timeLeft, tick]);
 
   return {
     otpValues,

@@ -1,5 +1,5 @@
 import { createBudgetCategoryApi } from '@/app/services/BudgetService';
-import { useAuthentication } from '@/app/store/AuthStore';
+import { useAuthStore } from '@/app/store/useAuthStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -9,16 +9,13 @@ export default function useCreateCategory({
 }: {
   setShow: (i: boolean) => void;
 }) {
-  const { authenticatedUser } = useAuthentication();
+  const { userData } = useAuthStore();
   const queryClient = useQueryClient();
 
   // create category mutation
   const createCategoryMutation = useMutation({
     mutationFn: (name: string) =>
-      createBudgetCategoryApi(
-        { name, subCategories: [] },
-        authenticatedUser?.token || '',
-      ),
+      createBudgetCategoryApi({ name, subCategories: [] }, userData?.token || ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['getAllBudgetCategories'] });
       toast.success('Category created successfully');

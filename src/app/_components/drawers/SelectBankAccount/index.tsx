@@ -1,0 +1,100 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import BottomDrawer from '../BottomDrawer';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { createBudgetSchema } from '@/app/utils/validationSchema';
+import Button from '../../button';
+import useSelectBankAccount from './useSelectBankAccount';
+import { RadioGroup } from '@nextui-org/react';
+import CustomRadio from '../../radio';
+
+interface Props {
+  setShow: (i: boolean) => void;
+  show: boolean;
+  linkedAccounts: {
+    institutionName: string;
+    accountName: string;
+    accountNumber: string;
+  }[];
+  isLoading: boolean;
+}
+
+const SelectBankAccountDrawer = ({ setShow, show, linkedAccounts, isLoading }: Props) => {
+  const navigate = useRouter();
+  const { onSubmit, selectedAccountId, setSelectedAccountId } = useSelectBankAccount({
+    setShow,
+  });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<{ account: string }>({
+    defaultValues: {
+      account: '',
+    },
+    // resolver: yupResolver(createBudgetSchema),
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 90 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="h-[100vh] w-full max-w-[500px] z-[40] left-0 right-0 mx-auto bottom-0 fixed bg-[#1c1c1c73]"
+    >
+      <BottomDrawer
+        footer={
+          <Button onClick={handleSubmit(onSubmit)} type="submit">
+            Proceed
+          </Button>
+        }
+        label="Select Bank Account"
+        back={false}
+        show={show}
+        close={true}
+        onClose={() => setShow(false)}
+      >
+        <div className="space-y-4">
+          <h1 className="text-gray-600">
+            Kindly select the bank account you would like to sync with
+          </h1>
+          <RadioGroup
+            orientation="vertical"
+            className="w-full"
+            color="success"
+            onValueChange={(value) => setSelectedAccountId(value)}
+          >
+            {isLoading ? (
+              <div className="mx-auto w-full my-[3rem]">Loading accounts...</div>
+            ) : linkedAccounts.length > 0 ? (
+              linkedAccounts.map((account: any, index: any) => (
+                <CustomRadio
+                  key={index}
+                  isSelected={selectedAccountId === account.id}
+                  onChange={() => setSelectedAccountId(account.id)}
+                  value={index}
+                >
+                  <p className="">{account.institutionName}</p>
+
+                  <div className="w-full flex gap-2 justify-between">
+                    <p> {account.accountName} </p>
+                    <p> {account.accountNumber}</p>
+                  </div>
+                </CustomRadio>
+              ))
+            ) : (
+              <div>No accounts available for selection.</div>
+            )}
+          </RadioGroup>
+        </div>
+      </BottomDrawer>
+    </motion.div>
+  );
+};
+
+export default SelectBankAccountDrawer;

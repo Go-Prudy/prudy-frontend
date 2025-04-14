@@ -3,13 +3,15 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { IOtpResponse, IVerifyOtpResponse } from '@/app/Types';
 import { sendOtp, verifyOtp } from '@/app/services/AuthenticationService';
-import { useAuthentication } from '@/app/store/AuthStore';
+import { useSignupStore } from '@/app/store/useSignupStore';
+import { useOtpTimer } from '@/app/_hooks/useOtpTimer';
 
 export default function useVerify() {
   const [otpValues, setOtpValues] = React.useState<string[]>(Array(6).fill(''));
   const [focusedInput, setFocusedInput] = React.useState<number | null>(null);
   const navigate = useRouter();
-  const { signup, form, timeLeft, tick, startTimer, canResend } = useAuthentication();
+  const { form, updateForm } = useSignupStore();
+  const { timeLeft, canResend, startTimer } = useOtpTimer();
 
   const verifyOtpMutation = useMutation({
     mutationFn: (otpFormData: any) => verifyOtp(otpFormData),
@@ -32,8 +34,7 @@ export default function useVerify() {
       sendOtp(otpFormData),
     onSuccess: (data: IOtpResponse) => {
       if (data?.success) {
-        const newFormData = { ...form, otpReference: data?.data.reference };
-        signup(newFormData);
+        updateForm({ otpReference: data?.data.reference });
       }
     },
     onError: (error: Error) => {
@@ -65,17 +66,9 @@ export default function useVerify() {
     if (otpValues.every((value) => value.length > 0)) {
       handleSubmit(); // Trigger form submission
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otpValues]);
 
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const interval = setInterval(() => {
-        tick();
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [timeLeft, tick]);
   return {
     otpValues,
     setOtpValues,

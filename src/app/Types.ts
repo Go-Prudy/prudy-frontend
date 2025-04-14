@@ -135,8 +135,8 @@ export interface IUserProfile {
 
 
 
-export interface IForgotPassword {
-  otpRef: string;
+export interface IForgotPasswordForm {
+  otpReference: string;
   email: string;
   pin: string;
   confirmPin: string;

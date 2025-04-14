@@ -1,4 +1,4 @@
-import api from '@/utils/axiosInstance';
+import api from '@/app/utils/axiosInstance';
 import toast from 'react-hot-toast';
 
 export const scanReceiptApi = async (token: string, url: any): Promise<any> => {
@@ -54,7 +54,7 @@ export const AssignSplitCategoryToTransactionApi = async (
   accountId: string,
   transactionId: string,
   budgetId: string,
-  categories: { allocationId: string; amount: number|string }[],
+  categories: { allocationId: string; amount: number | string }[],
   token: string,
 ) => {
   try {
