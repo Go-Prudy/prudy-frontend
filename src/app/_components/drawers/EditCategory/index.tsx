@@ -8,15 +8,26 @@ import ActionModal from '../../modals/ActionModal';
 import { BsPlus } from 'react-icons/bs';
 import AddSubCategoryDrawer from '../../modals/AddSubCategory';
 import { Switch } from '@nextui-org/react';
+import AllocationItem from '../../allocationItem';
+import cn from 'classnames';
 
 interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
   name: string;
   totalIncome: number;
+  budgetCategoryId: string;
+  budgetId: string;
 }
 
-export default function EditCategoryDrawer({ show, setShow, name, totalIncome }: Props) {
+export default function EditCategoryDrawer({
+  show,
+  setShow,
+  name,
+  totalIncome,
+  budgetCategoryId,
+  budgetId,
+}: Props) {
   const {
     handleSubmit,
     handleAmountChange,
@@ -30,11 +41,18 @@ export default function EditCategoryDrawer({ show, setShow, name, totalIncome }:
     handleOpenDeletCategoryModal,
     showAddSubCategoryDrawer,
     setShowAddSubCategoryModal,
-    showSubCategories,
-    setShowSubCategories,
+    showAddSubAllocations,
+    setShowAddSubAllocations,
+    subAllocations,
+    setSubAllocations,
+    remainingUnallocatedAmount,
+    handleDeleteSubAllocation,
+    createAllocationMutation,
   } = useEditCategory({
     setShow,
     totalIncome,
+    budgetCategoryId,
+    budgetId,
   });
 
   return (
@@ -54,7 +72,9 @@ export default function EditCategoryDrawer({ show, setShow, name, totalIncome }:
             >
               Delete category
             </Button>
-            <Button onClick={handleSubmit}>Save</Button>
+            <Button loading={createAllocationMutation.isPending} onClick={handleSubmit}>
+              Save
+            </Button>
           </div>
         }
         label={`${name} Budget`}
@@ -101,28 +121,49 @@ export default function EditCategoryDrawer({ show, setShow, name, totalIncome }:
                 />
               </div>
             </div>
+
             {/* sub categories */}
             <div className="border border-gray-200 rounded-2xl p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <p className="text-gray-600 text-sm font-medium">Add Sub-Categories</p>
                 <Switch
-                  isSelected={showSubCategories}
-                  onChange={() => setShowSubCategories(!showSubCategories)}
+                  isSelected={showAddSubAllocations}
+                  onChange={() => setShowAddSubAllocations(!showAddSubAllocations)}
                   size="sm"
                   color="success"
                 />
               </div>
-              {showSubCategories && (
-                <div className="flex justify-center items-center py-10">
-                  <Button
-                    onClick={() => {
-                      console.log('click');
-                      setShowAddSubCategoryModal(true);
-                    }}
-                    buttonIcon={<BsPlus size={16} />}
-                    buttonTitle="Add Sub-Category"
-                    buttonType="icon"
-                  />
+              {showAddSubAllocations && (
+                <div className="space-y-3">
+                  {subAllocations.length > 0 && (
+                    <>
+                      {subAllocations.map((allocation, index) => (
+                        <AllocationItem
+                          type="allocation"
+                          key={index}
+                          name={allocation.name}
+                          amount={allocation.amount}
+                        />
+                      ))}
+                      <div className="bg-gray-200 rounded-lg p-2 text-xs text-gray-600 font-medium">
+                        ₦{remainingUnallocatedAmount} left to categorize
+                      </div>
+                    </>
+                  )}
+
+                  <div
+                    className={cn(
+                      'flex justify-center items-center',
+                      subAllocations.length > 0 ? '' : 'py-10',
+                    )}
+                  >
+                    <Button
+                      onClick={() => setShowAddSubCategoryModal(true)}
+                      buttonIcon={<BsPlus size={16} />}
+                      buttonTitle="Add Sub-Category"
+                      buttonType="icon"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -134,6 +175,9 @@ export default function EditCategoryDrawer({ show, setShow, name, totalIncome }:
         <AddSubCategoryDrawer
           show={showAddSubCategoryDrawer}
           setShow={setShowAddSubCategoryModal}
+          subAllocations={subAllocations}
+          setSubAllocations={setSubAllocations}
+          allocatedAmount={amount}
         />
       )}
 

@@ -5,14 +5,30 @@ import Input from '../../input';
 import { addSubcategorySchema } from '@/app/utils/validationSchema';
 import { formatAmount } from '@/app/utils/functions';
 import useAddSubCategory from './useAddSubCategory';
+import { Dispatch, SetStateAction } from 'react';
+import { SubAllocationForm } from '@/app/types/budget';
 
 type Props = {
   setShow: (i: boolean) => void;
   show: boolean;
+  subAllocations: SubAllocationForm[];
+  setSubAllocations: Dispatch<SetStateAction<SubAllocationForm[]>>;
+  allocatedAmount: string;
 };
 
-export default function AddSubCategoryDrawer({ show, setShow }: Props) {
-  const { onSubmit } = useAddSubCategory({ setShow });
+export default function AddSubCategoryDrawer({
+  show,
+  setShow,
+  subAllocations,
+  setSubAllocations,
+  allocatedAmount,
+}: Props) {
+  const { onSubmit } = useAddSubCategory({
+    setShow,
+    subAllocations,
+    setSubAllocations,
+    allocatedAmount,
+  });
   const {
     register,
     handleSubmit,

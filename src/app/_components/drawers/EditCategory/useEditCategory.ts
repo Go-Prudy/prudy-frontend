@@ -1,20 +1,36 @@
-import { useState } from 'react';
+import { SubAllocationForm } from '@/app/types/budget';
+import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import api from '@/app/utils/axiosInstance';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+interface AllocationForm {
+  budgetCategoryId: string;
+  amount: number;
+  percentage: number;
+  subAllocations: SubAllocationForm[];
+}
 
 export default function useEditCategory({
   setShow,
   totalIncome,
+  budgetCategoryId,
+  budgetId,
 }: {
   setShow: (i: boolean) => void;
   totalIncome: number;
+  budgetCategoryId: string;
+  budgetId: string;
 }) {
+  const queryClient = useQueryClient();
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState<boolean>(false);
   const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState<boolean>(false);
   const [showAddSubCategoryDrawer, setShowAddSubCategoryModal] = useState<boolean>(false);
-  const [showSubCategories, setShowSubCategories] = useState<boolean>(false);
+  const [showAddSubAllocations, setShowAddSubAllocations] = useState<boolean>(false);
 
   const [amount, setAmount] = useState<string>('');
   const [percentage, setPercentage] = useState<number>(0);
+  const [subAllocations, setSubAllocations] = useState<SubAllocationForm[]>([]);
 
   const formatAmount = (value: string) => {
     // Remove all non-numeric characters except decimal point
@@ -38,6 +54,25 @@ export default function useEditCategory({
     return Number(((percentage / 100) * totalIncome).toFixed(2));
   };
 
+  const parsedCategoryAmount = useMemo(() => {
+    const parsedAmount = parseFloat(amount.replace(/[₦,\s]/g, ''));
+    return isNaN(parsedAmount) ? 0 : parsedAmount;
+  }, [amount]);
+
+  const remainingUnallocatedAmount = useMemo(() => {
+    const totalSubAllocated = subAllocations.reduce(
+      (acc, curr) => acc + (curr.amount || 0),
+      0,
+    );
+    return parsedCategoryAmount - totalSubAllocated;
+  }, [subAllocations, parsedCategoryAmount]);
+
+  const handleDeleteSubAllocation = (index: number) => {
+    const updatedSubAllocations = [...subAllocations];
+    updatedSubAllocations.splice(index, 1);
+    setSubAllocations(updatedSubAllocations);
+  };
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const currentValue = e.target.value.replace(/[₦,\s]/g, '');
     const numericValue = parseFloat(currentValue);
@@ -51,7 +86,7 @@ export default function useEditCategory({
     if (!isNaN(numericValue)) {
       if (numericValue > totalIncome) {
         toast.error(
-          `Amount cannot exceed total income of ₦${formatAmount(totalIncome.toString())}`,
+          `Amount cannot exceed total income of ${formatAmount(totalIncome.toString())}`,
         );
         return;
       } else {
@@ -84,13 +119,32 @@ export default function useEditCategory({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const createAllocationMutation = useMutation({
+    mutationFn: (values: AllocationForm) =>
+      api.post(`/budgets/${budgetId}/allocations`, values),
+    onSuccess: (data) => {
+      console.log(data.data);
+      queryClient.invalidateQueries({ queryKey: ['getAllBudgetAllocations'] });
+    },
+    onError: (error: unknown) => {
+      console.error('Error creating allocation:', error);
+    },
+  });
+
+  const handleSubmit = async () => {
     const numericAmount = parseFloat(amount.replace(/[₦,\s]/g, ''));
 
     console.log({
       amount: numericAmount,
       percentage: percentage,
+      budgetCategoryId,
+      subAllocations,
+    });
+    await createAllocationMutation.mutateAsync({
+      amount: numericAmount,
+      percentage: percentage,
+      budgetCategoryId,
+      subAllocations,
     });
 
     setShow(false);
@@ -109,7 +163,12 @@ export default function useEditCategory({
     handleOpenDeletCategoryModal: () => setShowDeleteCategoryModal(true),
     showAddSubCategoryDrawer,
     setShowAddSubCategoryModal,
-    showSubCategories,
-    setShowSubCategories,
+    showAddSubAllocations,
+    setShowAddSubAllocations,
+    subAllocations,
+    setSubAllocations,
+    remainingUnallocatedAmount,
+    handleDeleteSubAllocation,
+    createAllocationMutation,
   };
 }

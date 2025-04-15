@@ -384,7 +384,6 @@ export default function Page() {
             {/* <ImportantNote className="pb-6" /> */}
           </div>
         </div>
-        {/* TODO: fetch accounts, if account is fetching show loader in drawer */}
         {showSelectBankAccountDrawer && (
           <SelectBankAccountDrawer
             show={showSelectBankAccountDrawer}

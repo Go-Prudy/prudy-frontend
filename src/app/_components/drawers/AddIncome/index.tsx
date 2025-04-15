@@ -16,7 +16,8 @@ interface Props {
   budgetId: string;
 }
 export default function AddIncomeDrawer({ setShow, show, budgetId }: Props) {
-  const { onSubmit } = useAddIncome({ setShow, budgetId });
+  const { onSubmit, addIncomeMutation } = useAddIncome({ setShow, budgetId });
+
   const {
     register,
     handleSubmit,
@@ -39,7 +40,11 @@ export default function AddIncomeDrawer({ setShow, show, budgetId }: Props) {
     >
       <BottomDrawer
         footer={
-          <Button onClick={handleSubmit(onSubmit)} type="submit">
+          <Button
+            loading={addIncomeMutation.isPending}
+            onClick={handleSubmit(onSubmit)}
+            type="submit"
+          >
             Save
           </Button>
         }

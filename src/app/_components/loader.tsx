@@ -1,11 +1,11 @@
 import { CircularProgress } from '@nextui-org/react';
-import React from 'react';
+import cn from 'classnames';
 
-type Props = {};
+type Props = { className?: string };
 
-export default function Loader({}: Props) {
+export default function Loader({ className }: Props) {
   return (
-    <div className="flex justify-center items-center min-h-[200px]">
+    <div className={cn('flex justify-center items-center min-h-[200px]', className)}>
       <CircularProgress size="md" color="default" />
     </div>
   );

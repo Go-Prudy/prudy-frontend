@@ -10,6 +10,7 @@ type Props = {
   children?: ReactNode;
   buttonTitle?: string;
   buttonIcon?: ReactNode;
+  onClick?: () => void;
   [key: string]: any;
 };
 
@@ -21,6 +22,7 @@ export default function Button({
   buttonType,
   buttonTitle,
   buttonIcon,
+  onClick,
   ...rest
 }: Props) {
   return buttonType === 'icon' ? (
@@ -31,6 +33,7 @@ export default function Button({
         disabled && 'opacity-50',
       )}
       disabled={disabled || loading}
+      onClick={onClick}
       {...rest}
     >
       {buttonIcon} <span>{buttonTitle}</span>
@@ -43,6 +46,7 @@ export default function Button({
         disabled && 'opacity-50',
       )}
       disabled={disabled || loading}
+      onClick={onClick}
       {...rest}
     >
       {loading ? <CircularProgress color="default" size="sm" /> : children}

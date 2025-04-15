@@ -1,14 +1,15 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import BottomDrawer from '../BottomDrawer';
-import Input from '../../input';
-import { useRouter } from 'next/navigation';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { createBudgetSchema } from '@/app/utils/validationSchema';
+import BottomDrawer from '../BottomDrawer';
+import Input from '../../input';
 import Button from '../../button';
 import useCreateBudget from './useCreateBudget';
+import LoadingModal from '../../modals/LoadingModal';
+import { SuccessModal } from '../../modals/SuccessfulModal';
 
 interface Props {
   setShow: (i: boolean) => void;
@@ -16,14 +17,21 @@ interface Props {
 }
 
 const CreateBudgetDrawer = ({ setShow, show }: Props) => {
-  const navigate = useRouter();
-  const { onSubmit } = useCreateBudget({ setShow });
+  const {
+    onSubmit,
+    showLoadingModal,
+    handleShowLoadingModal,
+    showSuccessModal,
+    handleShowSuccessModal,
+  } = useCreateBudget({
+    setShow,
+  });
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
-  } = useForm<{ name: string; purpose?: string; startDate: string; endDate: string }>({
+    formState: { errors, isValid, isDirty },
+  } = useForm<{ name: string; purpose: string; startDate: string; endDate: string }>({
     defaultValues: {
       name: '',
       purpose: '',
@@ -31,6 +39,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
       endDate: '',
     },
     resolver: yupResolver(createBudgetSchema),
+    mode: 'onChange',
   });
 
   const startDate = watch('startDate');
@@ -48,7 +57,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
     >
       <BottomDrawer
         footer={
-          <Button onClick={handleSubmit(onSubmit)} type="submit">
+          <Button onClick={handleSubmit(onSubmit)} disabled={!isValid || !isDirty}>
             Create Budget
           </Button>
         }
@@ -73,6 +82,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
             type="text"
             placeholder="Monthly expenses..."
             {...register('purpose')}
+            error={errors?.purpose?.message}
           />
           <div className="flex gap-[16px] justify-between">
             <Input
@@ -96,6 +106,8 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
           </div>
         </form>
       </BottomDrawer>
+      <LoadingModal isOpen={showLoadingModal} onClose={handleShowLoadingModal} />
+      <SuccessModal isOpen={showSuccessModal} onClose={handleShowSuccessModal} />
     </motion.div>
   );
 };

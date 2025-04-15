@@ -60,3 +60,40 @@ export default function SuccessfulModal({ image, title, text, isOpen, onClose }:
     </Modal>
   );
 }
+
+type SuccessModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export const SuccessModal = ({ isOpen, onClose }: SuccessModalProps) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      placement="center"
+      onClose={onClose}
+      classNames={{
+        closeButton: 'hidden',
+      }}
+    >
+      <ModalContent className="p-6 rounded-[40px] max-w-[152px]">
+        {(onClose) => (
+          <>
+            <ModalHeader className="p-0">
+              <Image
+                src={successGif}
+                alt="success"
+                className="mx-auto"
+                width={77}
+                height={60}
+              />
+            </ModalHeader>
+            <ModalBody className="p-0">
+              <p>Success 🎉</p>
+            </ModalBody>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+};

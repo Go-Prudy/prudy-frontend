@@ -1,9 +1,5 @@
-import {
-  createBudgetCategoryApi,
-  inviteCollaboratorApi,
-} from '@/app/services/BudgetService';
-import { useAuthStore } from '@/app/store/useAuthStore';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '@/app/utils/axiosInstance';
+import { useMutation } from '@tanstack/react-query';
 import { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -14,12 +10,9 @@ export default function useInviteCollaborator({
   setShow: (i: boolean) => void;
   budgetId: string;
 }) {
-  const { userData } = useAuthStore();
-  const queryClient = useQueryClient();
-
   const inviteCollaboratorMutation = useMutation({
-    mutationFn: (email: string) =>
-      inviteCollaboratorApi(userData?.token ?? '', budgetId ?? '', email),
+    mutationFn: async (values: { email: string }) =>
+      await api.post(`/budgets/${budgetId}/invite`, values),
     onSuccess: () => {
       setShow(false);
       toast.success('Invitation sent successfully');
@@ -33,7 +26,7 @@ export default function useInviteCollaborator({
     email: string;
   }> = async (data) => {
     console.log('log data', data);
-    await inviteCollaboratorMutation.mutateAsync(data.email);
+    await inviteCollaboratorMutation.mutateAsync(data);
   };
   return { onSubmit, inviteCollaboratorMutation };
 }

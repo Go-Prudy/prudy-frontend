@@ -12,7 +12,8 @@ export const emailSchema = object().shape({
 });
 
 export const createBudgetSchema = object().shape({
-  name: string().required('Budget name is required'),
+  name: string().required('Name is required'),
+  purpose: string().required('Purpose is required'),
   startDate: string().required('Start date is required'),
   endDate: string().required('End date is required'),
 });

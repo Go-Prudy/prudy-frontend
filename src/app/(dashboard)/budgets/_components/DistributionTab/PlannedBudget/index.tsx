@@ -5,7 +5,7 @@ import BudgetVisualization from '@/components/BudgetVisualization';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
 import noBudgetImg from '/public/images/List 2.webp';
-import { BudgetDistributionCategory } from '@/app/utils/types';
+import { BudgetDistributionCategory } from '@/app/types/budget';
 
 type Props = {
   isLoading: boolean;

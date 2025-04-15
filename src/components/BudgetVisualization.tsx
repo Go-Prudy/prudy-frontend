@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import * as d3 from 'd3';
-import { BudgetDistributionCategory } from '@/app/utils/types';
+import { BudgetDistributionCategory } from '@/app/types/budget';
 
 interface BudgetVisualizationProps {
   totalBudget: number;
