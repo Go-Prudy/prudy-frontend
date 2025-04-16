@@ -4,8 +4,8 @@ import Button from '@/app/_components/button';
 import expenseImg from '/public/images/budget/total-expense.png';
 
 import { BsPlus } from 'react-icons/bs';
-import CreateCategoryDrawer from '../../../../_components/drawers/CreateCategory';
-import EditCategoryDrawer from '../../../../_components/drawers/EditCategory';
+import CreateCategoryDrawer from '@/app/_components/drawers/CreateCategory';
+import EditCategoryDrawer from '@/app/_components/drawers/EditCategory';
 import Loader from '@/app/_components/loader';
 import { Allocation, BudgetCategory } from '@/app/types/budget';
 import useCategoriesTab from './useCategoriesTab';

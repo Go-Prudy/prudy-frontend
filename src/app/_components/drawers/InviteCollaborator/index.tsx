@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { emailSchema } from '@/app/utils/validationSchema';
 import useInviteCollaborator from './useInviteCollaborator';
+import SuccessfulModal from '../../modals/SuccessfulModal';
 
 type Props = {
   setShow: (i: boolean) => void;
@@ -14,14 +15,19 @@ type Props = {
   budgetId: string;
 };
 export default function InviteCollaboratorDrawer({ show, setShow, budgetId }: Props) {
-  const { onSubmit, inviteCollaboratorMutation } = useInviteCollaborator({
+  const {
+    onSubmit,
+    inviteCollaboratorMutation,
+    invitedEmail,
+    showSuccessfulModal,
+    handleCloseSuccessfulModal,
+  } = useInviteCollaborator({
     setShow,
     budgetId,
   });
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<{ email: string }>({
     defaultValues: {
@@ -63,6 +69,11 @@ export default function InviteCollaboratorDrawer({ show, setShow, budgetId }: Pr
           />
         </form>
       </BottomDrawer>
+      <SuccessfulModal
+        title={`Invite sent successfully to ${invitedEmail}`}
+        isOpen={showSuccessfulModal}
+        onClose={handleCloseSuccessfulModal}
+      />
     </motion.div>
   );
 }

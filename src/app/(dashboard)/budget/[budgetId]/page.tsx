@@ -1,12 +1,14 @@
 'use client';
-import BarChart from '../../../_components/barChart';
+import BarChart from '@/app/_components/barChart';
 import Header from '@/components/header';
 import { Tab, Tabs } from '@nextui-org/react';
-import IncomeTab from '../_components/IncomeTab';
-import CategoriesTab from '../_components/CategriesTab';
-import DistributionTab from '../_components/DistributionTab';
+import IncomeTab from './_components/IncomeTab';
+import CategoriesTab from './_components/CategriesTab';
+import DistributionTab from './_components/DistributionTab';
 import Loader from '@/app/_components/loader';
 import useBudgetById from './useBudgetById';
+import { Icons } from '@/app/icons';
+import Link from 'next/link';
 
 const Page = ({ params }: { params: { budgetId: string } }) => {
   const { budgetStats, isLoadingBudgetStats, budgetDetails, isLoadingBudgetDetails } =
@@ -16,7 +18,15 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
 
   return (
     <div className="space-y-4">
-      <Header link="/budgets" title={budgetDetails?.name || ''} />
+      <Header link="/budgets" title={budgetDetails?.name || ''}>
+        {/* TODO: links to budget settings page */}
+        <Link
+          href={`/budget/${params.budgetId}/settings`}
+          className="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 text-gray-600"
+        >
+          {Icons.settings}
+        </Link>
+      </Header>
       {isLoadingBudgetStats ? (
         <Loader />
       ) : (

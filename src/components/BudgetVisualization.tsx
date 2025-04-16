@@ -150,7 +150,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .style('font-size', '18.85px')
       .style('font-weight', '700')
       .style('fill', '#333')
-      .text(`₦ ${totalBudget.toLocaleString()}`);
+      .text(`₦ ${totalBudget?.toLocaleString()}`);
 
     svg
       .append('text')

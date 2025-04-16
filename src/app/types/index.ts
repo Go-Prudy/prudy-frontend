@@ -5,3 +5,11 @@ export interface ApiResponse<T> {
   returnStatus: string;
   data: T;
 }
+
+export interface ErrorResponse {
+  code: number;
+  // data: null;
+  message: string;
+  returnStatus: string;
+  success: boolean;
+}

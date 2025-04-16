@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Tab, Tabs } from '@nextui-org/react';
 import { getBudgetDistributionApi } from '@/app/services/BudgetService';
-import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
 import { generateUniqueColors } from '@/app/utils/functions';
 import PlannedBudget from './PlannedBudget';
 import { BudgetDistributionCategory } from '@/app/types/budget';
+import { useAuthStore } from '@/app/store/useAuthStore';
 
 type Props = { budgetId: string; isLoadingBudgetDetails: boolean };
 
 export default function DistributionTab({ budgetId }: Props) {
-  const { authenticatedUser } = useAuthentication();
+  const { userData } = useAuthStore();
 
   const [distributions, setDistributions] = useState<BudgetDistributionCategory[]>([]);
   const [filteredDistributions, setFilteredDistributions] = useState<
@@ -22,8 +22,8 @@ export default function DistributionTab({ budgetId }: Props) {
 
   const { data: budgetDistributionData, isLoading } = useQuery({
     queryKey: ['getBudgetDistribution', budgetId],
-    queryFn: () => getBudgetDistributionApi(authenticatedUser?.token ?? '', budgetId),
-    enabled: !!authenticatedUser?.token && !!budgetId,
+    queryFn: () => getBudgetDistributionApi(userData?.token ?? '', budgetId),
+    enabled: !!userData?.token && !!budgetId,
     staleTime: 5 * 60 * 1000,
   });
 

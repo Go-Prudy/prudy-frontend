@@ -21,7 +21,7 @@ export default function useBudgets() {
     isPending,
     refetch: refetchAllBudgets,
   } = useQuery({
-    queryKey: ['allBudgetCategories'],
+    queryKey: ['allBudgets'],
     queryFn: () => GetAllBudgetsApi(userData?.token ?? ''),
     enabled: !!userData?.token,
     refetchOnWindowFocus: true,
@@ -49,7 +49,7 @@ export default function useBudgets() {
       console.log('Budget deleted successfully!');
       toast.success('Budget deleted');
       queryClient.invalidateQueries({
-        queryKey: ['allBudgetCategories'],
+        queryKey: ['allBudgets'],
       });
       setActiveTooltip(null);
     },

@@ -24,7 +24,7 @@ export default function useCreateBudget({ setShow }: { setShow: (i: boolean) => 
       setShowSuccessModal(true);
       setTimeout(() => {
         setShowSuccessModal(false);
-        navigate.push(`/budgets/${data.data.data.uid}`);
+        navigate.push(`/budget/${data.data.data.uid}`);
         setShow(false);
       }, 2000);
     },

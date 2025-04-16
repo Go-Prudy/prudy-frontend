@@ -1,17 +1,17 @@
 'use client';
 
-import ForwardArrow from '@/icons/forward-arrow';
 import Link from 'next/link';
 import cn from 'classnames';
+import { Icons } from '@/app/icons';
 
 type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   title: string;
   link: string;
-  childern?: React.ReactNode;
+  children?: React.ReactNode;
   isHeaderDark?: boolean;
 };
 
-const Header = ({ title, link, childern, isHeaderDark = false }: HeaderProps) => {
+const Header = ({ title, link, children, isHeaderDark = false }: HeaderProps) => {
   return (
     <div
       className={cn(
@@ -22,16 +22,16 @@ const Header = ({ title, link, childern, isHeaderDark = false }: HeaderProps) =>
       <Link
         href={link}
         className={cn(
-          'rounded-full w-10 h-10 inline-flex justify-center items-center',
+          'rounded-full w-9 h-9 inline-flex justify-center items-center',
           isHeaderDark ? 'bg-white' : 'bg-gray-100',
         )}
       >
-        <ForwardArrow className="rotate-180" />
+        <span className="rotate-180">{Icons.forwardArrow}</span>
       </Link>
 
       <p className="text-lg font-medium text-black mx-auto">{title}</p>
 
-      {childern}
+      {children}
     </div>
   );
 };
