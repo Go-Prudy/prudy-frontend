@@ -9,14 +9,33 @@ import { addIncomeSchema } from '@/app/utils/validationSchema';
 import Button from '../../button';
 import useAddIncome from './useAddIncome';
 import { formatAmount } from '@/app/utils/functions';
+import { Dispatch, SetStateAction } from 'react';
 
 interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
   budgetId: string;
+  setDisabledTabKeys: Dispatch<SetStateAction<string[]>>;
+  name?: string;
+  amount?: string;
+  incomeId?: string;
 }
-export default function AddIncomeDrawer({ setShow, show, budgetId }: Props) {
-  const { onSubmit, addIncomeMutation } = useAddIncome({ setShow, budgetId });
+export default function AddIncomeDrawer({
+  setShow,
+  show,
+  budgetId,
+  setDisabledTabKeys,
+  name,
+  amount,
+  incomeId,
+}: Props) {
+  const { onSubmit, addIncomeMutation, updateIncomeMutation } = useAddIncome({
+    setShow,
+    budgetId,
+    setDisabledTabKeys,
+    isEditing: !!(amount && name),
+    incomeId: incomeId ?? '',
+  });
 
   const {
     register,
@@ -25,8 +44,8 @@ export default function AddIncomeDrawer({ setShow, show, budgetId }: Props) {
     formState: { errors },
   } = useForm<{ name: string; amount: string }>({
     defaultValues: {
-      name: '',
-      amount: '',
+      name: name || '',
+      amount: amount || '',
     },
     resolver: yupResolver(addIncomeSchema),
   });
@@ -41,7 +60,7 @@ export default function AddIncomeDrawer({ setShow, show, budgetId }: Props) {
       <BottomDrawer
         footer={
           <Button
-            loading={addIncomeMutation.isPending}
+            loading={addIncomeMutation.isPending || updateIncomeMutation.isPending}
             onClick={handleSubmit(onSubmit)}
             type="submit"
           >

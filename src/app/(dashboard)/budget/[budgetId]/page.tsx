@@ -11,10 +11,18 @@ import { Icons } from '@/app/icons';
 import Link from 'next/link';
 
 const Page = ({ params }: { params: { budgetId: string } }) => {
-  const { budgetStats, isLoadingBudgetStats, budgetDetails, isLoadingBudgetDetails } =
-    useBudgetById({
-      budgetId: params.budgetId,
-    });
+  const {
+    budgetStats,
+    isLoadingBudgetStats,
+    budgetDetails,
+    isLoadingBudgetDetails,
+    disabledTabKeys,
+    setDisabledTabKeys,
+    handleTabSelection,
+    selectedTab,
+  } = useBudgetById({
+    budgetId: params.budgetId,
+  });
 
   return (
     <div className="space-y-4">
@@ -45,24 +53,33 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
       )}
 
       {/* tabs */}
-      <Tabs fullWidth>
-        <Tab key="income" title="Income" className="w-full bg-gray-100 p-4">
+      <Tabs
+        disabledKeys={disabledTabKeys}
+        selectedKey={selectedTab}
+        fullWidth
+        className="px-4"
+      >
+        <Tab key="income" title="Income" className="w-full border-none bg-gray-100 p-4">
           <IncomeTab
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
             collaborators={budgetDetails?.collaborators || []}
+            setDisabledTabKeys={setDisabledTabKeys}
+            handleTabSelection={handleTabSelection}
           />
         </Tab>
-        <Tab key="categories" title="Allocations" className="w-full bg-gray-100 p-4">
+        <Tab key="allocations" title="Allocations" className="w-full bg-gray-100 p-4">
           <CategoriesTab
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
+            handleTabSelection={handleTabSelection}
           />
         </Tab>
         <Tab key="distribution" title="Distribution" className="w-full bg-gray-100 p-4">
           <DistributionTab
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
+            handleTabSelection={handleTabSelection}
           />
         </Tab>
       </Tabs>

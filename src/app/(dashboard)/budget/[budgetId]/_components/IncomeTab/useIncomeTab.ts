@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import api from '@/app/utils/axiosInstance';
-import { Income } from '@/app/Types';
+import { Income } from '@/app/types/budget';
+import toast from 'react-hot-toast';
 
 interface BudgetIncomesResponse {
   data: Income[];
@@ -12,6 +13,8 @@ interface BudgetIncomesResponse {
 
 export default function useIncomeTab({ budgetId }: { budgetId: string }) {
   const { userData } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [showIncomeDrawer, setShowIncomeDrawer] = useState<boolean>(false);
   const [showInviteCollaboratorDrawer, setShowInviteCollaboratorDrawer] =
     useState<boolean>(false);
@@ -31,6 +34,31 @@ export default function useIncomeTab({ budgetId }: { budgetId: string }) {
     );
   }, [budgetIncomes]);
 
+  const deleteIncomeMutation = useMutation({
+    mutationFn: async (incomeId: string) => {
+      const response = await api.delete(`/budgets/${budgetId}/incomes/${incomeId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['getIncomes', budgetId] });
+      toast.success('Income deleted successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete income');
+      console.error('Delete income error:', error);
+    },
+  });
+
+  const handleEdit = (income: Income) => {
+    console.log(income);
+    setSelectedIncome(income);
+    setShowIncomeDrawer(true);
+  };
+
+  const handleDelete = async (income: Income) => {
+    await deleteIncomeMutation.mutateAsync(income.uid);
+  };
+
   return {
     showIncomeDrawer,
     setShowIncomeDrawer,
@@ -39,5 +67,9 @@ export default function useIncomeTab({ budgetId }: { budgetId: string }) {
     budgetIncomes: budgetIncomes?.data ?? [],
     isLoadingBudgetIncomes,
     totalIncome,
+    handleEdit,
+    handleDelete,
+    selectedIncome,
+    deleteIncomeMutation,
   };
 }

@@ -9,8 +9,7 @@ export default function useCategoriesTab({ budgetId }: { budgetId: string }) {
   const { userData } = useAuthStore();
   const [showCreateCategoryDrawer, setShowCreateCategoryDrawer] =
     useState<boolean>(false);
-  const [showEditCategory, setShowEditCategory] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory>();
+  const [showAddAllocation, setShowAddAllocation] = useState<boolean>(false);
 
   const { data: budgetCategories, isLoading: isBudgetCategriesLoading } = useQuery<
     ApiResponse<BudgetCategory[]>
@@ -39,9 +38,7 @@ export default function useCategoriesTab({ budgetId }: { budgetId: string }) {
     isBudgetAllocationsLoading,
     showCreateCategoryDrawer,
     setShowCreateCategoryDrawer,
-    showEditCategory,
-    setShowEditCategory,
-    selectedCategory,
-    setSelectedCategory,
+    showAddAllocation,
+    setShowAddAllocation,
   };
 }

@@ -1,31 +1,37 @@
 import Button from '@/app/_components/button';
 import moneyImg from '/public/images/budget/total-income.png';
 import inviteCollabratorImg from '/public/images/budget/invite-collaborator.png';
-import moneyIcon from '/public/images/icons/money.svg';
 import emptyListImg from '/public/images/empty-list.png';
 import Image from 'next/image';
 import AddIncomeDrawer from '@/app/_components/drawers/AddIncome';
-import { BsPerson, BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
+import { BsPlus } from 'react-icons/bs';
 import EmptyState from '@/app/_components/emptyState';
-import AppPopover from '@/app/_components/popover';
 import Loader from '@/app/_components/loader';
 import { Collaborator, Income } from '@/app/types/budget';
 import useIncomeTab from './useIncomeTab';
-import { Icons } from '@/app/icons';
 import InviteCollaboratorDrawer from '@/app/_components/drawers/InviteCollaborator';
 import AllocationItem from '@/app/_components/allocationItem';
+import CollaboratorItem from './collaborator';
+import { useAuthStore } from '@/app/store/useAuthStore';
+import { Dispatch, SetStateAction } from 'react';
+import BottomButton from '../bottomButton';
 
 type Props = {
   budgetId: string;
   isLoadingBudgetDetails: boolean;
   collaborators: Collaborator[];
+  setDisabledTabKeys: Dispatch<SetStateAction<string[]>>;
+  handleTabSelection: (key: string) => void;
 };
 
 export default function IncomeTab({
   budgetId,
   isLoadingBudgetDetails,
   collaborators,
+  setDisabledTabKeys,
+  handleTabSelection,
 }: Props) {
+  const { userData } = useAuthStore();
   const {
     showIncomeDrawer,
     setShowIncomeDrawer,
@@ -34,10 +40,14 @@ export default function IncomeTab({
     budgetIncomes,
     isLoadingBudgetIncomes,
     totalIncome,
+    handleEdit,
+    handleDelete,
+    selectedIncome,
+    deleteIncomeMutation,
   } = useIncomeTab({ budgetId });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-[100px]">
       <div className="border border-gray-200 bg-white rounded-3xl ">
         <div className="flex items-center gap-2 p-4 border-b border-gray-200">
           <div className="w-11 h-11 rounded-lg bg-lemonGreen-200 flex items-center justify-center">
@@ -64,12 +74,16 @@ export default function IncomeTab({
             {isLoadingBudgetIncomes ? (
               <Loader />
             ) : budgetIncomes.length > 0 ? (
-              budgetIncomes.map((income: Partial<Income>) => (
+              budgetIncomes.map((income: Income) => (
                 <AllocationItem
                   type="income"
                   key={income.uid}
                   name={income.name ?? ''}
                   amount={income.amount ?? 0}
+                  handleDelete={() => handleDelete(income)}
+                  handleEdit={() => handleEdit(income)}
+                  isLoadingDelete={deleteIncomeMutation.isPending}
+                  isLoadingEdit={false}
                 />
               ))
             ) : (
@@ -88,41 +102,25 @@ export default function IncomeTab({
 
           {isLoadingBudgetDetails ? (
             <Loader />
-          ) : (
-            // TODO: create a component for collaborator and import it
+          ) : collaborators.length > 0 ? (
             collaborators.map((collaborator) => (
-              <div
+              <CollaboratorItem
                 key={collaborator?.uid}
-                className="bg-gray-100 rounded-2xl border border-gray-200 p-4 flex items-start gap-1 justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  {collaborator?.picture ? (
-                    <Image
-                      src={collaborator.picture}
-                      alt={collaborator.name}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 object-cover object-center rounded-full "
-                    />
-                  ) : (
-                    <div className="bg-gray-200 h-10 w-10 rounded-full flex items-center justify-center text-gray-600">
-                      <BsPerson />
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    <p className="text-black-800 text-base font-medium text-center">
-                      {collaborator.name}
-                    </p>
-                    {/* <p className="text-gray-400">{collaborator?.email}</p> */}
-                  </div>
-                </div>
-                <p className="text-gray-400 rounded-[10px] bg-white text-[10px] px-2 py-0.5">
-                  {collaborator.isHost ? 'HOST' : 'GUEST'}
-                </p>
-              </div>
+                picture={collaborator?.picture}
+                name={collaborator?.name}
+                isHost={collaborator?.isHost}
+                email={collaborator?.email}
+              />
             ))
+          ) : (
+            <CollaboratorItem
+              picture={userData?.profile.profilePhotoUrl || ''}
+              name={`${userData?.profile.firstName} ${userData?.profile.lastName}`}
+              email={userData?.profile.email}
+              isHost
+            />
           )}
-          <div className="bg-lemonGreen-50 rounded-2xl border border-lemonGreen-600 p-4 flex items-center gap-3">
+          <div className="bg-lemonGreen-50 rounded-2xl border border-dashed border-lemonGreen-600 p-4 flex items-center gap-3">
             <button onClick={() => setShowInviteCollaboratorDrawer(true)}>
               <Image
                 src={inviteCollabratorImg}
@@ -138,12 +136,19 @@ export default function IncomeTab({
           </div>
         </div>
       </div>
+      <BottomButton>
+        <Button onClick={() => handleTabSelection('allocations')}>Continue</Button>
+      </BottomButton>
 
       {showIncomeDrawer && (
         <AddIncomeDrawer
           show={showIncomeDrawer}
           setShow={setShowIncomeDrawer}
           budgetId={budgetId}
+          setDisabledTabKeys={setDisabledTabKeys}
+          name={selectedIncome?.name}
+          amount={selectedIncome?.amount.toString()}
+          incomeId={selectedIncome?.uid}
         />
       )}
       {showInviteCollaboratorDrawer && (

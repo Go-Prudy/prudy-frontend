@@ -1,19 +1,25 @@
 import Image from 'next/image';
-
 import Button from '@/app/_components/button';
 import expenseImg from '/public/images/budget/total-expense.png';
+import emptyListImg from '/public/images/empty-state/list.png';
 
-import { BsPlus } from 'react-icons/bs';
+import { BsArrowLeft, BsArrowRight, BsPlus } from 'react-icons/bs';
 import CreateCategoryDrawer from '@/app/_components/drawers/CreateCategory';
-import EditCategoryDrawer from '@/app/_components/drawers/EditCategory';
 import Loader from '@/app/_components/loader';
-import { Allocation, BudgetCategory } from '@/app/types/budget';
 import useCategoriesTab from './useCategoriesTab';
 import useIncomeTab from '../IncomeTab/useIncomeTab';
+import EmptyState from '@/app/_components/emptyState';
+import AddAllocationDrawer from '@/app/_components/drawers/AddAllocation';
+import { Allocation } from '@/app/types/budget';
+import BottomButton from '../bottomButton';
 
-type Props = { budgetId: string; isLoadingBudgetDetails: boolean };
+type Props = {
+  budgetId: string;
+  isLoadingBudgetDetails: boolean;
+  handleTabSelection: (key: string) => void;
+};
 
-export default function CategoriesTab({ budgetId }: Props) {
+export default function CategoriesTab({ budgetId, handleTabSelection }: Props) {
   const { totalIncome } = useIncomeTab({ budgetId });
   const {
     budgetCategories,
@@ -22,14 +28,12 @@ export default function CategoriesTab({ budgetId }: Props) {
     isBudgetAllocationsLoading,
     showCreateCategoryDrawer,
     setShowCreateCategoryDrawer,
-    showEditCategory,
-    setShowEditCategory,
-    selectedCategory,
-    setSelectedCategory,
+    showAddAllocation,
+    setShowAddAllocation,
   } = useCategoriesTab({ budgetId });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-[100px]">
       <div className="border border-gray-200 bg-white rounded-3xl">
         <div className="flex items-center gap-2 p-4 border-b border-gray-200">
           <div className="w-11 h-11 rounded-lg bg-red-100 flex items-center justify-center">
@@ -40,58 +44,57 @@ export default function CategoriesTab({ budgetId }: Props) {
             <h6 className="text-xl text-black-800 font-bold">₦0.00</h6>
           </div>
         </div>
-        <div className="px-4 py-5 space-y-2">
+        <div className="px-4 py-5 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-black-800 font-medium">Budget Categories</p>
+            <p className="text-black-800 font-medium">Budget Allocations</p>
             <Button
-              onClick={() => setShowCreateCategoryDrawer(true)}
+              onClick={() => {
+                setShowAddAllocation(true);
+              }}
               buttonIcon={<BsPlus size={16} />}
-              buttonTitle="Create New"
+              buttonTitle="Add Allocations"
               buttonType="icon"
             />
           </div>
-          <p className="text-sm text-gray-400">
-            Click on the categories below to set their expenses.
-          </p>
 
-          {/* categories list */}
-          {isBudgetCategriesLoading || isBudgetAllocationsLoading ? (
+          {isBudgetAllocationsLoading ? (
             <Loader />
+          ) : budgetAllocations.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {budgetAllocations.map((allocation: Allocation) => (
+                <div
+                  key={allocation.uid}
+                  className="p-3 space-y-2 bg-gray-100 border border-gray-200 rounded-[20px] text-black-800 text-sm font-medium"
+                >
+                  <div className="size-10 bg-white rounded-full"></div>
+                  <p className="">{allocation.budgetCategory.name}</p>
+                  <p className="">{allocation.amountAllocated}</p>
+                </div>
+              ))}
+            </div>
           ) : (
-            <ul className="grid grid-cols-2 gap-3 overflow-auto min-h-[322px]">
-              {budgetCategories?.map((category: BudgetCategory, index: number) => {
-                const matchingAllocation = budgetAllocations.find(
-                  (allocation: Allocation) =>
-                    allocation.budgetCategory.uid === category.uid,
-                );
-                // TODO: check why budgetAllocations query is not invalidated when an alocation is created
-                return (
-                  <li
-                    key={category.uid}
-                    onClick={() => {
-                      console.log(index);
-
-                      setSelectedCategory(category);
-                      setShowEditCategory(true);
-                    }}
-                    className="bg-gray-100 border border-gray-200 p-3 rounded-[20px] space-y-2 text-gray-700"
-                  >
-                    <div
-                      className="w-5 h-5 rounded-full"
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <p className="text-xs">{category.name}</p>
-                    <p className="text-sm font-medium">
-                      ₦
-                      {matchingAllocation?.amountAllocated?.toLocaleString('en-US') ?? ''}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
+            <EmptyState
+              image={emptyListImg}
+              title="You are yet to allocate your expenses"
+              description="Click the “Add Allocations” button above to get started."
+            />
           )}
         </div>
       </div>
+
+      <BottomButton>
+        <Button
+          className="!bg-lemonGreen-100 !text-lemonGreen-900"
+          onClick={() => handleTabSelection('income')}
+        >
+          <BsArrowLeft />
+          Back
+        </Button>
+
+        <Button onClick={() => handleTabSelection('distribution')}>
+          Continue <BsArrowRight />
+        </Button>
+      </BottomButton>
 
       {showCreateCategoryDrawer && (
         <CreateCategoryDrawer
@@ -99,14 +102,14 @@ export default function CategoriesTab({ budgetId }: Props) {
           setShow={setShowCreateCategoryDrawer}
         />
       )}
-      {showEditCategory && (
-        <EditCategoryDrawer
-          name={selectedCategory?.name || ''}
-          show={showEditCategory}
-          setShow={setShowEditCategory}
+      {showAddAllocation && (
+        <AddAllocationDrawer
+          show={showAddAllocation}
+          setShow={setShowAddAllocation}
           totalIncome={totalIncome ?? 0}
-          budgetCategoryId={selectedCategory?.uid || ''}
           budgetId={budgetId}
+          budgetCategories={budgetCategories}
+          isBudgetCategriesLoading={isBudgetCategriesLoading}
         />
       )}
     </div>

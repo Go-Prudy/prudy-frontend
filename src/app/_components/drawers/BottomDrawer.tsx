@@ -71,7 +71,7 @@ const BottomDrawer: React.FC<IProps> = ({
           )}
         </div>
       </div>
-      <div className="p-6">{children}</div>
+      <div className="p-6 max-h-[450px] overflow-auto">{children}</div>
 
       {footer && (
         <div className="p-6 w-full border-t border-gray-200 rounded-t-3xl bg-white shadow-[0px_-5px_4px_0px_#EFF0F64D]">

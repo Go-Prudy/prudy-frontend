@@ -1,4 +1,4 @@
-import { SubAllocationForm } from '@/app/types/budget';
+import { BudgetCategory, SubAllocationForm } from '@/app/types/budget';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/app/utils/axiosInstance';
@@ -14,12 +14,10 @@ interface AllocationForm {
 export default function useEditCategory({
   setShow,
   totalIncome,
-  budgetCategoryId,
   budgetId,
 }: {
   setShow: (i: boolean) => void;
   totalIncome: number;
-  budgetCategoryId: string;
   budgetId: string;
 }) {
   const queryClient = useQueryClient();
@@ -27,9 +25,11 @@ export default function useEditCategory({
   const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState<boolean>(false);
   const [showAddSubCategoryDrawer, setShowAddSubCategoryModal] = useState<boolean>(false);
   const [showAddSubAllocations, setShowAddSubAllocations] = useState<boolean>(false);
+  const [showCategoriesDrawer, setShowCategoriesDrawer] = useState<boolean>(false);
 
   const [amount, setAmount] = useState<string>('');
   const [percentage, setPercentage] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory | null>(null);
   const [subAllocations, setSubAllocations] = useState<SubAllocationForm[]>([]);
 
   const formatAmount = (value: string) => {
@@ -137,13 +137,13 @@ export default function useEditCategory({
     console.log({
       amount: numericAmount,
       percentage: percentage,
-      budgetCategoryId,
+      budgetCategoryId: selectedCategory?.uid,
       subAllocations,
     });
     await createAllocationMutation.mutateAsync({
       amount: numericAmount,
       percentage: percentage,
-      budgetCategoryId,
+      budgetCategoryId: selectedCategory?.uid ?? '',
       subAllocations,
     });
 
@@ -156,6 +156,8 @@ export default function useEditCategory({
     handlePercentageChange,
     amount,
     percentage,
+    showCategoriesDrawer,
+    setShowCategoriesDrawer,
     showDeleteSuccessModal,
     handleCloseDeleteSuccessModal: () => setShowDeleteSuccessModal(false),
     showDeleteCategoryModal,
@@ -165,10 +167,13 @@ export default function useEditCategory({
     setShowAddSubCategoryModal,
     showAddSubAllocations,
     setShowAddSubAllocations,
+
     subAllocations,
     setSubAllocations,
     remainingUnallocatedAmount,
     handleDeleteSubAllocation,
     createAllocationMutation,
+    selectedCategory,
+    setSelectedCategory,
   };
 }

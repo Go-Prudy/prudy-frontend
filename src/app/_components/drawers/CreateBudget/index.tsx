@@ -58,7 +58,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
       <BottomDrawer
         footer={
           <Button onClick={handleSubmit(onSubmit)} disabled={!isValid || !isDirty}>
-            Create Budget
+            Proceed
           </Button>
         }
         label="Create budget"

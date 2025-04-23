@@ -59,23 +59,23 @@ const DashboardHeader = ({
         {type === 'home' ? (
           <div className="text-black-970 flex gap-2 items-start">
             <div
-              className={`rounded-full ${!userData?.profile.profilePhotoUrl ? 'p-1 border border-gray-600' : 'p-0'} `}
+              className={`${!userData?.profile.profilePhotoUrl ? 'p-1 border border-gray-600 rounded-xl' : 'p-0'} `}
             >
               {userData?.profile?.profilePhotoUrl ? (
                 <Image
                   src={userData.profile.profilePhotoUrl}
                   alt="profile"
-                  width={1000}
-                  height={1000}
-                  className=" size-10 rounded-full object-cover"
+                  width={40}
+                  height={40}
+                  className="size-10 rounded-xl object-cover"
                 />
               ) : (
-                <BsPerson className="text-gray-600 size-10" />
+                <BsPerson className="text-gray-600 size-8" />
               )}
             </div>
             <div className="text-gray-600">
               <p className="text-xs">Welcome 👋</p>
-              <h1 className="font-medium">
+              <h1 className="font-bold">
                 {userData?.profile.lastName ? userData?.profile.lastName : 'User'}
               </h1>
             </div>

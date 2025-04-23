@@ -2,31 +2,34 @@ import React from 'react';
 import Button from '../../button';
 import BottomDrawer from '../BottomDrawer';
 import { motion } from 'framer-motion';
-import useEditCategory from './useEditCategory';
+import useEditCategory from './useAddAllocation';
 import SuccessfulModal from '../../modals/SuccessfulModal';
 import ActionModal from '../../modals/ActionModal';
-import { BsPlus } from 'react-icons/bs';
+import { BsChevronDown, BsPlus } from 'react-icons/bs';
 import AddSubCategoryDrawer from '../../modals/AddSubCategory';
 import { Switch } from '@nextui-org/react';
 import AllocationItem from '../../allocationItem';
 import cn from 'classnames';
+import { BudgetCategory } from '@/app/types/budget';
+import SelectCategoryDrawer from '../SelectCategory';
 
 interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
-  name: string;
   totalIncome: number;
-  budgetCategoryId: string;
   budgetId: string;
+  budgetCategories: BudgetCategory[];
+  isBudgetCategriesLoading: boolean;
 }
 
-export default function EditCategoryDrawer({
+export default function AddAllocationDrawer({
   show,
   setShow,
-  name,
+
   totalIncome,
-  budgetCategoryId,
   budgetId,
+  budgetCategories,
+  isBudgetCategriesLoading,
 }: Props) {
   const {
     handleSubmit,
@@ -34,6 +37,8 @@ export default function EditCategoryDrawer({
     handlePercentageChange,
     amount,
     percentage,
+    showCategoriesDrawer,
+    setShowCategoriesDrawer,
     showDeleteSuccessModal,
     handleCloseDeleteSuccessModal,
     showDeleteCategoryModal,
@@ -48,10 +53,11 @@ export default function EditCategoryDrawer({
     remainingUnallocatedAmount,
     handleDeleteSubAllocation,
     createAllocationMutation,
+    selectedCategory,
+    setSelectedCategory,
   } = useEditCategory({
     setShow,
     totalIncome,
-    budgetCategoryId,
     budgetId,
   });
 
@@ -65,19 +71,26 @@ export default function EditCategoryDrawer({
     >
       <BottomDrawer
         footer={
-          <div className="flex gap-4">
-            <Button
-              onClick={handleOpenDeletCategoryModal}
-              className="bg-red-200 text-red-600"
-            >
-              Delete category
-            </Button>
-            <Button loading={createAllocationMutation.isPending} onClick={handleSubmit}>
-              Save
-            </Button>
-          </div>
+          <Button
+            disabled={!selectedCategory}
+            loading={createAllocationMutation.isPending}
+            onClick={handleSubmit}
+          >
+            Save
+          </Button>
+          // <div className="flex gap-4">
+          //   <Button
+          //     onClick={handleOpenDeletCategoryModal}
+          //     className="bg-red-200 text-red-600"
+          //   >
+          //     Delete category
+          //   </Button>
+          //   <Button loading={createAllocationMutation.isPending} onClick={handleSubmit}>
+          //     Save
+          //   </Button>
+          // </div>
         }
-        label={`${name} Budget`}
+        label="Add Budget Allocations"
         back={false}
         show={show}
         close={true}
@@ -85,28 +98,68 @@ export default function EditCategoryDrawer({
       >
         <div className="space-y-6">
           <div className="space-y-3">
-            <p className="text-gray-600 font-medium">Category amount/percentage</p>
-            <div className="relative bg-gray-100 text-gray-600 border border-gray-200 w-full px-4 py-3 rounded-[20px] flex justify-between">
-              <div className="w-full flex flex-col">
+            <div className="relative bg-gray-100 text-black-800 border border-gray-200 w-full p-2 rounded-2xl flex justify-between gap-2">
+              <div className="bg-white rounded-lg w-1/2 space-y-1 p-2">
+                <p className="text-xs text-gray-500">Left to allocate</p>
+                <p>₦500,000</p>
+              </div>
+              <div className="bg-white rounded-lg w-1/2 space-y-1 p-2">
+                <p className="text-xs text-gray-500">Left to allocate</p>
+                <p>₦500,000</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowCategoriesDrawer(true)}
+              className="rounded-2xl w-full p-4 bg-gray-100 border border-gray-200 space-y-1 text-left"
+            >
+              <p className="text-xs text-gray-500">Name of category</p>
+              <div
+                className={cn(
+                  'flex items-center justify-between text-gray-600',
+                  !selectedCategory && 'opacity-60',
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {/* image */}
+                  <span>{selectedCategory ? selectedCategory.name : 'e.g Food'}</span>
+                </div>
+                <BsChevronDown />
+              </div>
+            </button>
+
+            {showCategoriesDrawer && (
+              <SelectCategoryDrawer
+                show={showCategoriesDrawer}
+                setShow={setShowCategoriesDrawer}
+                categories={budgetCategories}
+                isLoading={isBudgetCategriesLoading}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+              />
+            )}
+
+            <div className="relative bg-gray-100 text-gray-600 border border-gray-200 w-full p-3 rounded-2xl flex justify-between items-center">
+              <div className="w-1/2 flex flex-col">
                 <label htmlFor="amount" className="text-xs text-gray-500">
                   Amount
                 </label>
                 <input
                   id="amount"
                   placeholder="e.g ₦ 200,000"
-                  className="bg-transparent max-w-[120px]"
+                  className="bg-transparent"
                   value={amount}
                   onChange={handleAmountChange}
                 />
               </div>
-              <div className="bg-white pt-0 pb-1 pl-[10px] pr-4 rounded-[10px] w-fit max-w-[88px]">
+              <div className="bg-white pt-0 pb-1 pl-[10px] pr-4 rounded-[10px] w-1/2 flex flex-col">
                 <label htmlFor="amount" className="text-xs text-gray-500">
                   Percentage
                 </label>
                 <input
                   id="percentage"
                   placeholder="20%"
-                  className="bg-transparent max-w-[62px]"
+                  className="bg-transparent"
                   value={percentage}
                   onChange={handlePercentageChange}
                   onBlur={(e) => {
@@ -143,6 +196,10 @@ export default function EditCategoryDrawer({
                           key={index}
                           name={allocation.name}
                           amount={allocation.amount}
+                          handleDelete={() => {}}
+                          handleEdit={() => {}}
+                          isLoadingDelete={false}
+                          isLoadingEdit={false}
                         />
                       ))}
                       <div className="bg-gray-200 rounded-lg p-2 text-xs text-gray-600 font-medium">

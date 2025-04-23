@@ -20,7 +20,7 @@ export default function EmptyState({ image, title, description }: Props) {
 
       <div className="space-y-2 text-center">
         <p className="font-medium text-gray-600">{title}</p>
-        {description && <p className="text-sm text-gray-400">{description}</p>}
+        {description && <p className="text-sm text-gray-400 max-w-[220px]">{description}</p>}
       </div>
     </div>
   );
@@ -36,7 +36,7 @@ export const EmptyStateDarkBg = ({
   isLoading,
 }: Props) => {
   return (
-    <div className="flex flex-col items-center justify-center h-[250px] gap-3 bg-gray-100 rounded-3xl">
+    <div className="flex flex-col items-center justify-center h-[200px] gap-3 bg-gray-100 rounded-3xl border border-gray-200">
       <Image src={image} width={75} height={75} alt="" />
 
       <div className="space-y-2 text-center">

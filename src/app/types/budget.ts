@@ -43,6 +43,7 @@ export interface Collaborator {
   name: string;
   picture: string;
   isHost: boolean;
+  email?:string
 }
 
 export interface SubAllocation {

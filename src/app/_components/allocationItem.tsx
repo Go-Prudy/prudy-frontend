@@ -9,10 +9,21 @@ type Props = {
   name: string;
   amount: number;
   type: 'income' | 'allocation';
-  handleDelete?: () => void;
+  handleDelete: () => void;
+  handleEdit: () => void;
+  isLoadingEdit: boolean;
+  isLoadingDelete: boolean;
 };
 
-export default function AllocationItem({ name, amount, type, handleDelete }: Props) {
+export default function AllocationItem({
+  name,
+  amount,
+  type,
+  handleDelete,
+  handleEdit,
+  isLoadingEdit,
+  isLoadingDelete,
+}: Props) {
   return (
     <div className="p-4 bg-gray-100 border border-gray-200 rounded-2xl flex items-center justify-between w-full gap-2">
       <div className="flex items-center gap-2">
@@ -31,7 +42,10 @@ export default function AllocationItem({ name, amount, type, handleDelete }: Pro
           }
           placement="bottom-end"
         >
-          <button className="text-left text-xs text-gray-600 flex items-center gap-0.5">
+          <button
+            onClick={handleEdit}
+            className="text-left text-xs text-gray-600 flex items-center gap-0.5"
+          >
             {Icons.edit}
             <span>Edit</span>
           </button>
@@ -40,7 +54,11 @@ export default function AllocationItem({ name, amount, type, handleDelete }: Pro
             className="text-left text-xs text-gray-600 flex items-center gap-0.5"
           >
             {Icons.trash}
-            <span>Delete {type === 'income' ? 'Income' : ''}</span>
+            {isLoadingDelete ? (
+              'Loading...'
+            ) : (
+              <span>Delete {type === 'income' ? 'Income' : ''}</span>
+            )}
           </button>
         </AppPopover>
       </div>

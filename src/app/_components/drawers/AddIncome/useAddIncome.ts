@@ -1,8 +1,8 @@
 import api from '@/app/utils/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 interface AddIncomeForm {
   name: string;
@@ -12,9 +12,15 @@ interface AddIncomeForm {
 export default function useAddIncome({
   setShow,
   budgetId,
+  setDisabledTabKeys,
+  isEditing,
+  incomeId,
 }: {
   setShow: (i: boolean) => void;
   budgetId: string;
+  setDisabledTabKeys: Dispatch<SetStateAction<string[]>>;
+  isEditing: boolean;
+  incomeId: string;
 }) {
   const queryClient = useQueryClient();
 
@@ -27,10 +33,40 @@ export default function useAddIncome({
         queryClient.invalidateQueries({ queryKey: ['getIncomes', budgetId] }),
         queryClient.invalidateQueries({ queryKey: ['getBudgetStats', budgetId] }),
       ]);
+
+      queryClient.setQueryData(['getIncomes', budgetId], (old: any) => {
+        if (!old) return { data: [data.data] };
+        return {
+          ...old,
+          data: [...old.data, data.data.data],
+        };
+      });
+
+      setDisabledTabKeys(['distribution']);
       setShow(false);
     },
     onError: (error: unknown) => {
       console.error('Error adding income:', error);
+    },
+  });
+
+  const updateIncomeMutation = useMutation({
+    mutationFn: async ({
+      values,
+      incomeId,
+    }: {
+      values: AddIncomeForm;
+      incomeId: string;
+    }) => api.put(`/budgets/${budgetId}/incomes/${incomeId}`, values),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['getIncomes', budgetId] });
+      setShow(false);
+      toast.success('Income updated successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to update income');
+      console.error('Update income error:', error);
     },
   });
 
@@ -40,10 +76,17 @@ export default function useAddIncome({
   }> = async (data) => {
     const amount = Number(data.amount.replace(/[^0-9.]/g, ''));
 
-    await addIncomeMutation.mutateAsync({
-      name: data.name,
-      amount: amount,
-    });
+    if (isEditing) {
+      updateIncomeMutation.mutateAsync({
+        values: { name: data.name, amount: amount },
+        incomeId,
+      });
+    } else {
+      await addIncomeMutation.mutateAsync({
+        name: data.name,
+        amount: amount,
+      });
+    }
   };
-  return { onSubmit, addIncomeMutation };
+  return { onSubmit, addIncomeMutation, updateIncomeMutation };
 }
