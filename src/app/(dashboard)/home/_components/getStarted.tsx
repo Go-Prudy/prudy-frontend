@@ -1,12 +1,15 @@
 import cn from 'classnames';
 import Image, { StaticImageData } from 'next/image';
-import { useState } from 'react';
 import CreateBudgetDrawer from '@/app/_components/drawers/CreateBudget';
 
 import createBudgetImage from '/public/images/quick-actions/1.png';
 import trackExpenseImage from '/public/images/quick-actions/6.png';
 import linkBankImage from '/public/images/quick-actions/2.png';
 import scanReceiptImage from '/public/images/quick-actions/3.png';
+import useGetStarted from './useGetStarted';
+import { CircularProgress } from '@nextui-org/react';
+import ScanReceipt from '@/app/_components/scanner';
+import { useRouter } from 'next/navigation';
 
 interface QuickActionType {
   id: string;
@@ -53,7 +56,14 @@ const quickActions: QuickActionType[] = [
 type Props = {};
 
 export default function GetStarted({}: Props) {
-  const [showCreateBudgetModal, setShowCreateBudgetModal] = useState<boolean>(false);
+  const navigate = useRouter();
+  const {
+    linkAccountMutation,
+    showScanner,
+    setShowScanner,
+    showCreateBudgetModal,
+    setShowCreateBudgetModal,
+  } = useGetStarted();
 
   return (
     <div className="rounded-[36px] border border-gray-200">
@@ -76,7 +86,7 @@ export default function GetStarted({}: Props) {
         {quickActions.map((action) => (
           <div
             key={action.id}
-            className="p-4 space-y-2 rounded-3xl border text-black-800 min-w-[160px]"
+            className="p-4 space-y-2 rounded-3xl border text-black-800"
             style={{
               borderColor: action.borderColor,
               backgroundColor: action.bgColor,
@@ -84,6 +94,15 @@ export default function GetStarted({}: Props) {
             onClick={() => {
               if (action.id === 'create') {
                 setShowCreateBudgetModal(true);
+              }
+              if (action.id === 'track') {
+                navigate.push('/track');
+              }
+              if (action.id === 'scan') {
+                setShowScanner(true);
+              }
+              if (action.id === 'link') {
+                linkAccountMutation.mutateAsync();
               }
             }}
           >
@@ -95,14 +114,18 @@ export default function GetStarted({}: Props) {
                 height={action.size || 34}
               />
             </div>
-            <h5 className="text-sm font-medium">
-              {action.title.split('/n').map((part, index) => (
-                <span key={index}>
-                  {part}
-                  {index < action.title.split('/n').length - 1 && <br />}
-                </span>
-              ))}
-            </h5>
+            {action.id === 'link' && linkAccountMutation.isPending ? (
+              <CircularProgress size="sm" />
+            ) : (
+              <h5 className="text-sm font-medium">
+                {action.title.split('/n').map((part, index) => (
+                  <span key={index}>
+                    {part}
+                    {index < action.title.split('/n').length - 1 && <br />}
+                  </span>
+                ))}
+              </h5>
+            )}
           </div>
         ))}
       </div>
@@ -112,6 +135,7 @@ export default function GetStarted({}: Props) {
           setShow={setShowCreateBudgetModal}
         />
       )}
+      <ScanReceipt showScanner={showScanner} setShowScanner={setShowScanner} />
     </div>
   );
 }

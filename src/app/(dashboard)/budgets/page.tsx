@@ -37,7 +37,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
 
   return (
     <div
-      className={`relative flex  items-center ${expenseWidth <= treshold ? 'mt-0' : 'mt-2'}`}
+      className={`relative flex  items-center ${expenseWidth <= treshold ? 'mt-0' : ''}`}
     >
       {partners
         ?.slice(0, maxAvatarsToShow)
@@ -89,7 +89,7 @@ const BudgetPage = () => {
     getPendingInvitesApiData,
     refetchAllBudgets,
   } = useBudgets();
-  
+
   const navigate = useRouter();
 
   return (
@@ -106,22 +106,21 @@ const BudgetPage = () => {
             <DashboardHeader
               type="dashboard"
               title="Budgets"
+              description="Be a step ahead of your expenses"
               headerIcon={budgetHeaderIcon}
               headerTitle="Budget smarter, Live better."
-              headerIconClass="mr-[-14px]"
-            >
-              <div className="flex gap-3 w-full">
-                <Button
-                  onClick={() => setCreateBudgetComponent(!createBudgetComponent)}
-                  className="text-xs py-[10px] px-3 rounded-xl"
-                >
-                  Create New Budget
-                </Button>
-                <Button className="bg-white text-xs py-[10px] px-3 rounded-xl">
-                  Duplicate Last Budget
-                </Button>
-              </div>
-            </DashboardHeader>
+              headerIconClass="mr-[-14px] w-[112px] h-[112px]"
+            />
+
+            <div className="flex items-center justify-between gap-3 w-full pt-6 pb-4 px-6">
+              <h2 className="text-lg font-medium">All Budgets</h2>
+              <Button
+                onClick={() => setCreateBudgetComponent(!createBudgetComponent)}
+                className="text-xs py-2 px-3 rounded-xl !w-fit"
+              >
+                Create Budget
+              </Button>
+            </div>
 
             <div className="min-h-[400px] w-full">
               {isPending ? (
@@ -139,7 +138,7 @@ const BudgetPage = () => {
                     className="size-[124px] mb-[8px]"
                     alt=""
                   />
-                  <h1 className="font-[500] leading-[24px]">
+                  <h1 className="font-medium leading-[24px]">
                     You do not have any budget history yet.
                   </h1>
                   <h1 className="text-[14px] text-[#828282] leading-[16.8px]">
@@ -147,7 +146,7 @@ const BudgetPage = () => {
                   </h1>
                 </div>
               ) : (
-                <div className="flex flex-col pb-[90px] gap-6 p-6">
+                <div className="flex flex-col pb-[90px] gap-6 p-6 bg-gray-100">
                   {budgets?.map((budget: any, index: any) => {
                     const totalBudgetIncome = Number(budget?.totalIncome) || 0;
                     const totalBudgetExpenses = Number(budget?.totalExpenses) || 0;
@@ -171,14 +170,14 @@ const BudgetPage = () => {
                       <div
                         onClick={() => navigate.push(`/budget/${budget.uid}`)}
                         key={index}
-                        className="bg-[#EFEFF0] rounded-[20px] flex flex-col relative border-[1px] border-[#E7E7EA] gap-[8px] p-[16px]"
+                        className="cursor-pointer bg-white rounded-[20px] flex flex-col relative border border-gray-200 gap-2 py-4"
                       >
-                        <div className="w-full justify-between items-center flex">
-                          <h1 className="text-[16px] font-[500] leading-[24px]">
+                        <div className="px-4 w-full justify-between items-center flex">
+                          <h1 className="text-[16px] font-medium leading-[24px]">
                             {budget.name}
                           </h1>
-                          <div className="flex items-center text-[12px] gap-[12px] text-[#828282]">
-                            <button className="bg-[#FFFFFF] rounded-[10px] px-[8px] py-[2px]">
+                          <div className="flex items-center text-xs gap-[12px] text-[#828282]">
+                            <button className="bg-gray-100 rounded-[10px] px-[8px] py-[2px]">
                               {budget.type}
                             </button>
                             <button
@@ -188,12 +187,12 @@ const BudgetPage = () => {
                                   activeTooltip === budget.uid ? null : budget.uid,
                                 );
                               }}
-                              className="bg-[#FFFFFF] z-[20] rounded-[10px] px-[8px] py-[2px]"
+                              className="bg-gray-100 z-20 rounded-full h-6 w-6 flex items-center justify-center px-2 py-0.5"
                             >
                               <BsThreeDotsVertical />
                             </button>
                             {activeTooltip === budget.uid && (
-                              <div className="absolute z-[12] bg-white border flex flex-col gap-[8px] top-[40px] right-[10px] rounded shadow-md mt-2 p-2">
+                              <div className="absolute z-[12] bg-gray-100 border flex flex-col gap-[8px] top-[40px] right-[10px] rounded shadow-md mt-2 p-2">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -229,25 +228,25 @@ const BudgetPage = () => {
                             )}
                           </div>
                         </div>
-                        <div className="mt-[8px] flex flex-col gap-[8px] w-full">
-                          <div className="flex flex-col gap-[4px]">
-                            <h1 className="flex justify-between w-full">
-                              <span className="text-[#575757] text-[10px]">Income</span>
-                              <span className={`text-[#575757] font-[500] text-[12px]`}>
+                        <div className="px-4 mt-[8px] flex flex-col gap-2 w-full">
+                          <div className="flex flex-col gap-1">
+                            <h1 className="flex justify-between w-full text-gray-600">
+                              <span className="text-[10px]">Income</span>
+                              <span className={`font-medium text-xs`}>
                                 {totalBudgetIncome.toLocaleString('en-NG', {
                                   minimumFractionDigits: 0,
                                   maximumFractionDigits: 0,
                                 })}
                               </span>
                             </h1>
-                            <div className="relative w-full bg-[#EFEFF0] rounded-[4px]">
+                            <div className="relative w-full bg-white rounded">
                               <div
                                 style={{
                                   width: `${incomeWidth}%`,
-                                  backgroundColor: '#01B0C5',
+                                  backgroundColor: '#11CDEF',
                                   maxWidth: '100%',
                                 }}
-                                className="h-[8px] rounded-[4px]"
+                                className="h-3 rounded"
                               />
                             </div>
                           </div>
@@ -257,41 +256,41 @@ const BudgetPage = () => {
                               width: `${expenseWidth}%`,
                               maxWidth: '100%',
                             }}
-                            className="flex flex-col relative  gap-[4px]"
+                            className="flex flex-col relative  gap-1"
                           >
-                            <h1 className="flex justify-between w-full">
-                              <span className="text-[#575757] text-[10px]">Expenses</span>
+                            <h1 className="flex justify-between w-full text-gray-600">
+                              <span className="text-[10px]">Expenses</span>
                               <span
-                                className={` ${expenseWidth <= dynamicThreshold ? 'hidden' : 'block'} text-[#575757] font-[500] text-[12px]`}
+                                className={` ${expenseWidth <= dynamicThreshold ? 'hidden' : 'block'} font-medium text-xs`}
                               >
                                 ₦ {totalBudgetExpenses.toLocaleString()}
                               </span>
                             </h1>
-                            <div className="relative w-full bg-[#EFEFF0] rounded-[4px]">
+                            <div className="relative w-full bg-white rounded">
                               <div
                                 style={{
                                   width: `${expenseWidth}%`,
-                                  backgroundColor: '#FB8417',
+                                  backgroundColor: '#F89446',
                                   maxWidth: '100%',
                                 }}
-                                className="h-[8px] rounded-[4px]"
+                                className="h-3 rounded"
                               />
                             </div>
                             <div
-                              className={` flex  ${expenseWidth <= dynamicThreshold ? 'block' : 'hidden'}   text-[#575757] font-[500] text-[12px]`}
+                              className={` flex  ${expenseWidth <= dynamicThreshold ? 'block' : 'hidden'} text-gray-600 font-medium text-xs`}
                             >
                               ₦{totalBudgetExpenses.toLocaleString()}
                             </div>
                           </div>
-                          <div className=" z-1 relative w-full">
-                            {budget?.collaborators.length === 0 ? null : (
-                              <AvatarGroup
-                                partners={budget?.collaborators}
-                                expenseWidth={3}
-                                treshold={treshold}
-                              />
-                            )}
-                          </div>
+                        </div>
+                        <div className=" z-1 relative w-full border-t border-gray-200 pt-2 px-4">
+                          {budget?.collaborators.length === 0 ? null : (
+                            <AvatarGroup
+                              partners={budget?.collaborators}
+                              expenseWidth={3}
+                              treshold={treshold}
+                            />
+                          )}
                         </div>
                       </div>
                     );

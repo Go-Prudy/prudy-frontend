@@ -11,7 +11,9 @@ type Props = {
   categories: BudgetCategory[];
   isLoading: boolean;
   selectedCategory: BudgetCategory | null;
-  setSelectedCategory: Dispatch<SetStateAction<BudgetCategory | null>>;
+  setSelectedCategory?: Dispatch<SetStateAction<BudgetCategory>>;
+  handleUpdateCategory?: (category: BudgetCategory, index: number) => void;
+  index?: number;
 };
 export default function SelectCategoryDrawer({
   show,
@@ -20,6 +22,8 @@ export default function SelectCategoryDrawer({
   isLoading,
   selectedCategory,
   setSelectedCategory,
+  handleUpdateCategory,
+  index,
 }: Props) {
   return (
     <motion.div
@@ -50,7 +54,9 @@ export default function SelectCategoryDrawer({
                     : 'border-gray-200',
                 )}
                 onClick={() => {
-                  setSelectedCategory(category);
+                  handleUpdateCategory
+                    ? handleUpdateCategory(category, index || 0)
+                    : setSelectedCategory && setSelectedCategory(category);
                   setShow(false);
                 }}
               >

@@ -1,3 +1,7 @@
+export const convertAmountToNumber = (num: string): number => {
+  return Number(num.replace(/[^0-9.]/g, ''));
+};
+
 export const formatNumber = (num: string) => {
   if (!num) return '';
   const [integer, decimal] = num.split('.');
@@ -55,6 +59,13 @@ export const formatAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
   if (value) {
     value = '₦' + Number(value).toLocaleString();
   }
+  e.target.value = value;
+};
+
+export const formatQuantity = (e: React.ChangeEvent<HTMLInputElement>) => {
+  let value = e.target.value;
+  value = value.replace(/[^\d]/g, '');
+
   e.target.value = value;
 };
 

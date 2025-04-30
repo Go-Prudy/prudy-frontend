@@ -4,31 +4,30 @@ import Webcam from 'react-webcam';
 import { useMutation } from '@tanstack/react-query';
 import { uploadReceiptApi } from '@/app/services/Media';
 import { scanReceiptApi } from '@/app/services/TransactionService';
-import { useAuthentication } from '@/app/store/AuthStore';
-import Image from 'next/image';
-import { IAddManualInput, ManualData } from '@/app/Types';
-import { BudgetCategory } from '@/app/types/budget';
+import { ScannedResult } from '@/app/types/scan';
+import { useAuthStore } from '@/app/store/useAuthStore';
 
 const Scanner: React.FC<{
-  scanState: boolean;
   setScanState: React.Dispatch<React.SetStateAction<boolean>>;
-  setManualData: React.Dispatch<React.SetStateAction<IAddManualInput>>;
-  setAddManualModal: React.Dispatch<React.SetStateAction<boolean>>;
-  setAddManualModalTitle: React.Dispatch<React.SetStateAction<string>>,
-  defaultCategory: BudgetCategory
-}> = ({ scanState, setScanState ,setManualData, setAddManualModal, setAddManualModalTitle, defaultCategory}) => {
+  setScannedResults: React.Dispatch<React.SetStateAction<ScannedResult | null>>;
+  setUploadedImageUrl: React.Dispatch<React.SetStateAction<string>>;
+  setShowReceiptDetails: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({
+  setScanState,
+  setUploadedImageUrl,
+  setScannedResults,
+  setShowReceiptDetails,
+}) => {
   const [cameraFacingMode, setCameraFacingMode] = useState<'user' | 'environment'>(
     'environment',
   );
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const webcamRef = useRef<Webcam>(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
-  const [scanResult, setScanResult] = useState<any | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const { authenticatedUser } = useAuthentication();
+
+  const { userData } = useAuthStore();
 
   const uploadReceiptMutation = useMutation({
-    mutationFn: (file: File) => uploadReceiptApi(authenticatedUser?.token ?? '', file),
+    mutationFn: (file: File) => uploadReceiptApi(userData?.token ?? '', file),
     onSuccess: (data) => {
       console.log('Receipt uploaded successfully:', data);
       setUploadedImageUrl(data.url);
@@ -40,21 +39,14 @@ const Scanner: React.FC<{
   });
 
   const scanReceiptMutation = useMutation({
-    mutationFn: (url: string) => scanReceiptApi(authenticatedUser?.token ?? '', url),
+    mutationFn: (url: string) => scanReceiptApi(userData?.token ?? '', url),
     onSuccess: (data) => {
       console.log('Receipt scanned successfully:', data);
       setIsCameraActive(false);
-      // setScanResult(data);
-      setManualData({
-        itemName: data.merchantName,
-        amount: data.amount,
-        date: data.date,
-        category: defaultCategory.name
-      });
-    //   setShowModal(true); // Show modal with the scan result
-    setAddManualModalTitle("Scanned Result");
-    setAddManualModal(true);
-    setScanState(false);
+
+      setShowReceiptDetails(data);
+      setScannedResults(data);
+      setScanState(false);
     },
     onError: (error) => {
       console.error('Error scanning receipt:', error);
@@ -182,31 +174,6 @@ const Scanner: React.FC<{
               {scanReceiptMutation.isPending || uploadReceiptMutation.isPending
                 ? 'Scanning...'
                 : 'Scan Receipt'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showModal && scanResult && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
-            <h2 className="text-lg font-semibold  text-left ">Scan Result:</h2>
-            <div className="mt-4 text-left">
-              <h1>
-                <strong>Merchant:</strong> {scanResult?.merchantName}
-              </h1>
-              <h1>
-                <strong>Amount:</strong> ${scanResult?.amount}
-              </h1>
-              <h1>
-                <strong>Date:</strong> {new Date(scanResult?.date).toLocaleDateString()}
-              </h1>
-            </div>
-            <button
-              onClick={() => setShowModal(false)}
-              className="bg-red-600 text-white py-2 px-4 rounded mt-4 w-full"
-            >
-              Close
             </button>
           </div>
         </div>

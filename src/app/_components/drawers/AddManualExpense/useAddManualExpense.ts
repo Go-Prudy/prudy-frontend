@@ -1,47 +1,71 @@
+import { BudgetCategory } from '@/app/types/budget';
+import api from '@/app/utils/axiosInstance';
+import { convertAmountToNumber } from '@/app/utils/functions';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 
-export default function useAddManualExpense({ setShow }: { setShow: (i: boolean) => void }) {
+export default function useAddManualExpense({
+  setShow,
+  budgetId,
+  categories,
+}: {
+  setShow: (i: boolean) => void;
+  budgetId: string;
+  categories: BudgetCategory[];
+}) {
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+
+  const [showCategoriesDrawer, setShowCategoriesDrawer] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory>(categories[0]);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories]);
+
+  const addManualExpenseMutation = useMutation({
+    mutationFn: async (values: { narration: string; amount: number; date: string }) =>
+      api.post(
+        `/budgets/${budgetId}/categories/${selectedCategory?.uid}/expenses`,
+        values,
+      ),
+    onSuccess: (data) => {
+      console.log(data);
+      setShowSuccessModal(true);
+    },
+    onError: (error) => {
+      console.error('Error during logout:', error);
+    },
+  });
+
   const onSubmit: SubmitHandler<{
-    name: string;
+    narration: string;
     amount: string;
     date: string;
   }> = async (data) => {
-    console.log('log data', data);
-
-    setShow(false);
+    console.log('log data', {
+      ...data,
+      amount: convertAmountToNumber(data.amount),
+    });
+    addManualExpenseMutation.mutateAsync({
+      ...data,
+      amount: convertAmountToNumber(data.amount),
+    });
   };
 
-  //   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const selectedCategoryId: any = e.target.value; // Get the selected category ID
-  //   const selectedCategory: any = categories.find(
-  //     (category) => category.id === selectedCategoryId,
-  //   ); // Find the category by ID
-
-  //   if (selectedCategory) {
-  //     setManualData((prevData) => ({
-  //       ...prevData,
-  //       category: selectedCategory.id, // Update the category in manualData with the selected category ID
-  //     }));
-
-  //     setSelectedCategory(selectedCategory.id);
-  //     setSelectedCategoryId(categories[0].id);
-  //   }
-  // };
-
-  //   const addManualMutation = useMutation({
-  //   mutationFn: async (data) =>
-  //     RecordExpenseApi(
-  //       selectedBudget.uid,
-  //       selectedCategoryId,
-  //       data,
-  //       authenticatedUser?.token ?? '',
-  //     ),
-  //   onSuccess: (data) => {
-  //     setShowAddManualDrawer(false);
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error during logout:', error);
-  //   },
-  // });
-  return { onSubmit };
+  return {
+    onSubmit,
+    showCategoriesDrawer,
+    setShowCategoriesDrawer,
+    selectedCategory,
+    setSelectedCategory,
+    showSuccessModal,
+    handleCloseSuccessModal: () => {
+      setShowSuccessModal(false);
+      setShow(false);
+    },
+    addManualExpenseMutation,
+  };
 }

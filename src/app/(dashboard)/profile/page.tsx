@@ -1,5 +1,4 @@
 'use client'
-import Header2 from "@/components/create-budget/Header2";
 import Image from "next/image";
 import { BsChevronRight, BsPerson } from "react-icons/bs";
 import premium from "/public/images/premium2.png";

@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        sm: '385px',
+      },
       animation: {
         scaleAndFadeIn: 'scale-and-fade-in 150ms cubic-bezier(.25, .75, .6, .98)',
         scaleAndFadeOut: 'scale-and-fade-out 75ms ease-out',
@@ -43,6 +46,7 @@ const config: Config = {
           400: '#78EF2C',
           // 500: '#8EF846',
           600: '#66C227',
+          800: '#2B660E',
           900: '#33810A',
           950: '#103003',
         },
@@ -75,6 +79,19 @@ const config: Config = {
           'linear-gradient(180deg, rgba(18, 18, 18, 0) 50%, rgba(15, 45, 0, 0.43) 179.64%)',
         'header-gradient':
           'radial-gradient(316.4% 252.92% at 50% 263.33%, #C3FD99 20%, #FFFFFF 100%)',
+        'planned-vs-actual': 'linear-gradient(180deg, #7544D4 -6.35%, #C09FFF 140.43%)',
+        'top-expenses': 'linear-gradient(180deg, #8D2A7B 0%, #D877C6 100%)',
+        'top-expenses-border':
+          'linear-gradient(180deg, rgba(255, 168, 239, 0.24) 0%, rgba(216, 129, 200, 0.46) 100%)',
+        'top-expenses-bar1': 'linear-gradient(180deg, #7AD3FF 0%, #4FBAF0 100%)',
+        'top-expenses-bar2': 'linear-gradient(180deg, #FF9364 0%, #F25F33 100%)',
+        'top-expenses-bar3': 'linear-gradient(180deg, #FFD572 0%, #FEBD38 100%)',
+        'best-performing': 'linear-gradient(20.37deg, #66C227 15.2%, #2A860A 74.4%)',
+        'worst-performing': 'linear-gradient(180deg, #1850A8 0%, #4780DB 100%)',
+        subscription: 'linear-gradient(180deg, #727A25 0%, #A2AE2A 100%)',
+        'spedning-trends': 'linear-gradient(180deg, #00BFE2 0%, #0BABC6 100%)',
+        'income-breakdown': 'linear-gradient(180deg, #D2303E 0%, #6C1920 100%)',
+        'expenses-breakdown': 'linear-gradient(180deg, #5856D6 0%, #5856D6 100%)',
       },
     },
   },

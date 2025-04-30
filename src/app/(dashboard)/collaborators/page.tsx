@@ -2,8 +2,9 @@
 import Header from '@/components/header';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import BottomDrawer from '@/app/_components/drawers/BottomDrawer';
-import { BsPerson, BsThreeDotsVertical, BsX } from 'react-icons/bs';
+import { BsThreeDotsVertical, BsX } from 'react-icons/bs';
+import Image from 'next/image';
+import userAvatarIcon from '/public/images/icons/avatar.svg';
 
 const Page = () => {
   const [showRemove, setShowRemove] = useState<number | null>(null); // Track the index of the clicked user
@@ -60,7 +61,7 @@ const Page = () => {
                   className="bg-[#F7F7F9] text-center items-center p-[15.2px] border-[#EFEFF0] border rounded-[16px] w-[162.5px] flex flex-col gap-[12px] justify-center relative"
                 >
                   <div className="rounded-[12px] border p-2 bg-white">
-                    <BsPerson className="size-[24px]" />
+                    <Image src={userAvatarIcon} alt="profile" width={40} height={40} />
                   </div>
 
                   <h2 className="leading-[16px] text-[#2D2D2D] font-[500] truncate">

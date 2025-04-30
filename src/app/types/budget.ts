@@ -43,7 +43,7 @@ export interface Collaborator {
   name: string;
   picture: string;
   isHost: boolean;
-  email?:string
+  email?: string;
 }
 
 export interface SubAllocation {
@@ -85,6 +85,26 @@ export interface Allocation {
       name: string;
     };
   }[];
+}
+
+export interface Budget {
+  uid: string;
+  name: string;
+  type: string;
+  totalExpenses: number;
+  totalIncome: number;
+  createdAt: string;
+  updatedAt: string;
+  collaborations: Collaborator[];
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  totalAmount: number;
+  remaining: number;
+  color: string;
+  selected: boolean;
 }
 
 export interface BudgetDistributionCategory {

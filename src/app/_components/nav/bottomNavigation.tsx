@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import React from 'react';
+import { ImportantNote } from '../importantNote';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
   {
@@ -132,18 +134,24 @@ const navItems = [
 type Props = {};
 
 export default function BottomNavigation({}: Props) {
+  // show importatnt note only if toute is /track
+  const pathname = usePathname();
+  const showImportantNote = pathname === '/track';
   return (
-    <div className="fixed max-w-[500px] bottom-0 left-0 right-0 mx-auto z-20 bg-white shadow-[0px_-20px_56px_0px_#514F6E1A]">
-      <ul className="flex items-center justify-between p-3">
-        {navItems.map((item, index) => (
-          <Link key={index} href={item.link}>
-            <li className="flex flex-col items-center gap-1 text-sm text-gray-500 hover:text-lemonGreen-600 p-3">
-              <span>{item.icon}</span>
-              <span>{item.name}</span>
-            </li>
-          </Link>
-        ))}
-      </ul>
+    <div className="fixed max-w-[500px] bottom-0 left-0 right-0 mx-auto z-20">
+      {showImportantNote && <ImportantNote />}
+      <div className="  bg-white shadow-[0px_-20px_56px_0px_#514F6E1A]">
+        <ul className="flex items-center justify-between p-3">
+          {navItems.map((item, index) => (
+            <Link key={index} href={item.link}>
+              <li className="flex flex-col items-center gap-1 text-sm text-gray-500 hover:text-lemonGreen-600 p-3">
+                <span>{item.icon}</span>
+                <span>{item.name}</span>
+              </li>
+            </Link>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

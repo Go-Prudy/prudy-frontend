@@ -82,3 +82,87 @@ export const addSubcategorySchema = object().shape({
       return numericValue > 0;
     }),
 });
+export const editScannedExpenseSchema = object().shape({
+  name: string().required('Income name is required'),
+
+  quantity: string()
+    .required('Quantity is required')
+    .test(
+      'valid-amount',
+      'Quantity must be a valid number with optional ₦ symbol and commas',
+      (value) => {
+        if (!value) return false;
+
+        const amountRegex = /^[\d,]+$/;
+        return amountRegex.test(value);
+      },
+    )
+    .test('min-value', 'Quantity must be greater than 0', (value) => {
+      if (!value) return false;
+      const numericValue = Number(value);
+      return numericValue > 0;
+    }),
+  price: string()
+    .required('Amount is required')
+    .test(
+      'valid-amount',
+      'Amount must be a valid number with optional ₦ symbol and commas',
+      (value) => {
+        if (!value) return false;
+
+        // Regex to match valid amount format: optional ₦, numbers, and commas
+        const amountRegex = /^₦?[\d,]+$/;
+        return amountRegex.test(value);
+      },
+    )
+    .test('min-value', 'Amount must be greater than 0', (value) => {
+      if (!value) return false;
+      // Remove ₦ symbol and commas, then convert to number
+      const numericValue = parseFloat(value.replace(/[₦,]/g, ''));
+      return numericValue > 0;
+    }),
+  total: string()
+    .required('Amount is required')
+    .test(
+      'valid-amount',
+      'Amount must be a valid number with optional ₦ symbol and commas',
+      (value) => {
+        if (!value) return false;
+
+        // Regex to match valid amount format: optional ₦, numbers, and commas
+        const amountRegex = /^₦?[\d,]+$/;
+        return amountRegex.test(value);
+      },
+    )
+    .test('min-value', 'Amount must be greater than 0', (value) => {
+      if (!value) return false;
+      // Remove ₦ symbol and commas, then convert to number
+      const numericValue = parseFloat(value.replace(/[₦,]/g, ''));
+      return numericValue > 0;
+    }),
+});
+
+export const addManualExpenseSchema = object().shape({
+  narration: string().required('Expense name is required'),
+  date: string().required('Expense data is required'),
+
+  amount: string()
+    .required('Amount is required')
+    .test(
+      'valid-amount',
+      'Amount must be a valid number with optional ₦ symbol and commas',
+      (value) => {
+        if (!value) return false;
+
+        // Regex to match valid amount format: optional ₦, numbers, and commas
+        const amountRegex = /^₦?[\d,]+$/;
+        return amountRegex.test(value);
+      },
+    )
+    .test('min-value', 'Amount must be greater than 0', (value) => {
+      if (!value) return false;
+      // Remove ₦ symbol and commas, then convert to number
+      const numericValue = parseFloat(value.replace(/[₦,]/g, ''));
+      return numericValue > 0;
+    }),
+});
