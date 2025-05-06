@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import Cookies from 'js-cookie';
 import { IAuthenticatedUser } from '../Types';
+import { Settings } from '../types/settings';
 
 interface AuthState {
   userData: IAuthenticatedUser | null;
@@ -11,6 +12,8 @@ interface AuthState {
   updateUserData: (data: IAuthenticatedUser) => void;
   rememberedName: string | null;
   setRememberedName: (name: string) => void;
+  settings: Settings | null;
+  updateSettings: (data: Settings) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -18,6 +21,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       userData: null,
       rememberedName: null,
+      settings: null,
 
       login: (data) => {
         Cookies.set('token', data.token, { path: '/', expires: 7 });
@@ -44,6 +48,14 @@ export const useAuthStore = create<AuthState>()(
         set((state) => ({
           userData: {
             ...(state.userData as IAuthenticatedUser),
+            ...data,
+          },
+        })),
+
+      updateSettings: (data: Settings) =>
+        set((state) => ({
+          settings: {
+            ...(state.settings as Settings),
             ...data,
           },
         })),

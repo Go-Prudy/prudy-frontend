@@ -9,10 +9,10 @@ import {
 } from '@nextui-org/react';
 import Button from '../button';
 import successGif from '/public/images/success-gif.gif';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 
 type Props = {
-  image?: string;
+  image?: StaticImageData;
   title: string;
   text?: string;
   isOpen: boolean;

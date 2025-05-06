@@ -1,4 +1,4 @@
-import { number, object, string } from 'yup';
+import { number, object, ref, string } from 'yup';
 
 export const signupSchema = object().shape({
   email: string().email('Invalid email').required('Email is required'),
@@ -165,4 +165,16 @@ export const addManualExpenseSchema = object().shape({
       const numericValue = parseFloat(value.replace(/[₦,]/g, ''));
       return numericValue > 0;
     }),
+});
+
+export const changePasscodeSchema = object().shape({
+  oldPasscode: string().required('Old passcode is required'),
+  newPasscode: string()
+    .required('New passcode is required')
+    .min(6, 'Passcode must be 6 characters long')
+    .max(6, 'Passcode must be 6 characters long'),
+
+  confirmPasscode: string()
+    .required('Confirm passcode is required')
+    .oneOf([ref('newPasscode')], 'Passcodes must match'),
 });

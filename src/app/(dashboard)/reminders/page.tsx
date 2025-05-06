@@ -13,6 +13,7 @@ import {
 } from '@/app/services/SettingService';
 import Header from '@/components/header';
 import BottomDrawer from '@/app/_components/drawers/BottomDrawer';
+import { useAuthStore } from '@/app/store/useAuthStore';
 
 const Page: React.FC = () => {
   const [showTimeModal, setShowTimeModal] = useState(false);
@@ -20,21 +21,12 @@ const Page: React.FC = () => {
   const { authenticatedUser } = useAuthentication();
   const [loading, setLoading] = useState(false);
 
+  const { settings } = useAuthStore();
+
   const times = Array.from({ length: 24 }, (_, i) => {
     const hour = i % 12 === 0 ? 12 : i % 12;
     const period = i < 12 ? 'AM' : 'PM';
     return `${hour.toString().padStart(2, '0')}:00 ${period}`;
-  });
-
-  const {
-    data: getSettingsData = {},
-    isPending: isSettingsLoading,
-    refetch: refetchSettings,
-  } = useQuery({
-    queryKey: ['getSettings'],
-    queryFn: () => GetSettingsApi(authenticatedUser?.token ?? ''),
-    enabled: !!authenticatedUser?.token,
-    staleTime: 5 * 60 * 1000,
   });
 
   const activateReminderMutation = useMutation({
@@ -42,7 +34,7 @@ const Page: React.FC = () => {
       ActivateReminderApi(authenticatedUser?.token ?? '', data),
     onSuccess: () => {
       toast.success('Reminder activated successfully!');
-      refetchSettings();
+      // refetchSettings();
     },
     onError: () => {
       toast.error('Failed to activate reminder.');
@@ -53,7 +45,7 @@ const Page: React.FC = () => {
     mutationFn: () => DeactivateReminderApi(authenticatedUser?.token ?? ''),
     onSuccess: () => {
       toast.success('Reminder deactivated successfully!');
-      refetchSettings();
+      // refetchSettings();
     },
     onError: () => {
       toast.error('Failed to deactivate reminder.');
@@ -61,9 +53,7 @@ const Page: React.FC = () => {
   });
 
   const toggleDailyReminder = async () => {
-    const { reminderTime, reminderTimeUnit, isReminderActive } = getSettingsData;
-
-    if (!reminderTime || !reminderTimeUnit) {
+    if (!settings?.reminderTime || !settings?.reminderTimeUnit) {
       alert('Please select a time to activate the daily reminder.');
       return;
     }
@@ -71,12 +61,12 @@ const Page: React.FC = () => {
     setLoading(true);
 
     try {
-      if (isReminderActive) {
+      if (settings?.isReminderActive) {
         await deactivateReminderMutation.mutateAsync();
       } else {
         await activateReminderMutation.mutateAsync({
-          reminderTime,
-          reminderTimeUnit,
+          reminderTime: settings?.reminderTime,
+          reminderTimeUnit: settings?.reminderTimeUnit,
         });
       }
     } catch (error) {
@@ -116,40 +106,35 @@ const Page: React.FC = () => {
         <div className="flex   w-[100vw] max-w-[500px] flex-col gap-[16px] p-[24px]">
           <div className="border rounded-[12px] border-[#EFEFF0] bg-[#F7F7F9] p-[16px]">
             <h1 className="leading-[28px] font-[500]">Daily reminders</h1>
-            {isSettingsLoading ? (
-              <div className="mt-[8px] p-[12px] text-center">Loading...</div>
-            ) : (
-              <div
-                className="mt-[8px] bg-[#FFFFFF] rounded-[12px] font-[400] text-[14px] text-[#828282] p-[12px] w-full flex justify-between items-center"
-                onClick={() => setShowTimeModal(true)}
-              >
-                <div className="flex gap-[8px] items-center">
-                  {getSettingsData?.reminderTime ? (
-                    <>
-                      Remind me at: {getSettingsData.reminderTime}{' '}
-                      {getSettingsData.reminderTimeUnit}
-                    </>
-                  ) : (
-                    <>Activate</>
-                  )}
-                  <span>
-                    <BsChevronRight size={20} />
-                  </span>
-                </div>
-                <div className="h-[24px] flex items-center">
-                  {loading ? (
-                    <CircularProgress size="sm" color="default" />
-                  ) : (
-                    <Switch
-                      isSelected={getSettingsData.isReminderActive}
-                      onChange={toggleDailyReminder}
-                      className="h-[24px]"
-                      color="success"
-                    />
-                  )}
-                </div>
+            <div
+              className="mt-[8px] bg-[#FFFFFF] rounded-[12px] font-[400] text-[14px] text-[#828282] p-[12px] w-full flex justify-between items-center"
+              onClick={() => setShowTimeModal(true)}
+            >
+              <div className="flex gap-[8px] items-center">
+                {settings?.reminderTime ? (
+                  <>
+                    Remind me at: {settings.reminderTime} {settings.reminderTimeUnit}
+                  </>
+                ) : (
+                  <>Activate</>
+                )}
+                <span>
+                  <BsChevronRight size={20} />
+                </span>
               </div>
-            )}
+              <div className="h-[24px] flex items-center">
+                {loading ? (
+                  <CircularProgress size="sm" color="default" />
+                ) : (
+                  <Switch
+                    isSelected={settings?.isReminderActive}
+                    onChange={toggleDailyReminder}
+                    className="h-[24px]"
+                    color="success"
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>

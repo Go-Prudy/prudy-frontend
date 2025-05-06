@@ -38,13 +38,17 @@ const config: Config = {
           600: '#575757',
           700: '#474747',
         },
+        green: {
+          600: '#006D00',
+        },
 
         lemonGreen: {
           50: '#E8FCD8',
           100: '#E1FEC9',
           200: '#E1F6D6',
+          300: '#ECF7E2',
           400: '#78EF2C',
-          // 500: '#8EF846',
+          500: '#8EF846',
           600: '#66C227',
           800: '#2B660E',
           900: '#33810A',
@@ -92,6 +96,8 @@ const config: Config = {
         'spedning-trends': 'linear-gradient(180deg, #00BFE2 0%, #0BABC6 100%)',
         'income-breakdown': 'linear-gradient(180deg, #D2303E 0%, #6C1920 100%)',
         'expenses-breakdown': 'linear-gradient(180deg, #5856D6 0%, #5856D6 100%)',
+        'profile-stats': 'linear-gradient(360deg, #66C227 -34.78%, #2A860A 100%)',
+        'subscription-bg': 'url("/images/bg/subscription.png")',
       },
     },
   },

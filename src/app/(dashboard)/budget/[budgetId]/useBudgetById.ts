@@ -8,8 +8,8 @@ import { useEffect, useState } from 'react';
 export default function useBudgetById({ budgetId }: { budgetId: string }) {
   const { userData } = useAuthStore();
   const [disabledTabKeys, setDisabledTabKeys] = useState<string[]>([
-    'allocations',
-    'distribution',
+    // 'allocations',
+    // 'distribution',
   ]);
   const [selectedTab, setSelectedTab] = useState<string>('income');
 
@@ -33,15 +33,15 @@ export default function useBudgetById({ budgetId }: { budgetId: string }) {
     refetchOnWindowFocus: true,
   });
 
-  useEffect(() => {
-    if ((budgetDetails?.data?.totalIncome ?? 0) > 0) {
-      setDisabledTabKeys(['distribution']);
-    }
+  // useEffect(() => {
+  //   if ((budgetDetails?.data?.totalIncome ?? 0) > 0) {
+  //     setDisabledTabKeys(['distribution']);
+  //   }
 
-    if ((budgetDetails?.data?.budgetCategories?.length ?? 0) > 0) {
-      setDisabledTabKeys(['']);
-    }
-  }, [budgetDetails]);
+  //   if ((budgetDetails?.data?.budgetCategories?.length ?? 0) > 0) {
+  //     setDisabledTabKeys(['']);
+  //   }
+  // }, [budgetDetails]);
 
   const handleTabSelection = (key: string) => {
     setSelectedTab(key);

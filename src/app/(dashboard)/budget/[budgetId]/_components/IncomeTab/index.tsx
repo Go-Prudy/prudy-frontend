@@ -15,6 +15,7 @@ import CollaboratorItem from './collaborator';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { Dispatch, SetStateAction } from 'react';
 import BottomButton from '../bottomButton';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   budgetId: string;
@@ -31,6 +32,7 @@ export default function IncomeTab({
   setDisabledTabKeys,
   handleTabSelection,
 }: Props) {
+  const navigate = useRouter();
   const { userData } = useAuthStore();
   const {
     showIncomeDrawer,
@@ -137,7 +139,7 @@ export default function IncomeTab({
         </div>
       </div>
       <BottomButton>
-        <Button onClick={() => handleTabSelection('allocations')}>Continue</Button>
+        <Button onClick={() => navigate.push('/track')}>Track your Expenses</Button>
       </BottomButton>
 
       {showIncomeDrawer && (

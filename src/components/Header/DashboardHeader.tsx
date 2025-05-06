@@ -3,7 +3,7 @@ import Image, { StaticImageData } from 'next/image';
 import cn from 'classnames';
 import { ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { BsBell, BsPerson } from 'react-icons/bs';
+import { BsBell } from 'react-icons/bs';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import userAvatarIcon from '/public/images/icons/avatar.svg';
 import { CircularProgress } from '@nextui-org/react';
@@ -11,7 +11,7 @@ import { Budget } from '@/app/types/budget';
 
 interface DashboardHeaderProp {
   title?: string;
-  type: 'budget' | 'dashboard' | 'home';
+  type: 'budget' | 'dashboard' | 'home' | 'profile';
   headerIcon?: StaticImageData;
   headerIconClass?: string;
   headerTitle?: string;
@@ -114,6 +114,9 @@ const DashboardHeader = ({
           </div>
         )}
       </div>
+      {type === 'profile' && (
+        <div className="px-6 bg-header-gradient rounded-b-[32px] overflow-hidden">{children}</div>
+      )}
       {headerIcon && (
         <div className={cn('px-6 pb-6 bg-header-gradient rounded-b-[32px]')}>
           <div className="flex items-center justify-between gap-1">
@@ -136,7 +139,6 @@ const DashboardHeader = ({
               />
             )}
           </div>
-          {children}
         </div>
       )}
     </>

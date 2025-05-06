@@ -54,8 +54,8 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
 
       {/* tabs */}
       <Tabs
-        disabledKeys={disabledTabKeys}
-        selectedKey={selectedTab}
+        // disabledKeys={disabledTabKeys}
+        // selectedKey={selectedTab}
         fullWidth
         className="px-4"
       >

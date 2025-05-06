@@ -9,27 +9,48 @@ type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   link: string;
   children?: React.ReactNode;
   isHeaderDark?: boolean;
+  isHeaderTransparent?: boolean;
+  icon?: React.ReactNode;
 };
 
-const Header = ({ title, link, children, isHeaderDark = false }: HeaderProps) => {
+const Header = ({
+  title,
+  link,
+  children,
+  isHeaderDark = false,
+  isHeaderTransparent,
+  icon,
+}: HeaderProps) => {
   return (
     <div
       className={cn(
-        'relative flex w-full justify-between items-center px-6 py-3',
+        'relative flex w-full justify-between items-center px-6',
         isHeaderDark && 'bg-gray-100',
+        isHeaderTransparent ? 'py-4' : 'py-3',
       )}
     >
       <Link
         href={link}
         className={cn(
           'rounded-full w-9 h-9 inline-flex justify-center items-center',
-          isHeaderDark ? 'bg-white' : 'bg-gray-100',
+          isHeaderTransparent
+            ? 'bg-[#FFFFFF1A] text-white'
+            : isHeaderDark
+              ? 'bg-white'
+              : 'bg-gray-100',
         )}
       >
-        <span className="rotate-180">{Icons.forwardArrow}</span>
+        <span className="rotate-180">{icon || Icons.forwardArrow}</span>
       </Link>
 
-      <p className="text-lg font-medium text-black mx-auto">{title}</p>
+      <p
+        className={cn(
+          'text-lg font-medium mx-auto',
+          isHeaderTransparent ? 'text-white' : 'text-black',
+        )}
+      >
+        {title}
+      </p>
 
       {children}
     </div>

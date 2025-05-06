@@ -5,9 +5,10 @@ import Image from 'next/image';
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  text?: string;
 };
 
-export default function LoadingModal({ isOpen, onClose }: Props) {
+export default function LoadingModal({ isOpen, onClose, text }: Props) {
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +31,7 @@ export default function LoadingModal({ isOpen, onClose }: Props) {
               />
             </ModalHeader>
             <ModalBody className="p-0">
-              <p className='text-center'>Creating...</p>
+              <p className="text-center">{text || 'Creating...'}</p>
             </ModalBody>
           </>
         )}

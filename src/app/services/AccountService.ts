@@ -18,9 +18,9 @@ export const initLinkAccountApi = async (token: string): Promise<any> => {
     console.log(response.data);
 
     // // Automatically redirect if URL is present
-    // if (response.data.data.url) {
-    //   window.location.href = response.data.data.url;
-    // }
+    if (response.data.data.url) {
+      window.location.href = response.data.data.url;
+    }
 
     return response.data.data;
   } catch (error: any) {
