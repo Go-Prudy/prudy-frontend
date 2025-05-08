@@ -98,6 +98,7 @@ const config: Config = {
         'expenses-breakdown': 'linear-gradient(180deg, #5856D6 0%, #5856D6 100%)',
         'profile-stats': 'linear-gradient(360deg, #66C227 -34.78%, #2A860A 100%)',
         'subscription-bg': 'url("/images/bg/subscription.png")',
+        'rewards-bg': 'url("/images/bg/rewards.png")',
       },
     },
   },

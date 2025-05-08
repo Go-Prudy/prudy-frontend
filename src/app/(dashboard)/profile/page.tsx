@@ -1,36 +1,14 @@
 'use client';
 import Image from 'next/image';
 import { BsChevronRight, BsPerson } from 'react-icons/bs';
-import premium from '/public/images/premium2.png';
 import logout from '/public/images/logout.png';
-import budgetIcon from '/public/images/category-2.png';
-import collaborationIcon from '/public/images/collaborationicon.png';
-import reminderIcon from '/public/images/remindericon.png';
-import subscriptionIcon from '/public/images/subscriptionicon.png';
-import reportIcon from '/public/images/reporticon.png';
-import trialIcon from '/public/images/icons/trial.svg';
-import faqIcon from '/public/images/faq.png';
-import passcodeIcon from '/public/images/passcode.png';
-import currencyIcon from '/public/images/currency.png';
-import {
-  FaClipboardList,
-  FaUsers,
-  FaBell,
-  FaDollarSign,
-  FaChartPie,
-  FaQuestionCircle,
-  FaLock,
-  FaGlobe,
-} from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { IAuthenticatedUser } from '@/app/Types';
 import { useEffect, useState, type JSX } from 'react';
 import Link from 'next/link';
-import { getAllPlans, getUserSubscription } from '@/app/services/SubscriptionService';
-import { GetSettingsApi } from '@/app/services/SettingService';
-import BudgetPageHeader from '@/components/create-budget/BudgetPageHeader';
+import { getUserSubscription } from '@/app/services/SubscriptionService';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
 import { motion } from 'framer-motion';
 import DashboardHeader from '@/components/Header/DashboardHeader';
@@ -53,7 +31,11 @@ const profileItems = [
   {
     category: 'SETTINGS',
     items: [
-      { name: 'Passcode Settings', icon: Icons.keySquare, link: '/settings/passcode' },
+      {
+        name: 'Passcode Settings',
+        icon: Icons.keySquare,
+        link: '/settings/change-passcode',
+      },
       { name: 'Currency & Data', icon: Icons.moneyChange, link: '/settings/currency' },
     ],
   },
@@ -83,35 +65,6 @@ export default function Page() {
 
   const { userData } = useAuthStore();
 
-  // React Query hook
-  const {
-    data: plans = [],
-    isPending: isGetAllPlansPending,
-    isError: isGetAllPlansError,
-  } = useQuery({
-    queryKey: ['getAllPlans'],
-    queryFn: () => getAllPlans(userData?.token ?? ''),
-    enabled: !!userData?.token, // Only fetch if token exists
-    refetchOnWindowFocus: false, // Prevent refetching on window focus
-    refetchOnMount: false, // Prevent refetching on component mount
-    refetchInterval: false, // Disable polling
-    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
-  });
-
-  const {
-    data: settingsData = {},
-    isPending: isGetSettingsPending,
-    isError: isGetSettingsError,
-  } = useQuery({
-    queryKey: ['GetSettings'],
-    queryFn: () => GetSettingsApi(userData?.token ?? ''),
-    enabled: !!userData?.token, // Only fetch if token exists
-    refetchOnWindowFocus: false, // Prevent refetching on window focus
-    refetchOnMount: false, // Prevent refetching on component mount
-    refetchInterval: false, // Disable polling
-    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
-  });
-
   const {
     data: usersubscription = {},
     isPending: isGetUserSubscriptionPending,
@@ -138,12 +91,12 @@ export default function Page() {
     >
       <DashboardWrapper>
         <DashboardHeader type="profile" title="Profile" headerTitleClass="text-[28px]">
-          <div
-            onClick={() => navigation.push('/profile/user')}
-            className="w-full cursor-pointer space-y-4"
-          >
+          <div className="w-full space-y-4">
             {/* user info */}
-            <div className="p-4 flex justify-between items-center w-full bg-white rounded-2xl shadow-[8px_8px_8px_0px_#1847000D]">
+            <div
+              onClick={() => navigation.push('/profile/user')}
+              className=" cursor-pointer p-4 flex justify-between items-center w-full bg-white rounded-2xl shadow-[8px_8px_8px_0px_#1847000D]"
+            >
               <div className="flex items-center gap-1">
                 <Image
                   src={userData?.profile?.profilePhotoUrl || userAvatarIcon}
@@ -168,7 +121,10 @@ export default function Page() {
             </div>
 
             {/* stats info */}
-            <div className="bg-profile-stats rounded-t-2xl px-4 py-2 text-white">
+            <div
+              onClick={() => navigation.push('/profile/rewards')}
+              className=" cursor-pointer bg-profile-stats rounded-t-2xl px-4 py-2 text-white"
+            >
               <div>
                 <p>Your Stats</p>
                 <div className="w-full flex justify-between items-center py-2">

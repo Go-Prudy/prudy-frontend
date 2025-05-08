@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import Cookies from 'js-cookie';
-import { IAuthenticatedUser } from '../Types';
+import { IAuthenticatedUser, IUserProfile } from '../Types';
 import { Settings } from '../types/settings';
 
 interface AuthState {
@@ -9,6 +9,7 @@ interface AuthState {
   login: (data: IAuthenticatedUser) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  updateUserProfile: (data: Partial<IUserProfile>) => void;
   updateUserData: (data: IAuthenticatedUser) => void;
   rememberedName: string | null;
   setRememberedName: (name: string) => void;
@@ -49,6 +50,17 @@ export const useAuthStore = create<AuthState>()(
           userData: {
             ...(state.userData as IAuthenticatedUser),
             ...data,
+          },
+        })),
+
+      updateUserProfile: (data: Partial<IUserProfile>) =>
+        set((state) => ({
+          userData: {
+            ...(state.userData as IAuthenticatedUser),
+            profile: {
+              ...(state.userData?.profile as IUserProfile),
+              ...data,
+            },
           },
         })),
 

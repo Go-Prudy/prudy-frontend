@@ -118,8 +118,7 @@ export interface IAuthenticatedUser {
 }
 
 export interface IUserProfile {
-  createdAt: string;
-  updatedAt: string;
+
   uid: string;
   hasFreeTrial: boolean;
   firstName: string;

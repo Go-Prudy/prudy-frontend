@@ -11,7 +11,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { updateSettings } = useAuthStore();
 
   const {
-    data: userSettings = { data: {} },
+    data: userSettings = {
+      data: {
+        countryFlag: '',
+        currency: '',
+        currencySymbol: '',
+        reminderTime: 1,
+        reminderTimeUnit: 'PM',
+        hasFreeTrial: true,
+        isReminderActive: false,
+      },
+    },
     isLoading,
     status: getUserProfileStatus,
   } = useQuery<ApiResponse<Settings>>({
@@ -26,7 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (getUserProfileStatus === 'success') {
       updateSettings({
-        ...userSettings?.data,
+        ...userSettings.data,
       });
     }
   }, [getUserProfileStatus]);
