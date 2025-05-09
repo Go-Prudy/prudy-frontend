@@ -15,6 +15,11 @@ import Subscriptions from './_components/subscriptions';
 import SpendingTrends from './_components/spendingTrends';
 import IncomeBreakdown from './_components/incomeBreakdown';
 import ExpenseBreakdown from './_components/expenseBreakdown';
+import api from '@/app/utils/axiosInstance';
+import { useAuthStore } from '@/app/store/useAuthStore';
+import { useQuery } from '@tanstack/react-query';
+import { useAnalyticsStore } from '@/app/store/useAnalyticsStore';
+import { Autoplay } from 'swiper/modules';
 
 const Header = ({ title }: { title: string }) => (
   <div className="flex justify-between items-center pb-4 text-white">
@@ -59,6 +64,7 @@ const backgrounds = [
 ];
 
 export default function Page() {
+  const { analytics, isLoadingAnalytics } = useAnalyticsStore();
   const [activeIndex, setActiveIndex] = useState(0);
   const totalSlides = 8;
 
@@ -81,28 +87,46 @@ export default function Page() {
         grabCursor
         slidesPerView={1}
         onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+        modules={[Autoplay]}
       >
         <SwiperSlide>
           <SummaryWrapper title="Planned vs Actual">
-            <PlannedVsActual />
+            <PlannedVsActual
+              analytics={analytics?.overall ?? null}
+              isLoadingAnalytics={isLoadingAnalytics}
+            />
           </SummaryWrapper>
         </SwiperSlide>
 
         <SwiperSlide>
           <SummaryWrapper title="Your Top Expenses">
-            <TopExpenses />
+            <TopExpenses
+              analytics={analytics?.topExpenses ?? null}
+              isLoadingAnalytics={isLoadingAnalytics}
+            />
           </SummaryWrapper>
         </SwiperSlide>
 
         <SwiperSlide>
           <SummaryWrapper title="Best Performing Category">
-            <BestPerformingCategory />
+            <BestPerformingCategory
+              analytics={analytics?.bestPerformingCategory ?? null}
+              isLoadingAnalytics={isLoadingAnalytics}
+            />
           </SummaryWrapper>
         </SwiperSlide>
 
         <SwiperSlide>
           <SummaryWrapper title="Worst Performing Category">
-            <WorstPerformingCategory />
+            <WorstPerformingCategory
+              analytics={analytics?.worstPerformingCategory ?? null}
+              isLoadingAnalytics={isLoadingAnalytics}
+            />
           </SummaryWrapper>
         </SwiperSlide>
 

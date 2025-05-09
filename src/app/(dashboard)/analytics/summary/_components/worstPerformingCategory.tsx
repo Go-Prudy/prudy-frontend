@@ -1,15 +1,27 @@
 import Image from 'next/image';
 import Performance from './performance';
 import performanceImage from '/public/images/analytics/3.png';
+import { Breakdown, Remark } from '@/app/types/analytics';
 
-type Props = {};
+type Props = {
+  analytics: {
+    breakdown: Breakdown;
+    remark: Remark;
+  } | null;
+  isLoadingAnalytics: boolean;
+};
 
-export default function WorstPerformingCategory({}: Props) {
+export default function WorstPerformingCategory({
+  analytics,
+  isLoadingAnalytics,
+}: Props) {
   return (
     <div className="space-y-10">
       <div className="bg-white py-8 mx-auto max-w-[260px] rounded-3xl border-[10px] border-[#368EF5] text-black-800">
-        <p className="text-lg">Generousity</p>
-        <p className="text-2xl font-bold">₦250,000</p>
+        <p className="text-lg">{analytics?.breakdown.title}</p>
+        <p className="text-2xl font-bold">
+          ₦{analytics?.breakdown.actualExpenses.toLocaleString()}
+        </p>
       </div>
       <Image
         src={performanceImage}
@@ -19,15 +31,14 @@ export default function WorstPerformingCategory({}: Props) {
         className="!-mt-1 !-mb-7 mx-auto"
       />
       <div className="text-white space-y-4">
-        <h6 className="text-xl font-bold space-y-4">
-          Common man, you cannot save the world!
-        </h6>
-        <p>
-          Let’s be frank. You out gave yourself this week. While this is not a bad thing,
-          it is not sustainable for you. Let’s do better next time.
-        </p>
+        <h6 className="text-xl font-bold space-y-4">{analytics?.remark.title}</h6>
+        <p>{analytics?.remark.description}</p>
       </div>
-      <Performance title="Transportation" plannedBudget={200000} actualExpenses={50000} />
+      <Performance
+        title={analytics?.breakdown.title ?? ''}
+        plannedBudget={analytics?.breakdown.totalBudgeted ?? 0}
+        actualExpenses={analytics?.breakdown.actualExpenses ?? 0}
+      />{' '}
     </div>
   );
 }

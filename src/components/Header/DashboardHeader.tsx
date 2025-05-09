@@ -3,7 +3,7 @@ import Image, { StaticImageData } from 'next/image';
 import cn from 'classnames';
 import { ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { BsBell } from 'react-icons/bs';
+import { BsBell, BsCaretDown, BsChevronDown } from 'react-icons/bs';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import userAvatarIcon from '/public/images/icons/avatar.svg';
 import { CircularProgress } from '@nextui-org/react';
@@ -76,9 +76,12 @@ const DashboardHeader = ({
             />
             <div className="text-gray-600">
               <p className="text-xs">Welcome 👋</p>
-              <h1 className="font-bold">
-                {userData?.profile.lastName ? userData?.profile.lastName : 'User'}
-              </h1>
+              <div className="flex items-center gap">
+                <h1 className="font-bold">
+                  {userData?.profile.lastName ? userData?.profile.lastName : 'User'}
+                </h1>
+                <BsChevronDown size={20} />
+              </div>
             </div>
           </div>
         ) : (
@@ -115,7 +118,9 @@ const DashboardHeader = ({
         )}
       </div>
       {type === 'profile' && (
-        <div className="px-6 bg-header-gradient rounded-b-[32px] overflow-hidden">{children}</div>
+        <div className="px-6 bg-header-gradient rounded-b-[32px] overflow-hidden">
+          {children}
+        </div>
       )}
       {headerIcon && (
         <div className={cn('px-6 pb-6 bg-header-gradient rounded-b-[32px]')}>

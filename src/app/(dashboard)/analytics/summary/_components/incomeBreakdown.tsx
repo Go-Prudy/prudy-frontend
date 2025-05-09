@@ -6,7 +6,7 @@ export default function IncomeBreakdown({}: Props) {
   return (
     <div>
       <div className="space-y-7">
-        {/* chart */}
+        {/* TODO: chart */}
 
         <div className="text-white space-y-4">
           <h6 className="text-xl font-bold space-y-4">Good one mate! 😊👏🏽</h6>

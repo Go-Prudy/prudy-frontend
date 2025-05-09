@@ -3,7 +3,7 @@ import api from '@/app/utils/axiosInstance';
 import { Allocation, BudgetCategory } from '@/app/types/budget';
 import { ApiResponse } from '@/app/types/index';
 import { useAuthStore } from '@/app/store/useAuthStore';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function useCategoriesTab({ budgetId }: { budgetId: string }) {
   const { userData } = useAuthStore();
@@ -31,6 +31,12 @@ export default function useCategoriesTab({ budgetId }: { budgetId: string }) {
     refetchOnWindowFocus: true,
   });
 
+  const totalAllocations = useMemo(() => {
+    return budgetAllocations?.data.reduce((acc, allocation) => {
+      return acc + Number(allocation.amountAllocated);
+    }, 0);
+  }, [budgetAllocations]);
+
   return {
     budgetCategories: budgetCategories?.data ?? [],
     isBudgetCategriesLoading,
@@ -40,5 +46,6 @@ export default function useCategoriesTab({ budgetId }: { budgetId: string }) {
     setShowCreateCategoryDrawer,
     showAddAllocation,
     setShowAddAllocation,
+    totalAllocations: totalAllocations ?? 0,
   };
 }

@@ -11,6 +11,28 @@ interface AllocationForm {
   subAllocations: SubAllocationForm[];
 }
 
+const formatAmount = (value: string) => {
+  // Remove all non-numeric characters except decimal point
+  const numericValue = value.replace(/[^0-9.]/g, '');
+
+  // Format with commas
+  const parts = numericValue.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Add Naira symbol
+  return `₦${parts.join('.')}`;
+};
+
+// Calculate percentage based on amount
+const calculatePercentage = (amount: number, totalIncome: number): number => {
+  return Number(((amount / totalIncome) * 100).toFixed(2));
+};
+
+// Calculate amount based on percentage
+const calculateAmount = (percentage: number, totalIncome: number): number => {
+  return Number(((percentage / 100) * totalIncome).toFixed(2));
+};
+
 export default function useEditCategory({
   setShow,
   totalIncome,
@@ -31,28 +53,6 @@ export default function useEditCategory({
   const [percentage, setPercentage] = useState<number>(0);
   const [selectedCategory, setSelectedCategory] = useState<BudgetCategory | null>(null);
   const [subAllocations, setSubAllocations] = useState<SubAllocationForm[]>([]);
-
-  const formatAmount = (value: string) => {
-    // Remove all non-numeric characters except decimal point
-    const numericValue = value.replace(/[^0-9.]/g, '');
-
-    // Format with commas
-    const parts = numericValue.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-    // Add Naira symbol
-    return `₦${parts.join('.')}`;
-  };
-
-  // Calculate percentage based on amount
-  const calculatePercentage = (amount: number): number => {
-    return Number(((amount / totalIncome) * 100).toFixed(2));
-  };
-
-  // Calculate amount based on percentage
-  const calculateAmount = (percentage: number): number => {
-    return Number(((percentage / 100) * totalIncome).toFixed(2));
-  };
 
   const parsedCategoryAmount = useMemo(() => {
     const parsedAmount = parseFloat(amount.replace(/[₦,\s]/g, ''));
@@ -90,7 +90,7 @@ export default function useEditCategory({
         );
         return;
       } else {
-        const newPercentage = calculatePercentage(numericValue);
+        const newPercentage = calculatePercentage(numericValue, totalIncome);
         setPercentage(newPercentage);
         setAmount(formatAmount(numericValue.toString()));
       }
@@ -112,7 +112,7 @@ export default function useEditCategory({
         toast.error('Percentage cannot exceed 100%');
         return;
       } else {
-        const newAmount = calculateAmount(percentageValue);
+        const newAmount = calculateAmount(percentageValue, totalIncome);
         setAmount(formatAmount(newAmount.toString()));
         setPercentage(percentageValue);
       }
@@ -122,9 +122,11 @@ export default function useEditCategory({
   const createAllocationMutation = useMutation({
     mutationFn: (values: AllocationForm) =>
       api.post(`/budgets/${budgetId}/allocations`, values),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log(data.data);
-      queryClient.invalidateQueries({ queryKey: ['getAllBudgetAllocations'] });
+      await queryClient.invalidateQueries({ queryKey: ['getAllBudgetAllocations'] });
+
+      setShow(false);
     },
     onError: (error: unknown) => {
       console.error('Error creating allocation:', error);
@@ -146,8 +148,6 @@ export default function useEditCategory({
       budgetCategoryId: selectedCategory?.uid ?? '',
       subAllocations,
     });
-
-    setShow(false);
   };
 
   return {

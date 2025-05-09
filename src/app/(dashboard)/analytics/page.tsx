@@ -3,15 +3,60 @@ import { motion } from 'framer-motion';
 
 import DashboardHeader from '@/components/Header/DashboardHeader';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
-import { useAuthStore } from '@/app/store/useAuthStore';
 import Image from 'next/image';
 import summaryImage from '/public/images/analytics/1.png';
 import Button from '@/app/_components/button';
 import Link from 'next/link';
+import { useBudgetStore } from '@/app/store/useBudgetStore';
+import { useAnalyticsStore } from '@/app/store/useAnalyticsStore';
 
+const filters = [
+  {
+    name: 'Planned budget vs Actual',
+    link: '',
+  },
+  {
+    name: 'Top Expenses',
+    link: '',
+  },
+  {
+    name: 'Best performing category',
+    link: '',
+  },
+  {
+    name: 'Subscriptions',
+    link: '',
+  },
+  {
+    name: 'Worst performing category',
+    link: '',
+  },
+  {
+    name: 'Spending trends',
+    link: '',
+  },
+  {
+    name: 'Left to spend',
+    link: '',
+  },
+  {
+    name: 'Overspending',
+    link: '',
+  },
+  {
+    name: 'Income to Expense ratio',
+    link: '',
+  },
+];
 
 export default function Page() {
-  const { userData } = useAuthStore();
+  const { budgets, isLoadingBudgets } = useBudgetStore();
+  const { setSelectedBudgetId } = useAnalyticsStore();
+
+  const handleBudgetChange = (selectedUid: string) => {
+    const budget = budgets.find((budget) => budget.uid === selectedUid);
+    setSelectedBudgetId(budget?.uid || '');
+  };
 
   return (
     <motion.div
@@ -25,10 +70,9 @@ export default function Page() {
         <DashboardHeader
           type="dashboard"
           title="Analytics"
-
-          // budgets={budgets}
-          // handleBudgetChange={handleBudgetChange}
-          // isLoadingBudgets={isLoadingBudgets}
+          budgets={budgets}
+          handleBudgetChange={handleBudgetChange}
+          isLoadingBudgets={isLoadingBudgets}
         />
         <div className="px-6 py-8 space-y-8">
           <div className="relative">
@@ -60,6 +104,17 @@ export default function Page() {
                 height={210}
               />
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {filters.map((filter, index) => (
+              <div
+                key={filter.name}
+                className="bg-gray-100 border border-gray-200 rounded-xl py-1.5 px-3 text-sm font-medium text-gray-800"
+              >
+                {filter.name}
+              </div>
+            ))}
           </div>
         </div>
       </DashboardWrapper>

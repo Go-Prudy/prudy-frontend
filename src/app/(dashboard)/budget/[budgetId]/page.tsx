@@ -9,8 +9,12 @@ import Loader from '@/app/_components/loader';
 import useBudgetById from './useBudgetById';
 import { Icons } from '@/app/icons';
 import Link from 'next/link';
+import BottomButton from './_components/bottomButton';
+import Button from '@/app/_components/button';
+import { useRouter } from 'next/navigation';
 
 const Page = ({ params }: { params: { budgetId: string } }) => {
+  const router = useRouter();
   const {
     budgetStats,
     isLoadingBudgetStats,
@@ -25,9 +29,8 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-[100px]">
       <Header link="/budgets" title={budgetDetails?.name || ''}>
-        {/* TODO: links to budget settings page */}
         <Link
           href={`/budget/${params.budgetId}/settings`}
           className="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 text-gray-600"
@@ -35,22 +38,6 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
           {Icons.settings}
         </Link>
       </Header>
-      {isLoadingBudgetStats ? (
-        <Loader />
-      ) : (
-        (budgetStats?.totalIncome > 0 ||
-          budgetStats?.totalExpense > 0 ||
-          budgetStats?.amountLeft > 0) && (
-          <BarChart
-            labels={['Income', 'Expenses', 'Amount Left']}
-            values={[
-              budgetStats?.totalIncome,
-              budgetStats?.totalExpense,
-              budgetStats?.amountLeft,
-            ]}
-          />
-        )
-      )}
 
       {/* tabs */}
       <Tabs
@@ -59,7 +46,18 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
         fullWidth
         className="px-4"
       >
-        <Tab key="income" title="Income" className="w-full border-none bg-gray-100 p-4">
+        <Tab key="income" title="Income" className="w-full border-none p-0">
+          <div className="px-6 mb-3">
+            <BarChart
+              labels={['Income', 'Expenses', 'Amount Left']}
+              values={[
+                budgetStats?.totalIncome || 0,
+                budgetStats?.totalExpense || 0,
+                budgetStats?.amountLeft || 0,
+              ]}
+              isLoadingBudgetStats={isLoadingBudgetStats}
+            />
+          </div>
           <IncomeTab
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
@@ -68,7 +66,18 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
             handleTabSelection={handleTabSelection}
           />
         </Tab>
-        <Tab key="allocations" title="Allocations" className="w-full bg-gray-100 p-4">
+        <Tab key="allocations" title="Allocations" className="w-full p-0">
+          <div className="px-6 mb-3">
+            <BarChart
+              labels={['Income', 'Expenses', 'Amount Left']}
+              values={[
+                budgetStats?.totalIncome || 0,
+                budgetStats?.totalExpense || 0,
+                budgetStats?.amountLeft || 0,
+              ]}
+              isLoadingBudgetStats={isLoadingBudgetStats}
+            />
+          </div>
           <CategoriesTab
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
@@ -83,6 +92,9 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
           />
         </Tab>
       </Tabs>
+      <BottomButton>
+        <Button onClick={() => router.push('/track')}>Track your Expenses</Button>
+      </BottomButton>
     </div>
   );
 };

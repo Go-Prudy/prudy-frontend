@@ -380,6 +380,7 @@ export default function Page({
           setShowSplitExapenseDrawer={setShowSplitExapenseDrawer}
           accountId={params.accountId}
           transactionId={transactionId}
+          transactionDetails={transactionDetails ?? null}
           budgetId={params.budgetId}
           budgetCategories={singleBudgetData?.budgetCategories || []}
         />

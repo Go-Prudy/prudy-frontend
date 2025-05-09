@@ -55,41 +55,39 @@ export default function PlannedBudget({
 
       {isLoading ? (
         <Loader />
-      ) : (
+      ) : distributions.length > 0 ? (
         <>
           <BudgetVisualization totalBudget={totalBudget} distributions={distributions} />
           <div className="bg-white mt-[28px] p-4 flex flex-col gap-[16px]  w-full">
-            {distributions.length > 0 ? (
-              distributions?.map((category: any, index: number) => (
-                <div
-                  key={category.uid}
-                  className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
-                >
-                  {/* Category Name */}
-                  <div className="flex gap-[8px] items-center">
-                    <span
-                      className="inline-block size-[12px] rounded-full"
-                      style={{ backgroundColor: category.color }} // Dynamically set color for each category
-                    ></span>
-                    <span className="text-[#474747] text-[14px] font-medium">
-                      {category.name}
-                    </span>
-                  </div>
-
-                  {/* Percentage */}
-                  <span className="text-[#474747] text-[14px]">
-                    {category.percentage.toFixed(1)}%
+            {distributions?.map((category: any, index: number) => (
+              <div
+                key={category.uid}
+                className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
+              >
+                {/* Category Name */}
+                <div className="flex gap-[8px] items-center">
+                  <span
+                    className="inline-block size-[12px] rounded-full"
+                    style={{ backgroundColor: category.color }} // Dynamically set color for each category
+                  ></span>
+                  <span className="text-[#474747] text-[14px] font-medium">
+                    {category.name}
                   </span>
                 </div>
-              ))
-            ) : (
-              <EmptyState
-                image={noBudgetImg}
-                title=" You do not have any budget history yet."
-              />
-            )}
+
+                {/* Percentage */}
+                <span className="text-[#474747] text-[14px]">
+                  {category.percentage.toFixed(1)}%
+                </span>
+              </div>
+            ))}
           </div>
         </>
+      ) : (
+        <EmptyState
+          image={noBudgetImg}
+          title=" You do not have any budget history yet."
+        />
       )}
 
       {showFilterCategoriesDrawer && (

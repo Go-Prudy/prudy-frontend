@@ -9,6 +9,17 @@ import { Switch } from '@nextui-org/react';
 import { lightenColor } from '@/app/utils/functions';
 import { BsCheck } from 'react-icons/bs';
 import SuccessfulModal from '../../modals/SuccessfulModal';
+import { BudgetAllocation } from '@/app/types/budget';
+
+interface Transaction {
+  id: number;
+  name: string;
+  date: string;
+  time: string;
+  amount: number;
+  currency: string;
+  narration: string;
+}
 
 interface Props {
   setShow: (i: boolean) => void;
@@ -17,9 +28,8 @@ interface Props {
   accountId: string;
   budgetId: string;
   transactionId: string;
-
-  // TODO: Replace with actual type
-  budgetCategories: any;
+  budgetCategories: BudgetAllocation[];
+  transactionDetails: Transaction | null;
 }
 
 const AssignExpenseDrawer = ({
@@ -30,6 +40,7 @@ const AssignExpenseDrawer = ({
   budgetId,
   transactionId,
   budgetCategories,
+  transactionDetails,
 }: Props) => {
   const navigate = useRouter();
   const {
@@ -72,6 +83,20 @@ const AssignExpenseDrawer = ({
         onClose={() => setShow(false)}
       >
         <div className="space-y-4 bg-white">
+          {/* TODO: transaction */}
+          <div className="bg-gray-100 border border-gray-200 rounded-2xl p-4 text-sm flex justify-between items-end">
+            <div>
+              <p className="font-medium">{transactionDetails?.narration}</p>
+              <p className="text-gray-600 text-xs">
+                {/* {formatDateTime(transactionDetails?.date)} */}
+                {transactionDetails?.date}
+              </p>
+            </div>
+            <div className="font-medium whitespace-nowrap">
+              ₦ {transactionDetails?.amount?.toLocaleString()}
+            </div>
+          </div>
+
           <h1 className="text-base font-medium text-black-800">Select category</h1>
 
           <div className="flex items-center justify-between p-3 border rounded-lg">

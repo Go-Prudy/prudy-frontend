@@ -49,7 +49,7 @@ export default function IncomeTab({
   } = useIncomeTab({ budgetId });
 
   return (
-    <div className="space-y-6 mb-[100px]">
+    <div className="space-y-6 bg-gray-100 p-4">
       <div className="border border-gray-200 bg-white rounded-3xl ">
         <div className="flex items-center gap-2 p-4 border-b border-gray-200">
           <div className="w-11 h-11 rounded-lg bg-lemonGreen-200 flex items-center justify-center">
@@ -138,9 +138,6 @@ export default function IncomeTab({
           </div>
         </div>
       </div>
-      <BottomButton>
-        <Button onClick={() => navigate.push('/track')}>Track your Expenses</Button>
-      </BottomButton>
 
       {showIncomeDrawer && (
         <AddIncomeDrawer

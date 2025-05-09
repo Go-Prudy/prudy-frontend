@@ -5,7 +5,7 @@ import { ScannedItem } from '../types/scan';
 
 type Props = {
   setShowCategoriesDrawer: Dispatch<SetStateAction<boolean>>;
-  category?: BudgetCategory;
+  category?: BudgetCategory|null;
   scannedItem?: ScannedItem;
 };
 

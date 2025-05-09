@@ -32,15 +32,16 @@ export default function useAddIncome({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['getIncomes', budgetId] }),
         queryClient.invalidateQueries({ queryKey: ['getBudgetStats', budgetId] }),
+        queryClient.invalidateQueries({ queryKey: ['getAllBudgets'] }),
       ]);
 
-      queryClient.setQueryData(['getIncomes', budgetId], (old: any) => {
-        if (!old) return { data: [data.data] };
-        return {
-          ...old,
-          data: [...old.data, data.data.data],
-        };
-      });
+      // queryClient.setQueryData(['getIncomes', budgetId], (old: any) => {
+      //   if (!old) return { data: [data.data] };
+      //   return {
+      //     ...old,
+      //     data: [...old.data, data.data.data],
+      //   };
+      // });
 
       setDisabledTabKeys(['distribution']);
       setShow(false);

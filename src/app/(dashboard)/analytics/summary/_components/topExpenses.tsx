@@ -1,49 +1,55 @@
+import { ExpenseCategory, Remark } from '@/app/types/analytics';
 import CategoriesBreakdown from './categoriesBreakdown';
 import cn from 'classnames';
 
-type Props = {};
+type Props = {
+  analytics: {
+    categories: ExpenseCategory[];
+    remark: Remark;
+  } | null;
+  isLoadingAnalytics: boolean;
+};
 
-export default function TopExpenses({}: Props) {
+const backgrounds = [
+  'bg-top-expenses-bar1',
+  'bg-top-expenses-bar2',
+  'bg-top-expenses-bar3',
+];
+
+export default function TopExpenses({ analytics, isLoadingAnalytics }: Props) {
   return (
     <div className="space-y-7">
       <div className="p-[1px] bg-top-expenses-border rounded-[32px]">
         <div className="text-white space-y-4 bg-[#8D2A7B] rounded-[32px] p-6">
-          {/* bar chart */}
-          <div className="flex items-end justify-center space-x-6">
-            <Bar
-              label="Housing"
-              amount="₦250,000"
-              percentage={80}
-              color="bg-top-expenses-bar1"
-            />
-            <Bar
-              label="Food"
-              amount="₦250,000"
-              percentage={60}
-              color="bg-top-expenses-bar2"
-            />
-            <Bar
-              label="Transport"
-              amount="₦250,000"
-              percentage={70}
-              color="bg-top-expenses-bar3"
-            />
+          <div className="flex items-end justify-center space-x-6 max-w-[300px] mx-auto">
+            {analytics?.categories
+              ?.slice(0, 3)
+              .map((category, index) => (
+                <Bar
+                  key={category.uid}
+                  label={category.name}
+                  amount={category.amountSpent}
+                  percentage={100 - category.percentageLeft}
+                  color={backgrounds[index]}
+                />
+              ))}
           </div>
-          <h6 className="text-xl font-bold space-y-4">Come on you Stunner!🎉🥳👏🏽</h6>
-          <p>
-            You spent more on your housing expenses this month, however it is way above
-            budget.
-          </p>
+          <h6 className="text-xl font-bold space-y-4">{analytics?.remark.title}</h6>
+          <p>{analytics?.remark.description}</p>
         </div>
       </div>
-      <CategoriesBreakdown title="Top Expenses Breakdown" buttonColor="bg-[#C16CB2]" />
+      <CategoriesBreakdown
+        title="Top Expenses Breakdown"
+        buttonColor="bg-[#C16CB2]"
+        categories={analytics?.categories.splice(0, 3) ?? []}
+      />
     </div>
   );
 }
 
 type BarProps = {
   label: string;
-  amount: string;
+  amount: number;
   percentage: number;
   color: string;
 };
@@ -62,7 +68,7 @@ const Bar = ({ label, amount, percentage, color }: BarProps) => {
           }}
         />
         <div className="absolute left-0 right-0 bottom-8 h-fit flex justify-center items-center font-bold text-white rotate-[-90deg]">
-          {amount}
+          {amount.toLocaleString()}
         </div>
       </div>
       <span className="text-sm font-medium">{label}</span>

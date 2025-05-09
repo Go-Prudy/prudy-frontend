@@ -2,7 +2,6 @@ import { ErrorResponse } from '@/app/types/index';
 import api from '@/app/utils/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -20,12 +19,11 @@ export default function useDeleteBudget({
 
   const deleteBudgetMutation = useMutation({
     mutationFn: async () => await api.delete(`/budgets/${budgetId}`),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['getAllBudgets'] });
+
       handleCloseDeleteModal();
       handleOpenSuccessfulModal();
-      queryClient.invalidateQueries({
-        queryKey: ['allBudgets'],
-      });
     },
     onError: (error: AxiosError<ErrorResponse>) => {
       console.log('Error deleting budget:', error);

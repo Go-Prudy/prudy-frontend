@@ -1,42 +1,46 @@
 import Image from 'next/image';
 import Performance from './performance';
 import performanceImage from '/public/images/analytics/2.png';
-import coinImage from '/public/images/analytics/coin.png';
+import { Breakdown, Remark } from '@/app/types/analytics';
 
-type Props = {};
+type Props = {
+  analytics: {
+    breakdown: Breakdown;
+    remark: Remark;
+  } | null;
+  isLoadingAnalytics: boolean;
+};
 
-export default function BestPerformingCategory({}: Props) {
+export default function BestPerformingCategory({ analytics, isLoadingAnalytics }: Props) {
   return (
     <div className="space-y-7">
-      <div className="relative">
+      <div className="relative w-[114%] left-[-7%]">
         <Image
-          src={coinImage}
-          alt=""
-          width={200}
-          height={200}
-          className="-mt-5 mb-[150px] mx-auto"
-        />
-        {/* <Image
           src={performanceImage}
           alt=""
-          width={354}
+          width={390}
           height={473}
-          className="mx-auto absolute top-[-62px] sm:top-[-98px] left-[-37px] sm:left-0 right-0 min-h-[410px] sm:min-h-[473px] min-w-[320px] sm:min-w-[354px]"
-        /> */}
+          className="-mt-[100px] mx-auto min-w-[350px]"
+        />
 
-        <div className="max-w-[126px] space-y-1 absolute h-fit top-0 right-0 left-0 bottom-0 m-auto ">
-          <p className="text-sm font-medium">Transportation</p>
-          <h4 className="font-bold text-xl">₦250,000</h4>
+        <div className="w-full space-y-1 absolute h-fit top-[37%] right-0 left-0">
+          <p className="text-sm font-medium max-w-[110px] mx-auto">{analytics?.breakdown.title}</p>
+          <h4 className="font-bold text-xl">
+            ₦{analytics?.breakdown.actualExpenses.toLocaleString()}
+          </h4>
         </div>
       </div>
       <div className="text-white space-y-4">
-        <h6 className="text-xl font-bold space-y-4">Good one mate! 😊👏🏽</h6>
+        <h6 className="text-xl font-bold space-y-4">{analytics?.remark.title}</h6>
         <p>
-          Obviously, you have been able to keep up with your budget for Transportation.
-          You should keep this up.
+         {analytics?.remark.description}
         </p>
       </div>
-      <Performance title="Transportation" plannedBudget={200000} actualExpenses={50000} />
+      <Performance
+        title={analytics?.breakdown.title ?? ''}
+        plannedBudget={analytics?.breakdown.totalBudgeted ?? 0}
+        actualExpenses={analytics?.breakdown.actualExpenses ?? 0}
+      />
     </div>
   );
 }

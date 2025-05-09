@@ -16,6 +16,7 @@ import SelectCategoryDrawer from '../SelectCategory';
 interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
+  totalAllocations: number;
   totalIncome: number;
   budgetId: string;
   budgetCategories: BudgetCategory[];
@@ -25,7 +26,7 @@ interface Props {
 export default function AddAllocationDrawer({
   show,
   setShow,
-
+  totalAllocations,
   totalIncome,
   budgetId,
   budgetCategories,
@@ -100,12 +101,12 @@ export default function AddAllocationDrawer({
           <div className="space-y-3">
             <div className="relative bg-gray-100 text-black-800 border border-gray-200 w-full p-2 rounded-2xl flex justify-between gap-2">
               <div className="bg-white rounded-lg w-1/2 space-y-1 p-2">
-                <p className="text-xs text-gray-500">Left to allocate</p>
-                <p>₦500,000</p>
+                <p className="text-xs text-gray-500">Total Budget</p>
+                <p>₦{totalIncome.toLocaleString()}</p>
               </div>
               <div className="bg-white rounded-lg w-1/2 space-y-1 p-2">
                 <p className="text-xs text-gray-500">Left to allocate</p>
-                <p>₦500,000</p>
+                <p>₦{(totalIncome - totalAllocations).toLocaleString()}</p>
               </div>
             </div>
 

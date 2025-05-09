@@ -87,6 +87,16 @@ export interface Allocation {
   }[];
 }
 
+export interface BudgetApiResponse<T> {
+  totalRecords: number;
+  pageTotal: number;
+  next: object;
+  prev: object;
+  offset: number;
+  limit: number;
+  docs: T;
+}
+
 export interface Budget {
   uid: string;
   name: string;
@@ -95,7 +105,7 @@ export interface Budget {
   totalIncome: number;
   createdAt: string;
   updatedAt: string;
-  collaborations: Collaborator[];
+  collaborators: Collaborator[];
 }
 
 export interface Category {

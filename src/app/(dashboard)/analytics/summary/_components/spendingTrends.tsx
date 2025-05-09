@@ -6,7 +6,7 @@ export default function SpendingTrends({}: Props) {
   return (
     <div>
       <div className="space-y-7">
-        {/* chart */}
+        {/* TODO: chart */}
 
         <div className="text-white space-y-4">
           <h6 className="text-xl font-bold space-y-4">Big Spender Purr 😊👏🏽</h6>

@@ -74,7 +74,7 @@ export default function Page() {
   } = useTrackPage();
 
   const navigate = useRouter();
-
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}

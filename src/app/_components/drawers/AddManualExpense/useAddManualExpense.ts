@@ -17,7 +17,7 @@ export default function useAddManualExpense({
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
   const [showCategoriesDrawer, setShowCategoriesDrawer] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory>(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory|null>(categories[0]);
 
   useEffect(() => {
     if (categories.length > 0) {

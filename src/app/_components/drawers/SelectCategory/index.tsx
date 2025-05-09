@@ -11,7 +11,7 @@ type Props = {
   categories: BudgetCategory[];
   isLoading: boolean;
   selectedCategory: BudgetCategory | null;
-  setSelectedCategory?: Dispatch<SetStateAction<BudgetCategory>>;
+  setSelectedCategory?: Dispatch<SetStateAction<BudgetCategory | null>>;
   handleUpdateCategory?: (category: BudgetCategory, index: number) => void;
   index?: number;
 };

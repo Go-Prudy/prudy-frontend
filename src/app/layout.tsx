@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Script from 'next/script';
 import 'react-toastify/dist/ReactToastify.css';
 import { Toaster } from 'react-hot-toast';
-import Providers from './ReactQueryProvider';
+import ReactQueryProvider from './ReactQueryProvider';
 
 export default function RootLayout({
   children,
@@ -20,9 +20,9 @@ export default function RootLayout({
       <body className="font-aeonik bg-white flex justify-center min-h-screen">
         <NextUIProvider className="w-full max-w-[500px]">
           <Toaster position="top-right" reverseOrder={false} />
-          <Providers>
+          <ReactQueryProvider>
             <div className="w-full font-aeonik max-w-[500px] bg-white">{children}</div>
-          </Providers>
+          </ReactQueryProvider>
         </NextUIProvider>
         <Script id="gtm-script" strategy="afterInteractive">
           {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

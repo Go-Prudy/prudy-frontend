@@ -3,7 +3,7 @@ import Button from '@/app/_components/button';
 import expenseImg from '/public/images/budget/total-expense.png';
 import emptyListImg from '/public/images/empty-state/list.png';
 
-import { BsArrowLeft, BsArrowRight, BsPlus } from 'react-icons/bs';
+import { BsPlus } from 'react-icons/bs';
 import CreateCategoryDrawer from '@/app/_components/drawers/CreateCategory';
 import Loader from '@/app/_components/loader';
 import useCategoriesTab from './useCategoriesTab';
@@ -11,7 +11,7 @@ import useIncomeTab from '../IncomeTab/useIncomeTab';
 import EmptyState from '@/app/_components/emptyState';
 import AddAllocationDrawer from '@/app/_components/drawers/AddAllocation';
 import { Allocation } from '@/app/types/budget';
-import BottomButton from '../bottomButton';
+import { Progress } from '@nextui-org/react';
 
 type Props = {
   budgetId: string;
@@ -30,10 +30,11 @@ export default function CategoriesTab({ budgetId, handleTabSelection }: Props) {
     setShowCreateCategoryDrawer,
     showAddAllocation,
     setShowAddAllocation,
+    totalAllocations,
   } = useCategoriesTab({ budgetId });
 
   return (
-    <div className="space-y-6 mb-[100px]">
+    <div className="space-y-6 bg-gray-100 p-4">
       <div className="border border-gray-200 bg-white rounded-3xl">
         <div className="flex items-center gap-2 p-4 border-b border-gray-200">
           <div className="w-11 h-11 rounded-lg bg-red-100 flex items-center justify-center">
@@ -41,7 +42,9 @@ export default function CategoriesTab({ budgetId, handleTabSelection }: Props) {
           </div>
           <div className="space-y-1">
             <p className="text-sm text-gray-400">Total Planned Expenses</p>
-            <h6 className="text-xl text-black-800 font-bold">₦0.00</h6>
+            <h6 className="text-xl text-black-800 font-bold">
+              ₦{totalAllocations.toLocaleString()}
+            </h6>
           </div>
         </div>
         <div className="px-4 py-5 space-y-4">
@@ -68,7 +71,29 @@ export default function CategoriesTab({ budgetId, handleTabSelection }: Props) {
                 >
                   <div className="size-10 bg-white rounded-full"></div>
                   <p className="">{allocation.budgetCategory.name}</p>
-                  <p className="">{allocation.amountAllocated}</p>
+                  {/* <p className=""> ₦ {allocation.amountAllocated}</p> */}
+                  <p className="">
+                    <span className="font-medium text-sm">
+                      ₦ {allocation.amountLeft.toLocaleString()}{' '}
+                    </span>
+                    <span className="text-[10px] text-gray-400">left</span>
+                  </p>
+                  <Progress
+                    aria-label="Progress showing amount spent and left"
+                    value={allocation?.amountLeft}
+                    maxValue={allocation?.amountAllocated}
+                    size="md"
+                    color="warning"
+                    radius="md"
+                    classNames={{
+                      base: 'max-w-md',
+                      track: 'bg-gray-200 h-1.5',
+                      indicator: 'bg-gray-600 h-1.5',
+                      label: 'tracking-wider font-medium text-default-600',
+                      value: 'text-foreground/60',
+                    }}
+                    showValueLabel={false}
+                  />
                 </div>
               ))}
             </div>
@@ -81,20 +106,6 @@ export default function CategoriesTab({ budgetId, handleTabSelection }: Props) {
           )}
         </div>
       </div>
-
-      <BottomButton>
-        <Button
-          className="!bg-lemonGreen-100 !text-lemonGreen-900"
-          onClick={() => handleTabSelection('income')}
-        >
-          <BsArrowLeft />
-          Back
-        </Button>
-
-        <Button onClick={() => handleTabSelection('distribution')}>
-          Continue <BsArrowRight />
-        </Button>
-      </BottomButton>
 
       {showCreateCategoryDrawer && (
         <CreateCategoryDrawer
@@ -110,6 +121,7 @@ export default function CategoriesTab({ budgetId, handleTabSelection }: Props) {
           budgetId={budgetId}
           budgetCategories={budgetCategories}
           isBudgetCategriesLoading={isBudgetCategriesLoading}
+          totalAllocations={totalAllocations}
         />
       )}
     </div>

@@ -1,31 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteBudgetApi, GetAllBudgetsApi } from '@/app/services/BudgetService';
+import { deleteBudgetApi } from '@/app/services/BudgetService';
 import { getPendingInvitesApi } from '@/app/services/InviteService';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/app/store/useAuthStore';
+import { useBudgetStore } from '@/app/store/useBudgetStore';
 
 export default function useBudgets() {
-  const [showInvites, setShowInvites] = useState(false);
-  const [createBudgetComponent, setCreateBudgetComponent] = useState(false);
-  const [treshold, setTreshold] = useState(0);
-  const [showInviteCollaboratorDrawer, setShowInviteCollaboratorDrawer] =
-    useState<boolean>(false);
-  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  const [inviteBudgetId, setInviteBudgetId] = useState<string | null>(null);
-
+  const queryClient = useQueryClient();
+  const { budgets, isLoadingBudgets } = useBudgetStore();
   const { userData } = useAuthStore();
 
-  const {
-    data: budgets = [],
-    isPending,
-    refetch: refetchAllBudgets,
-  } = useQuery({
-    queryKey: ['allBudgets'],
-    queryFn: () => GetAllBudgetsApi(userData?.token ?? ''),
-    enabled: !!userData?.token,
-    refetchOnWindowFocus: true,
-  });
+  const [showInvites, setShowInvites] = useState(false);
+  const [createBudgetComponent, setCreateBudgetComponent] = useState<boolean>(false);
+  const [showInviteCollaboratorDrawer, setShowInviteCollaboratorDrawer] =
+    useState<boolean>(false);
+  const [showDeleteBudgetModal, setShowDeleteBudgetModal] = useState<boolean>(false);
+
+  const [budgetId, setBudgetId] = useState<string | null>(null);
 
   const { data: getPendingInvitesApiData = [] } = useQuery({
     queryKey: ['getPendingInvites'],
@@ -40,18 +32,12 @@ export default function useBudgets() {
     }
   }, [getPendingInvitesApiData]);
 
-  const queryClient = useQueryClient();
-
-  // React Query mutation to delete budget
   const deleteBudgetMutation = useMutation({
     mutationFn: (id: string) => deleteBudgetApi(userData?.token ?? '', id ?? ''),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['getAllBudgets'] });
       console.log('Budget deleted successfully!');
       toast.success('Budget deleted');
-      queryClient.invalidateQueries({
-        queryKey: ['allBudgets'],
-      });
-      setActiveTooltip(null);
     },
     onError: (error: unknown) => {
       console.error('Error inviting collaborator:', error);
@@ -62,18 +48,16 @@ export default function useBudgets() {
     setShowInvites,
     createBudgetComponent,
     setCreateBudgetComponent,
-    treshold,
-    setTreshold,
     showInviteCollaboratorDrawer,
     setShowInviteCollaboratorDrawer,
-    activeTooltip,
-    setActiveTooltip,
-    inviteBudgetId,
-    setInviteBudgetId,
+    budgetId,
+    setBudgetId,
     budgets,
     deleteBudgetMutation,
-    isPending,
+    isPending: isLoadingBudgets,
     getPendingInvitesApiData,
-    refetchAllBudgets,
+    showDeleteBudgetModal,
+    setShowDeleteBudgetModal,
+    // refetchAllBudgets,
   };
 }

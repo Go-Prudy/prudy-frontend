@@ -1,0 +1,16 @@
++ Onboarding
+    + Track actions progress
++ Budget & Analytics
+    + Charts
+    + Actual expense
+    + Edit & Delete allocations
++ Track page
+    + Sync account on page load
+    + Show reauthorize modal
+    + Show first time countdown modal
+    + Auto categorize with ai
++ Scan receipts
+    + Auto categorize
++ Profile
+    + Rewards
++ Invties & collaborators

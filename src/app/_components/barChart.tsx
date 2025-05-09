@@ -9,25 +9,24 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import Loader from './loader';
 
-// Register the necessary chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// Define the Props interface with default values
 interface ChartProps {
   labels?: string[];
   values?: number[];
+  isLoadingBudgetStats?: boolean;
 }
 
-// Create the component
 const BarChart: React.FC<ChartProps> = ({
-  labels = [], // Default to empty array if labels are undefined
-  values = [], // Default to empty array if values are undefined
+  labels = [],
+  values = [],
+  isLoadingBudgetStats,
 }) => {
   // Prepare chart values: Replace negatives with 0 for plotting
   const chartValues = values.map((value) => (value < 0 ? 0 : value));
 
-  // Data for the chart
   const data = {
     labels: labels,
     datasets: [
@@ -41,7 +40,6 @@ const BarChart: React.FC<ChartProps> = ({
     ],
   };
 
-  // Options for the chart
   const options: any = {
     responsive: true,
     plugins: {
@@ -73,9 +71,11 @@ const BarChart: React.FC<ChartProps> = ({
     },
   };
 
-  return (
+  return isLoadingBudgetStats ? (
+    <Loader />
+  ) : (
     <div className="border border-gray-200 rounded-3xl">
-      <div className="mb-[51.4px] relative">
+      <div className="mb-[51.4px] relative bg-gray-100 rounded-t-3xl">
         <Bar
           data={data}
           className="w-full bg-gray-100 pt-5 rounded-t-3xl"
