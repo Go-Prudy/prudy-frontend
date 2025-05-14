@@ -19,7 +19,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
     const arcGenerator = d3
       .arc<any>()
       .innerRadius(radius - 60)
-      .outerRadius(radius - 20)
+      .outerRadius(radius - 40)
       .padAngle(0.01);
 
     const pieGenerator = d3.pie<BudgetDistributionCategory>().value((d) => d.percentage);
@@ -44,7 +44,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .style('visibility', 'hidden')
       .style('background-color', 'white')
       .style('border', '1px solid #ddd')
-      .style('border-radius', '5px')
+      .style('border-radius', '15px')
       .style('padding', '5px 10px')
       .style('font-size', '14px')
       .style('box-shadow', '0px 2px 5px rgba(0,0,0,0.1)')

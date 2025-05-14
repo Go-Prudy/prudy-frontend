@@ -2,32 +2,47 @@ import Link from 'next/link';
 import React from 'react';
 import { ImportantNote } from '../importantNote';
 import { usePathname } from 'next/navigation';
+import cn from 'classnames';
 
 const navItems = [
   {
     name: 'Home',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <path
-          d="m9.02 2.84-5.39 4.2C2.73 7.74 2 9.23 2 10.36v7.41c0 2.32 1.89 4.22 4.21 4.22h11.58c2.32 0 4.21-1.9 4.21-4.21V10.5c0-1.21-.81-2.76-1.8-3.45l-6.18-4.33c-1.4-.98-3.65-.93-5 .12ZM12 17.99v-3"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        ></path>
-      </svg>
-    ),
+    icon: (isActive: boolean) =>
+      isActive ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="m20.83 8.01-6.55-5.24C13 1.75 11 1.74 9.73 2.76L3.18 8.01c-.94.75-1.51 2.25-1.31 3.43l1.26 7.54C3.42 20.67 4.99 22 6.7 22h10.6c1.69 0 3.29-1.36 3.58-3.03l1.26-7.54c.18-1.17-.39-2.67-1.31-3.42ZM12.75 18c0 .41-.34.75-.75.75s-.75-.34-.75-.75v-3c0-.41.34-.75.75-.75s.75.34.75.75v3Z"
+            fill="currentColor"
+          ></path>
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="m9.02 2.84-5.39 4.2C2.73 7.74 2 9.23 2 10.36v7.41c0 2.32 1.89 4.22 4.21 4.22h11.58c2.32 0 4.21-1.9 4.21-4.21V10.5c0-1.21-.81-2.76-1.8-3.45l-6.18-4.33c-1.4-.98-3.65-.93-5 .12ZM12 17.99v-3"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      ),
     link: '/home',
   },
   {
     name: 'Budgets',
-    icon: (
+    icon: (isActive: boolean) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -55,7 +70,7 @@ const navItems = [
   },
   {
     name: 'Track',
-    icon: (
+    icon: (isActive: boolean) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -76,7 +91,7 @@ const navItems = [
   },
   {
     name: 'Analytics',
-    icon: (
+    icon: (isActive: boolean) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -110,7 +125,7 @@ const navItems = [
   },
   {
     name: 'Profile',
-    icon: (
+    icon: (isActive: boolean) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -134,7 +149,6 @@ const navItems = [
 type Props = {};
 
 export default function BottomNavigation({}: Props) {
-  // show importatnt note only if toute is /track
   const pathname = usePathname();
   const showImportantNote = pathname === '/track';
   return (
@@ -142,14 +156,22 @@ export default function BottomNavigation({}: Props) {
       {showImportantNote && <ImportantNote />}
       <div className="  bg-white shadow-[0px_-20px_56px_0px_#514F6E1A]">
         <ul className="flex items-center justify-between p-3">
-          {navItems.map((item, index) => (
-            <Link key={index} href={item.link}>
-              <li className="flex flex-col items-center gap-1 text-sm text-gray-500 hover:text-lemonGreen-600 p-3">
-                <span>{item.icon}</span>
-                <span>{item.name}</span>
-              </li>
-            </Link>
-          ))}
+          {navItems.map((item, index) => {
+            const isActive = pathname === item.link;
+            return (
+              <Link key={index} href={item.link}>
+                <li
+                  className={cn(
+                    'flex flex-col items-center gap-1 text-sm text-gray-500 hover:text-lemonGreen-600 p-3',
+                    isActive ? 'text-lemonGreen-600' : 'text-gray-500 ',
+                  )}
+                >
+                  <span>{item.icon(isActive)}</span>
+                  <span>{item.name}</span>
+                </li>
+              </Link>
+            );
+          })}
         </ul>
       </div>
     </div>

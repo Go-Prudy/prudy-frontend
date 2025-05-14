@@ -1,12 +1,9 @@
 'use client';
 import Image from 'next/image';
 import { BsChevronRight, BsPerson } from 'react-icons/bs';
-import logout from '/public/images/logout.png';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthentication } from '@/app/store/AuthStore';
-import { IAuthenticatedUser } from '@/app/Types';
-import { useEffect, useState, type JSX } from 'react';
 import Link from 'next/link';
 import { getUserSubscription } from '@/app/services/SubscriptionService';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
@@ -15,12 +12,22 @@ import DashboardHeader from '@/components/Header/DashboardHeader';
 import userAvatarIcon from '/public/images/icons/avatar.svg';
 import { Icons } from '@/app/icons';
 import { useAuthStore } from '@/app/store/useAuthStore';
+import RewardValues from './_components/rewardValues';
+import { useEffect } from 'react';
+import api from '@/app/utils/axiosInstance';
+import { AxiosResponse } from 'axios';
+import { UserSubscription } from '@/app/types/subscription';
+import { user } from '@nextui-org/react';
 
 const profileItems = [
   {
     category: 'TOOLS',
     items: [
-      { name: 'Budget Categories', icon: Icons.category, link: '/profile/categories' },
+      {
+        name: 'Budget Categories',
+        icon: Icons.category,
+        link: '/profile/budget-categories',
+      },
       { name: 'Reminders', icon: Icons.toggle, link: '/reminders' },
       { name: 'Subscription', icon: Icons.crown, link: '/subscription' },
       { name: 'FAQs', icon: Icons.messageQuestion, link: '/faqs' },
@@ -42,14 +49,7 @@ const profileItems = [
 ];
 
 export default function Page() {
-  type ToolItem = {
-    title: string;
-    icon: JSX.Element; // Assuming you want to add an icon component here
-    category: string;
-    link: string; // Link property added
-  };
-
-  const navigation = useRouter();
+  const navigate = useRouter();
 
   const { LogOut } = useAuthentication();
 
@@ -65,21 +65,17 @@ export default function Page() {
 
   const { userData } = useAuthStore();
 
-  const {
-    data: usersubscription = {},
-    isPending: isGetUserSubscriptionPending,
-    isError: isGetUserSubscriptionError,
-  } = useQuery({
+  const { data: userSubscription, isLoading: isGetUserSubscriptionLoading } = useQuery({
     queryKey: ['getuserSubscription'],
-    queryFn: () => getUserSubscription(userData?.token ?? ''),
-    enabled: !!userData?.token, // Only fetch if token exists
-    refetchOnWindowFocus: false, // Prevent refetching on window focus
-    refetchOnMount: false, // Prevent refetching on component mount
-    refetchInterval: false, // Disable polling
-    staleTime: 5 * 60 * 1000, // Data will be considered fresh for 5 minutes
+    queryFn: async () =>
+      (await api.get<AxiosResponse<UserSubscription>>('subscriptions/me')).data,
+    enabled: !!userData?.token,
+    refetchOnWindowFocus: false,
   });
 
-  // console.log(usersubscription);
+  useEffect(() => {
+    console.log(userSubscription?.data);
+  }, [userSubscription]);
 
   return (
     <motion.div
@@ -92,9 +88,8 @@ export default function Page() {
       <DashboardWrapper>
         <DashboardHeader type="profile" title="Profile" headerTitleClass="text-[28px]">
           <div className="w-full space-y-4">
-            {/* user info */}
             <div
-              onClick={() => navigation.push('/profile/user')}
+              onClick={() => navigate.push('/profile/user')}
               className=" cursor-pointer p-4 flex justify-between items-center w-full bg-white rounded-2xl shadow-[8px_8px_8px_0px_#1847000D]"
             >
               <div className="flex items-center gap-1">
@@ -120,30 +115,13 @@ export default function Page() {
               <BsChevronRight size={24} />
             </div>
 
-            {/* stats info */}
             <div
-              onClick={() => navigation.push('/profile/rewards')}
+              onClick={() => navigate.push('/profile/rewards')}
               className=" cursor-pointer bg-profile-stats rounded-t-2xl px-4 py-2 text-white"
             >
               <div>
                 <p>Your Stats</p>
-                <div className="w-full flex justify-between items-center py-2">
-                  <p className="flex flex-col items-center text-white text-sm">
-                    {Icons.flash}
-                    <span>9 days</span>
-                  </p>
-                  <div className="w-[1px] h-full bg-lemonGreen-50" />
-                  <p className="flex flex-col items-center text-white text-sm">
-                    {Icons.flash}
-                    <span>54 pts</span>
-                  </p>
-                  <div className="w-[1px] h-full bg-lemonGreen-50" />
-
-                  <p className="flex flex-col items-center text-white text-sm">
-                    {Icons.flashy}
-                    <span>12 days</span>
-                  </p>
-                </div>
+                <RewardValues points={20} longestStreak={20} currentStreak={20} />
               </div>
             </div>
           </div>
@@ -154,16 +132,27 @@ export default function Page() {
               <p className="text-gray-600 text-sm">{categories.category}</p>
               <div className="grid grid-cols-2 gap-4">
                 {categories.items.map((item) => (
-                  <Link
-                    href={item.link}
+                  <button
+                    onClick={() => {
+                      // if returning user, show manage subscription page
+                      if (userSubscription?.data.isActive) {
+                        navigate.push('manage-subscription');
+                      }
+                      // if (userData?.profile.hasFreeTrial) {
+                      //   navigate.push('manage-subscription');
+                      // }
+                      else {
+                        navigate.push(item.link);
+                      }
+                    }}
                     key={item.name}
-                    className="p-4 bg-gray-100 border border-gray-200 rounded-[20px] space-y-2 text-gray-600"
+                    className="block p-4 bg-gray-100 border border-gray-200 rounded-[20px] space-y-2 text-gray-600"
                   >
                     <span className="bg-white w-10 h-10 rounded-full flex items-center justify-center">
                       {item.icon}
                     </span>
                     <span className="text-sm">{item.name}</span>
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>

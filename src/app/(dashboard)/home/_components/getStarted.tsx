@@ -1,7 +1,6 @@
 import cn from 'classnames';
 import Image, { StaticImageData } from 'next/image';
 import CreateBudgetDrawer from '@/app/_components/drawers/CreateBudget';
-
 import createBudgetImage from '/public/images/quick-actions/1.png';
 import trackExpenseImage from '/public/images/quick-actions/6.png';
 import linkBankImage from '/public/images/quick-actions/2.png';
@@ -10,9 +9,11 @@ import useGetStarted from './useGetStarted';
 import { CircularProgress } from '@nextui-org/react';
 import ScanReceipt from '@/app/_components/scanner';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { BsCheck2Circle } from 'react-icons/bs';
 
 interface QuickActionType {
-  id: string;
+  key: string;
   title: string;
   image: StaticImageData;
   bgColor: string;
@@ -22,15 +23,14 @@ interface QuickActionType {
 
 const quickActions: QuickActionType[] = [
   {
-    id: 'create',
+    key: 'budget_creation',
     title: 'Create /n a Budget',
-
     image: createBudgetImage,
     bgColor: '#D7F4FB',
     borderColor: '#11CDEF',
   },
   {
-    id: 'track',
+    key: 'assign_expense',
     title: 'Track /n your Expenses',
     image: trackExpenseImage,
     bgColor: '#FBE9DA',
@@ -38,14 +38,14 @@ const quickActions: QuickActionType[] = [
     size: 46,
   },
   {
-    id: 'scan',
+    key: 'receipt_scanning',
     title: 'Scan /n your Receipt',
     image: scanReceiptImage,
     bgColor: '#F4DEF2',
     borderColor: '#E149C0',
   },
   {
-    id: 'link',
+    key: 'account_linking',
     title: 'Link your /n Bank Accounts',
     image: linkBankImage,
     bgColor: '#D9D9FA',
@@ -63,7 +63,14 @@ export default function GetStarted({}: Props) {
     setShowScanner,
     showCreateBudgetModal,
     setShowCreateBudgetModal,
+    actionsProgress,
   } = useGetStarted();
+
+  useEffect(() => {
+    if (actionsProgress) {
+      console.log(actionsProgress);
+    }
+  }, [actionsProgress]);
 
   return (
     <div className="rounded-[36px] border border-gray-200">
@@ -73,48 +80,59 @@ export default function GetStarted({}: Props) {
           <div
             className="absolute inset-0 rounded-full"
             style={{
-              background: 'conic-gradient(#66C227 0% 0%, #D9D9D9 0% 100%)',
-              //       background: 'conic-gradient(#66C227 0% 50%, #D9D9D9 50% 100%)',
+              // background: 'conic-gradient(#66C227 0% 0%, #D9D9D9 0% 100%)',
+              background: `conic-gradient(#66C227 0% ${actionsProgress?.percentage ?? 0}%, #D9D9D9 ${actionsProgress?.percentage ?? 0}% 100%)`,
             }}
           />
           <div className="absolute inset-[6px] bg-white rounded-full flex items-center justify-center">
-            <span className="text-black-800 text-xs font-bold">0%</span>
+            <span className="text-black-800 text-xs font-bold">
+              {actionsProgress?.percentage ?? 0}%
+            </span>
           </div>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4 p-4">
         {quickActions.map((action) => (
           <div
-            key={action.id}
-            className="p-4 space-y-2 rounded-3xl border text-black-800"
+            key={action.key}
+            className="p-4 space-y-2 rounded-3xl border text-black-800 relative"
             style={{
               borderColor: action.borderColor,
               backgroundColor: action.bgColor,
             }}
             onClick={() => {
-              if (action.id === 'create') {
+              if (action.key === 'budget_creation') {
                 setShowCreateBudgetModal(true);
               }
-              if (action.id === 'track') {
+              if (action.key === 'assign_expense') {
                 navigate.push('/track');
               }
-              if (action.id === 'scan') {
+              if (action.key === 'receipt_scanning') {
                 setShowScanner(true);
               }
-              if (action.id === 'link') {
+              if (action.key === 'account_linking') {
                 linkAccountMutation.mutateAsync();
               }
             }}
           >
+            {actionsProgress?.completedSteps?.includes(action.key) && (
+              <div
+                className={cn('absolute top-2 right-2')}
+                style={{ color: action.borderColor }}
+              >
+                <BsCheck2Circle />
+              </div>
+            )}
+
             <div className={cn('bg-white rounded-xl w-fit', action.size ? 'p-0' : 'p-1')}>
               <Image
                 src={action.image}
-                alt={action.id}
+                alt={action.key}
                 width={action.size || 34}
                 height={action.size || 34}
               />
             </div>
-            {action.id === 'link' && linkAccountMutation.isPending ? (
+            {action.key === 'account_linking' && linkAccountMutation.isPending ? (
               <CircularProgress size="sm" />
             ) : (
               <h5 className="text-sm font-medium">

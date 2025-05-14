@@ -18,8 +18,44 @@ export type SubscriptionPlan = {
   monthlyAmount: number;
 };
 
+
+
 export type SubscriptionPlans = {
   monthly: SubscriptionPlan[];
   quaterly: SubscriptionPlan[];
   yearly: SubscriptionPlan[];
+};
+
+export type PaymentMethod = {
+  uid: string;
+  firstSixDigits: string;
+  lastFourDigits: string;
+  issuer: string;
+  country: string;
+  type: 'MASTERCARD' | 'VISA';
+  expiry: string;
+  isDefault: boolean;
+};
+
+export type UserSubscription = {
+  uid: string;
+  plan: {
+    id: 1;
+    uid: string;
+    name: string;
+    benefits: string[];
+    basePrice: number;
+    currency: string;
+    features: {
+      maxReceiptsScanning: number;
+      maxAccountLinking: number;
+      maxTransactionSyncing: number;
+      maxCollaboratorInvites: number;
+      budgetAnalytics: boolean;
+    };
+  };
+  startDate: string;
+  interval: string;
+  isActive: boolean;
+  nextBillingDate: string;
 };

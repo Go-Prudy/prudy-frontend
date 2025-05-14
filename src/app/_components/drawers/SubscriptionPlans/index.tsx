@@ -1,19 +1,22 @@
 import { motion } from 'framer-motion';
 import BottomDrawer from '../BottomDrawer';
 import Button from '../../button';
-import { useState } from 'react';
 import { planOptions } from '@/app/utils/constants';
 import Loader from '../../loader';
 import { RadioGroup } from '@nextui-org/react';
-import CustomRadio from './customRadio';
 import { SubscriptionPlan, SubscriptionPlans } from '@/app/types/subscription';
+import useSubscriptionPlans from './useSubscriptionPlans';
+import SubscriptionRadio from '../../subscriptionRadio';
+import useSubscription from '@/app/(dashboard)/subscription/useSubscription';
+import { useEffect, useState } from 'react';
+import LoadingModal from '../../modals/LoadingModal';
 
 interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
-  isGetAllPlansPending: boolean;
-  subscriptionPlans: SubscriptionPlans;
-  handleMakePayment: () => void;
+  isGetAllPlansPending?: boolean;
+  subscriptionPlans?: SubscriptionPlans;
+  // handleMakePayment: () => void;
 }
 
 export default function SubscriptionPlansDrawer({
@@ -21,9 +24,30 @@ export default function SubscriptionPlansDrawer({
   show,
   isGetAllPlansPending,
   subscriptionPlans,
-  handleMakePayment,
+  // handleMakePayment,
 }: Props) {
-  const [selectedPlan, setSelectedPlan] = useState<keyof SubscriptionPlans>('monthly');
+  const { plans, isGetAllPlansLoading } = useSubscriptionPlans({
+    subscriptionPlans,
+  });
+
+  const {
+    selectedPlan,
+    selectedPlanItem,
+    setSelectedPlanItem,
+    handleSelectPlan,
+    showSuccessfulModal,
+    setShowSuccessfulModal,
+    fetchPaymentMethods,
+    setFetchPaymentMethods,
+    addPaymentMedthodMutation,
+    isGetPaymentMethodLoading,
+    checkoutSubscriptionMutation,
+    completeAddPaymentMethodMutation,
+  } = useSubscription();
+
+  useEffect(() => {
+    console.log(fetchPaymentMethods);
+  }, [fetchPaymentMethods]);
 
   return (
     <motion.div
@@ -36,9 +60,19 @@ export default function SubscriptionPlansDrawer({
       <BottomDrawer
         footer={
           <Button
-            onClick={() => handleMakePayment()}
+            onClick={() => {
+              if (selectedPlanItem) {
+                const planData = plans?.[selectedPlan].find(
+                  (plan) => plan.uid === selectedPlanItem,
+                );
+
+                localStorage.setItem('your-selected-plan', JSON.stringify(planData));
+                setFetchPaymentMethods(true);
+              }
+            }}
             type="submit"
             className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA]  flex items-center justify-center gap-[8px] font-[500]"
+            disabled={!selectedPlanItem}
           >
             Subscribe
           </Button>
@@ -47,13 +81,16 @@ export default function SubscriptionPlansDrawer({
         back={false}
         show={show}
         close={true}
-        onClose={() => setShow(false)}
+        onClose={() => {
+          setShow(false);
+          setFetchPaymentMethods(false);
+        }}
       >
         <div className="space-y-4">
           <div className="p-1 bg-gray-100 rounded-xl flex justify-center w-fit mx-auto">
             {planOptions.map((option: string) => (
               <button
-                onClick={() => setSelectedPlan(option as keyof SubscriptionPlans)}
+                onClick={() => handleSelectPlan(option as keyof SubscriptionPlans)}
                 className={`${option.toLowerCase() === selectedPlan.toLowerCase() && 'rounded-xl text-white bg-lemonGreen-600 '} p-2 text-sm font-medium capitalize`}
                 key={option}
               >
@@ -61,19 +98,25 @@ export default function SubscriptionPlansDrawer({
               </button>
             ))}
           </div>
-          {isGetAllPlansPending ? (
+          {isGetAllPlansPending || isGetAllPlansLoading ? (
             <Loader />
           ) : (
-            <RadioGroup orientation="vertical" className="space-y-4" color="success">
+            <RadioGroup
+              orientation="vertical"
+              className="space-y-4"
+              color="success"
+              value={selectedPlanItem}
+              onValueChange={(value) => setSelectedPlanItem(value)}
+            >
               <div className="mb-[10px] flex flex-col w-full gap-[16px]">
                 {planOptions?.map(
                   (period) =>
                     selectedPlan?.toLowerCase() === period &&
-                    subscriptionPlans?.[selectedPlan]
+                    plans?.[selectedPlan]
                       ?.slice()
                       .reverse()
                       .map((plan: SubscriptionPlan) => (
-                        <CustomRadio
+                        <SubscriptionRadio
                           key={plan?.uid}
                           header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
                           header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
@@ -87,7 +130,7 @@ export default function SubscriptionPlansDrawer({
                                 : null
                           }
                           className="flex w-full justify-between"
-                          value={plan?.basePrice}
+                          value={plan?.uid}
                           label={plan?.discount ? `save ${plan?.discount}%` : null}
                         >
                           <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
@@ -95,7 +138,7 @@ export default function SubscriptionPlansDrawer({
                               <li key={index}>{benefit}</li>
                             ))}
                           </ul>
-                        </CustomRadio>
+                        </SubscriptionRadio>
                       )),
                 )}
               </div>
@@ -103,6 +146,17 @@ export default function SubscriptionPlansDrawer({
           )}
         </div>
       </BottomDrawer>
+
+      <LoadingModal
+        isOpen={
+          addPaymentMedthodMutation.isPending ||
+          isGetPaymentMethodLoading ||
+          completeAddPaymentMethodMutation.isPending ||
+          checkoutSubscriptionMutation.isPending
+        }
+        onClose={() => {}}
+        text="Please wait..."
+      />
     </motion.div>
   );
 }

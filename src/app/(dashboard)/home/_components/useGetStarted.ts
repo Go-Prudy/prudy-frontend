@@ -1,6 +1,6 @@
 import { ApiResponse } from '@/app/types/index';
 import api from '@/app/utils/axiosInstance';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -12,6 +12,12 @@ interface LinkAccountResponse {
 export default function useGetStarted() {
   const [showScanner, setShowScanner] = useState<boolean>(false);
   const [showCreateBudgetModal, setShowCreateBudgetModal] = useState<boolean>(false);
+
+  // fetch actions progress using useQuery
+  const { data: actionsProgress, isLoading: isLoadingActionsProgress } = useQuery({
+    queryKey: ['getActionsProgress'],
+    queryFn: async () => (await api.get('/onboarding/progress')).data,
+  });
 
   const linkAccountMutation = useMutation({
     mutationFn: async () => {
@@ -36,5 +42,6 @@ export default function useGetStarted() {
     setShowScanner,
     showCreateBudgetModal,
     setShowCreateBudgetModal,
+    actionsProgress: actionsProgress?.data || {},
   };
 }

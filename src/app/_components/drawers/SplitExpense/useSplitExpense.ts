@@ -1,7 +1,5 @@
-import {
-  AssignCategoryToTransactionApi,
-  AssignSplitCategoryToTransactionApi,
-} from '@/app/services/TransactionService';
+import useTrackProgress from '@/app/_hooks/useTrackProgress';
+import { AssignSplitCategoryToTransactionApi } from '@/app/services/TransactionService';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
@@ -37,6 +35,7 @@ export default function useSplitExpense({
 }: Props) {
   const { userData } = useAuthStore();
   const queryClient = useQueryClient();
+  const { trackProgressMutation } = useTrackProgress();
 
   const [showSplitExpenseSuccessModal, setShowSplitExpenseSuccessModal] = useState(false);
   const [splitCategories, setSplitCategories] = useState<SplitCategory[]>([]); // Array of categories to split the expense into
@@ -127,6 +126,8 @@ export default function useSplitExpense({
       ),
 
     onSuccess: (data) => {
+      trackProgressMutation.mutate('assign_expense');
+
       toast.success('Transaction updated with selected category!');
       setSplitCategories([]);
       setShow(false);

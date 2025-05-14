@@ -2,7 +2,7 @@
 
 import { useRadio, VisuallyHidden, cn } from '@nextui-org/react';
 
-const CustomRadio = (props: any) => {
+const SubscriptionRadio = (props: any) => {
   const {
     Component,
     children,
@@ -15,7 +15,16 @@ const CustomRadio = (props: any) => {
     getControlProps,
   } = useRadio(props);
 
-  const { duration, header1, header2, header3, label, labelText } = props;
+  const {
+    duration,
+    header1,
+    header2,
+    header3,
+    label,
+    labelText,
+    isDefaultSelected,
+    isCurrentPlan,
+  } = props;
 
   // Combine description and duration into a single node
   const combinedDescription = (
@@ -32,7 +41,9 @@ const CustomRadio = (props: any) => {
       className={cn(
         'group flex flex-col p-4 rounded-lg border-1 transition-all',
         'w-full cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4',
-        isSelected ? 'border-[#66C227] bg-[#ECFDDC]' : 'bg-[#F7F7F9] border-[#EFEFF0]',
+        isDefaultSelected || isSelected
+          ? 'border-lemonGreen-600 bg-[#ECFDDC]'
+          : 'bg-[#F7F7F9] border-[#EFEFF0]',
       )}
     >
       <VisuallyHidden>
@@ -43,12 +54,17 @@ const CustomRadio = (props: any) => {
         <div className="flex flex-col w-full  ">
           <div className={`flex justify-between  `}>
             <div>
-              <h1 className="text-[#66C227] font-[700] text-[14px]">
+              <h1 className="text-lemonGreen-600 font-[700] text-[14px] space-x-2">
                 {header1}{' '}
+                {isCurrentPlan && (
+                  <span className="px-2 p-0.5 bg-white text-lemonGreen-600 text-[10px] rounded-xl font-normal">
+                    Current Plan
+                  </span>
+                )}{' '}
                 {label && (
                   <span
                     className={`px-[8px]
-                                 ${isSelected ? 'text-[#ffffff] bg-[#66C227] ' : 'text-black bg-white'}    ml-[8px] py-[2px] text-[10px]  rounded-[12px] font-[400]`}
+                                 ${isDefaultSelected || isSelected ? 'text-[#ffffff] bg-lemonGreen-600 ' : 'text-black bg-white'}    py-[2px] text-[10px]  rounded-[12px] font-[400]`}
                   >
                     {labelText}
                   </span>
@@ -56,9 +72,11 @@ const CustomRadio = (props: any) => {
               </h1>
               <h1 className="mt-[8px] flex items-start font-[700] text-[24px] leading-[24px]">
                 {header2}{' '}
-                <span className=" text-[12px] font-[400] text-[#575757] ml-[8px]">
-                  {header3}
-                </span>
+                {header3 && (
+                  <span className=" text-[12px] font-[400] text-[#575757] ml-[8px]">
+                    {header3}
+                  </span>
+                )}
               </h1>
             </div>
             <div {...getWrapperProps()}>
@@ -80,4 +98,4 @@ const CustomRadio = (props: any) => {
   );
 };
 
-export default CustomRadio;
+export default SubscriptionRadio;

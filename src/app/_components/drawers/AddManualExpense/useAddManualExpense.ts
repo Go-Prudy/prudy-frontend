@@ -1,3 +1,4 @@
+import useTrackProgress from '@/app/_hooks/useTrackProgress';
 import { BudgetCategory } from '@/app/types/budget';
 import api from '@/app/utils/axiosInstance';
 import { convertAmountToNumber } from '@/app/utils/functions';
@@ -17,7 +18,11 @@ export default function useAddManualExpense({
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
   const [showCategoriesDrawer, setShowCategoriesDrawer] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory|null>(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory | null>(
+    categories[0],
+  );
+
+  const { trackProgressMutation } = useTrackProgress();
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -33,6 +38,8 @@ export default function useAddManualExpense({
       ),
     onSuccess: (data) => {
       console.log(data);
+      trackProgressMutation.mutate('assign_expense');
+
       setShowSuccessModal(true);
     },
     onError: (error) => {

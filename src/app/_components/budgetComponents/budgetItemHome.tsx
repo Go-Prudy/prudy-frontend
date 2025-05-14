@@ -38,17 +38,17 @@ export default function BudgetItemHome({
           <div className="flex justify-between text-[10px] text-gray-800 font-medium">
             <p className="">
               Budget <br />
-              <span className="text-xs"> ₦{totalIncome.toLocaleString()}</span>
+              <span className="text-xs"> ₦ {totalIncome.toLocaleString()}</span>
             </p>
             <p className="">
               Left to Spend <br />{' '}
-              <span className="text-xs">₦{leftToSpend.toLocaleString()}</span>
+              <span className="text-xs">₦ {leftToSpend.toLocaleString()}</span>
             </p>
           </div>
           <div className="w-full rounded h-3 relative overflow-hidden">
             <div className="bg-white rounded h-3 absolute top-0 left-0 w-full" />
             <div
-              className="bg-[#FB8417] rounded h-3 relative"
+              className="bg-lemonGreen-600 rounded h-3 relative"
               style={{ width: `${percentageIncomeUsed}%` }} // Used part
             />
           </div>

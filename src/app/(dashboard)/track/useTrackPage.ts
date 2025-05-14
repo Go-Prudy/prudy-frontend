@@ -10,9 +10,11 @@ import {
   removeAccountApi,
 } from '@/app/services/AccountService';
 import { useAuthStore } from '@/app/store/useAuthStore';
+import useTrackProgress from '@/app/_hooks/useTrackProgress';
 
 export default function useTrackPage() {
   const { userData } = useAuthStore();
+  const { trackProgressMutation } = useTrackProgress();
 
   const [showSelectBankAccountDrawer, setShowSelectBankAccountDrawer] = useState(false);
   const [showAddManualDrawer, setShowAddManualDrawer] = useState<boolean>(false);
@@ -69,6 +71,19 @@ export default function useTrackPage() {
       console.error('Error linking account:', error);
     },
   });
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (
+      urlParams.get('status') === 'linked' &&
+      urlParams.get('reason') === 'account_linked'
+    ) {
+      trackProgressMutation.mutate('account_linking');
+      // remove the   query param from the url
+      urlParams.delete('status');
+      urlParams.delete('reason');
+    }
+  }, []);
 
   const handleBudgetChange = (selectedUid: string) => {
     const budget = budgets.find((budget) => budget.uid === selectedUid);

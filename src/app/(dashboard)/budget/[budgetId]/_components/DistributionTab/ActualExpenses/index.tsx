@@ -2,28 +2,63 @@ import FilterCategoriesDrawer from '@/app/_components/drawers/FilterCategories';
 import EmptyState from '@/app/_components/emptyState';
 import Loader from '@/app/_components/loader';
 import BudgetVisualization from '@/components/BudgetVisualization';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
 import noBudgetImg from '/public/images/empty-state/list.png';
 import { BudgetDistributionCategory } from '@/app/types/budget';
+import { generateUniqueColors } from '@/app/utils/functions';
+import { getBudgetDistributionApi } from '@/app/services/BudgetService';
+import { useAuthStore } from '@/app/store/useAuthStore';
+import { useQuery } from '@tanstack/react-query';
 
 type Props = {
-  isLoading: boolean;
-  totalBudget: number;
-  selectedCategories: string[];
-  setSelectedCategories: Dispatch<SetStateAction<string[]>>;
-  distributions: BudgetDistributionCategory[];
+  budgetId: string;
 };
-
-export default function ActualExpenses({
-  isLoading,
-  totalBudget,
-  selectedCategories,
-  setSelectedCategories,
-  distributions,
-}: Props) {
+export default function ActualExpenses({ budgetId }: Props) {
   const [showFilterCategoriesDrawer, setShowFilterCategoriesDrawer] =
     useState<boolean>(false);
+  const { userData } = useAuthStore();
+
+  const [distributions, setDistributions] = useState<BudgetDistributionCategory[]>([]);
+  const [filteredDistributions, setFilteredDistributions] = useState<
+    BudgetDistributionCategory[]
+  >([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    'All categories',
+  ]);
+
+  const { data: budgetDistributionData, isLoading } = useQuery({
+    queryKey: ['getBudgetDistribution', budgetId],
+    queryFn: () => getBudgetDistributionApi(userData?.token ?? '', budgetId),
+    enabled: !!userData?.token && !!budgetId,
+  });
+
+  useEffect(() => {
+    if (budgetDistributionData) {
+      const colors = generateUniqueColors(budgetDistributionData?.distributions.length);
+
+      const newDistributions =
+        budgetDistributionData?.distributions?.map((item: any, index: number) => ({
+          ...item,
+          color: colors[index],
+        })) || [];
+
+      setDistributions(newDistributions);
+      setFilteredDistributions(newDistributions);
+    }
+  }, [budgetDistributionData]);
+
+  useEffect(() => {
+    if (selectedCategories.includes('All categories')) {
+      setFilteredDistributions(distributions);
+    } else {
+      const filtered = distributions.filter((distribution) =>
+        selectedCategories.includes(distribution.name),
+      );
+      setFilteredDistributions(filtered);
+    }
+  }, [selectedCategories, distributions]);
+
   const handleCategorySelect = (categoryName: string) => {
     setSelectedCategories((prev) => {
       if (categoryName === 'All categories') {
@@ -52,17 +87,50 @@ export default function ActualExpenses({
           <BsChevronDown size={10} className=" text-gray-500 " />
         </button>
       </div>
+      {isLoading ? (
+        <Loader />
+      ) : filteredDistributions.length > 0 ? (
+        <>
+          <BudgetVisualization
+            totalBudget={budgetDistributionData?.totalBudget}
+            distributions={filteredDistributions}
+          />
+          <div className="bg-white mt-[28px] p-4 flex flex-col gap-[16px]  w-full">
+            {filteredDistributions?.map((category: any, index: number) => (
+              <div
+                key={category.uid}
+                className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
+              >
+                {/* Category Name */}
+                <div className="flex gap-[8px] items-center">
+                  <span
+                    className="inline-block size-[12px] rounded-full"
+                    style={{ backgroundColor: category.color }} // Dynamically set color for each category
+                  ></span>
+                  <span className="text-[#474747] text-[14px] font-medium">
+                    {category.name}
+                  </span>
+                </div>
 
-      <EmptyState
-        image={noBudgetImg}
-        title="You have not made any expenses yet"
-        description="Begin tracking your expenses to see the summary here."
-      />
+                {/* Percentage */}
+                <span className="text-[#474747] text-[14px]">
+                  {category.percentage.toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <EmptyState
+          image={noBudgetImg}
+          title=" You do not have any budget history yet."
+        />
+      )}
       {showFilterCategoriesDrawer && (
         <FilterCategoriesDrawer
           show={showFilterCategoriesDrawer}
           setShow={setShowFilterCategoriesDrawer}
-          items={['All categories', ...distributions.map((item) => item.name)]}
+          items={['All categories', ...filteredDistributions.map((item) => item.name)]}
           handleCategorySelect={handleCategorySelect}
           selectedCategories={selectedCategories}
         />

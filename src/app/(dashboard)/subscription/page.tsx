@@ -19,6 +19,8 @@ import Button from '@/app/_components/button';
 import { planOptions } from '@/app/utils/constants';
 import SubscriptionPlansDrawer from '@/app/_components/drawers/SubscriptionPlans';
 import succesGif from '/public/images/success.gif';
+import { SubscriptionPlans } from '@/app/types/subscription';
+import LoadingModal from '@/app/_components/modals/LoadingModal';
 
 const Page = () => {
   const {
@@ -35,6 +37,11 @@ const Page = () => {
     handleMakePayment,
     showSuccessfulModal,
     setShowSuccessfulModal,
+    setFetchPaymentMethods,
+    addPaymentMedthodMutation,
+    isGetPaymentMethodLoading,
+    checkoutSubscriptionMutation,
+    completeAddPaymentMethodMutation,
   } = useSubscription();
 
   return (
@@ -58,7 +65,11 @@ const Page = () => {
             <>
               <div className="items-center flex justify-between w-full">
                 <p className="text-lg font-semibold">
-                  {subscriptionPlans?.[selectedPlan][2]?.name}
+                  {
+                    subscriptionPlans?.[
+                      selectedPlan as keyof typeof subscriptionPlans
+                    ]?.[2]?.name
+                  }
                 </p>
                 <Popover
                   isOpen={popoverIsOpen}
@@ -92,26 +103,34 @@ const Page = () => {
                 </Popover>
               </div>
               <div className="bg-white p-3 rounded-xl space-y-2">
-                {subscriptionPlans?.[selectedPlan][2]?.benefits?.map(
-                  (feature: string, index: number) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <BsCheck2Circle
-                        strokeWidth={1.6}
-                        className="text-lemonGreen-900 size-4 min-w-[16px]"
-                      />
-                      <span className="text-sm leading-7">{feature}</span>
-                    </div>
-                  ),
-                )}
+                {subscriptionPlans?.[
+                  selectedPlan as keyof typeof subscriptionPlans
+                ][2]?.benefits?.map((feature: string, index: number) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <BsCheck2Circle
+                      strokeWidth={1.6}
+                      className="text-lemonGreen-900 size-4 min-w-[16px]"
+                    />
+                    <span className="text-sm leading-7">{feature}</span>
+                  </div>
+                ))}
                 <div className="bg-lemonGreen-300 text-gray-600 p-3 w-full rounded-lg text-center text-sm">
                   30 days free, then{' '}
                   <span className=" font-bold text-base">
-                    ₦ {subscriptionPlans?.[selectedPlan][2]?.monthlyAmount}
+                    ₦{' '}
+                    {
+                      subscriptionPlans?.[
+                        selectedPlan as keyof typeof subscriptionPlans
+                      ][2]?.monthlyAmount
+                    }
                   </span>{' '}
                   /monthly
                 </div>
               </div>
-              <Button className="bg-lemonGreen-500" onClick={() => setMakePayment(true)}>
+              <Button
+                className="bg-lemonGreen-500"
+                onClick={() => setFetchPaymentMethods(true)}
+              >
                 Continue
               </Button>
             </>
@@ -130,13 +149,13 @@ const Page = () => {
         <SubscriptionPlansDrawer
           show={showSubscriptionPlan}
           setShow={setShowSubscriptionPlan}
-          subscriptionPlans={subscriptionPlans}
+          subscriptionPlans={subscriptionPlans as SubscriptionPlans}
           isGetAllPlansPending={isGetAllPlansPending}
-          handleMakePayment={handleMakePayment}
+          // handleMakePayment={handleMakePayment}
         />
       )}
 
-      {makePayment && (
+      {/* {makePayment && (
         <motion.div
           initial={{ opacity: 0, y: 90 }}
           animate={{ opacity: 1, y: 0 }}
@@ -165,13 +184,23 @@ const Page = () => {
             </div>
           </BottomDrawer>
         </motion.div>
-      )}
+      )} */}
 
       <SuccessfulModal
         title="Payment successful"
         isOpen={showSuccessfulModal}
         onClose={() => setShowSuccessfulModal(false)}
         image={succesGif}
+      />
+      <LoadingModal
+        isOpen={
+          addPaymentMedthodMutation.isPending ||
+          isGetPaymentMethodLoading ||
+          completeAddPaymentMethodMutation.isPending ||
+          checkoutSubscriptionMutation.isPending
+        }
+        onClose={() => {}}
+        text="Please wait..."
       />
     </div>
   );

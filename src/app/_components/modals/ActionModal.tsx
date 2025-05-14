@@ -8,7 +8,6 @@ import {
   ModalFooter,
 } from '@nextui-org/react';
 import Button from '../button';
-import successGif from '/public/images/success-gif.gif';
 import warningGif from '/public/images/warning-gif.gif';
 
 import Image from 'next/image';

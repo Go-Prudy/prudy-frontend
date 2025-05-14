@@ -1,3 +1,4 @@
+import useTrackProgress from '@/app/_hooks/useTrackProgress';
 import api from '@/app/utils/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -14,6 +15,7 @@ interface CreateBudgetForm {
 export default function useCreateBudget({ setShow }: { setShow: (i: boolean) => void }) {
   const queryClient = useQueryClient();
   const navigate = useRouter();
+  const { trackProgressMutation } = useTrackProgress();
 
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -22,6 +24,7 @@ export default function useCreateBudget({ setShow }: { setShow: (i: boolean) => 
     mutationFn: (values: CreateBudgetForm) => api.post('/budgets', values),
     onSuccess: async (data) => {
       console.log(data.data);
+      trackProgressMutation.mutate('budget_creation');
       await queryClient.invalidateQueries({ queryKey: ['getAllBudgets'] });
 
       setShowLoadingModal(false);

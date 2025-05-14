@@ -1,3 +1,4 @@
+import useTrackProgress from '@/app/_hooks/useTrackProgress';
 import { AssignCategoryToTransactionApi } from '@/app/services/TransactionService';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,6 +20,7 @@ export default function useAssignExpense({
 }: Props) {
   const { userData } = useAuthStore();
   const queryClient = useQueryClient();
+  const { trackProgressMutation } = useTrackProgress();
 
   const [showAssignExpenseSuccessModal, setShowAssignExpenseSuccessModal] =
     useState(false);
@@ -40,14 +42,16 @@ export default function useAssignExpense({
       ),
 
     onSuccess: (data) => {
+      trackProgressMutation.mutate('assign_expense');
+
       toast.success('Transaction updated with selected category!');
       setSelectedCategory(null);
-     queryClient.invalidateQueries({
-       queryKey: ['getAllAccountTransactions'],
-     });
-     queryClient.invalidateQueries({
-       queryKey: ['singleBudgetData', budgetId],
-     });
+      queryClient.invalidateQueries({
+        queryKey: ['getAllAccountTransactions'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['singleBudgetData', budgetId],
+      });
       setShow(false);
       setShowAssignExpenseSuccessModal(true);
     },
