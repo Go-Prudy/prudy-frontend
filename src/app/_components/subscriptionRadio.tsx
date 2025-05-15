@@ -28,9 +28,9 @@ const SubscriptionRadio = (props: any) => {
 
   // Combine description and duration into a single node
   const combinedDescription = (
-    <div className="flex gap-[8px] text-[#575757] items-center">
-      <span className="text-[16px] font-[500]">{description}</span>
-      {duration && <span className="text-[12px]">{duration}</span>}{' '}
+    <div className="flex gap-2 text-gray-600 items-center">
+      <span className="text-base font-medium">{description}</span>
+      {duration && <span className="text-xs">{duration}</span>}{' '}
       {/* Only render duration if it exists */}
     </div>
   );
@@ -54,7 +54,7 @@ const SubscriptionRadio = (props: any) => {
         <div className="flex flex-col w-full  ">
           <div className={`flex justify-between  `}>
             <div>
-              <h1 className="text-lemonGreen-600 font-[700] text-[14px] space-x-2">
+              <h1 className="text-lemonGreen-600 font-bold text-sm space-x-2">
                 {header1}{' '}
                 {isCurrentPlan && (
                   <span className="px-2 p-0.5 bg-white text-lemonGreen-600 text-[10px] rounded-xl font-normal">
@@ -63,17 +63,17 @@ const SubscriptionRadio = (props: any) => {
                 )}{' '}
                 {label && (
                   <span
-                    className={`px-[8px]
-                                 ${isDefaultSelected || isSelected ? 'text-[#ffffff] bg-lemonGreen-600 ' : 'text-black bg-white'}    py-[2px] text-[10px]  rounded-[12px] font-[400]`}
+                    className={`px-2
+                                 ${isDefaultSelected || isSelected ? 'text-white bg-lemonGreen-600 ' : 'text-black bg-white'}    py-0.5 text-[10px]  rounded-[12px] font-normal`}
                   >
                     {labelText}
                   </span>
                 )}
               </h1>
-              <h1 className="mt-[8px] flex items-start font-[700] text-[24px] leading-[24px]">
+              <h1 className="mt-2 flex items-start font-bold text-[24px] leading-[24px]">
                 {header2}{' '}
                 {header3 && (
-                  <span className=" text-[12px] font-[400] text-[#575757] ml-[8px]">
+                  <span className="text-xs font-normal text-gray-600 ml-2">
                     {header3}
                   </span>
                 )}
@@ -86,7 +86,7 @@ const SubscriptionRadio = (props: any) => {
           <div>
             <div
               {...getLabelProps()}
-              className="text-[#575757] mt-[12px] w-full bg-[#FFFFFF] rounded-b-[12px] text-[12px] py-[12px]   px-[4px] "
+              className="text-gray-600 mt-3 w-full bg-white rounded-b-[12px] text-xs py-3 px-1"
             >
               {children}
             </div>

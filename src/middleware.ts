@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
         // If the user is authenticated and tries to access a public route, redirect them to /budgets
         if (publicRoutes.includes(pathname)) {
-            return NextResponse.redirect(new URL('/budgets', request.url));
+            return NextResponse.redirect(new URL('/home', request.url));
         }
     } else {
         // If the user is not authenticated and tries to access a private route, redirect them to /login

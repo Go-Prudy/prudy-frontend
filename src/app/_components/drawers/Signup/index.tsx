@@ -97,7 +97,7 @@ export default function SignupDrawer({
             <Checkbox checked={isAgreed} onChange={handleIsAgreedCheckbox} required />
 
             <p>
-              <span className="text-[14px] leading-[24px] text-[#575757]">
+              <span className="text-sm text-gray-600">
                 I have read and agreed to {"Prudy's "}
               </span>
               <Link href="/terms&condition" className="text-[14px] text-lemonGreen-600">
@@ -106,7 +106,7 @@ export default function SignupDrawer({
             </p>
           </div>
           <p className="flex font-medium justify-center gap-2">
-            <span className="text-[#575757]">Already have an account? </span>{' '}
+            <span className="text-gray-600">Already have an account? </span>{' '}
             <Link
               onClick={() => setShow(false)}
               href="/login"

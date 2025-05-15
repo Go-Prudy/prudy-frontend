@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { IBudget, Income, IAllocation, ISubAllocation, ICreateCategory } from '../Types';
-import { v4 as uuidv4 } from 'uuid';
 import { IPreviousBudget } from '../types/budget';
 
 // Function to generate a random color
@@ -241,7 +240,6 @@ export const useBudgetStore = create<BudgetState>()(
             //     if (lastBudget) {
             //         const newBudget: IBudget = {
             //             ...lastBudget,
-            //             id: uuidv4(),
             //         };
             //         set((state) => ({
             //             budgets: [...state.budgets, newBudget],

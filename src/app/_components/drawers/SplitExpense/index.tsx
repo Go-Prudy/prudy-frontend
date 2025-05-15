@@ -93,7 +93,7 @@ export default function SplitExpenseDrawer({
       >
         <div className="space-y-4 bg-white">
           <div className="flex items-center justify-between p-3 border rounded-lg">
-            <p className="text-xs font-[500] text-[#575757]">
+            <p className="text-xs font-medium text-gray-600">
               Split to different categories
             </p>
             <Switch
@@ -115,34 +115,34 @@ export default function SplitExpenseDrawer({
             <p className="text-xs">
               {transactionDetails?.name ?? transactionDetails?.narration}
             </p>
-            <h1 className=" font-[500] text-[28px] leading-[28px]">
+            <h1 className=" font-medium text-[28px] leading-[28px]">
               ₦{transactionDetails?.amount.toLocaleString()}
             </h1>
 
             <div className="w-full max-w-[310px] bg-white p-2 rounded-[12px]">
-              <p className="text-base font-500 text-[#2D2D2D]">
+              <p className="text-base font-500 text-black-800">
                 ₦ {amountDetails?.amountLeft?.toLocaleString()}{' '}
-                <span className="text-[#575757] text-sm">left to split</span>
+                <span className="text-gray-600 text-sm">left to split</span>
               </p>
-              <div className="w-full bg-white rounded-[10px] mt-[8px] h-[8px] relative overflow-hidden">
+              <div className="w-full bg-white rounded-[10px] mt-2 h-2 relative overflow-hidden">
                 <div
-                  className="bg-[#EFEFF0] rounded-[10px] h-[8px] absolute top-0 left-0"
+                  className="bg-gray-200 rounded-[10px] h-2 absolute top-0 left-0"
                   style={{ width: `${100}%` }} // Remaining part
                 ></div>
 
                 <div
-                  className="bg-[#FB8417] rounded-[10px] h-[8px] relative"
+                  className="bg-[#FB8417] rounded-[10px] h-2 relative"
                   style={{ width: `${amountDetails.percentageIncomeUsed}%` }} // Used part
                 ></div>
               </div>
             </div>
           </div>
-          <p className="text-sm text-[#828282]">
+          <p className="text-sm text-gray-400">
             Enter the amount you want to split into the categories below
           </p>
         </div>
 
-        <div className="bg-[#F7F7F9] pt-4 pb-[32px] px-4 rounded-t-lg shadow-lg">
+        <div className="bg-gray-100 pt-4 pb-8 px-4 rounded-t-lg shadow-lg">
           <div className="grid grid-cols-2 gap-3">
             {singleBudgetData?.budgetCategories?.map((category: any) => {
               // const isSelected = splitCategories.some(
@@ -152,7 +152,7 @@ export default function SplitExpenseDrawer({
               return (
                 <div
                   key={category.uid}
-                  className={`relative p-[8px] w-full border rounded-[20px] cursor-pointer space-y-2 bg-white`}
+                  className={`relative p-2 w-full border rounded-[20px] cursor-pointer space-y-2 bg-white`}
                 >
                   <div className="flex flex-col">
                     <div className="flex flex-col">
@@ -167,19 +167,19 @@ export default function SplitExpenseDrawer({
                       >
                         {/* {isSelected && <BsCheck className="text-white" />} */}
                       </div>
-                      <h1 className="text-[#2d2d2d] text-[12px] truncate">
+                      <h1 className="text-black-800 text-xs truncate">
                         {category.name}
                       </h1>
                     </div>
-                    <h1 className="font-medium text-[14px] text-[#2d2d2d] truncate">
+                    <h1 className="font-medium text-sm text-black-800 truncate">
                       ₦ {category.amountLeft}
-                      <span className="text-[#828282] text-[10px] font-[400]"> left</span>
+                      <span className="text-gray-400 text-[10px] font-normal"> left</span>
                     </h1>
                   </div>
                   <div className="">
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-[#575757] h-2 rounded-full"
+                        className="bg-gray-600 h-2 rounded-full"
                         style={{
                           width: `${
                             (category.amountLeft / category.amountAllocated) * 100
@@ -190,7 +190,7 @@ export default function SplitExpenseDrawer({
                   </div>
 
                   {/* {isSelected && ( */}
-                  <div className="bg-[#F7F7F9] border border-[#EFEFF0] px-2 py-1 w-full text-sm rounded-lg flex items-center gap-1">
+                  <div className="bg-gray-100 border border-gray-200 px-2 py-1 w-full text-sm rounded-lg flex items-center gap-1">
                     <span> ₦</span>
                     <input
                       type="text"

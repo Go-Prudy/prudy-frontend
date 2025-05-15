@@ -1,7 +1,6 @@
 'use client';
 import Image from 'next/image';
-import lunch from '/public/images/Launch.png';
-import emptyState from '/public/images/empty-transaction.png';
+import emptyState from '/public/images/empty-state/transaction.png';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -16,21 +15,13 @@ import Header from '@/components/header';
 import AssignExpenseDrawer from '@/app/_components/drawers/AssignExpense';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import SplitExpenseDrawer from '@/app/_components/drawers/SplitExpense';
-
-interface Bank {
-  name: string;
-  balance: number;
-  logo: any;
-  user: string;
-  number: string;
-}
-
-// Example bank data array
-const bank_data: Bank[] = [
-  // { name: 'Wema Bank', user: 'Ayomide Asekun', number: '0248356709', balance: 450000, logo: wema },
-  // { name: 'Kuda Bank', balance: 450000, logo: kuda, user: 'Ayomide Asekun', number: '0248356709' },
-  // { name: 'GT Bank', balance: 450000, logo: gt, user: 'Ayomide Asekun', number: '0248356709' },
-];
+import Loader from '@/app/_components/loader';
+import TrackPageModal from '@/app/_components/modals/trackPageModal';
+import { format } from 'date-fns';
+import { EmptyStateDarkBg } from '@/app/_components/emptyState';
+import BottomButton from '@/app/(dashboard)/budget/[budgetId]/_components/bottomButton';
+import Button from '@/app/_components/button';
+import { Icons } from '@/app/icons';
 
 interface Transaction {
   uid: string;
@@ -53,6 +44,12 @@ interface Transaction {
   currency: string;
 }
 
+const formatTime = (seconds: number): Date => {
+  const date = new Date(0);
+  date.setSeconds(seconds);
+  return date;
+};
+
 export default function Page({
   params,
 }: {
@@ -60,19 +57,12 @@ export default function Page({
 }) {
   const { userData } = useAuthStore();
 
-  const [bankData, setBankData] = useState<Bank[]>(bank_data);
-  const [showSyncModal, setShowSyncModal] = useState(false);
-  const [showAccountProcessingModal, setShowAccountProcessingModal] = useState(false);
+  // const [showAccountProcessingModal, setShowAccountProcessingModal] = useState(true);
   const [showReauthorizeAccountModal, setShowReauthorizeAccountModal] = useState(false);
   const [showSplitExapenseDrawer, setShowSplitExapenseDrawer] = useState<boolean>(false);
   const [showAssignExpenseDrawer, setShowAssignExpenseDrawer] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [transactionDetails, setTransactionDetails] = useState<Transaction>();
-
-  const [showSyncTransactionFirstModal, setShowSyncTransactionFirstModal] = useState<any>(
-    bankData[0],
-  );
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedCategoryForTransaction, setSelectedCategoryForTransaction] =
@@ -85,22 +75,6 @@ export default function Page({
     setShowBalance((prevState) => !prevState);
   };
 
-  const handleSyncTransaction = async () => {
-    try {
-      // Make the API call to sync transactions
-      await syncAccountTransactionsApi(userData?.token ?? '', params.accountId);
-
-      // On successful sync, show synced data
-    } catch (error) {
-      // Handle error (Optional: you can show an error state)
-      console.error('Error syncing transactions:', error);
-    }
-  };
-
-  useEffect(() => {
-    showSyncModal && handleSyncTransaction();
-  }, [showSyncModal]);
-
   // query to fetch account information with account id
   const { data: selectedBankAccount = {}, isLoading: selectedBankAccountLoading } =
     useQuery({
@@ -111,47 +85,30 @@ export default function Page({
       refetchOnMount: false,
     });
 
-  const assignExpense = (transactionId: string, transaction: Transaction) => {
-    setTransactionId(transactionId);
-    setShowAssignExpenseDrawer(true);
-    setTransactionDetails(transaction);
-  };
-
-  const handleSyncTransactions = async () => {
-    setShowAccountProcessingModal(false);
-    // Show loader when syncing starts
-    setIsSyncing(true); // Indicate syncing state
-
-    try {
-      // Manually trigger the fetch (queryFn)
-      await refetchAccountTransactions();
-
-      // Simulate a 2-second delay after fetching
-      setTimeout(() => {
-        setIsSyncing(false); // Stop syncing
-      }, 2000); // 2-second delay after sync
-    } catch (error) {
-      console.error('Sync failed', error);
-      setIsSyncing(false); // Stop syncing in case of error
-    }
-  };
-
-  const { data: syncAccountTransactions = [], refetch: refetchAccountTransactions } =
-    useQuery({
-      queryKey: ['accountInfo', params.accountId],
-      queryFn: () => syncAccountTransactionsApi(userData?.token ?? '', params.accountId),
-      enabled: false, // Disables automatic fetching
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchInterval: false,
-    });
-
   const { data: singleBudgetData = [] } = useQuery({
     queryKey: ['singleBudgetData' + params.budgetId],
     queryFn: () => getSingleBudgetApi(userData?.token ?? '', params.budgetId),
     enabled: !!userData?.token && !!params.budgetId,
     refetchOnWindowFocus: true, // This should be directly in the options object.
   });
+
+  // const {
+  //   data: syncAccountTransactions = [],
+  //   isLoading: isSyncing,
+  //   refetch: refetchSyncedAccountTransactions,
+  // } = useQuery({
+  //   queryKey: ['accountInfo', params.accountId],
+  //   queryFn: () => syncAccountTransactionsApi(userData?.token ?? '', params.accountId),
+  //   enabled: showAccountProcessingModal, // Disables automatic fetching
+  //   refetchOnWindowFocus: false,
+  //   refetchOnMount: false,
+  //   refetchInterval: false,
+  // });
+
+  // const handleSyncTransactions = async () => {
+  //   await refetchSyncedAccountTransactions();
+  //   setShowAccountProcessingModal(false);
+  // };
 
   // re-authorize account
   const handleReauthorizeAccount = useMutation({
@@ -165,6 +122,12 @@ export default function Page({
       console.error('Error reauthorizing account:', error);
     },
   });
+
+  const assignExpense = (transactionId: string, transaction: Transaction) => {
+    setTransactionId(transactionId);
+    setShowAssignExpenseDrawer(true);
+    setTransactionDetails(transaction);
+  };
 
   // Fetch transactions API
   const {
@@ -198,6 +161,29 @@ export default function Page({
       );
     }
   }, [transactionData]);
+
+  useEffect(() => {
+    // if (selectedBankAccount?.accountStatus === 'PROCESSING') {
+    //   setShowAccountProcessingModal(true);
+    // } else
+    if (selectedBankAccount?.reauthRequired) {
+      setShowReauthorizeAccountModal(true);
+    }
+  }, [selectedBankAccount]);
+
+  // // account processing timer
+  // const [timeLeft, setTimeLeft] = useState<number>(30);
+  // useEffect(() => {
+  //   if (showAccountProcessingModal) {
+  //     if (timeLeft <= 0) return;
+
+  //     const timer = setInterval(() => {
+  //       setTimeLeft((prevTime) => prevTime - 1);
+  //     }, 1000);
+
+  //     return () => clearInterval(timer);
+  //   } else setTimeLeft(30);
+  // }, [timeLeft, showAccountProcessingModal]);
 
   return (
     <div className="w-full">
@@ -247,65 +233,36 @@ export default function Page({
           </div>
         </div>
       </div>
-      <div className="flex px-6 py-[18px] w-full items-center justify-between">
-        <p className="text-black-800 font-medium">Latest transactions</p>
-        <button
-          onClick={() => {
-            // TODO: if accountStatus	 is 'PROCESSING', show modal else sync account
-            if (selectedBankAccount?.accountStatus === 'PROCESSING') {
-              setShowAccountProcessingModal(true);
-            } else {
-              handleSyncTransactions();
-            }
-          }}
-          className="bg-gray-200 text-xs text-black-800 py-1 px-2 rounded-[32px]"
-          disabled={isSyncing}
-        >
-          {isSyncing ? 'Syncing...' : 'Sync Latest'}
-        </button>
-      </div>
+
+      <p className="px-6 py-[18px] text-black-800 font-medium">Latest transactions</p>
 
       <div className="bg-gray-100 h-full w-full pb-20">
         {isLoadingGetAllAccountTransactions ? (
-          <div className="flex flex-col gap-[16px] h-[60vh] items-center justify-center w-full mt-[16px]">
-            <motion.div
-              initial={{ opacity: 0, y: 90 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col items-center justify-center w-full"
-            >
-              <Image
-                width={1000}
-                height={1000}
-                src={lunch}
-                alt="loading"
-                className="h-[141.27px] w-[126.52px]"
-              />
-            </motion.div>
-          </div>
+          <Loader />
         ) : (
           <div className="px-6 py-4 h-full space-y-4">
             {transactions.length > 0 ? (
               <>
-                {transactions.map((transaction, index) => (
-                  <div
-                    key={transaction.uid}
-                    onClick={() => assignExpense(transaction.uid, transaction)}
-                    className="flex justify-between items-end bg-white rounded-2xl border border-gray-200 p-4 text-sm text-black-800"
-                  >
-                    <div>
-                      <p className="font-medium ">{transaction.narration}</p>
-                      <p className="text-gray-600 text-xs">
-                        {/* {formatDateTime(transaction.date)} */}
-                        {transaction.date}
-                      </p>
+                <div className="space-y-2">
+                  {transactions.map((transaction, index) => (
+                    <div
+                      key={transaction.uid}
+                      onClick={() => assignExpense(transaction.uid, transaction)}
+                      className="flex justify-between items-end bg-white rounded-2xl border border-gray-200 p-4 text-sm text-black-800"
+                    >
+                      <div>
+                        <p className="font-medium ">{transaction.narration}</p>
+                        <p className="text-gray-600 text-xs">
+                          {/* {formatDateTime(transaction.date)} */}
+                          {transaction.date}
+                        </p>
+                      </div>
+                      <div className="font-medium whitespace-nowrap">
+                        ₦ {transaction.amount.toLocaleString()}
+                      </div>
                     </div>
-                    <div className="font-medium whitespace-nowrap">
-                      ₦ {transaction.amount.toLocaleString()}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
                 {isFetchingNextPage && (
                   <p className=" text-[#66C227] mx-auto w-full">Loading more...</p>
                 )}
@@ -322,43 +279,47 @@ export default function Page({
                 </button>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center gap-4 text-center">
-                <Image
-                  width={78}
-                  height={56}
-                  src={emptyState}
-                  alt=""
-                  className="h-[141.27px] w-[126.52px]"
-                />
-                <h1 className="font-[500] text-[20px] text-[#2d2d2d] leading-[24px]">
-                  Yaay! You made it here 😎
-                </h1>
-                <p className="text-[#575757] text-sm">
-                  This page is empty because you have not synced your transactions yet.
-                  Click the button below to sync them now.
-                </p>
-
-                <button
-                  onClick={() => {
-                    // TODO: if accountStatus	 is 'PROCESSING', show modal else sync account
-                    if (selectedBankAccount?.accountStatus === 'PROCESSING') {
-                      console.log('check account status');
-
-                      setShowAccountProcessingModal(true);
-                    } else {
-                      handleSyncTransactions();
-                    }
-                  }}
-                  className="btn w-full rounded-[32px] px-[28px] py-[14px] bg-black text-[#FAFAFA] flex items-center justify-center gap-[8px] font-[500]"
-                  disabled={isSyncing} // Disable button while syncing
-                >
-                  {isSyncing ? 'Syncing...' : 'Sync transactions now'}
-                </button>
-              </div>
+              <EmptyStateDarkBg
+                image={emptyState}
+                title="You have not synced your transactions"
+                description="This page is empty because you have not synced your transactions yet."
+              />
             )}
           </div>
         )}
       </div>
+
+      {/* account processing modal */}
+      {/* <TrackPageModal
+        title="Account Processing"
+        text="Your account status will be available in a few seconds"
+        isOpen={showAccountProcessingModal}
+        onClose={() => setShowAccountProcessingModal(false)}
+        showFooter={timeLeft === 0}
+        onClick={() => handleSyncTransactions()}
+        footerButtonText="Sync Transactions Now"
+      >
+        <div className="w-fit mx-auto">
+          <span className="h-[22px] p-1 bg-[#eef4fd] rounded p-px text-center text-[#3172dd] text-sm font-normal leading-[14px]">
+            {format(formatTime(timeLeft), 'mm')}
+          </span>{' '}
+          :{' '}
+          <span className="h-[22px] p-1 bg-[#eef4fd] rounded p-px text-center text-[#3172dd] text-sm font-normal leading-[14px]">
+            {format(formatTime(timeLeft), 'ss')}
+          </span>
+        </div>
+      </TrackPageModal> */}
+
+      {/* re authorize modal */}
+      <TrackPageModal
+        title="Re-Authorization `Required"
+        text="To keep your accounts safe and your transactions sync running smoothly, kindly re-authorize your bank account."
+        isOpen={showReauthorizeAccountModal}
+        onClose={() => setShowReauthorizeAccountModal(false)}
+        showFooter
+        onClick={() => handleReauthorizeAccount.mutate(selectedBankAccount.uid)}
+        footerButtonText="Proceed"
+      />
 
       {showSplitExapenseDrawer && (
         <SplitExpenseDrawer
@@ -385,6 +346,16 @@ export default function Page({
           budgetCategories={singleBudgetData?.budgetCategories || []}
         />
       )}
+      {/* bottom navigation */}
+      <BottomButton>
+        <Button
+          // className="!bg-lemonGreen-100 !text-lemonGreen-900"
+          // onClick={() => handleTabSelection('allocations')}
+        >
+          {Icons.magicIcon}
+          Auto-Categorize with Prudy AI
+        </Button>
+      </BottomButton>
     </div>
   );
 }

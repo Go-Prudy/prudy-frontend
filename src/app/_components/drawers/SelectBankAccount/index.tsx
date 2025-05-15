@@ -2,14 +2,10 @@
 
 import { motion } from 'framer-motion';
 import BottomDrawer from '../BottomDrawer';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { createBudgetSchema } from '@/app/utils/validationSchema';
 import Button from '../../button';
-import useSelectBankAccount from './useSelectBankAccount';
 import { RadioGroup } from '@nextui-org/react';
 import CustomRadio from '../../radio';
+import { Dispatch, SetStateAction } from 'react';
 
 interface Props {
   setShow: (i: boolean) => void;
@@ -20,25 +16,20 @@ interface Props {
     accountNumber: string;
   }[];
   isLoading: boolean;
+  setShowSyncPeriodDrawer: Dispatch<SetStateAction<boolean>>;
+  selectedAccountId: string;
+  setSelectedAccountId: Dispatch<SetStateAction<string | undefined>>;
 }
 
-const SelectBankAccountDrawer = ({ setShow, show, linkedAccounts, isLoading }: Props) => {
-  const navigate = useRouter();
-  const { onSubmit, selectedAccountId, setSelectedAccountId } = useSelectBankAccount({
-    setShow,
-  });
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<{ account: string }>({
-    defaultValues: {
-      account: '',
-    },
-    // resolver: yupResolver(createBudgetSchema),
-  });
-
+const SelectBankAccountDrawer = ({
+  setShow,
+  show,
+  linkedAccounts,
+  isLoading,
+  setShowSyncPeriodDrawer,
+  selectedAccountId,
+  setSelectedAccountId,
+}: Props) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 90 }}
@@ -49,7 +40,11 @@ const SelectBankAccountDrawer = ({ setShow, show, linkedAccounts, isLoading }: P
     >
       <BottomDrawer
         footer={
-          <Button onClick={handleSubmit(onSubmit)} type="submit">
+          <Button
+            disabled={!selectedAccountId}
+            onClick={() => setShowSyncPeriodDrawer(true)}
+            type="submit"
+          >
             Proceed
           </Button>
         }

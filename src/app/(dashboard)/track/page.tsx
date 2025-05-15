@@ -20,14 +20,16 @@ import AppPopover from '@/app/_components/popover';
 import { useRouter } from 'next/navigation';
 import ScanReceipt from '@/app/_components/scanner';
 import useTrackPage from './useTrackPage';
+import { useState } from 'react';
+import SelectSyncPeriodDrawer from '@/app/_components/drawers/SelectSyncPeriod';
 
-interface QuickActionType {
+type QuickActionType = {
   id: string;
   title: string;
   image: StaticImageData;
   bgColor: string;
   borderColor: string;
-}
+};
 
 const quickActions: QuickActionType[] = [
   {
@@ -53,6 +55,10 @@ const quickActions: QuickActionType[] = [
   },
 ];
 
+type ValuePiece = Date | null;
+
+type Value = ValuePiece | [ValuePiece, ValuePiece];
+
 export default function Page() {
   const {
     linkAccountMutation,
@@ -74,7 +80,11 @@ export default function Page() {
   } = useTrackPage();
 
   const navigate = useRouter();
-  
+
+  const [value, setValue] = useState<Value>(new Date());
+  const [showSyncPeriodDrawer, setShowSyncPeriodDrawer] = useState<boolean>(false);
+  const [selectedAccountId, setSelectedAccountId] = useState<string>();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -147,11 +157,10 @@ export default function Page() {
               ) : linkedAccounts.length > 0 ? (
                 linkedAccounts.map((account: any, index: any) => (
                   <div
-                    onClick={() =>
-                      navigate.push(
-                        `/track/${selectedBudgetId}/transactions/${account.uid}`,
-                      )
-                    }
+                    onClick={() => {
+                      setSelectedAccountId(account.uid);
+                      setShowSyncPeriodDrawer(true);
+                    }}
                     key={account.uid}
                     className="p-4 bg-gray-100 border border-gray-200 rounded-[20px] w-full flex justify-between relative cursor-pointer transition hover:opacity-70"
                   >
@@ -217,6 +226,9 @@ export default function Page() {
             setShow={setShowSelectBankAccountDrawer}
             linkedAccounts={linkedAccounts}
             isLoading={isGetAllLinkedAccountsLoading}
+            setShowSyncPeriodDrawer={setShowSyncPeriodDrawer}
+            selectedAccountId={selectedAccountId ?? ''}
+            setSelectedAccountId={setSelectedAccountId}
           />
         )}
 
@@ -227,6 +239,18 @@ export default function Page() {
             categories={activeBudgetCategories}
             budgetId={selectedBudgetId || ''}
             isLoadingCategories={isLoadingCategories}
+          />
+        )}
+
+        {/* select sync period */}
+        {showSyncPeriodDrawer && (
+          <SelectSyncPeriodDrawer
+            show={showSyncPeriodDrawer}
+            setShow={setShowSyncPeriodDrawer}
+            value={value}
+            onChange={setValue}
+            accountId={selectedAccountId ?? ''}
+            selectedBudgetId={selectedBudgetId ?? ''}
           />
         )}
 

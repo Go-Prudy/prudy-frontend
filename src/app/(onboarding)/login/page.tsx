@@ -64,11 +64,11 @@ const LoginPage = () => {
           </p>
           {/* <button
               type="button"
-              className=" w-full py-[16px] gap-[8px] rounded-[20px] text-[#575757] justify-center inline-flex flex-col items-center bg-[#F7F7F9] border border-[#EFEFF0]"
+              className=" w-full py-4 gap-2 rounded-[20px] text-gray-600 justify-center inline-flex flex-col items-center bg-gray-100 border border-gray-200"
               onClick={(e) => handleGoogleLogin(e)}
             >
               <GoogleLogo scale={24} />
-              <p className=" text-[12px] leading-[14.4px]">Google</p>
+              <p className=" text-xs">Google</p>
             </button> */}
         </div>
         <div className="space-y-4">
