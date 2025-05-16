@@ -5,13 +5,14 @@ import { getPendingInvitesApi } from '@/app/services/InviteService';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useBudgetStore } from '@/app/store/useBudgetStore';
+import api from '@/app/utils/axiosInstance';
 
 export default function useBudgets() {
   const queryClient = useQueryClient();
   const { budgets, isLoadingBudgets } = useBudgetStore();
   const { userData } = useAuthStore();
 
-  const [showInvites, setShowInvites] = useState(false);
+  const [showInvitesModal, setShowInvitesModal] = useState<boolean>(false);
   const [createBudgetComponent, setCreateBudgetComponent] = useState<boolean>(false);
   const [showInviteCollaboratorDrawer, setShowInviteCollaboratorDrawer] =
     useState<boolean>(false);
@@ -27,8 +28,8 @@ export default function useBudgets() {
   });
 
   useEffect(() => {
-    if (getPendingInvitesApiData) {
-      setShowInvites(true);
+    if (getPendingInvitesApiData?.length > 0) {
+      setShowInvitesModal(true);
     }
   }, [getPendingInvitesApiData]);
 
@@ -43,9 +44,38 @@ export default function useBudgets() {
       console.error('Error inviting collaborator:', error);
     },
   });
+
+  const acceptInviteMutation = useMutation({
+    mutationFn: (data: { inviteId: string; budgetId: string }) =>
+      api.post(`invites/${data.inviteId}/budget/${data.budgetId}/accept`),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['getPendingInvites'] });
+      console.log('Invite accepted successfully!');
+      toast.success('Invite accepted');
+      setShowInvitesModal(false);
+    },
+    onError: (error: unknown) => {
+      console.error('Error accepting invite:', error);
+    },
+  });
+
+  const rejectInviteMutation = useMutation({
+    mutationFn: (data: { inviteId: string; budgetId: string }) =>
+      api.post(`invites/${data.inviteId}/budget/${data.budgetId}/reject`),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['getPendingInvites'] });
+      console.log('Invite rejected successfully!');
+      toast.success('Invite rejected');
+      setShowInvitesModal(false);
+    },
+    onError: (error: unknown) => {
+      console.error('Error rejecting invite:', error);
+    },
+  });
+
   return {
-    showInvites,
-    setShowInvites,
+    showInvitesModal,
+    setShowInvitesModal,
     createBudgetComponent,
     setCreateBudgetComponent,
     showInviteCollaboratorDrawer,
@@ -58,6 +88,7 @@ export default function useBudgets() {
     getPendingInvitesApiData,
     showDeleteBudgetModal,
     setShowDeleteBudgetModal,
-    // refetchAllBudgets,
+    rejectInviteMutation,
+    acceptInviteMutation,
   };
 }

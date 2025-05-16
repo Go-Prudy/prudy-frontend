@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Input from '@/app/_components/input';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -37,7 +37,7 @@ const Page = () => {
       transition={{ duration: 0.3 }}
       className="max-w-[500px] h-[100vh] "
     >
-      <Header link={'/signup/verify'} title="Create account" />
+      <InnerPageHeader link={'/signup/verify'} title="Create account" />
       <div className="px-6 py-10">
         <div className="w-full">
           <p className="mb-6 font-[500] text-[20px] leading-[28px] text-[#2D2D2D]">

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { CircularProgress } from '@nextui-org/react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Input from '@/app/_components/input';
 import Button from '@/app/_components/button';
 import OtpInput from '@/components/OtpInput';
@@ -49,7 +49,7 @@ const VerifyOtpPage = () => {
 
   return (
     <div>
-      <Header link={'/login'} title="Remember passcode" />
+      <InnerPageHeader link={'/login'} title="Remember passcode" />
 
       {step === 1 ? (
         <motion.div

@@ -1,6 +1,6 @@
 'use client';
 
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Button from '@/app/_components/button';
 import succesGif from '/public/images/success.gif';
 import SuccessfulModal from '@/app/_components/modals/SuccessfulModal';
@@ -33,7 +33,7 @@ const Page = () => {
 
   return (
     <div className="">
-      <Header isHeaderDark link={`/profile`} title="Passcode Settings" />
+      <InnerPageHeader isHeaderDark link={`/profile`} title="Passcode Settings" />
 
       <div className="p-6 space-y-6">
         <p className="font-medium text-black-800">Change your passcode</p>

@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BsThreeDotsVertical, BsX } from 'react-icons/bs';
@@ -52,7 +52,7 @@ const Page = () => {
         transition={{ type: 'tween', stiffness: 600 }}
       >
         <motion.div className="w-full relative">
-          <Header link={`/profile`} title="Collaborators" />
+          <InnerPageHeader link={`/profile`} title="Collaborators" />
           <div className="flex flex-col gap-[24px] p-[24px] justify-center">
             <div className="flex justify-center gap-[16px]">
               {users.map((user, index) => (

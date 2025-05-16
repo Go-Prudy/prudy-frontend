@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import { Icons } from '@/app/icons';
 import InviteCollaboratorDrawer from '@/app/_components/drawers/InviteCollaborator';
 import { useState } from 'react';
@@ -40,7 +40,7 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
 
   return (
     <div className="">
-      <Header link="/budgets" title="Budget Settings" />
+      <InnerPageHeader link="/budgets" title="Budget Settings" />
       <div className="p-6 space-y-4">
         {actions.map((action, index) => (
           <button

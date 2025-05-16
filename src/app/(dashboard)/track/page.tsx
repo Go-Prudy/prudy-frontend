@@ -4,7 +4,7 @@ import linkIcon from '/public/images/Mindmap.png';
 import { BsPlus, BsThreeDotsVertical } from 'react-icons/bs';
 import { motion } from 'framer-motion';
 
-import DashboardHeader from '@/components/Header/DashboardHeader';
+import DashboardHeader from '@/app/_components/Header/DashboardHeader';
 import trackHeaderIcon from '/public/images/header/track.png';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
 import syncTransactionImage from '/public/images/quick-actions/4.png';
@@ -12,7 +12,7 @@ import scanReceiptImage from '/public/images/quick-actions/3.png';
 import addManuallyImage from '/public/images/quick-actions/5.png';
 import AddManualExpenseDrawer from '@/app/_components/drawers/AddManualExpense';
 import SelectBankAccountDrawer from '@/app/_components/drawers/SelectBankAccount';
-import SectionHeader from '@/components/Header/SectionHeader';
+import SectionHeader from '@/app/_components/Header/SectionHeader';
 import Loader from '@/app/_components/loader';
 import { EmptyStateDarkBg } from '@/app/_components/emptyState';
 import { getLastFourDigits } from '@/app/utils/functions';

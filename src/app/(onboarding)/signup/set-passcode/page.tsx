@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import OtpInput from '@/components/OtpInput';
 import Button from '@/app/_components/button';
 import useSetPasscode from './useSetPasscode';
@@ -22,7 +22,7 @@ const Page = () => {
 
   return (
     <div>
-      <Header link={'/signup/verify'} title="Create account" isHeaderDark />
+      <InnerPageHeader link={'/signup/verify'} title="Create account" isHeaderDark />
       <div className="px-6 py-10 space-y-6">
         <div className="w-full">
           <p className="font-[500] text-[20px] leading-[28px] text-[#2D2D2D]">

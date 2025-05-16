@@ -24,7 +24,7 @@ import { getAllPlans } from '@/app/services/SubscriptionService';
 import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
 import { getBillingCycleApi } from '@/app/services/BillingServices';
-import DeleteSuccessModal from './DeleteSuccessModal';
+import ActionModal from '@/app/_components/modals/ActionModal';
 
 interface CardFormValues {
   nameOnCard: string;
@@ -527,11 +527,10 @@ const SubscriptionRestriction = ({
           transition={{ duration: 0.3 }}
           className="h-[100vh] w-full z-[40] max-w-[500px] bottom-0 fixed bg-[#1c1c1c73]"
         >
-          <DeleteSuccessModal
-            showModal={showSuccessfullPayment}
-            setShowModal={setShowSuccessfullPayment}
-            handleClose={() => console.log('Modal closed')}
-            text="Removed successfully"
+          <ActionModal
+            isOpen={showSuccessfullPayment}
+            onClose={() => setShowSuccessfullPayment(false)}
+            title="Removed successfully"
           />
         </motion.div>
       )}

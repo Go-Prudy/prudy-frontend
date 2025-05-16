@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import { Accordion, AccordionItem } from '@nextui-org/react';
 import React from 'react';
 
@@ -44,7 +44,7 @@ const Page = () => {
 
   return (
     <div>
-      <Header isHeaderDark link={`/profile`} title="FAQs" />
+      <InnerPageHeader isHeaderDark link={`/profile`} title="FAQs" />
       <Accordion
         className="px-6 pb-6"
         itemClasses={{

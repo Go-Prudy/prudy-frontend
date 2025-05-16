@@ -44,7 +44,7 @@ const SummaryWrapper = ({
   title: string;
 }) => (
   <div className={cn('p-6 text-center w-full h-full', className)}>
-    <Header title="Analytics" />
+    <InnerPageHeader title="Analytics" />
     <div className="space-y-10 text-white pt-6">
       <h3 className="text-2xl font-bold">{title}</h3>
       {children}

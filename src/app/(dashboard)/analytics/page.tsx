@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 
-import DashboardHeader from '@/components/Header/DashboardHeader';
+import DashboardHeader from '@/app/_components/Header/DashboardHeader';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
 import Image from 'next/image';
 import summaryImage from '/public/images/analytics/1.png';

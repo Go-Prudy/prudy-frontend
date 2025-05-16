@@ -11,7 +11,7 @@ import {
   syncAccountTransactionsApi,
 } from '@/app/services/AccountService';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import AssignExpenseDrawer from '@/app/_components/drawers/AssignExpense';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import SplitExpenseDrawer from '@/app/_components/drawers/SplitExpense';
@@ -187,7 +187,7 @@ export default function Page({
 
   return (
     <div className="w-full">
-      <Header link="/track" title={'Transactions'} />
+      <InnerPageHeader link="/track" title={'Transactions'} />
 
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="p-4 rounded-3xl bg-gradient-to-tl from-[#66C227] to-[#2A860A]">
@@ -349,8 +349,8 @@ export default function Page({
       {/* bottom navigation */}
       <BottomButton>
         <Button
-          // className="!bg-lemonGreen-100 !text-lemonGreen-900"
-          // onClick={() => handleTabSelection('allocations')}
+        // className="!bg-lemonGreen-100 !text-lemonGreen-900"
+        // onClick={() => handleTabSelection('allocations')}
         >
           {Icons.magicIcon}
           Auto-Categorize with Prudy AI

@@ -12,7 +12,7 @@ import mono1 from '/public/images/mono1.png';
 import Image from 'next/image';
 import SuccessfulModal from '@/app/_components/modals/SuccessfulModal';
 import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/react';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Loader from '@/app/_components/loader';
 import useSubscription from './useSubscription';
 import Button from '@/app/_components/button';
@@ -46,7 +46,12 @@ const Page = () => {
 
   return (
     <div className="relative bg-subscription-bg bg-no-repeat bg-cover pb-10">
-      <Header link="/profile" title="Subscription" icon={<BsX />} isHeaderTransparent />
+      <InnerPageHeader
+        link="/profile"
+        title="Subscription"
+        icon={<BsX />}
+        isHeaderTransparent
+      />
 
       <div className="space-y-6 px-6">
         <div className="space-y-3 text-white">

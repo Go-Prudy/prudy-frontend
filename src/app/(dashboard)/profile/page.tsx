@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { getUserSubscription } from '@/app/services/SubscriptionService';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
 import { motion } from 'framer-motion';
-import DashboardHeader from '@/components/Header/DashboardHeader';
+import DashboardHeader from '@/app/_components/Header/DashboardHeader';
 import userAvatarIcon from '/public/images/icons/avatar.svg';
 import { Icons } from '@/app/icons';
 import { useAuthStore } from '@/app/store/useAuthStore';

@@ -13,7 +13,7 @@ type HeaderProps = React.ComponentPropsWithoutRef<'div'> & {
   icon?: React.ReactNode;
 };
 
-const Header = ({
+const InnerPageHeader = ({
   title,
   link,
   children,
@@ -57,4 +57,4 @@ const Header = ({
   );
 };
 
-export default Header;
+export default InnerPageHeader;

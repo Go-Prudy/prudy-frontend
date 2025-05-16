@@ -10,7 +10,7 @@ import AddSubCategoryDrawer from '../../modals/AddSubCategory';
 import { Switch } from '@nextui-org/react';
 import AllocationItem from '../../allocationItem';
 import cn from 'classnames';
-import { BudgetCategory } from '@/app/types/budget';
+import { Allocation, BudgetCategory } from '@/app/types/budget';
 import SelectCategoryDrawer from '../SelectCategory';
 
 interface Props {
@@ -21,6 +21,7 @@ interface Props {
   budgetId: string;
   budgetCategories: BudgetCategory[];
   isBudgetCategriesLoading: boolean;
+  selectedAllocation?: Allocation;
 }
 
 export default function AddAllocationDrawer({
@@ -31,6 +32,7 @@ export default function AddAllocationDrawer({
   budgetId,
   budgetCategories,
   isBudgetCategriesLoading,
+  selectedAllocation,
 }: Props) {
   const {
     handleSubmit,
@@ -40,11 +42,6 @@ export default function AddAllocationDrawer({
     percentage,
     showCategoriesDrawer,
     setShowCategoriesDrawer,
-    showDeleteSuccessModal,
-    handleCloseDeleteSuccessModal,
-    showDeleteCategoryModal,
-    handleCloseDeletCategoryModal,
-    handleOpenDeletCategoryModal,
     showAddSubCategoryDrawer,
     setShowAddSubCategoryModal,
     showAddSubAllocations,
@@ -54,12 +51,15 @@ export default function AddAllocationDrawer({
     remainingUnallocatedAmount,
     handleDeleteSubAllocation,
     createAllocationMutation,
+    editAllocationMutation,
     selectedCategory,
     setSelectedCategory,
   } = useEditCategory({
     setShow,
     totalIncome,
     budgetId,
+    isEditing: !!selectedAllocation,
+    selectedAllocation,
   });
 
   return (
@@ -74,22 +74,13 @@ export default function AddAllocationDrawer({
         footer={
           <Button
             disabled={!selectedCategory}
-            loading={createAllocationMutation.isPending}
+            loading={
+              createAllocationMutation.isPending || editAllocationMutation.isPending
+            }
             onClick={handleSubmit}
           >
             Save
           </Button>
-          // <div className="flex gap-4">
-          //   <Button
-          //     onClick={handleOpenDeletCategoryModal}
-          //     className="bg-red-200 text-red-600"
-          //   >
-          //     Delete category
-          //   </Button>
-          //   <Button loading={createAllocationMutation.isPending} onClick={handleSubmit}>
-          //     Save
-          //   </Button>
-          // </div>
         }
         label="Add Budget Allocations"
         back={false}
@@ -111,7 +102,9 @@ export default function AddAllocationDrawer({
             </div>
 
             <button
-              onClick={() => setShowCategoriesDrawer(true)}
+              onClick={() =>
+                !!selectedAllocation !== true && setShowCategoriesDrawer(true)
+              }
               className="rounded-2xl w-full p-4 bg-gray-100 border border-gray-200 space-y-1 text-left"
             >
               <p className="text-xs text-gray-500">Name of category</p>
@@ -197,31 +190,34 @@ export default function AddAllocationDrawer({
                           key={index}
                           name={allocation.name}
                           amount={allocation.amount}
-                          handleDelete={() => {}}
+                          handleDelete={() => handleDeleteSubAllocation(index)}
                           handleEdit={() => {}}
                           isLoadingDelete={false}
                           isLoadingEdit={false}
+                          showActions={!!selectedAllocation ? false : true}
                         />
                       ))}
                       <div className="bg-gray-200 rounded-lg p-2 text-xs text-gray-600 font-medium">
-                        ₦{remainingUnallocatedAmount} left to categorize
+                        ₦{remainingUnallocatedAmount.toLocaleString()} left to categorize
                       </div>
                     </>
                   )}
 
-                  <div
-                    className={cn(
-                      'flex justify-center items-center',
-                      subAllocations.length > 0 ? '' : 'py-10',
-                    )}
-                  >
-                    <Button
-                      onClick={() => setShowAddSubCategoryModal(true)}
-                      buttonIcon={<BsPlus size={16} />}
-                      buttonTitle="Add Sub-Category"
-                      buttonType="icon"
-                    />
-                  </div>
+                  {!!selectedAllocation !== true && (
+                    <div
+                      className={cn(
+                        'flex justify-center items-center',
+                        subAllocations.length > 0 ? '' : 'py-10',
+                      )}
+                    >
+                      <Button
+                        onClick={() => setShowAddSubCategoryModal(true)}
+                        buttonIcon={<BsPlus size={16} />}
+                        buttonTitle="Add Sub-Category"
+                        buttonType="icon"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -238,21 +234,6 @@ export default function AddAllocationDrawer({
           allocatedAmount={amount}
         />
       )}
-
-      <ActionModal
-        title="Delete category"
-        text="Are you sure you want to delete this category from your budget?"
-        isOpen={showDeleteCategoryModal}
-        onClose={handleCloseDeletCategoryModal}
-      >
-        <Button className="!bg-lemonGreen-100 !text-lemonGreen-900">Yes, delete</Button>
-      </ActionModal>
-
-      <SuccessfulModal
-        title="Deleted successfully"
-        isOpen={showDeleteSuccessModal}
-        onClose={handleCloseDeleteSuccessModal}
-      />
     </motion.div>
   );
 }

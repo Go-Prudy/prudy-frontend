@@ -1,14 +1,19 @@
-import { BudgetCategory, SubAllocationForm } from '@/app/types/budget';
+import { Allocation, BudgetCategory, SubAllocationForm } from '@/app/types/budget';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/app/utils/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-interface AllocationForm {
+interface CreateAllocationForm {
   budgetCategoryId: string;
   amount: number;
   percentage: number;
   subAllocations: SubAllocationForm[];
+}
+
+interface EditAllocationForm {
+  amount: number;
+  percentage: number;
 }
 
 const formatAmount = (value: string) => {
@@ -37,22 +42,41 @@ export default function useEditCategory({
   setShow,
   totalIncome,
   budgetId,
+  isEditing,
+  selectedAllocation,
 }: {
   setShow: (i: boolean) => void;
   totalIncome: number;
   budgetId: string;
+  isEditing?: boolean;
+  selectedAllocation?: Allocation;
 }) {
   const queryClient = useQueryClient();
-  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState<boolean>(false);
-  const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState<boolean>(false);
   const [showAddSubCategoryDrawer, setShowAddSubCategoryModal] = useState<boolean>(false);
-  const [showAddSubAllocations, setShowAddSubAllocations] = useState<boolean>(false);
   const [showCategoriesDrawer, setShowCategoriesDrawer] = useState<boolean>(false);
+  const [showAddSubAllocations, setShowAddSubAllocations] = useState<boolean>(
+    selectedAllocation && selectedAllocation?.subCategoryAllocations?.length > 0
+      ? true
+      : false,
+  );
 
-  const [amount, setAmount] = useState<string>('');
-  const [percentage, setPercentage] = useState<number>(0);
-  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory | null>(null);
-  const [subAllocations, setSubAllocations] = useState<SubAllocationForm[]>([]);
+  const [amount, setAmount] = useState<string>(
+    selectedAllocation?.amountAllocated.toLocaleString() ?? '',
+  );
+  const [percentage, setPercentage] = useState<number>(
+    selectedAllocation?.percentage ?? 0,
+  );
+  const [selectedCategory, setSelectedCategory] = useState<BudgetCategory | null>(
+    selectedAllocation?.budgetCategory ?? null,
+  );
+  const [subAllocations, setSubAllocations] = useState<SubAllocationForm[]>(
+    selectedAllocation?.subCategoryAllocations
+      ? selectedAllocation.subCategoryAllocations.map((sa) => ({
+          name: sa.budgetSubCategory?.name ?? '',
+          amount: sa.amount,
+        }))
+      : [],
+  );
 
   const parsedCategoryAmount = useMemo(() => {
     const parsedAmount = parseFloat(amount.replace(/[₦,\s]/g, ''));
@@ -120,16 +144,34 @@ export default function useEditCategory({
   };
 
   const createAllocationMutation = useMutation({
-    mutationFn: (values: AllocationForm) =>
+    mutationFn: (values: CreateAllocationForm) =>
       api.post(`/budgets/${budgetId}/allocations`, values),
     onSuccess: async (data) => {
       console.log(data.data);
-      await queryClient.invalidateQueries({ queryKey: ['getAllBudgetAllocations'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['getAllBudgetAllocations', budgetId],
+      });
 
       setShow(false);
     },
     onError: (error: unknown) => {
       console.error('Error creating allocation:', error);
+    },
+  });
+
+  const editAllocationMutation = useMutation({
+    mutationFn: (values: EditAllocationForm) =>
+      api.patch(`/budgets/${budgetId}/allocations/${selectedAllocation?.uid}`, values),
+    onSuccess: async (data) => {
+      console.log(data.data);
+      await queryClient.invalidateQueries({
+        queryKey: ['getAllBudgetAllocations', budgetId],
+      });
+
+      setShow(false);
+    },
+    onError: (error: unknown) => {
+      console.error('Error editing allocation:', error);
     },
   });
 
@@ -142,12 +184,20 @@ export default function useEditCategory({
       budgetCategoryId: selectedCategory?.uid,
       subAllocations,
     });
-    await createAllocationMutation.mutateAsync({
-      amount: numericAmount,
-      percentage: percentage,
-      budgetCategoryId: selectedCategory?.uid ?? '',
-      subAllocations,
-    });
+
+    if (isEditing) {
+      await editAllocationMutation.mutateAsync({
+        amount: numericAmount,
+        percentage: percentage,
+      });
+    } else {
+      await createAllocationMutation.mutateAsync({
+        amount: numericAmount,
+        percentage: percentage,
+        budgetCategoryId: selectedCategory?.uid ?? '',
+        subAllocations,
+      });
+    }
   };
 
   return {
@@ -158,11 +208,7 @@ export default function useEditCategory({
     percentage,
     showCategoriesDrawer,
     setShowCategoriesDrawer,
-    showDeleteSuccessModal,
-    handleCloseDeleteSuccessModal: () => setShowDeleteSuccessModal(false),
-    showDeleteCategoryModal,
-    handleCloseDeletCategoryModal: () => setShowDeleteCategoryModal(false),
-    handleOpenDeletCategoryModal: () => setShowDeleteCategoryModal(true),
+
     showAddSubCategoryDrawer,
     setShowAddSubCategoryModal,
     showAddSubAllocations,
@@ -173,6 +219,7 @@ export default function useEditCategory({
     remainingUnallocatedAmount,
     handleDeleteSubAllocation,
     createAllocationMutation,
+    editAllocationMutation,
     selectedCategory,
     setSelectedCategory,
   };

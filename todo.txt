@@ -1,21 +1,26 @@
-+ Budget & Analytics
-    + Charts
-    + Edit & Delete allocations
++ Analytics
+    + Line Charts
 + Track page
-    + Sync account on when user clicks on account and synct action button
-    + Show first time countdown modal
     + Auto categorize with ai
 + Scan receipts
     + Auto categorize
-+ Invties & collaborators
++ Code cleanup
+    + Code organization
+    + Code comments
+    + Code optimization
+    + Code refactoring
+
 
 DONE:
 - Subscription
+- Invties & collaborators
 - Onboarding
     - Track actions progress
 - Profile
     - Rewards
-- Budget & Analytics
+- Budget
     - Actual expense
+    - Edit & Delete allocations
 - Track page
     - Show reauthorize modal
+    - Sync account on when user clicks on account and sync action button

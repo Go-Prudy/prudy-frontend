@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import { BsPlus } from 'react-icons/bs';
 import LoadingModal from '@/app/_components/modals/LoadingModal';
 import useBudgetCategories from './useBudgetCategories';
@@ -21,7 +21,7 @@ const Page = () => {
 
   return (
     <div className="relative">
-      <Header isHeaderDark link={`/profile`} title="Budget Categories" />
+      <InnerPageHeader isHeaderDark link={`/profile`} title="Budget Categories" />
 
       <div className="space-y-3 p-6">
         <div className="flex items-center justify-between gap-2">

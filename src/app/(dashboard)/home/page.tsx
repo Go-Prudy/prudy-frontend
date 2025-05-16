@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { EmptyStateDarkBg } from '@/app/_components/emptyState';
-import DashboardHeader from '@/components/Header/DashboardHeader';
+import DashboardHeader from '@/app/_components/Header/DashboardHeader';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
 import GetStarted from './_components/getStarted';
 import Analytics from './_components/analytics';

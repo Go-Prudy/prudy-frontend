@@ -1,6 +1,6 @@
 'use client';
 import { CircularProgress } from '@nextui-org/react';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import OtpInput from '@/components/OtpInput';
 import Success from '../../_components/Success';
 import useVerify from './useVerify';
@@ -18,7 +18,7 @@ const VerifyOtpPage = () => {
   } = useVerify();
   return (
     <div>
-      <Header link={'/signup/verify'} title="Create account" isHeaderDark />
+      <InnerPageHeader link={'/signup/verify'} title="Create account" isHeaderDark />
       <form
         id="otp-form"
         className="py-10 px-6 space-y-6"

@@ -10,14 +10,15 @@ import {
 import Button from '../button';
 import warningGif from '/public/images/warning-gif.gif';
 
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 
 type Props = {
-  image?: string;
+  image?: StaticImageData;
   title: string;
   text?: string;
   isOpen: boolean;
   onClose: () => void;
+  showCloseButton?: boolean;
   children?: React.ReactNode;
 };
 
@@ -27,6 +28,7 @@ export default function ActionModal({
   text,
   isOpen,
   onClose,
+  showCloseButton = true,
   children,
 }: Props) {
   return (
@@ -61,7 +63,7 @@ export default function ActionModal({
             </ModalBody>
             <ModalFooter className="p-0 flex gap-4">
               {children}
-              <Button onClick={onClose}>No</Button>
+              {showCloseButton && <Button onClick={onClose}>No</Button>}
             </ModalFooter>
           </>
         )}

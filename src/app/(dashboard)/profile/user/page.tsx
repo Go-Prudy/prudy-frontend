@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import React, { ChangeEvent } from 'react';
 import Image from 'next/image';
 // import PhoneInput from 'react-phone-input-2';
@@ -35,7 +35,7 @@ const Page = () => {
 
   return (
     <div className="relative">
-      <Header isHeaderDark link={`/profile`} title="Personal Information" />
+      <InnerPageHeader isHeaderDark link={`/profile`} title="Personal Information" />
 
       <div className="space-y-4 p-6">
         <div className="bg-gray-100 border border-gray-200 px-6 py-10 rounded-[20px] ">

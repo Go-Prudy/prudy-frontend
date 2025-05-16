@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Flag from 'react-world-flags'; // import flag component
 import Image from 'next/image';
 import SelectCurrencyDrawer from '@/app/_components/drawers/SelectCurrency';
@@ -18,7 +18,7 @@ const Page = () => {
 
   return (
     <div>
-      <Header isHeaderDark link={`/profile`} title="Currency Settings" />
+      <InnerPageHeader isHeaderDark link={`/profile`} title="Currency Settings" />
       <div className="p-6 space-y-6">
         <h1 className="text-xl font-medium text-black-800">
           Set your preferred currency

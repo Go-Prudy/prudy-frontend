@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import SuccessModal from '@/components/Modals/SuccessModal';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Button from '@/app/_components/button';
 import OtpInput from '@/components/OtpInput';
 import Success from '../_components/Success';
@@ -27,7 +27,7 @@ const ChangePasscodePage = () => {
 
   return (
     <div className="w-full">
-      <Header title="Remember passcode" link="/forgot-password" />
+      <InnerPageHeader title="Remember passcode" link="/forgot-password" />
       <div className="px-6 py-10 space-y-6">
         <h1 className="font-medium text-xl text-black-800">Reset passcode</h1>
 

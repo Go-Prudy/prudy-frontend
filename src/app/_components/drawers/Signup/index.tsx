@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { signupSchema } from '@/app/utils/validationSchema';
 import Input from '@/app/_components/input';
 import Button from '@/app/_components/button';
-import Checkbox from '@/components/checkbox';
+import Checkbox from '@/app/_components/checkbox';
 import useSignup from './useSignup';
 
 interface Props {

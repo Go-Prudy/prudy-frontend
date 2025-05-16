@@ -13,6 +13,7 @@ type Props = {
   handleEdit: () => void;
   isLoadingEdit: boolean;
   isLoadingDelete: boolean;
+  showActions?: boolean;
 };
 
 export default function AllocationItem({
@@ -23,6 +24,7 @@ export default function AllocationItem({
   handleEdit,
   isLoadingEdit,
   isLoadingDelete,
+  showActions = true,
 }: Props) {
   return (
     <div className="p-4 bg-gray-100 border border-gray-200 rounded-2xl flex items-center justify-between w-full gap-2">
@@ -34,33 +36,35 @@ export default function AllocationItem({
         <p className="text-black-800 text-base font-medium">
           ₦ {amount?.toLocaleString()}
         </p>
-        <AppPopover
-          trigger={
-            <button className="dots-button">
-              <BsThreeDotsVertical className="text-gray-400" />
+        {showActions && (
+          <AppPopover
+            trigger={
+              <button className="dots-button">
+                <BsThreeDotsVertical className="text-gray-400" />
+              </button>
+            }
+            placement="bottom-end"
+          >
+            <button
+              onClick={handleEdit}
+              className="text-left text-xs text-gray-600 flex items-center gap-0.5"
+            >
+              {Icons.edit}
+              <span>Edit</span>
             </button>
-          }
-          placement="bottom-end"
-        >
-          <button
-            onClick={handleEdit}
-            className="text-left text-xs text-gray-600 flex items-center gap-0.5"
-          >
-            {Icons.edit}
-            <span>Edit</span>
-          </button>
-          <button
-            onClick={handleDelete}
-            className="text-left text-xs text-gray-600 flex items-center gap-0.5"
-          >
-            {Icons.trash}
-            {isLoadingDelete ? (
-              'Loading...'
-            ) : (
-              <span>Delete {type === 'income' ? 'Income' : ''}</span>
-            )}
-          </button>
-        </AppPopover>
+            <button
+              onClick={handleDelete}
+              className="text-left text-xs text-gray-600 flex items-center gap-0.5"
+            >
+              {Icons.trash}
+              {isLoadingDelete ? (
+                'Loading...'
+              ) : (
+                <span>Delete {type === 'income' ? 'Income' : ''}</span>
+              )}
+            </button>
+          </AppPopover>
+        )}
       </div>
     </div>
   );

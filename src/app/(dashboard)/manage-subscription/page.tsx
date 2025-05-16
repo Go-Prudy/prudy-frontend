@@ -2,7 +2,7 @@
 import { BsX } from 'react-icons/bs';
 import SuccessfulModal from '@/app/_components/modals/SuccessfulModal';
 import { Tabs, Tab } from '@nextui-org/react';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import useManageSubscription from './useManageSubscription';
 import SubscriptionPlans from './_components/subscriptionPlans';
 import BillingCycle from './_components/billingCycle';
@@ -13,7 +13,12 @@ const Page = () => {
 
   return (
     <div className="relative">
-      <Header link="/profile" title="Manage Subscription" icon={<BsX />} isHeaderDark />
+      <InnerPageHeader
+        link="/profile"
+        title="Manage Subscription"
+        icon={<BsX />}
+        isHeaderDark
+      />
 
       <Tabs className="py-3 px-6" fullWidth>
         <Tab key="subscriptionPlans" title="Subscription Plans" className="w-full">

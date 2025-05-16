@@ -1,11 +1,11 @@
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Image from 'next/image';
 import React from 'react';
 import launchImage from '/public/images/Launch.png';
 const page = () => {
   return (
     <div className="">
-      <Header isHeaderDark link={`/profile`} title="Reports" />
+      <InnerPageHeader isHeaderDark link={`/profile`} title="Reports" />
       <div className="space-y-6 p-6">
         <p className="text-center text-gray-600">
           Export your transactions and use them in spreadsheets

@@ -3,9 +3,8 @@ import budgetHeaderIcon from '/public/images/header/budget.png';
 import noBudgetImg from '/public/images/List 2.webp';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@nextui-org/react';
-import InviteModal from '@/components/InviteModal';
 import Button from '@/app/_components/button';
-import DashboardHeader from '@/components/Header/DashboardHeader';
+import DashboardHeader from '@/app/_components/Header/DashboardHeader';
 import CreateBudgetDrawer from '@/app/_components/drawers/CreateBudget';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
 import InviteCollaboratorDrawer from '@/app/_components/drawers/InviteCollaborator';
@@ -15,11 +14,13 @@ import { Budget } from '@/app/types/budget';
 import BudgetItem from '@/app/_components/budgetComponents/budgetItem';
 import LoadingModal from '@/app/_components/modals/LoadingModal';
 import DeleteBudgetModal from '@/app/_components/modals/DeleteBudget';
+import ActionModal from '@/app/_components/modals/ActionModal';
+import handShakeGif from '/public/images/hand-shake.gif';
 
 const BudgetPage = () => {
   const {
-    showInvites,
-    setShowInvites,
+    showInvitesModal,
+    setShowInvitesModal,
     createBudgetComponent,
     setCreateBudgetComponent,
     showInviteCollaboratorDrawer,
@@ -33,6 +34,8 @@ const BudgetPage = () => {
     showDeleteBudgetModal,
     setShowDeleteBudgetModal,
     // refetchAllBudgets,
+    rejectInviteMutation,
+    acceptInviteMutation,
   } = useBudgets();
 
   return (
@@ -97,6 +100,7 @@ const BudgetPage = () => {
 
                     return (
                       <BudgetItem
+                        key={budget.uid}
                         budget={budget}
                         incomeWidth={incomeWidth}
                         expenseWidth={expenseWidth}
@@ -118,14 +122,40 @@ const BudgetPage = () => {
           setShow={setCreateBudgetComponent}
         />
       )}
-      {showInvites && getPendingInvitesApiData.length > 0 && (
-        <InviteModal
-          // refetchAllBudgets={refetchAllBudgets}
-          getPendingInvitesApiData={getPendingInvitesApiData}
-          show={showInvites}
-          setShow={setShowInvites}
-        />
-      )}
+
+      <ActionModal
+        image={handShakeGif}
+        isOpen={showInvitesModal}
+        onClose={() => setShowInvitesModal(false)}
+        title="Collaboration Invite"
+        text={`You have been invited by ${getPendingInvitesApiData?.[0]?.owner ? getPendingInvitesApiData?.[0]?.owner?.firstName + ' ' + getPendingInvitesApiData?.[0]?.owner?.lastName : 'Unknown User'} to collaborate on ${getPendingInvitesApiData?.[0]?.budget?.name ?? 'Unnamed Budget'}`}
+        showCloseButton={false}
+      >
+        <Button
+          onClick={() =>
+            rejectInviteMutation.mutate(
+              getPendingInvitesApiData[0]?.uid,
+              getPendingInvitesApiData[0]?.budget?.uid,
+            )
+          }
+          loading={rejectInviteMutation.isPending}
+          className="!bg-lemonGreen-100 !text-lemonGreen-900"
+        >
+          Decline
+        </Button>
+        <Button
+          onClick={() =>
+            acceptInviteMutation.mutate(
+              getPendingInvitesApiData[0]?.uid,
+              getPendingInvitesApiData[0]?.budget?.uid,
+            )
+          }
+          loading={acceptInviteMutation.isPending}
+        >
+          Accept invite
+        </Button>
+      </ActionModal>
+
       {showInviteCollaboratorDrawer && (
         <InviteCollaboratorDrawer
           budgetId={budgetId ?? ''}

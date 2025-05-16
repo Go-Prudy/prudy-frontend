@@ -1,7 +1,7 @@
 import { useState, useCallback, Dispatch, SetStateAction, useEffect } from 'react';
 import BottomButton from '@/app/(dashboard)/budget/[budgetId]/_components/bottomButton';
 import { ScannedResult, ScannedItem } from '@/app/types/scan';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Button from '../button';
 import EditScannedExpenseDrawer from '../drawers/EditScannedExpense';
 import { BudgetCategory } from '@/app/types/budget';
@@ -71,7 +71,7 @@ export default function ReceiptDetails({
 
   return (
     <div className="bg-white px-6 space-y-[18px] min-h-screen w-full h-full max-w-[500px] z-[40] left-0 right-0 mx-auto top-0 fixed overflow-auto">
-      <Header link="/track" title="Scanned Receipt" />
+      <InnerPageHeader link="/track" title="Scanned Receipt" />
 
       <div className="border border-gray-200 rounded-3xl">
         <LocationInfo

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Switch } from '@nextui-org/react';
 import { BsChevronRight } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import SelectReminderTimeDrawer from '@/app/_components/drawers/SelectReminderTime';
 import api from '@/app/utils/axiosInstance';
@@ -44,7 +44,7 @@ const Page: React.FC = () => {
 
   return (
     <div>
-      <Header link="/profile" title="Notifications & Reminders" />
+      <InnerPageHeader link="/profile" title="Notifications & Reminders" />
       <div className="flex p-6">
         <div className="w-full rounded-3xl border border-gray-200 bg-gray-100 p-4 space-y-2">
           <h1 className="font-medium">Daily reminders</h1>

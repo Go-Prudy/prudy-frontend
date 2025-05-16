@@ -1,9 +1,9 @@
 'use client';
 import BarChart from '@/app/_components/barChart';
-import Header from '@/components/header';
+import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import { Tab, Tabs } from '@nextui-org/react';
 import IncomeTab from './_components/IncomeTab';
-import CategoriesTab from './_components/CategriesTab';
+import AllocationsTab from './_components/AllocationsTab';
 import DistributionTab from './_components/DistributionTab';
 import Loader from '@/app/_components/loader';
 import useBudgetById from './useBudgetById';
@@ -30,14 +30,14 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
 
   return (
     <div className="space-y-4 pb-[100px]">
-      <Header link="/budgets" title={budgetDetails?.name || ''}>
+      <InnerPageHeader link="/budgets" title={budgetDetails?.name || ''}>
         <Link
           href={`/budget/${params.budgetId}/settings`}
           className="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 text-gray-600"
         >
           {Icons.settings}
         </Link>
-      </Header>
+      </InnerPageHeader>
 
       {/* tabs */}
       <Tabs
@@ -78,7 +78,7 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
               isLoadingBudgetStats={isLoadingBudgetStats}
             />
           </div>
-          <CategoriesTab
+          <AllocationsTab
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
             handleTabSelection={handleTabSelection}
