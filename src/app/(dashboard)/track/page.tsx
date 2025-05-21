@@ -94,7 +94,7 @@ export default function Page() {
       className="mt-[90px] pb-8"
     >
       <DashboardWrapper>
-        <div className="bg-white w-full relative max-w-[500px]">
+        <div className="bg-white w-full relative max-w-[680px]">
           <DashboardHeader
             type="dashboard"
             title="Track"

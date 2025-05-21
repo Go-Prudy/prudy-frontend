@@ -44,7 +44,7 @@ const Page = () => {
   };
 
   return (
-    <div className="relative  w-[100vw] max-w-[500px] h-screen">
+    <div className="relative  w-[100vw] max-w-[680px] h-screen">
       <motion.div
         initial={{ x: '100%' }}
         animate={{ x: 0 }}

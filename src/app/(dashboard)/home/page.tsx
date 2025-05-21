@@ -37,7 +37,7 @@ const HomePage = () => {
       className="mt-[90px]"
     >
       <DashboardWrapper>
-        <div className="relative w-full max-w-[500px] transition-all duration-300 ease-out min-h-screen">
+        <div className="relative w-full max-w-[680px] transition-all duration-300 ease-out min-h-screen">
           <DashboardHeader
             type="home"
             headerTitle="Take the first step to financial freedom."

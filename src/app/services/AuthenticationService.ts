@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import api from '../utils/axiosInstance';
-import { IForgotPassword, ILoginForm, IOtpResponse, ISignupForm } from '../Types';
+import { IForgotPasswordForm, ILoginForm, ISignupForm } from '../Types';
 
 // Function to send OTP with SIGNUP
 export const sendOtp = async (otpFormData: any) => {
@@ -95,7 +95,7 @@ export const loginWithGoogle = async () => {
   }
 };
 
-export const forgotPassword = async (data: IForgotPassword) => {
+export const forgotPassword = async (data: IForgotPasswordForm) => {
   try {
     console.log(data);
 

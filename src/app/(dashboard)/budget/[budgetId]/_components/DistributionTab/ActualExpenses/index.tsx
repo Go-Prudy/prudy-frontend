@@ -7,7 +7,10 @@ import { BsChevronDown } from 'react-icons/bs';
 import noBudgetImg from '/public/images/empty-state/list.png';
 import { BudgetDistributionCategory } from '@/app/types/budget';
 import { generateUniqueColors } from '@/app/utils/functions';
-import { getBudgetDistributionApi } from '@/app/services/BudgetService';
+import {
+  getActualExpenseApi,
+  getBudgetDistributionApi,
+} from '@/app/services/BudgetService';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useQuery } from '@tanstack/react-query';
 
@@ -28,8 +31,8 @@ export default function ActualExpenses({ budgetId }: Props) {
   ]);
 
   const { data: budgetDistributionData, isLoading } = useQuery({
-    queryKey: ['getBudgetDistribution', budgetId],
-    queryFn: () => getBudgetDistributionApi(userData?.token ?? '', budgetId),
+    queryKey: ['getActualExpense', budgetId],
+    queryFn: () => getActualExpenseApi(userData?.token ?? '', budgetId),
     enabled: !!userData?.token && !!budgetId,
   });
 

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 const SplashScreen2 = () => {
   return (
-    <div className="fixed top-0 w-full h-screen flex justify-center items-center max-w-[500px]">
+    <div className="fixed top-0 w-full h-screen flex justify-center items-center max-w-[680px]">
       <motion.div
         initial={{
           opacity: 0,

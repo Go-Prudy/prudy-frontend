@@ -21,10 +21,10 @@ import { useRouter } from 'next/navigation';
 import { Select, SelectItem, Avatar } from '@nextui-org/react';
 import { Popover, PopoverTrigger, PopoverContent, Button } from '@nextui-org/react';
 import { getAllPlans } from '@/app/services/SubscriptionService';
-import { useAuthentication } from '@/app/store/AuthStore';
 import { useQuery } from '@tanstack/react-query';
 import { getBillingCycleApi } from '@/app/services/BillingServices';
 import ActionModal from '@/app/_components/modals/ActionModal';
+import { useAuthStore } from '@/app/store/useAuthStore';
 
 interface CardFormValues {
   nameOnCard: string;
@@ -69,7 +69,7 @@ const SubscriptionRestriction = ({
     'Record expense manually',
   ];
 
-  const { authenticatedUser } = useAuthentication();
+  const { userData } = useAuthStore();
   // State to manage checkbox values
   const [checkedFeatures, setCheckedFeatures] = useState(
     features.map(() => true), // Initialize all checkboxes as checked
@@ -289,8 +289,8 @@ const SubscriptionRestriction = ({
     isError,
   } = useQuery({
     queryKey: ['getAllPlans'],
-    queryFn: () => getAllPlans(authenticatedUser?.token ?? ''),
-    enabled: !!authenticatedUser?.token, // Only fetch if token exists
+    queryFn: () => getAllPlans(userData?.token ?? ''),
+    enabled: !!userData?.token, // Only fetch if token exists
     refetchOnWindowFocus: false, // Prevent refetching on window focus
     refetchOnMount: false, // Prevent refetching on component mount
     refetchInterval: false, // Disable polling
@@ -304,7 +304,7 @@ const SubscriptionRestriction = ({
       initial={{ y: '100%' }} // Start completely off-screen at the bottom
       animate={{ y: 0 }} // Animate to the top
       transition={{ duration: 0.35, ease: 'easeInOut' }}
-      className="relative w-full max-w-[500px] h-[884px]  subscription-bg  overflow-x-hidden"
+      className="relative w-full max-w-[680px] h-[884px]  subscription-bg  overflow-x-hidden"
       // style={{
       //     background: "linear-gradient(0deg, #66C227 15.2%, #2A860A 74.4%)",
 
@@ -525,7 +525,7 @@ const SubscriptionRestriction = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="h-[100vh] w-full z-[40] max-w-[500px] bottom-0 fixed bg-[#1c1c1c73]"
+          className="h-[100vh] w-full z-[40] max-w-[680px] bottom-0 fixed bg-[#1c1c1c73]"
         >
           <ActionModal
             isOpen={showSuccessfullPayment}

@@ -18,10 +18,10 @@ export default function RootLayout({
         <link rel="icon" sizes="" href="/icon.ico?e17e014ad5625454" />
       </Head>
       <body className="font-aeonik bg-white flex justify-center min-h-screen">
-        <NextUIProvider className="w-full max-w-[500px]">
+        <NextUIProvider className="w-full max-w-[680px]">
           <Toaster position="top-right" reverseOrder={false} />
           <ReactQueryProvider>
-            <div className="w-full font-aeonik max-w-[500px] bg-white">{children}</div>
+            <div className="w-full font-aeonik max-w-[680px] bg-white">{children}</div>
           </ReactQueryProvider>
         </NextUIProvider>
         <Script id="gtm-script" strategy="afterInteractive">

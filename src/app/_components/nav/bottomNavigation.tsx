@@ -152,7 +152,7 @@ export default function BottomNavigation({}: Props) {
   const pathname = usePathname();
   const showImportantNote = pathname === '/track';
   return (
-    <div className="fixed max-w-[500px] bottom-0 left-0 right-0 mx-auto z-20">
+    <div className="fixed max-w-[680px] bottom-0 left-0 right-0 mx-auto z-20">
       {showImportantNote && <ImportantNote />}
       <div className="  bg-white shadow-[0px_-20px_56px_0px_#514F6E1A]">
         <ul className="flex items-center justify-between p-3">

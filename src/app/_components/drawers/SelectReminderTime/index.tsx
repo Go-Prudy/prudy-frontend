@@ -7,9 +7,13 @@ import { Dispatch, SetStateAction } from 'react';
 type Props = {
   setShow: (i: boolean) => void;
   show: boolean;
-  setIsReminderActive:Dispatch<SetStateAction<boolean>>
+  setIsReminderActive: Dispatch<SetStateAction<boolean>>;
 };
-export default function SelectReminderTimeDrawer({ show, setShow, setIsReminderActive }: Props) {
+export default function SelectReminderTimeDrawer({
+  show,
+  setShow,
+  setIsReminderActive,
+}: Props) {
   const { reminderTimeRange, handleTimeSelect, activateReminderMutation } =
     useReminderTime({
       setShow,
@@ -21,7 +25,7 @@ export default function SelectReminderTimeDrawer({ show, setShow, setIsReminderA
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="h-[100vh] w-full max-w-[500px] z-[40] left-0 right-0 mx-auto bottom-0 fixed bg-[#1c1c1c73]"
+      className="h-[100vh] w-full max-w-[680px] z-[40] left-0 right-0 mx-auto bottom-0 fixed bg-[#1c1c1c73]"
     >
       <BottomDrawer
         label="Select time"

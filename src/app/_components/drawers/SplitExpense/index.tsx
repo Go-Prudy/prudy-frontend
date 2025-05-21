@@ -69,7 +69,7 @@ export default function SplitExpenseDrawer({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="h-[100vh] w-full max-w-[500px] z-[40] left-0 right-0 mx-auto bottom-0 fixed bg-[#1c1c1c73]"
+      className="h-[100vh] w-full max-w-[680px] z-[40] left-0 right-0 mx-auto bottom-0 fixed bg-[#1c1c1c73]"
     >
       <BottomDrawer
         footer={
@@ -167,9 +167,7 @@ export default function SplitExpenseDrawer({
                       >
                         {/* {isSelected && <BsCheck className="text-white" />} */}
                       </div>
-                      <h1 className="text-black-800 text-xs truncate">
-                        {category.name}
-                      </h1>
+                      <h1 className="text-black-800 text-xs truncate">{category.name}</h1>
                     </div>
                     <h1 className="font-medium text-sm text-black-800 truncate">
                       ₦ {category.amountLeft}

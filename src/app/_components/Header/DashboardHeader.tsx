@@ -61,7 +61,7 @@ const DashboardHeader = ({
     <>
       <div
         className={cn(
-          'z-[30] w-full max-w-[500px] fixed top-0 left-0 right-0 mx-auto pt-8 pb-2 px-6 flex justify-between items-center backdrop-brightness-105 backdrop-blur-lg text-gray-600',
+          'z-[30] w-full max-w-[680px] fixed top-0 left-0 right-0 mx-auto pt-8 pb-2 px-6 flex justify-between items-center backdrop-brightness-105 backdrop-blur-lg text-gray-600',
           scrolled ? 'text-white' : 'bg-white',
         )}
       >

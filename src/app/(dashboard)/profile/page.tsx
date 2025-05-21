@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { BsChevronRight, BsPerson } from 'react-icons/bs';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useAuthentication } from '@/app/store/AuthStore';
 import Link from 'next/link';
 import { getUserSubscription } from '@/app/services/SubscriptionService';
 import DashboardWrapper from '@/app/_components/dashboardWrapper';
@@ -51,17 +50,16 @@ const profileItems = [
 export default function Page() {
   const navigate = useRouter();
 
-  const { LogOut } = useAuthentication();
 
-  const logOutMutation = useMutation({
-    mutationFn: async () => LogOut(),
-    onSuccess: (data) => {
-      console.log('Logout successful', data);
-    },
-    onError: (error) => {
-      console.error('Error during logout:', error);
-    },
-  });
+  // const logOutMutation = useMutation({
+  //   mutationFn: async () => LogOut(),
+  //   onSuccess: (data) => {
+  //     console.log('Logout successful', data);
+  //   },
+  //   onError: (error) => {
+  //     console.error('Error during logout:', error);
+  //   },
+  // });
 
   const { userData } = useAuthStore();
 
@@ -135,8 +133,10 @@ export default function Page() {
                   <button
                     onClick={() => {
                       // if returning user, show manage subscription page
-                      if (userSubscription?.data.isActive) {
-                        navigate.push('manage-subscription');
+                      if (item.name === 'Subscription') {
+                        if (userSubscription?.data.isActive) {
+                          navigate.push('manage-subscription');
+                        }
                       }
                       // if (userData?.profile.hasFreeTrial) {
                       //   navigate.push('manage-subscription');
@@ -151,7 +151,7 @@ export default function Page() {
                     <span className="bg-white w-10 h-10 rounded-full flex items-center justify-center">
                       {item.icon}
                     </span>
-                    <span className="text-sm">{item.name}</span>
+                    <span className="inline-block text-left w-full text-[13px]">{item.name}</span>
                   </button>
                 ))}
               </div>

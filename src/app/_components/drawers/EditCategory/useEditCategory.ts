@@ -27,7 +27,7 @@ export default function useEditCategory({ setShow }: { setShow: (i: boolean) => 
     name: string;
   }> = async (data) => {
     console.log('log data', data);
-    // await editCategoryMutation.mutateAsync(data.name);
+    await editCategoryMutation.mutateAsync(data.name);
   };
   return { onSubmit, editCategoryMutation };
 }

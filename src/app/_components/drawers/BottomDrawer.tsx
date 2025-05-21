@@ -42,7 +42,7 @@ const BottomDrawer: React.FC<IProps> = ({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'max-w-[500px] w-full z-[60] absolute bottom-0 bg-white rounded-t-3xl',
+        'max-w-[680px] w-full z-[60] absolute bottom-0 bg-white rounded-t-3xl',
         className,
       )}
     >

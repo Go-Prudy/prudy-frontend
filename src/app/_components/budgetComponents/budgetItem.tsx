@@ -48,6 +48,7 @@ export default function BudgetItem({
           >
             {actions.map((action) => (
               <button
+                key={action.key}
                 onClick={() => {
                   if (action.key === 'edit') {
                   }

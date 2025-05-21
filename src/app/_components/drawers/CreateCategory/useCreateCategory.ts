@@ -16,8 +16,8 @@ export default function useCreateCategory({
   const createCategoryMutation = useMutation({
     mutationFn: (name: string) =>
       createBudgetCategoryApi({ name, subCategories: [] }, userData?.token || ''),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['getAllBudgetCategories'] });
+    onSuccess: async() => {
+      await queryClient.invalidateQueries({ queryKey: ['getAllBudgetCategories'] });
       toast.success('Category created successfully');
       setShow(false);
     },

@@ -70,7 +70,7 @@ export default function ReceiptDetails({
   if (!scannedResults) return null;
 
   return (
-    <div className="bg-white px-6 space-y-[18px] min-h-screen w-full h-full max-w-[500px] z-[40] left-0 right-0 mx-auto top-0 fixed overflow-auto">
+    <div className="bg-white px-6 space-y-[18px] min-h-screen w-full h-full max-w-[680px] z-[40] left-0 right-0 mx-auto top-0 fixed overflow-auto">
       <InnerPageHeader link="/track" title="Scanned Receipt" />
 
       <div className="border border-gray-200 rounded-3xl">

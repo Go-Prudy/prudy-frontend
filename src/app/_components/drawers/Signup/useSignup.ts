@@ -20,7 +20,6 @@ type SignupInputs = {
 
 export default function useSignup() {
   const [isAgreed, setIsAgreed] = useState<boolean>(false);
-  // const { signup } = useAuthentication();
   const { updateForm } = useSignupStore();
   const navigate = useRouter();
 
