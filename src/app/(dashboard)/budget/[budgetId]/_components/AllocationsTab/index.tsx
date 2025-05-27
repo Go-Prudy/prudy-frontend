@@ -48,7 +48,8 @@ export default function AllocationsTab({ budgetId, handleTabSelection }: Props) 
           <div className="space-y-1">
             <p className="text-sm text-gray-400">Total Planned Expenses</p>
             <h6 className="text-xl text-black-800 font-bold">
-              ₦{totalAllocations.toLocaleString()}
+              <span>₦{totalAllocations.toLocaleString()}</span>
+              <span className="text-sm">.00</span>
             </h6>
           </div>
         </div>

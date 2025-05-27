@@ -8,16 +8,26 @@ type InputProps = {
   required?: boolean;
   disabled?: boolean;
   error?: string;
+  className?: string;
   [key: string]: any;
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, inputName, placeholder, required = false, disabled, error, ...rest },
+    {
+      label,
+      inputName,
+      placeholder,
+      className,
+      required = false,
+      disabled,
+      error,
+      ...rest
+    },
     ref,
   ) => {
     return (
-      <div className="relative w-full">
+      <div className={cn('relative w-full', className)}>
         <label
           htmlFor={inputName}
           className="absolute top-4 left-4 text-xs text-gray-500"
@@ -31,7 +41,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           required={required}
           placeholder={placeholder}
           className={cn(
-            'bg-gray-100 text-gray-600 border outline-lemonGreen-600 h-20 w-full px-4 rounded-[20px] pt-5 pb-2',
+            'bg-gray-100 text-gray-600 text-sm sm:text-base border outline-lemonGreen-600 h-[73px] w-full px-4 rounded-[20px] pt-5 pb-0',
             disabled ? 'cursor-not-allowed bg-gray-200' : '',
           )}
           disabled={disabled}

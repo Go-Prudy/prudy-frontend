@@ -15,7 +15,6 @@ interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
   budgetId: string;
-  setDisabledTabKeys: Dispatch<SetStateAction<string[]>>;
   name?: string;
   amount?: string;
   incomeId?: string;
@@ -24,7 +23,6 @@ export default function AddIncomeDrawer({
   setShow,
   show,
   budgetId,
-  setDisabledTabKeys,
   name,
   amount,
   incomeId,
@@ -32,7 +30,6 @@ export default function AddIncomeDrawer({
   const { onSubmit, addIncomeMutation, updateIncomeMutation } = useAddIncome({
     setShow,
     budgetId,
-    setDisabledTabKeys,
     isEditing: !!(amount && name),
     incomeId: incomeId ?? '',
   });

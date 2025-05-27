@@ -46,7 +46,7 @@ const LoginPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-[500px] h-[100vh] pb-6"
+      className="max-w-[680px] h-[100vh] pb-6"
     >
       <div className="h-[298px]">
         <Image className="object-cover h-full rounded-b-[32px]" src={loginImage} alt="" />

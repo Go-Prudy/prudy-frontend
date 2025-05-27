@@ -273,10 +273,19 @@ input[type='date']::-webkit-calendar-picker-indicator:hover {
   /* margin: 5px !important; */
 }
 .react-calendar__tile--active {
-  color: #2b660e !important;
+  /* color: #2b660e !important; */
+  /* font-weight: 600 !important; */
+  border: none !important;
+  background: #e8fcd8 !important;
+  border-radius: 4px !important;
+}
+
+.react-calendar__tile--active.react-calendar__tile--rangeStart,
+.react-calendar__tile--active.react-calendar__tile--rangeEnd {
+  color: white !important;
   font-weight: 600 !important;
-  border: 1px solid#2b660e !important;
-  background: #f7f7f9 !important;
+  border: none !important;
+  background: #66c227 !important;
   border-radius: 4px !important;
 }
 .react-calendar__tile--hasActive {

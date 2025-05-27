@@ -86,7 +86,7 @@ const DashboardHeader = ({
           </div>
         ) : (
           <>
-            <h1 className="text-black-970 font-bold text-2xl">{title}</h1>
+            <h1 className="text-black-970 font-bold text-xl sm:text-2xl">{title}</h1>
             {budgets && budgets.length > 0 && (
               <select
                 name="budget"
@@ -126,13 +126,19 @@ const DashboardHeader = ({
         <div className={cn('px-6 pb-6 bg-header-gradient rounded-b-[32px]')}>
           <div className="flex items-center justify-between gap-1">
             <div className="space-y-1">
-              {headerTitle2 && (
-                <h3 className="text-black-970 font-bold text-xl">{headerTitle2}</h3>
+              <div className="space-y-0.5">
+                {headerTitle2 && (
+                  <h3 className="text-black-970 font-medium text-lg sm:text-xl">
+                    {headerTitle2}
+                  </h3>
+                )}
+                <h3 className={cn('text-xl sm:text-2xl font-bold', headerTitleClass)}>
+                  {headerTitle}
+                </h3>
+              </div>
+              {description && (
+                <p className="text-black-800 text-xs sm:text-sm">{description}</p>
               )}
-              <h3 className={cn('text-2xl font-bold', headerTitleClass)}>
-                {headerTitle}
-              </h3>
-              {description && <p className="text-black-800 text-sm">{description}</p>}
             </div>
             {headerIcon && (
               <Image

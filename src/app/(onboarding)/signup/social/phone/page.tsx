@@ -35,7 +35,7 @@ const Page = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-[500px] h-[100vh] "
+      className="max-w-[680px] h-[100vh] "
     >
       <InnerPageHeader link={'/signup/verify'} title="Create account" />
       <div className="px-6 py-10">

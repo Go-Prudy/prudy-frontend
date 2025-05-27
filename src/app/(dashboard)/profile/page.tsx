@@ -17,6 +17,7 @@ import api from '@/app/utils/axiosInstance';
 import { AxiosResponse } from 'axios';
 import { UserSubscription } from '@/app/types/subscription';
 import { user } from '@nextui-org/react';
+import Button from '@/app/_components/button';
 
 const profileItems = [
   {
@@ -49,7 +50,6 @@ const profileItems = [
 
 export default function Page() {
   const navigate = useRouter();
-
 
   // const logOutMutation = useMutation({
   //   mutationFn: async () => LogOut(),
@@ -99,7 +99,7 @@ export default function Page() {
                   className="size-12 rounded-xl object-cover"
                 />
                 <div className="gap-1 justify-start items-start">
-                  <h1 className="font-medium text-black-970 text-lg">
+                  <h1 className="font-medium text-black-970 text-base sm:text-lg">
                     {userData?.profile.firstName
                       ? `${userData?.profile.firstName} ${userData?.profile.lastName}`
                       : 'User'}
@@ -110,7 +110,7 @@ export default function Page() {
                   </div>
                 </div>
               </div>
-              <BsChevronRight size={24} />
+              <BsChevronRight size={20} />
             </div>
 
             <div
@@ -151,12 +151,17 @@ export default function Page() {
                     <span className="bg-white w-10 h-10 rounded-full flex items-center justify-center">
                       {item.icon}
                     </span>
-                    <span className="inline-block text-left w-full text-[13px]">{item.name}</span>
+                    <span className="inline-block text-left w-full text-[13px]">
+                      {item.name}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
           ))}
+          <Button className="text-red-600 bg-red-200">
+            {Icons.logout} <span>Logout</span>
+          </Button>
         </div>
       </DashboardWrapper>
     </motion.div>

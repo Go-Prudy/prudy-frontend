@@ -48,7 +48,7 @@ const quickActions: QuickActionType[] = [
   },
   {
     id: 'manual',
-    title: 'Add Manually',
+    title: 'Add Exp. Manually',
     image: addManuallyImage,
     bgColor: '#D9D9FA',
     borderColor: '#3A36F5',
@@ -143,7 +143,7 @@ export default function Page() {
             </div>
 
             {/* linked accounts */}
-            <div className="space-y-4 py-6">
+            <div className="space-y-4 pb-6">
               <SectionHeader
                 title="Linked Accounts"
                 onClick={async () => linkAccountMutation.mutateAsync()}
@@ -165,7 +165,7 @@ export default function Page() {
                     className="p-4 bg-gray-100 border border-gray-200 rounded-[20px] w-full flex justify-between relative cursor-pointer transition hover:opacity-70"
                   >
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 font-sm">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
                         <Image
                           width={100}
                           height={100}
@@ -173,12 +173,12 @@ export default function Page() {
                           alt={account.institutionName}
                           className="size-6 rounded-full"
                         />
-                        <p className="font-medium">{account.institutionName}</p>
+                        <p className="font-medium ">{account.institutionName}</p>
                       </div>
 
                       <div className="flex gap-2 justify-between">
-                        <p className="">{account.accountName}</p>
-                        <p className="font-medium">
+                        <p className="text-sm sm:text-base">{account.accountName}</p>
+                        <p className="font-medium text-sm sm:text-base">
                           ****{getLastFourDigits(account.accountNumber)}
                         </p>
                       </div>

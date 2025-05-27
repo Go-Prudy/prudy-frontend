@@ -16,6 +16,22 @@ import LoadingModal from '@/app/_components/modals/LoadingModal';
 import DeleteBudgetModal from '@/app/_components/modals/DeleteBudget';
 import ActionModal from '@/app/_components/modals/ActionModal';
 import handShakeGif from '/public/images/hand-shake.gif';
+import { BsChevronDown } from 'react-icons/bs';
+import AppPopover from '@/app/_components/popover';
+import { Icons } from '@/app/icons';
+
+const actions = [
+  {
+    name: 'Create Budget',
+    key: 'create',
+    icon: Icons.add,
+  },
+  {
+    name: 'Duplicate Budget',
+    key: 'duplicate',
+    icon: Icons.copy,
+  },
+];
 
 const BudgetPage = () => {
   const {
@@ -58,14 +74,32 @@ const BudgetPage = () => {
               headerIconClass="mr-[-14px] w-[112px] h-[112px]"
             />
 
-            <div className="flex items-center justify-between gap-3 w-full pt-6 pb-4 px-6">
+            <div className="flex items-center justify-between gap-3 w-full pt-6 pb-4 px-6 relative">
               <h2 className="text-lg font-medium">All Budgets</h2>
-              <Button
-                onClick={() => setCreateBudgetComponent(!createBudgetComponent)}
-                className="text-xs py-2 px-3 rounded-xl !w-fit"
+
+              <AppPopover
+                trigger={
+                  <button className="flex items-center gap-1 bg-lemonGreen-400 font-medium text-xs py-2 px-3 rounded-xl !w-fit">
+                    Create Budget <BsChevronDown size={12} />
+                  </button>
+                }
+                placement="bottom-end"
               >
-                Create Budget
-              </Button>
+                {actions.map((action) => (
+                  <button
+                    onClick={() => {
+                      if (action.key === 'create') {
+                        setCreateBudgetComponent(true);
+                      } else if (action.key === 'duplicate') {
+                        setCreateBudgetComponent(true);
+                      }
+                    }}
+                    key={action.key}
+                  >
+                    {action.name}
+                  </button>
+                ))}
+              </AppPopover>
             </div>
 
             <div className="w-full">

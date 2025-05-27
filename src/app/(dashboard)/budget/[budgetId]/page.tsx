@@ -12,6 +12,11 @@ import Link from 'next/link';
 import BottomButton from './_components/bottomButton';
 import Button from '@/app/_components/button';
 import { useRouter } from 'next/navigation';
+import TrackExpenseDrawer from '@/app/_components/drawers/TrackExpenses';
+import SelectSyncPeriodDrawer from '@/app/_components/drawers/SelectSyncPeriod';
+import AddManualExpenseDrawer from '@/app/_components/drawers/AddManualExpense';
+import SelectBankAccountDrawer from '@/app/_components/drawers/SelectBankAccount';
+import ScanReceipt from '@/app/_components/scanner';
 
 const Page = ({ params }: { params: { budgetId: string } }) => {
   const router = useRouter();
@@ -20,10 +25,23 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
     isLoadingBudgetStats,
     budgetDetails,
     isLoadingBudgetDetails,
-    disabledTabKeys,
-    setDisabledTabKeys,
     handleTabSelection,
-    selectedTab,
+    showTrackExpensesDrawer,
+    setShowTrackExpensesDrawer,
+    showSelectBankAccountDrawer,
+    setShowSelectBankAccountDrawer,
+    showAddManualDrawer,
+    setShowAddManualDrawer,
+    showScanner,
+    setShowScanner,
+    showSyncPeriodDrawer,
+    setShowSyncPeriodDrawer,
+    selectedAccountId,
+    setSelectedAccountId,
+    value,
+    setValue,
+    linkedAccounts,
+    isGetAllLinkedAccountsLoading,
   } = useBudgetById({
     budgetId: params.budgetId,
   });
@@ -40,12 +58,7 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
       </InnerPageHeader>
 
       {/* tabs */}
-      <Tabs
-        // disabledKeys={disabledTabKeys}
-        // selectedKey={selectedTab}
-        fullWidth
-        className="px-4"
-      >
+      <Tabs fullWidth className="px-4">
         <Tab key="income" title="Income" className="w-full border-none p-0">
           <div className="px-6 mb-3">
             <BarChart
@@ -62,8 +75,6 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
             budgetId={params.budgetId}
             isLoadingBudgetDetails={isLoadingBudgetDetails}
             collaborators={budgetDetails?.collaborators || []}
-            setDisabledTabKeys={setDisabledTabKeys}
-            handleTabSelection={handleTabSelection}
           />
         </Tab>
         <Tab key="allocations" title="Allocations" className="w-full p-0">
@@ -93,8 +104,59 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
         </Tab>
       </Tabs>
       <BottomButton>
-        <Button onClick={() => router.push('/track')}>Track your Expenses</Button>
+        <Button onClick={() => setShowTrackExpensesDrawer(true)}>
+          Track your Expenses
+        </Button>
       </BottomButton>
+
+      {showTrackExpensesDrawer && (
+        <TrackExpenseDrawer
+          show={showTrackExpensesDrawer}
+          setShow={setShowTrackExpensesDrawer}
+          setShowSelectBankAccountDrawer={setShowSelectBankAccountDrawer}
+          setShowAddManualDrawer={setShowAddManualDrawer}
+          setShowScanner={setShowScanner}
+        />
+      )}
+      {showSelectBankAccountDrawer && (
+        <SelectBankAccountDrawer
+          show={showSelectBankAccountDrawer}
+          setShow={setShowSelectBankAccountDrawer}
+          linkedAccounts={linkedAccounts}
+          isLoading={isGetAllLinkedAccountsLoading}
+          setShowSyncPeriodDrawer={setShowSyncPeriodDrawer}
+          selectedAccountId={selectedAccountId ?? ''}
+          setSelectedAccountId={setSelectedAccountId}
+        />
+      )}
+
+      {showAddManualDrawer && (
+        <AddManualExpenseDrawer
+          show={showAddManualDrawer}
+          setShow={setShowAddManualDrawer}
+          categories={(budgetDetails?.budgetCategories || []).map((cat: any) => ({
+            id: cat.id,
+            name: cat.name,
+            color: cat.color,
+            uid: cat.uid,
+          }))}
+          budgetId={params.budgetId || ''}
+          isLoadingCategories={isLoadingBudgetDetails}
+        />
+      )}
+
+      {/* select sync period */}
+      {showSyncPeriodDrawer && (
+        <SelectSyncPeriodDrawer
+          show={showSyncPeriodDrawer}
+          setShow={setShowSyncPeriodDrawer}
+          value={value}
+          onChange={setValue}
+          accountId={selectedAccountId ?? ''}
+          selectedBudgetId={params.budgetId ?? ''}
+        />
+      )}
+      <ScanReceipt showScanner={showScanner} setShowScanner={setShowScanner} />
     </div>
   );
 };

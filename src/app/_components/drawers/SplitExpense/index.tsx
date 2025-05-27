@@ -104,6 +104,10 @@ export default function SplitExpenseDrawer({
               }}
               size="sm"
               color="success"
+              classNames={{
+                wrapper: show ? '!bg-[#58D50D]' : '!bg-[#78788029]',
+                thumb: 'data-[selected=true]:bg-white',
+              }}
             />
           </div>
           <div

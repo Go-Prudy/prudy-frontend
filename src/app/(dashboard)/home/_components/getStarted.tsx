@@ -75,7 +75,9 @@ export default function GetStarted({}: Props) {
   return (
     <div className="rounded-[36px] border border-gray-200">
       <div className="flex items-center justify-between bg-gray-100 px-6 py-2.5 rounded-t-[36px]">
-        <p className="text-black-900 font-medium">Get Started with Prudy</p>
+        <p className="text-black-900 font-medium text-sm sm:text-base">
+          Get Started with Prudy
+        </p>
         <div className="relative h-12 w-12">
           <div
             className="absolute inset-0 rounded-full"
@@ -135,14 +137,14 @@ export default function GetStarted({}: Props) {
             {action.key === 'account_linking' && linkAccountMutation.isPending ? (
               <CircularProgress size="sm" />
             ) : (
-              <h5 className="text-sm font-medium">
+              <p className="text-xs sm:text-sm font-medium">
                 {action.title.split('/n').map((part, index) => (
                   <span key={index}>
                     {part}
                     {index < action.title.split('/n').length - 1 && <br />}
                   </span>
                 ))}
-              </h5>
+              </p>
             )}
           </div>
         ))}

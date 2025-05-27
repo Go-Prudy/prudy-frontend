@@ -95,10 +95,10 @@ export default function ActualExpenses({ budgetId }: Props) {
       ) : filteredDistributions.length > 0 ? (
         <>
           <BudgetVisualization
-            totalBudget={budgetDistributionData?.totalBudget}
+            totalBudget={budgetDistributionData?.totalExpense}
             distributions={filteredDistributions}
           />
-          <div className="bg-white mt-[28px] p-4 flex flex-col gap-[16px]  w-full">
+          <div className="bg-white mt-[28px] flex flex-col gap-[16px]  w-full">
             {filteredDistributions?.map((category: any, index: number) => (
               <div
                 key={category.uid}

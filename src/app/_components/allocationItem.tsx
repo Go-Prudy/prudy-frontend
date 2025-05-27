@@ -27,13 +27,13 @@ export default function AllocationItem({
   showActions = true,
 }: Props) {
   return (
-    <div className="p-4 bg-gray-100 border border-gray-200 rounded-2xl flex items-center justify-between w-full gap-2">
+    <div className="p-3 sm:p-4 bg-gray-100 border border-gray-200 rounded-2xl flex items-center justify-between w-full gap-2">
       <div className="flex items-center gap-2">
         <Image src={moneyIcon} className="size-8" alt={'icon'} />
-        <p className="text-black-800 text-base font-medium">{name}</p>
+        <p className="text-black-800 text-sm sm:text-base font-medium">{name}</p>
       </div>
       <div className="flex items-center gap-2">
-        <p className="text-black-800 text-base font-medium">
+        <p className="text-black-800 text-sm sm:text-base font-medium">
           ₦ {amount?.toLocaleString()}
         </p>
         {showActions && (

@@ -87,13 +87,13 @@ const BarChart: React.FC<ChartProps> = ({
             <div key={index} className="text-center py-2">
               {/* Show the original value in red if negative */}
               <div
-                className={`font-[500] ${
+                className={`font-medium text-sm sm:text-base  ${
                   values[index] < 0 ? 'text-red-500' : 'text-[#060221]'
                 }`}
               >
-                {values[index] != null ? '₦ ' + values[index].toLocaleString() : 'N/A'}
+                {values[index] != null ? '₦' + values[index].toLocaleString() : 'N/A'}
               </div>
-              <div className="text-[12px] text-[#A0A3BD]">{label}</div>
+              <div className="text-xs text-[#A0A3BD]">{label}</div>
             </div>
           ))}
         </div>

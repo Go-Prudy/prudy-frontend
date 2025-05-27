@@ -4,6 +4,7 @@ import Image from 'next/image';
 import fireIcon from '/public/images/rewards/fire.png';
 import rewardsImage from '/public/images/rewards/1.png';
 import pointsImage from '/public/images/rewards/points.png';
+import calendarImage from '/public/images/rewards/calendar.png';
 
 import RewardValues from '../_components/rewardValues';
 import { BsChevronRight, BsX } from 'react-icons/bs';
@@ -48,7 +49,7 @@ const Page = () => {
           </div>
           <div className="p-3 border border-gray-200 space-y-2 rounded-[20px]">
             <p>Your Daily Streak</p>
-            {/* calendar */}
+            <Image src={calendarImage} alt="" width={302} height={200} />
           </div>
           <button
             onClick={() => setShowPointsHistoryDrawer(true)}

@@ -5,7 +5,7 @@ import { ScannedItem } from '../types/scan';
 
 type Props = {
   setShowCategoriesDrawer: Dispatch<SetStateAction<boolean>>;
-  category?: BudgetCategory|null;
+  category?: BudgetCategory | null;
   scannedItem?: ScannedItem;
 };
 
@@ -18,13 +18,15 @@ export default function CategorySelectInput({
     <button
       type="button"
       onClick={() => setShowCategoriesDrawer(true)}
-      className="rounded-2xl w-full p-4 bg-gray-100 border border-gray-200 space-y-1 text-left"
+      className="rounded-2xl p-4 bg-gray-100 border border-gray-200 space-y-1 text-left w-1/2"
     >
       <p className="text-xs text-gray-500">Name of category</p>
       <div className="flex items-center justify-between text-gray-600">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           {/* image */}
-          <span>{scannedItem?.categoryName || category?.name}</span>
+          <span className="truncate text-ellipsis">
+            {scannedItem?.categoryName || category?.name}
+          </span>
         </div>
         <BsChevronDown />
       </div>

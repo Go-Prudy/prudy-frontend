@@ -88,7 +88,7 @@ export default function Page() {
         slidesPerView={1}
         onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
         autoplay={{
-          delay: 5000,
+          delay: 15000,
           disableOnInteraction: false,
           pauseOnMouseEnter: true,
         }}

@@ -12,6 +12,7 @@ const config: Config = {
     extend: {
       screens: {
         sm: '385px',
+        
       },
       animation: {
         scaleAndFadeIn: 'scale-and-fade-in 150ms cubic-bezier(.25, .75, .6, .98)',

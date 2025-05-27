@@ -9,18 +9,10 @@
     + Code comments
     + Code optimization
     + Code refactoring
++ Sync not working through the sync account action button on the track page
++ ⁠use skeleton for data fetching
++ duplicate previous budget
 
 
-DONE:
-- Subscription
-- Invties & collaborators
-- Onboarding
-    - Track actions progress
-- Profile
-    - Rewards
-- Budget
-    - Actual expense
-    - Edit & Delete allocations
-- Track page
-    - Show reauthorize modal
-    - Sync account on when user clicks on account and sync action button
+
+

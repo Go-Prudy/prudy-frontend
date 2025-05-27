@@ -86,8 +86,8 @@ export default function Page() {
               className="py-5 px-6 rounded-[32px] text-white relative z-10"
             >
               <div className="space-y-4 text-white">
-                <h3 className="text-[32px] leading-9 font-bold">
-                  What was your <br /> money up to last week?
+                <h3 className="text-[28px] sm:text-[32px] leading-8 sm:leading-9 font-bold">
+                  What was your <br className="hidden sm:block" /> money up to last week?
                 </h3>
                 <p className="">See what your spending patterns looked like last week</p>
                 <Link className="inline-block w-full" href="/analytics/summary">

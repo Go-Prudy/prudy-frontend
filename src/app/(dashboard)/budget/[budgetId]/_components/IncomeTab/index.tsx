@@ -13,24 +13,18 @@ import InviteCollaboratorDrawer from '@/app/_components/drawers/InviteCollaborat
 import AllocationItem from '@/app/_components/allocationItem';
 import CollaboratorItem from './collaborator';
 import { useAuthStore } from '@/app/store/useAuthStore';
-import { Dispatch, SetStateAction } from 'react';
-import BottomButton from '../bottomButton';
 import { useRouter } from 'next/navigation';
 
 type Props = {
   budgetId: string;
   isLoadingBudgetDetails: boolean;
   collaborators: Collaborator[];
-  setDisabledTabKeys: Dispatch<SetStateAction<string[]>>;
-  handleTabSelection: (key: string) => void;
 };
 
 export default function IncomeTab({
   budgetId,
   isLoadingBudgetDetails,
   collaborators,
-  setDisabledTabKeys,
-  handleTabSelection,
 }: Props) {
   const navigate = useRouter();
   const { userData } = useAuthStore();
@@ -58,7 +52,8 @@ export default function IncomeTab({
           <div className="space-y-1">
             <p className="text-sm text-gray-400">Total Income</p>
             <h6 className="text-xl text-black-800 font-bold">
-              ₦ {totalIncome?.toLocaleString()}
+              <span>₦{totalIncome?.toLocaleString()}</span>
+              <span className="text-sm">.00</span>
             </h6>
           </div>
         </div>
@@ -122,17 +117,17 @@ export default function IncomeTab({
               isHost
             />
           )}
-          <div className="bg-lemonGreen-50 rounded-2xl border border-dashed border-lemonGreen-600 p-4 flex items-center gap-3">
+          <div className="bg-lemonGreen-50 rounded-2xl border border-dashed border-lemonGreen-600 p-3 sm:p-4 flex items-center gap-3">
             <button onClick={() => setShowInviteCollaboratorDrawer(true)}>
               <Image
                 src={inviteCollabratorImg}
                 alt=""
                 width={40}
                 height={40}
-                className="w-10 h-10 object-cover object-center rounded-full "
+                className="w-8 sm:w-10 h-8 sm:h-10 object-cover object-center rounded-full "
               />
             </button>
-            <p className="text-black-800 text-base font-medium text-center">
+            <p className="text-black-800 text-sm sm:text-base font-medium text-center">
               Invite a collaborator
             </p>
           </div>
@@ -144,7 +139,6 @@ export default function IncomeTab({
           show={showIncomeDrawer}
           setShow={setShowIncomeDrawer}
           budgetId={budgetId}
-          setDisabledTabKeys={setDisabledTabKeys}
           name={selectedIncome?.name}
           amount={selectedIncome?.amount.toString()}
           incomeId={selectedIncome?.uid}

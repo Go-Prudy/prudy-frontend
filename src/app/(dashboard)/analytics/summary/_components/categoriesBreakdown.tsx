@@ -20,7 +20,10 @@ export default function CategoriesBreakdown({
       <p className="text-left text-black-800">{title}</p>
       {categories.length > 0 ? (
         categories.map((category: ExpenseCategory) => (
-          <div key={category.uid} className="p-3 flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-2xl">
+          <div
+            key={category.uid}
+            className="p-3 flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-2xl"
+          >
             <div className="w-10 h-10 bg-white rounded-full" />
             <div
               className={cn(
@@ -69,7 +72,7 @@ export default function CategoriesBreakdown({
       )}
       <button
         className={cn(
-          'rounded-2xl py-3 px-2 text-sm font-medium w-[85%] mx-auto flex items-center justify-center gap-2',
+          'rounded-2xl py-3 px-2 text-sm font-medium w-[90%] mx-auto flex items-center justify-center gap-2',
           buttonColor,
         )}
       >

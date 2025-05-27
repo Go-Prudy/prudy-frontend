@@ -94,7 +94,7 @@ const AddManualExpenseDrawer = ({
             onChange={formatAmount}
             error={errors?.amount?.message}
           />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Input
               label="Date"
               inputName="date"
@@ -102,6 +102,7 @@ const AddManualExpenseDrawer = ({
               placeholder="Select date..."
               {...register('date')}
               error={errors?.date?.message}
+              className="!w-1/2"
             />
             <CategorySelectInput
               setShowCategoriesDrawer={setShowCategoriesDrawer}

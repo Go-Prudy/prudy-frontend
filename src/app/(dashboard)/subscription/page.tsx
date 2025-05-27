@@ -44,8 +44,17 @@ const Page = () => {
     completeAddPaymentMethodMutation,
   } = useSubscription();
 
+  if (
+    addPaymentMedthodMutation.isPending ||
+    isGetPaymentMethodLoading ||
+    completeAddPaymentMethodMutation.isPending ||
+    checkoutSubscriptionMutation.isPending
+  ) {
+    return <LoadingModal isOpen={true} onClose={() => {}} text="Please wait..." />;
+  }
+
   return (
-    <div className="relative bg-subscription-bg bg-no-repeat bg-cover pb-10">
+    <div className="relative min-h-screen bg-subscription-bg bg-no-repeat bg-cover pb-10">
       <InnerPageHeader
         link="/profile"
         title="Subscription"
@@ -160,53 +169,13 @@ const Page = () => {
         />
       )}
 
-      {/* {makePayment && (
-        <motion.div
-          initial={{ opacity: 0, y: 90 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="h-[100vh] max-w-[680px] w-full z-[40] bottom-0 fixed bg-[#1c1c1c73]"
-        >
-          <BottomDrawer
-            label="Subscription plans"
-            back={false}
-            show={makePayment}
-            close={true}
-            onClose={() => setMakePayment(false)}
-          >
-            <div className=" w-full flex flex-col items-center justify-center  mx-auto mb-[203px] mt-[52px]">
-              <Image
-                src={mono1}
-                className=" size-[125px]  "
-                height={1000}
-                width={1000}
-                alt="payment icon"
-              />
-              <p className=" font-[500] text-[20px] mt-[16px] leading-[24px]">
-                Payment gateway
-              </p>
-            </div>
-          </BottomDrawer>
-        </motion.div>
-      )} */}
-
       <SuccessfulModal
         title="Payment successful"
         isOpen={showSuccessfulModal}
         onClose={() => setShowSuccessfulModal(false)}
         image={succesGif}
       />
-      <LoadingModal
-        isOpen={
-          addPaymentMedthodMutation.isPending ||
-          isGetPaymentMethodLoading ||
-          completeAddPaymentMethodMutation.isPending ||
-          checkoutSubscriptionMutation.isPending
-        }
-        onClose={() => {}}
-        text="Please wait..."
-      />
+     
     </div>
   );
 };

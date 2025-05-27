@@ -23,8 +23,10 @@ export default function BestPerformingCategory({ analytics, isLoadingAnalytics }
           className="-mt-[100px] mx-auto min-w-[350px]"
         />
 
-        <div className="w-full space-y-1 absolute h-fit top-[37%] right-0 left-0">
-          <p className="text-sm font-medium max-w-[110px] mx-auto">{analytics?.breakdown.title}</p>
+        <div className="w-full space-y-1 absolute h-fit top-[35%] right-0 left-0">
+          <p className="text-sm font-medium max-w-[110px] mx-auto">
+            {analytics?.breakdown.title}
+          </p>
           <h4 className="font-bold text-xl">
             ₦{analytics?.breakdown.actualExpenses.toLocaleString()}
           </h4>
@@ -32,9 +34,7 @@ export default function BestPerformingCategory({ analytics, isLoadingAnalytics }
       </div>
       <div className="text-white space-y-4">
         <h6 className="text-xl font-bold space-y-4">{analytics?.remark.title}</h6>
-        <p>
-         {analytics?.remark.description}
-        </p>
+        <p>{analytics?.remark.description}</p>
       </div>
       <Performance
         title={analytics?.breakdown.title ?? ''}

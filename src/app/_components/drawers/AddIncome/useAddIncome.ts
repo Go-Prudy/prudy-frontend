@@ -12,13 +12,11 @@ interface AddIncomeForm {
 export default function useAddIncome({
   setShow,
   budgetId,
-  setDisabledTabKeys,
   isEditing,
   incomeId,
 }: {
   setShow: (i: boolean) => void;
   budgetId: string;
-  setDisabledTabKeys: Dispatch<SetStateAction<string[]>>;
   isEditing: boolean;
   incomeId: string;
 }) {
@@ -43,7 +41,6 @@ export default function useAddIncome({
       //   };
       // });
 
-      setDisabledTabKeys(['distribution']);
       setShow(false);
     },
     onError: (error: unknown) => {

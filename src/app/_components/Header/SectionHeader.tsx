@@ -43,7 +43,7 @@ const SectionHeader = ({
         buttonText && (
           <button
             onClick={onClick}
-            className="px-3 py-1.5 bg-lemonGreen-100 rounded-xl border border-gray-200 flex items-center gap-2 text-lemonGreen-950 text-xs font-medium"
+            className="px-2 py-1.5 bg-lemonGreen-100 rounded-xl border border-gray-200 flex items-center gap-2 text-lemonGreen-950 text-xs font-medium"
           >
             {isLoading ? (
               <CircularProgress size="sm" />

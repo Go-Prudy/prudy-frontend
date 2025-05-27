@@ -178,6 +178,10 @@ export default function AddAllocationDrawer({
                   onChange={() => setShowAddSubAllocations(!showAddSubAllocations)}
                   size="sm"
                   color="success"
+                  classNames={{
+                    wrapper: showAddSubAllocations ? '!bg-[#58D50D]' : '!bg-[#78788029]',
+                    thumb: 'data-[selected=true]:bg-white',
+                  }}
                 />
               </div>
               {showAddSubAllocations && (

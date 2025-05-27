@@ -3,7 +3,7 @@ import { Collaborator } from '@/app/types/budget';
 import { Avatar, AvatarGroup } from '@nextui-org/react';
 import Link from 'next/link';
 import React from 'react';
-import {  BsChevronRight } from 'react-icons/bs';
+import { BsChevronRight } from 'react-icons/bs';
 
 type Props = {
   name: string;
@@ -11,7 +11,7 @@ type Props = {
   percentageIncomeUsed: number;
   totalIncome: number;
   leftToSpend: number;
-  budgetId:string
+  budgetId: string;
 };
 
 export default function BudgetItemHome({
@@ -23,7 +23,7 @@ export default function BudgetItemHome({
   budgetId,
 }: Props) {
   return (
-    <div className="bg-gray-100 rounded-[20px] flex flex-col relative border border-gray-200 gap-2 pt-3 pb-4">
+    <div className="bg-gray-100 rounded-[20px] flex flex-col relative border border-gray-200 gap-2 py-3">
       <div className="space-y-4">
         <div className="px-4 w-full justify-between items-center flex">
           <p className="font-medium">{name}</p>

@@ -84,7 +84,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
             {...register('purpose')}
             error={errors?.purpose?.message}
           />
-          <div className="flex gap-[16px] justify-between">
+          <div className="flex gap-3 justify-between">
             <Input
               label="Start date"
               inputName="startdate"
@@ -92,6 +92,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
               placeholder="Select date..."
               {...register('startDate')}
               error={errors?.startDate?.message}
+              className="!w-1/2"
             />
             <Input
               label="End date"
@@ -102,6 +103,7 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
               disabled={!startDate}
               {...register('endDate')}
               error={errors?.endDate?.message}
+              className="!w-1/2"
             />
           </div>
         </form>

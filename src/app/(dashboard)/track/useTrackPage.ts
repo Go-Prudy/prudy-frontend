@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   getActiveBudgetCategoriesApi,
   GetAllBudgetsApi,
@@ -13,6 +18,7 @@ import { useAuthStore } from '@/app/store/useAuthStore';
 import useTrackProgress from '@/app/_hooks/useTrackProgress';
 
 export default function useTrackPage() {
+  const queryClient = useQueryClient();
   const { userData } = useAuthStore();
   const { trackProgressMutation } = useTrackProgress();
 
@@ -94,7 +100,9 @@ export default function useTrackPage() {
   const handleRemoveAccount = async (id: string) => {
     const response = await removeAccountApi(userData?.token ?? '', id);
     if (response.success) {
-      // TODO: invalidate getAllLinkedAccountsQuery
+      await queryClient.invalidateQueries({
+        queryKey: ['getAllLinkedaccounts'],
+      });
     }
   };
   return {

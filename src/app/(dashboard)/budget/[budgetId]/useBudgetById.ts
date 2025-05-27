@@ -4,14 +4,22 @@ import { useAuthStore } from '@/app/store/useAuthStore';
 import { ApiResponse } from '@/app/types/index';
 import { BudgetDetails, BudgetStats } from '@/app/types/budget';
 import { useEffect, useState } from 'react';
+import { getAllAccountsApi } from '@/app/services/AccountService';
+
+type ValuePiece = Date | null;
+type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export default function useBudgetById({ budgetId }: { budgetId: string }) {
   const { userData } = useAuthStore();
-  const [disabledTabKeys, setDisabledTabKeys] = useState<string[]>([
-    // 'allocations',
-    // 'distribution',
-  ]);
+
   const [selectedTab, setSelectedTab] = useState<string>('income');
+  const [showTrackExpensesDrawer, setShowTrackExpensesDrawer] = useState<boolean>(false);
+  const [showSelectBankAccountDrawer, setShowSelectBankAccountDrawer] = useState(false);
+  const [showAddManualDrawer, setShowAddManualDrawer] = useState<boolean>(false);
+  const [showScanner, setShowScanner] = useState<boolean>(false);
+  const [showSyncPeriodDrawer, setShowSyncPeriodDrawer] = useState<boolean>(false);
+  const [selectedAccountId, setSelectedAccountId] = useState<string>();
+  const [value, setValue] = useState<Value>(new Date());
 
   const { data: budgetDetails, isLoading: isLoadingBudgetDetails } = useQuery<
     ApiResponse<BudgetDetails>
@@ -33,15 +41,16 @@ export default function useBudgetById({ budgetId }: { budgetId: string }) {
     refetchOnWindowFocus: true,
   });
 
-  // useEffect(() => {
-  //   if ((budgetDetails?.data?.totalIncome ?? 0) > 0) {
-  //     setDisabledTabKeys(['distribution']);
-  //   }
-
-  //   if ((budgetDetails?.data?.budgetCategories?.length ?? 0) > 0) {
-  //     setDisabledTabKeys(['']);
-  //   }
-  // }, [budgetDetails]);
+  // React Query hook
+  const { data: linkedAccounts = [], isLoading: isGetAllLinkedAccountsLoading } =
+    useQuery({
+      queryKey: ['getAllLinkedaccounts'],
+      queryFn: () => getAllAccountsApi(userData?.token ?? ''),
+      enabled: !!userData?.token && showSelectBankAccountDrawer,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchInterval: false,
+    });
 
   const handleTabSelection = (key: string) => {
     setSelectedTab(key);
@@ -52,9 +61,23 @@ export default function useBudgetById({ budgetId }: { budgetId: string }) {
     isLoadingBudgetStats,
     budgetDetails: budgetDetails?.data,
     isLoadingBudgetDetails,
-    disabledTabKeys,
-    setDisabledTabKeys,
     handleTabSelection,
     selectedTab,
+    showTrackExpensesDrawer,
+    setShowTrackExpensesDrawer,
+    showSelectBankAccountDrawer,
+    setShowSelectBankAccountDrawer,
+    showAddManualDrawer,
+    setShowAddManualDrawer,
+    showScanner,
+    setShowScanner,
+    showSyncPeriodDrawer,
+    setShowSyncPeriodDrawer,
+    selectedAccountId,
+    setSelectedAccountId,
+    value,
+    setValue,
+    linkedAccounts,
+    isGetAllLinkedAccountsLoading,
   };
 }

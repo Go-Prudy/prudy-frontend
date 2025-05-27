@@ -42,37 +42,44 @@ const HomePage = () => {
             type="home"
             headerTitle="Take the first step to financial freedom."
             headerIcon={homeHeaderIcon}
-            headerIconClass="mr-2 w-[100px]"
+            headerIconClass="-mr-2 w-[100px]"
             description="Budget & track your expenses easily."
           />
 
-          <div className="space-y-6 p-6">
-            <GetStarted />
+          <div className="space-y-6 py-5">
+            <div className="px-4">
+              <GetStarted />
+            </div>
+
             <Analytics />
-            {isLoadingBudgets ? (
-              <div className="flex flex-col mb-[90px] gap-6 p-6">
-                {[...Array(3)].map((_, index) => (
-                  <Skeleton key={index} className="h-[100px] w-full rounded-[20px]" />
-                ))}
-              </div>
-            ) : Array.isArray(budgets?.data.docs) && budgets.data.docs.length > 0 ? (
-              budgets.data.docs.map((budget: Budget) => (
-                <BudgetItemHome
-                  key={budget.uid}
-                  name={budget.name}
-                  collaborators={budget.collaborators}
-                  percentageIncomeUsed={(budget.totalExpenses / budget.totalIncome) * 100}
-                  totalIncome={budget.totalIncome}
-                  leftToSpend={budget.totalIncome - budget.totalExpenses}
-                  budgetId={budget.uid}
+            <div className="px-6">
+              {isLoadingBudgets ? (
+                <div className="flex flex-col mb-[90px] gap-6 p-6">
+                  {[...Array(3)].map((_, index) => (
+                    <Skeleton key={index} className="h-[100px] w-full rounded-[20px]" />
+                  ))}
+                </div>
+              ) : Array.isArray(budgets?.data.docs) && budgets.data.docs.length > 0 ? (
+                budgets.data.docs.map((budget: Budget) => (
+                  <BudgetItemHome
+                    key={budget.uid}
+                    name={budget.name}
+                    collaborators={budget.collaborators}
+                    percentageIncomeUsed={
+                      (budget.totalExpenses / budget.totalIncome) * 100
+                    }
+                    totalIncome={budget.totalIncome}
+                    leftToSpend={budget.totalIncome - budget.totalExpenses}
+                    budgetId={budget.uid}
+                  />
+                ))
+              ) : (
+                <EmptyStateDarkBg
+                  image={emptyBudgetImage}
+                  title="No recent budget created yet"
                 />
-              ))
-            ) : (
-              <EmptyStateDarkBg
-                image={emptyBudgetImage}
-                title="No recent budget created yet"
-              />
-            )}
+              )}
+            </div>
           </div>
         </div>
       </DashboardWrapper>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Switch } from '@nextui-org/react';
 import { BsChevronRight } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -42,6 +42,10 @@ const Page: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    setIsReminderActive(settings?.isReminderActive || false);
+  }, [settings]);
+
   return (
     <div>
       <InnerPageHeader link="/profile" title="Notifications & Reminders" />
@@ -65,7 +69,10 @@ const Page: React.FC = () => {
               isSelected={isReminderActive}
               onChange={toggleDailyReminder}
               className="h-6"
-              color="success"
+              classNames={{
+                wrapper: isReminderActive ? '!bg-[#58D50D]' : '!bg-[#78788029]',
+                thumb: 'data-[selected=true]:bg-white',
+              }}
             />
           </div>
         </div>

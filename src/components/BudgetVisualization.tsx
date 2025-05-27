@@ -12,15 +12,16 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
   distributions,
 }) => {
   useEffect(() => {
-    const width = 300;
-    const height = 300;
+    const width = 280;
+    const height = 280;
     const radius = Math.min(width, height) / 2;
 
     const arcGenerator = d3
       .arc<any>()
       .innerRadius(radius - 60)
       .outerRadius(radius - 40)
-      .padAngle(0.01);
+      .padAngle(0)
+      .cornerRadius(6);
 
     const pieGenerator = d3.pie<BudgetDistributionCategory>().value((d) => d.percentage);
 
@@ -57,7 +58,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .append('path')
       .attr('d', arcGenerator)
       .attr('fill', (d) => d.data.color)
-      .attr('stroke', '#fff')
+      .attr('stroke', '#F7F7F9')
       .attr('stroke-width', 3)
       .on('mouseover', (event, d) => {
         const arcCentroid = arcGenerator.centroid(d);

@@ -55,9 +55,9 @@ const SelectBankAccountDrawer = ({
         onClose={() => setShow(false)}
       >
         <div className="space-y-4">
-          <h1 className="text-gray-600">
+          <p className="text-gray-600">
             Kindly select the bank account you would like to sync with
-          </h1>
+          </p>
           <RadioGroup
             orientation="vertical"
             className="w-full"
@@ -83,7 +83,11 @@ const SelectBankAccountDrawer = ({
                 </CustomRadio>
               ))
             ) : (
-              <div>No accounts available for selection.</div>
+              <p className="text-sm text-gray-600">
+                You have not linked your bank account yet. Kindly add your account to
+                track your expenses to track your expenses easily.
+                {/*  */}
+              </p>
             )}
           </RadioGroup>
         </div>
