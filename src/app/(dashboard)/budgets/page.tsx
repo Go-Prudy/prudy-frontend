@@ -22,12 +22,12 @@ import { Icons } from '@/app/icons';
 
 const actions = [
   {
-    name: 'Create Budget',
+    name: 'Create New Budget',
     key: 'create',
     icon: Icons.add,
   },
   {
-    name: 'Duplicate Budget',
+    name: 'Duplicate Last Budget',
     key: 'duplicate',
     icon: Icons.copy,
   },
@@ -92,16 +92,20 @@ const BudgetPage = () => {
               >
                 {actions.map((action) => (
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (action.key === 'create') {
                         setCreateBudgetComponent(true);
                       } else if (action.key === 'duplicate') {
-                        setCreateBudgetComponent(true);
+                        await duplicateBudgeteMutation.mutateAsync(
+                          budgets?.[0]?.uid ?? '',
+                        );
                       }
                     }}
                     key={action.key}
                   >
-                    {action.name}
+                    {action.key === 'duplicate' && duplicateBudgeteMutation.isPending
+                      ? 'duplicating...'
+                      : action.name}
                   </button>
                 ))}
               </AppPopover>
