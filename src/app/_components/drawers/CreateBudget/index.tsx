@@ -10,13 +10,29 @@ import Button from '../../button';
 import useCreateBudget from './useCreateBudget';
 import LoadingModal from '../../modals/LoadingModal';
 import { SuccessModal } from '../../modals/SuccessfulModal';
+import { CreateBudgetForm } from '@/app/types/budget';
+import { Dispatch, SetStateAction } from 'react';
 
 interface Props {
   setShow: (i: boolean) => void;
   show: boolean;
+  type: 'create' | 'edit';
+  budgetId?: string;
+  budgetData?: CreateBudgetForm;
+  setTypeOfDrawer?: Dispatch<SetStateAction<'create' | 'edit'>>;
 }
 
-const CreateBudgetDrawer = ({ setShow, show }: Props) => {
+const getDate = (date: string): string =>
+  date ? new Date(new Date(date).getTime() + 86400000).toISOString().split('T')[0] : '';
+
+const CreateBudgetDrawer = ({
+  setShow,
+  show,
+  budgetData,
+  budgetId,
+  type,
+  setTypeOfDrawer,
+}: Props) => {
   const {
     onSubmit,
     showLoadingModal,
@@ -25,7 +41,11 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
     handleShowSuccessModal,
   } = useCreateBudget({
     setShow,
+    type,
+    budgetId,
+    setTypeOfDrawer,
   });
+
   const {
     register,
     handleSubmit,
@@ -33,19 +53,17 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
     formState: { errors, isValid, isDirty },
   } = useForm<{ name: string; purpose: string; startDate: string; endDate: string }>({
     defaultValues: {
-      name: '',
-      purpose: '',
-      startDate: '',
-      endDate: '',
+      name: budgetData?.name || '',
+      purpose: budgetData?.purpose || '',
+      startDate: budgetData?.startDate ? getDate(budgetData.startDate) : '',
+      endDate: budgetData?.endDate ? getDate(budgetData.endDate) : '',
     },
     resolver: yupResolver(createBudgetSchema),
     mode: 'onChange',
   });
 
   const startDate = watch('startDate');
-  const minEndDate = startDate
-    ? new Date(new Date(startDate).getTime() + 86400000).toISOString().split('T')[0]
-    : '';
+  const minEndDate = getDate(startDate);
 
   return (
     <motion.div
@@ -61,11 +79,16 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
             Proceed
           </Button>
         }
-        label="Create budget"
+        label={type === 'edit' ? 'Edit Budget' : 'Create New Budget'}
         back={false}
         show={show}
         close={true}
-        onClose={() => setShow(false)}
+        onClose={() => {
+          if (setTypeOfDrawer) {
+            setTypeOfDrawer('create');
+          }
+          setShow(false);
+        }}
       >
         <form className="space-y-6" id="create-budget-form">
           <Input
@@ -108,7 +131,11 @@ const CreateBudgetDrawer = ({ setShow, show }: Props) => {
           </div>
         </form>
       </BottomDrawer>
-      <LoadingModal isOpen={showLoadingModal} onClose={handleShowLoadingModal} />
+      <LoadingModal
+        text={type === 'edit' ? 'Please wait...' : 'Creating...'}
+        isOpen={showLoadingModal}
+        onClose={handleShowLoadingModal}
+      />
       <SuccessModal isOpen={showSuccessModal} onClose={handleShowSuccessModal} />
     </motion.div>
   );

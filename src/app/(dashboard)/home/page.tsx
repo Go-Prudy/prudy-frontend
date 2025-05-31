@@ -48,7 +48,7 @@ const HomePage = () => {
 
           <div className="space-y-6 py-5">
             <div className="px-4">
-              <GetStarted />
+              <GetStarted budgetId={budgets?.data.docs[0]?.uid || ''} />
             </div>
 
             <Analytics />

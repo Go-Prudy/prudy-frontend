@@ -41,7 +41,7 @@ const SelectBankAccountDrawer = ({
       <BottomDrawer
         footer={
           <Button
-            // disabled={!selectedAccountId}
+            disabled={!selectedAccountId}
             onClick={() => setShowSyncPeriodDrawer(true)}
             type="submit"
           >
@@ -70,8 +70,9 @@ const SelectBankAccountDrawer = ({
               linkedAccounts.map((account: any, index: any) => (
                 <CustomRadio
                   key={index}
-                  isSelected={selectedAccountId === account.id}
-                  onChange={() => setSelectedAccountId(account.id)}
+                  isSelected={selectedAccountId === account.uid}
+                  // this is not selecting account
+                  onChange={() => setSelectedAccountId(account.uid)}
                   value={index}
                 >
                   <p className="">{account.institutionName}</p>

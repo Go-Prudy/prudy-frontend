@@ -1,3 +1,10 @@
+export interface CreateBudgetForm {
+  name: string;
+  purpose: string;
+  startDate: string;
+  endDate: string;
+}
+
 export interface Income {
   createdAt: string;
   updatedAt: string;
@@ -106,6 +113,9 @@ export interface Budget {
   createdAt: string;
   updatedAt: string;
   collaborators: Collaborator[];
+  startDate: string;
+  endDate: string;
+  purpose: string;
 }
 
 export interface Category {

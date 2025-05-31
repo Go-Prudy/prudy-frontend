@@ -71,19 +71,19 @@ export default function AllocationsTab({ budgetId, handleTabSelection }: Props) 
 
           {isBudgetAllocationsLoading ? (
             <Loader />
-          ) : budgetAllocations.length > 0 ? (
+          ) : budgetAllocations?.length > 0 ? (
             <div className="grid grid-cols-2 gap-4">
-              {budgetAllocations.map((allocation: Allocation) => (
+              {budgetAllocations?.map((allocation: Allocation) => (
                 <div
-                  key={allocation.uid}
+                  key={allocation?.uid}
                   className="relative p-3 space-y-2 bg-gray-100 border border-gray-200 rounded-[20px] text-black-800 text-sm font-medium"
                 >
                   <div className="size-10 bg-white rounded-full"></div>
-                  <p className="">{allocation.budgetCategory.name}</p>
-                  {/* <p className=""> ₦ {allocation.amountAllocated}</p> */}
+                  <p className="">{allocation?.budgetCategory?.name}</p>
+                  {/* <p className=""> ₦ {allocation?.amountAllocated}</p> */}
                   <p className="">
                     <span className="font-medium text-sm">
-                      ₦ {allocation.amountLeft.toLocaleString()}{' '}
+                      ₦ {allocation?.amountLeft?.toLocaleString()}{' '}
                     </span>
                     <span className="text-[10px] text-gray-400">left</span>
                   </p>
@@ -119,7 +119,7 @@ export default function AllocationsTab({ budgetId, handleTabSelection }: Props) 
                       <span>Edit</span>
                     </button>
                     <button
-                      onClick={() => deleteMutation.mutate(allocation.uid)}
+                      onClick={() => deleteMutation.mutate(allocation?.uid)}
                       className="text-left text-xs text-gray-600 flex items-center gap-0.5"
                     >
                       {Icons.trash}

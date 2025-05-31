@@ -1,18 +1,22 @@
 import useTrackProgress from '@/app/_hooks/useTrackProgress';
+import { CreateBudgetForm } from '@/app/types/budget';
 import api from '@/app/utils/axiosInstance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 
-interface CreateBudgetForm {
-  name: string;
-  purpose: string;
-  startDate: string;
-  endDate: string;
-}
-
-export default function useCreateBudget({ setShow }: { setShow: (i: boolean) => void }) {
+export default function useCreateBudget({
+  setShow,
+  type,
+  budgetId,
+  setTypeOfDrawer,
+}: {
+  setShow: (i: boolean) => void;
+  type: 'create' | 'edit';
+  budgetId?: string;
+  setTypeOfDrawer?: Dispatch<SetStateAction<'create' | 'edit'>>;
+}) {
   const queryClient = useQueryClient();
   const navigate = useRouter();
   const { trackProgressMutation } = useTrackProgress();
@@ -40,10 +44,32 @@ export default function useCreateBudget({ setShow }: { setShow: (i: boolean) => 
     },
   });
 
+  const editBudgetMutation = useMutation({
+    mutationFn: (values: CreateBudgetForm) => api.patch(`/budgets/${budgetId}`, values),
+    onSuccess: async (data) => {
+      console.log(data.data);
+      await queryClient.invalidateQueries({ queryKey: ['getAllBudgets'] });
+
+      setShowLoadingModal(false);
+      setShowSuccessModal(true);
+      setShow(false);
+      if (setTypeOfDrawer) {
+        setTypeOfDrawer('create');
+      }
+    },
+    onError: (error: unknown) => {
+      console.error('Error editing budget:', error);
+    },
+  });
+
   const onSubmit: SubmitHandler<CreateBudgetForm> = async (data) => {
-    console.log('log data', data);
+    // console.log('log data', data);
     setShowLoadingModal(true);
-    await createBudgetMutation.mutateAsync(data);
+    if (type === 'edit') {
+      await editBudgetMutation.mutateAsync(data);
+    } else {
+      await createBudgetMutation.mutateAsync(data);
+    }
   };
   return {
     onSubmit,

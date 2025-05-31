@@ -22,6 +22,7 @@ import ScanReceipt from '@/app/_components/scanner';
 import useTrackPage from './useTrackPage';
 import { useState } from 'react';
 import SelectSyncPeriodDrawer from '@/app/_components/drawers/SelectSyncPeriod';
+import { DateValue } from '@/app/types/index';
 
 type QuickActionType = {
   id: string;
@@ -55,10 +56,6 @@ const quickActions: QuickActionType[] = [
   },
 ];
 
-type ValuePiece = Date | null;
-
-type Value = ValuePiece | [ValuePiece, ValuePiece];
-
 export default function Page() {
   const {
     linkAccountMutation,
@@ -79,9 +76,7 @@ export default function Page() {
     selectedBudgetId,
   } = useTrackPage();
 
-  const navigate = useRouter();
-
-  const [value, setValue] = useState<Value>(new Date());
+  const [value, setValue] = useState<DateValue>(new Date());
   const [showSyncPeriodDrawer, setShowSyncPeriodDrawer] = useState<boolean>(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string>();
 
@@ -254,7 +249,11 @@ export default function Page() {
           />
         )}
 
-        <ScanReceipt showScanner={showScanner} setShowScanner={setShowScanner} />
+        <ScanReceipt
+          showScanner={showScanner}
+          setShowScanner={setShowScanner}
+          budgetId={selectedBudgetId || ''}
+        />
       </DashboardWrapper>
     </motion.div>
   );

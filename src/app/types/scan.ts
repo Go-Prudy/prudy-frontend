@@ -4,6 +4,8 @@ export interface ScannedResult {
   subTotal: number;
   'vat(%)': number;
   totalAmount: number;
+  date?: string;
+  budgetId?: string;
 }
 interface Location {
   name: string;
@@ -13,11 +15,13 @@ interface Location {
 }
 
 export interface ScannedItem {
-  name: string;
-  quantity: number;
-  baseAmount: number;
-  totalAmount: number;
+  description: string;
+  amount: number;
   categoryName: string;
   categoryUid: string;
   isCategorySuggested: boolean;
+  name?: string;
+  quantity?: number;
+  baseAmount?: number;
+  totalAmount?: number;
 }

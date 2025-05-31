@@ -53,9 +53,9 @@ const quickActions: QuickActionType[] = [
   },
 ];
 
-type Props = {};
+type Props = {budgetId: string};
 
-export default function GetStarted({}: Props) {
+export default function GetStarted({budgetId}: Props) {
   const navigate = useRouter();
   const {
     linkAccountMutation,
@@ -151,11 +151,16 @@ export default function GetStarted({}: Props) {
       </div>
       {showCreateBudgetModal && (
         <CreateBudgetDrawer
+          type="create"
           show={showCreateBudgetModal}
           setShow={setShowCreateBudgetModal}
         />
       )}
-      <ScanReceipt showScanner={showScanner} setShowScanner={setShowScanner} />
+      <ScanReceipt
+        showScanner={showScanner}
+        setShowScanner={setShowScanner}
+        budgetId={budgetId}
+      />
     </div>
   );
 }

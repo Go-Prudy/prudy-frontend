@@ -6,9 +6,10 @@ import Scanner from './scan';
 type Props = {
   showScanner: boolean;
   setShowScanner: React.Dispatch<React.SetStateAction<boolean>>;
+  budgetId: string;
 };
 
-export default function ScanReceipt({ showScanner, setShowScanner }: Props) {
+export default function ScanReceipt({ showScanner, setShowScanner, budgetId }: Props) {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
   const [scannedResults, setScannedResults] = useState<ScannedResult | null>(null);
   const [showReceiptDetails, setShowReceiptDetails] = useState<boolean>(false);
@@ -27,6 +28,7 @@ export default function ScanReceipt({ showScanner, setShowScanner }: Props) {
           scannedResults={scannedResults}
           uploadedImageUrl={uploadedImageUrl}
           setScannedResults={setScannedResults}
+          budgetId={budgetId}
         />
       )}
     </>

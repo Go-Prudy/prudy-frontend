@@ -9,9 +9,10 @@
     + Code comments
     + Code optimization
     + Code refactoring
-+ Sync not working through the sync account action button on the track page
 + ⁠use skeleton for data fetching
 + duplicate previous budget
++ get category expense
++ 
 
 
 

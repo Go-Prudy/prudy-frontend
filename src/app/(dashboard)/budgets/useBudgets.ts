@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useBudgetStore } from '@/app/store/useBudgetStore';
 import api from '@/app/utils/axiosInstance';
+import { CreateBudgetForm } from '@/app/types/budget';
 
 export default function useBudgets() {
   const queryClient = useQueryClient();
@@ -19,6 +20,8 @@ export default function useBudgets() {
   const [showDeleteBudgetModal, setShowDeleteBudgetModal] = useState<boolean>(false);
 
   const [budgetId, setBudgetId] = useState<string | null>(null);
+  const [typeOfDrawer, setTypeOfDrawer] = useState<'create' | 'edit'>('create');
+  const [budgetData, setBudgetData] = useState<CreateBudgetForm>();
 
   const { data: getPendingInvitesApiData = [] } = useQuery({
     queryKey: ['getPendingInvites'],
@@ -73,6 +76,17 @@ export default function useBudgets() {
     },
   });
 
+  const duplicateBudgeteMutation = useMutation({
+    mutationFn: (id: string) => api.post(`budgets/${id}/duplicate`),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['getAllBudgets'] });
+      console.log('Budget duplicated successfully!');
+    },
+    onError: (error: unknown) => {
+      console.error('Error duplicating budget:', error);
+    },
+  });
+
   return {
     showInvitesModal,
     setShowInvitesModal,
@@ -82,6 +96,10 @@ export default function useBudgets() {
     setShowInviteCollaboratorDrawer,
     budgetId,
     setBudgetId,
+    typeOfDrawer,
+    setTypeOfDrawer,
+    budgetData,
+    setBudgetData,
     budgets,
     deleteBudgetMutation,
     isPending: isLoadingBudgets,
@@ -90,5 +108,6 @@ export default function useBudgets() {
     setShowDeleteBudgetModal,
     rejectInviteMutation,
     acceptInviteMutation,
+    duplicateBudgeteMutation,
   };
 }

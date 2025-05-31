@@ -6,16 +6,14 @@ import 'react-calendar/dist/Calendar.css';
 import Button from '../../button';
 import useSelectSyncPeriod from './useSelectSyncPeriod';
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
-
-type ValuePiece = Date | null;
-
-type Value = ValuePiece | [ValuePiece, ValuePiece];
+import { DateValue } from '@/app/types/index';
+import { format } from 'date-fns';
 
 type Props = {
   setShow: (i: boolean) => void;
   show: boolean;
-  value: Value;
-  onChange: Dispatch<SetStateAction<Value>>;
+  value: DateValue;
+  onChange: Dispatch<SetStateAction<DateValue>>;
   accountId: string;
   selectedBudgetId: string;
 };
@@ -28,7 +26,7 @@ export default function SelectSyncPeriodDrawer({
   accountId,
   selectedBudgetId,
 }: Props) {
-  const { setEnableSync, isSyncing } = useSelectSyncPeriod({
+  const { setEnableSync, isSyncing, setStartDate, setEndDate } = useSelectSyncPeriod({
     accountId,
     selectedBudgetId,
   });
@@ -46,8 +44,16 @@ export default function SelectSyncPeriodDrawer({
           <Button
             loading={isSyncing}
             onClick={() => {
-              console.log(value, accountId);
-              setEnableSync(true);
+              // console.log(value, accountId);
+              if (value && Array.isArray(value) && value[0]) {
+                console.log(
+                  format(value[0] as Date, 'yyyy-MM-dd'),
+                  format(value[1] as Date, 'yyyy-MM-dd'),
+                );
+                setStartDate(value[0] as Date);
+                setEndDate(value[1] as Date);
+                setEnableSync(true);
+              }
             }}
           >
             Proceed

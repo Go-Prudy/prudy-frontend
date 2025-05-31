@@ -156,7 +156,11 @@ const Page = ({ params }: { params: { budgetId: string } }) => {
           selectedBudgetId={params.budgetId ?? ''}
         />
       )}
-      <ScanReceipt showScanner={showScanner} setShowScanner={setShowScanner} />
+      <ScanReceipt
+        showScanner={showScanner}
+        setShowScanner={setShowScanner}
+        budgetId={params.budgetId || ''}
+      />
     </div>
   );
 };

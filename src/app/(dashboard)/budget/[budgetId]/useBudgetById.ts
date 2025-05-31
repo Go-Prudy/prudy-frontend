@@ -3,11 +3,9 @@ import api from '@/app/utils/axiosInstance';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { ApiResponse } from '@/app/types/index';
 import { BudgetDetails, BudgetStats } from '@/app/types/budget';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getAllAccountsApi } from '@/app/services/AccountService';
-
-type ValuePiece = Date | null;
-type Value = ValuePiece | [ValuePiece, ValuePiece];
+import { DateValue } from '@/app/types/index';
 
 export default function useBudgetById({ budgetId }: { budgetId: string }) {
   const { userData } = useAuthStore();
@@ -19,7 +17,7 @@ export default function useBudgetById({ budgetId }: { budgetId: string }) {
   const [showScanner, setShowScanner] = useState<boolean>(false);
   const [showSyncPeriodDrawer, setShowSyncPeriodDrawer] = useState<boolean>(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string>();
-  const [value, setValue] = useState<Value>(new Date());
+  const [value, setValue] = useState<DateValue>(new Date());
 
   const { data: budgetDetails, isLoading: isLoadingBudgetDetails } = useQuery<
     ApiResponse<BudgetDetails>

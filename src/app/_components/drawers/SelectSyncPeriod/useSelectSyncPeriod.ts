@@ -3,6 +3,7 @@ import api from '@/app/utils/axiosInstance';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useEffect, useState } from 'react';
+import { DateValue } from '@/app/types/index';
 
 export default function useSelectSyncPeriod({
   selectedBudgetId,
@@ -14,6 +15,8 @@ export default function useSelectSyncPeriod({
   const navigate = useRouter();
   const { userData } = useAuthStore();
   const [enableSync, setEnableSync] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<DateValue>();
+  const [endDate, setEndDate] = useState<DateValue>();
 
   const {
     data: syncAccountTransactions = [],
@@ -21,7 +24,12 @@ export default function useSelectSyncPeriod({
     isSuccess,
   } = useQuery({
     queryKey: ['syncAccountTransactions', accountId],
-    queryFn: async () => (await api.get(`accounts/${accountId}/transactions/sync`)).data,
+    queryFn: async () =>
+      (
+        await api.get(
+          `accounts/${accountId}/transactions/sync?startDate=${startDate}&endDate=${endDate}`,
+        )
+      ).data,
     enabled: !!userData?.token && enableSync,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -40,5 +48,5 @@ export default function useSelectSyncPeriod({
     }
   }, [isSyncing]);
 
-  return { setEnableSync, isSyncing };
+  return { setEnableSync, isSyncing, setStartDate, setEndDate };
 }

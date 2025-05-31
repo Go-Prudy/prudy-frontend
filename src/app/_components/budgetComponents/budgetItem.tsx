@@ -2,7 +2,7 @@ import { Avatar, AvatarGroup } from '@nextui-org/react';
 import React, { Dispatch, SetStateAction } from 'react';
 import { BsChevronRight, BsThreeDotsVertical } from 'react-icons/bs';
 import AppPopover from '../popover';
-import { Budget } from '@/app/types/budget';
+import { Budget, CreateBudgetForm } from '@/app/types/budget';
 import cn from 'classnames';
 import Link from 'next/link';
 
@@ -13,6 +13,11 @@ type Props = {
   setBudgetId: Dispatch<SetStateAction<string | null>>;
   setShowInviteCollaboratorDrawer: Dispatch<SetStateAction<boolean>>;
   setShowDeleteBudgetModal: Dispatch<SetStateAction<boolean>>;
+  setTypeOfDrawer?: Dispatch<SetStateAction<'create' | 'edit'>>;
+  setCreateBudgetComponent?: Dispatch<SetStateAction<boolean>>;
+  setBudgetData?: Dispatch<SetStateAction<CreateBudgetForm | undefined>>;
+  duplicateBudget?: (id: string) => void;
+  duplicateBudgetLoading?: boolean;
 };
 
 const actions = [
@@ -29,6 +34,11 @@ export default function BudgetItem({
   setBudgetId,
   setShowInviteCollaboratorDrawer,
   setShowDeleteBudgetModal,
+  setTypeOfDrawer,
+  setCreateBudgetComponent,
+  setBudgetData,
+  duplicateBudget,
+  duplicateBudgetLoading,
 }: Props) {
   return (
     <div className="bg-white rounded-[20px] flex flex-col relative border border-gray-200 gap-2 py-4">
@@ -51,8 +61,18 @@ export default function BudgetItem({
                 key={action.key}
                 onClick={() => {
                   if (action.key === 'edit') {
+                    setTypeOfDrawer?.('edit');
+                    setBudgetId(budget?.uid);
+                    setBudgetData?.({
+                      name: budget?.name,
+                      purpose: budget?.purpose,
+                      startDate: budget?.startDate,
+                      endDate: budget?.endDate,
+                    });
+                    setCreateBudgetComponent?.(true);
                   }
                   if (action.key === 'duplicate') {
+                    duplicateBudget?.(budget?.uid);
                   }
                   if (action.key === 'delete') {
                     setBudgetId(budget?.uid);
@@ -65,7 +85,9 @@ export default function BudgetItem({
                 }}
                 className="block w-full text-left"
               >
-                {action.name}
+                {action.key === 'duplicate' && duplicateBudgetLoading
+                  ? 'loading...'
+                  : action.name}
               </button>
             ))}
           </AppPopover>

@@ -10,6 +10,7 @@ import { generateUniqueColors } from '@/app/utils/functions';
 import { getBudgetDistributionApi } from '@/app/services/BudgetService';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   budgetId: string;
@@ -20,6 +21,7 @@ export default function PlannedBudget({ budgetId }: Props) {
     useState<boolean>(false);
 
   const { userData } = useAuthStore();
+  const navigate = useRouter();
 
   const [distributions, setDistributions] = useState<BudgetDistributionCategory[]>([]);
   const [filteredDistributions, setFilteredDistributions] = useState<
@@ -100,8 +102,11 @@ export default function PlannedBudget({ budgetId }: Props) {
           />
           <div className="bg-white mt-[28px] flex flex-col gap-[16px]  w-full">
             {filteredDistributions?.map((category: any, index: number) => (
-              <div
+              <button
                 key={category.uid}
+                onClick={() =>
+                  navigate.push(`/budget/${budgetId}/${category.uid}/category-expense`)
+                }
                 className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
               >
                 {/* Category Name */}
@@ -119,7 +124,7 @@ export default function PlannedBudget({ budgetId }: Props) {
                 <span className="text-[#474747] text-[14px]">
                   {category.percentage.toFixed(1)}%
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </>

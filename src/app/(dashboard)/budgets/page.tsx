@@ -43,6 +43,10 @@ const BudgetPage = () => {
     setShowInviteCollaboratorDrawer,
     budgetId,
     setBudgetId,
+    typeOfDrawer,
+    setTypeOfDrawer,
+    budgetData,
+    setBudgetData,
     budgets,
     deleteBudgetMutation,
     isPending,
@@ -52,6 +56,7 @@ const BudgetPage = () => {
     // refetchAllBudgets,
     rejectInviteMutation,
     acceptInviteMutation,
+    duplicateBudgeteMutation,
   } = useBudgets();
 
   return (
@@ -141,6 +146,13 @@ const BudgetPage = () => {
                         setBudgetId={setBudgetId}
                         setShowInviteCollaboratorDrawer={setShowInviteCollaboratorDrawer}
                         setShowDeleteBudgetModal={setShowDeleteBudgetModal}
+                        setTypeOfDrawer={setTypeOfDrawer}
+                        setCreateBudgetComponent={setCreateBudgetComponent}
+                        setBudgetData={setBudgetData}
+                        duplicateBudget={async (id) =>
+                          duplicateBudgeteMutation.mutateAsync(id)
+                        }
+                        duplicateBudgetLoading={duplicateBudgeteMutation.isPending}
                       />
                     );
                   })}
@@ -152,8 +164,11 @@ const BudgetPage = () => {
       </DashboardWrapper>
       {createBudgetComponent && (
         <CreateBudgetDrawer
+          type={typeOfDrawer}
           show={createBudgetComponent}
           setShow={setCreateBudgetComponent}
+          budgetData={budgetData}
+          budgetId={budgetId ?? ''}
         />
       )}
 

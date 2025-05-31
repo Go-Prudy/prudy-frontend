@@ -13,3 +13,7 @@ export interface ErrorResponse {
   returnStatus: string;
   success: boolean;
 }
+
+export type DateValuePiece = Date | null;
+
+export type DateValue = DateValuePiece | [DateValuePiece, DateValuePiece];
