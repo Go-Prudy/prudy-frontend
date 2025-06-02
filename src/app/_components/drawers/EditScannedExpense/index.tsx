@@ -56,9 +56,9 @@ const EditScannedExpenseDrawer = ({
   }>({
     defaultValues: {
       name: scannedItem.name || '',
-      quantity: scannedItem.quantity.toString() || '1',
-      total: scannedItem.totalAmount.toString() || '0',
-      price: scannedItem.baseAmount.toString() || '0',
+      quantity: scannedItem?.quantity?.toString() || '1',
+      total: scannedItem?.totalAmount?.toString() || '0',
+      price: scannedItem?.baseAmount?.toString() || '0',
     },
     resolver: yupResolver(editScannedExpenseSchema),
   });

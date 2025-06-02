@@ -41,9 +41,10 @@ export default function useEditScannedExpense({
         ...prev,
         items: updatedItems,
         // recalculate subtotals, totalAmount, and vat
-        subTotal: updatedItems.reduce((acc, item) => acc + item.totalAmount, 0),
+        subTotal: updatedItems.reduce((acc, item) => acc + (item.totalAmount ?? 0), 0),
         totalAmount:
-          updatedItems.reduce((acc, item) => acc + item.totalAmount, 0) + prev['vat(%)'],
+          updatedItems.reduce((acc, item) => acc + (item.totalAmount ?? 0), 0) +
+          prev['vat(%)'],
       };
     });
 

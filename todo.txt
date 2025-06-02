@@ -1,18 +1,16 @@
++ ⁠use skeleton for data fetching
++ get category expense
 + Analytics
     + Line Charts
 + Track page
     + Auto categorize with ai
-+ Scan receipts
-    + Auto categorize
 + Code cleanup
     + Code organization
     + Code comments
     + Code optimization
     + Code refactoring
-+ ⁠use skeleton for data fetching
-+ duplicate previous budget
-+ get category expense
-+ 
+
+
 
 
 

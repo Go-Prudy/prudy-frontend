@@ -32,11 +32,11 @@ const ItemCard = ({
   <div className="bg-white border border-gray-200 p-4 rounded-2xl space-y-3">
     <div className="flex justify-between gap-2 text-black-800">
       <p className="font-medium">{item.name}</p>
-      <p className="font-bold">₦{item.totalAmount.toLocaleString()}</p>
+      <p className="font-bold">₦{item?.totalAmount?.toLocaleString()}</p>
     </div>
     <div className="flex justify-between gap-2 text-gray-600 text-xs">
       <p className="bg-gray-100 border border-gray-200 rounded-lg py-1 px-2">
-        x{item.quantity} / ₦{item.baseAmount.toLocaleString()}
+        x{item.quantity} / ₦{item?.baseAmount?.toLocaleString()}
       </p>
       <button
         onClick={onCategoryClick}
