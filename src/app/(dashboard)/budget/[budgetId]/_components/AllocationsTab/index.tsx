@@ -14,6 +14,7 @@ import { Progress } from '@nextui-org/react';
 import useAllocationsTab from './useAllocationsTab';
 import AppPopover from '@/app/_components/popover';
 import { Icons } from '@/app/icons';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   budgetId: string;
@@ -37,6 +38,8 @@ export default function AllocationsTab({ budgetId, handleTabSelection }: Props) 
     handleEdit,
     selectedAllocation,
   } = useAllocationsTab({ budgetId });
+
+  const navigate = useRouter();
 
   return (
     <div className="space-y-6 bg-gray-100 p-4">
@@ -74,9 +77,14 @@ export default function AllocationsTab({ budgetId, handleTabSelection }: Props) 
           ) : budgetAllocations?.length > 0 ? (
             <div className="grid grid-cols-2 gap-4">
               {budgetAllocations?.map((allocation: Allocation) => (
-                <div
+                <button
                   key={allocation?.uid}
                   className="relative p-3 space-y-2 bg-gray-100 border border-gray-200 rounded-[20px] text-black-800 text-sm font-medium"
+                  onClick={() =>
+                    navigate.push(
+                      `/budget/${budgetId}/${allocation?.budgetCategory?.uid}/category-expense`,
+                    )
+                  }
                 >
                   <div className="size-10 bg-white rounded-full"></div>
                   <p className="">{allocation?.budgetCategory?.name}</p>
@@ -126,7 +134,7 @@ export default function AllocationsTab({ budgetId, handleTabSelection }: Props) 
                       {deleteMutation.isPending ? 'Loading...' : <span>Delete </span>}
                     </button>
                   </AppPopover>
-                </div>
+                </button>
               ))}
             </div>
           ) : (

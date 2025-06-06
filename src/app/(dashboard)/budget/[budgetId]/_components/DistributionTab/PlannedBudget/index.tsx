@@ -102,11 +102,8 @@ export default function PlannedBudget({ budgetId }: Props) {
           />
           <div className="bg-white mt-[28px] flex flex-col gap-[16px]  w-full">
             {filteredDistributions?.map((category: any, index: number) => (
-              <button
+              <div
                 key={category.uid}
-                onClick={() =>
-                  navigate.push(`/budget/${budgetId}/${category.uid}/category-expense`)
-                }
                 className="flex justify-between w-full items-center p-[12px] bg-[#F7F7F9] rounded-[12px] border-[1px] border-[#EFEFF0]"
               >
                 {/* Category Name */}
@@ -124,7 +121,7 @@ export default function PlannedBudget({ budgetId }: Props) {
                 <span className="text-[#474747] text-[14px]">
                   {category.percentage.toFixed(1)}%
                 </span>
-              </button>
+              </div>
             ))}
           </div>
         </>

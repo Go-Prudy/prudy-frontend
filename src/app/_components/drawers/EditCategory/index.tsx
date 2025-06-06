@@ -16,7 +16,10 @@ type Props = {
 };
 
 export default function EditCategoryDrawer({ show, setShow, selectedCategory }: Props) {
-  const { onSubmit, editCategoryMutation } = useCreateCategory({ setShow });
+  const { onSubmit, editCategoryMutation } = useCreateCategory({
+    setShow,
+    id: selectedCategory?.uid ?? '',
+  });
   const {
     register,
     handleSubmit,

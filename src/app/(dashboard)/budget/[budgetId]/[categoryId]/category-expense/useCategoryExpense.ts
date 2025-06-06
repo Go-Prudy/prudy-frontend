@@ -1,5 +1,5 @@
 // src/app/hooks/useCategoryExpenses.ts
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/app/utils/axiosInstance';
 import { useAuthStore } from '@/app/store/useAuthStore';
@@ -17,14 +17,14 @@ export const useCategoryExpense = (budgetId: string, categoryId: string) => {
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['categoryExpenses', budgetId, categoryId],
-    queryFn: async () => {
-      const response = (
-        await api.get(`/budgets/${budgetId}/categories/${categoryId}/expenses`)
-      ).data;
-      return response.data.data;
-    },
+    queryFn: async () =>
+      (await api.get(`/budgets/${budgetId}/categories/${categoryId}/expenses`)).data,
     enabled: !!budgetId && !!categoryId && !!userData?.token,
   });
+
+  useEffect(() => {
+    console.log(data.data);
+  }, [data]);
 
   return {
     expenses: data?.data?.docs ?? [],
