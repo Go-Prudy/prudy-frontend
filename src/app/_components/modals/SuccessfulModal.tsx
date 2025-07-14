@@ -10,6 +10,7 @@ import {
 import Button from '../button';
 import successGif from '/public/images/success-gif.gif';
 import Image, { StaticImageData } from 'next/image';
+import cn from 'classnames';
 
 type Props = {
   image?: StaticImageData;
@@ -17,9 +18,19 @@ type Props = {
   text?: string;
   isOpen: boolean;
   onClose: () => void;
+  children?: React.ReactNode;
+  textCenter?: boolean;
 };
 
-export default function SuccessfulModal({ image, title, text, isOpen, onClose }: Props) {
+export default function SuccessfulModal({
+  image,
+  title,
+  text,
+  isOpen,
+  onClose,
+  children,
+  textCenter = false,
+}: Props) {
   return (
     <Modal
       isOpen={isOpen}
@@ -42,17 +53,23 @@ export default function SuccessfulModal({ image, title, text, isOpen, onClose }:
               />
             </ModalHeader>
             <ModalBody className="space-y-6 p-0">
-              <h1 className="font-medium text-xl text-black-800 text-center">{title}</h1>
+              <h1 className="font-bold text-xl text-black-800 text-center">{title}</h1>
 
-              {text && <p className="text-base text-gray-300">{text}</p>}
+              {text && (
+                <p className={cn('text-base text-gray-300', textCenter && 'text-center')}>
+                  {text}
+                </p>
+              )}
             </ModalBody>
             <ModalFooter className="p-0">
-              <Button
-                onClick={onClose}
-                className="!bg-lemonGreen-100 !text-lemonGreen-900"
-              >
-                Close
-              </Button>
+              {children || (
+                <Button
+                  onClick={onClose}
+                  className="!bg-lemonGreen-100 !text-lemonGreen-900"
+                >
+                  Close
+                </Button>
+              )}
             </ModalFooter>
           </>
         )}

@@ -39,6 +39,7 @@ const ChangePasscodePage = () => {
             setOtpValues={setNewPasscode}
             focusedInput={focusedNewPasscode}
             setFocusedInput={setFocusedNewPasscode}
+            isPassword
           />
           {forgotPasswordMutation.data && <Success />}
           <p className="text-gray-400 text-sm">Confirm Passcode</p>
@@ -48,6 +49,7 @@ const ChangePasscodePage = () => {
             setOtpValues={setConfirmPasscode}
             focusedInput={focusedConfirmPasscode}
             setFocusedInput={setFocusedConfirmPasscode}
+            isPassword
           />
           {forgotPasswordMutation.data && <Success />}
           {error && <p className="text-red-500">{error}</p>}

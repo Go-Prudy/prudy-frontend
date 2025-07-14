@@ -2,13 +2,11 @@
 import Image from 'next/image';
 import emptyState from '/public/images/empty-state/transaction.png';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getSingleBudgetApi, reauthorizeAccountApi } from '@/app/services/BudgetService';
 import {
   fetchAccountInfoApi,
   fetchAccountTransactionsApi,
-  syncAccountTransactionsApi,
 } from '@/app/services/AccountService';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
@@ -22,169 +20,57 @@ import { EmptyStateDarkBg } from '@/app/_components/emptyState';
 import BottomButton from '@/app/(dashboard)/budget/[budgetId]/_components/bottomButton';
 import Button from '@/app/_components/button';
 import { Icons } from '@/app/icons';
-
-interface Transaction {
-  uid: string;
-  narration: string;
-  date: string;
-  amount: number;
-}
-
-interface TransactionsPage {
-  docs: Transaction[]; // List of transactions
-  next?: { page: number }; // Information about the next page
-}
-
-interface Transaction {
-  id: number;
-  name: string;
-  date: string;
-  time: string;
-  amount: number;
-  currency: string;
-}
-
-const formatTime = (seconds: number): Date => {
-  const date = new Date(0);
-  date.setSeconds(seconds);
-  return date;
-};
+import cn from 'classnames';
+import toast from 'react-hot-toast';
+import useAccountPage from './useAccountPage';
+import AutoCategorizeDrawer from '@/app/_components/drawers/AutoCategorize';
+import AutoCategorizeExpensesDrawer from '@/app/_components/drawers/AutoCategorize/expenses';
+import LoadingModal from '@/app/_components/modals/LoadingModal';
 
 export default function Page({
   params,
 }: {
   params: { budgetId: string; accountId: string };
 }) {
-  const { userData } = useAuthStore();
-
-  // const [showAccountProcessingModal, setShowAccountProcessingModal] = useState(true);
-  const [showReauthorizeAccountModal, setShowReauthorizeAccountModal] = useState(false);
-  const [showSplitExapenseDrawer, setShowSplitExapenseDrawer] = useState<boolean>(false);
-  const [showAssignExpenseDrawer, setShowAssignExpenseDrawer] = useState(false);
-  const [transactionId, setTransactionId] = useState('');
-  const [transactionDetails, setTransactionDetails] = useState<Transaction>();
-
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedCategoryForTransaction, setSelectedCategoryForTransaction] =
-    useState(null);
-
-  const limit = 12; // Items per page
-  const [showBalance, setShowBalance] = useState(true); // Track balance visibility
-
-  const toggleBalanceVisibility = () => {
-    setShowBalance((prevState) => !prevState);
-  };
-
-  // query to fetch account information with account id
-  const { data: selectedBankAccount = {}, isLoading: selectedBankAccountLoading } =
-    useQuery({
-      queryKey: ['getSelectedAccountInfo', params.accountId],
-      queryFn: () => fetchAccountInfoApi(userData?.token ?? '', params.accountId),
-      enabled: !!userData?.token,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    });
-
-  const { data: singleBudgetData = [] } = useQuery({
-    queryKey: ['singleBudgetData' + params.budgetId],
-    queryFn: () => getSingleBudgetApi(userData?.token ?? '', params.budgetId),
-    enabled: !!userData?.token && !!params.budgetId,
-    refetchOnWindowFocus: true, // This should be directly in the options object.
-  });
-
-  // const {
-  //   data: syncAccountTransactions = [],
-  //   isLoading: isSyncing,
-  //   refetch: refetchSyncedAccountTransactions,
-  // } = useQuery({
-  //   queryKey: ['accountInfo', params.accountId],
-  //   queryFn: () => syncAccountTransactionsApi(userData?.token ?? '', params.accountId),
-  //   enabled: showAccountProcessingModal, // Disables automatic fetching
-  //   refetchOnWindowFocus: false,
-  //   refetchOnMount: false,
-  //   refetchInterval: false,
-  // });
-
-  // const handleSyncTransactions = async () => {
-  //   await refetchSyncedAccountTransactions();
-  //   setShowAccountProcessingModal(false);
-  // };
-
-  // re-authorize account
-  const handleReauthorizeAccount = useMutation({
-    mutationFn: async (id: string) =>
-      reauthorizeAccountApi(userData?.token ?? '', id ?? ''),
-    onSuccess: (data) => {
-      window.location.href = data.data.url;
-      setShowReauthorizeAccountModal(false);
-    },
-    onError: (error) => {
-      console.error('Error reauthorizing account:', error);
-    },
-  });
-
-  const assignExpense = (transactionId: string, transaction: Transaction) => {
-    setTransactionId(transactionId);
-    setShowAssignExpenseDrawer(true);
-    setTransactionDetails(transaction);
-  };
-
-  // Fetch transactions API
   const {
-    data: transactionData,
-    isLoading: isLoadingGetAllAccountTransactions,
+    transactions,
+    isLoadingGetAllAccountTransactions,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<TransactionsPage, Error>({
-    queryKey: ['getAllAccountTransactions', params.accountId],
-    queryFn: async ({ pageParam = 1 }: any) =>
-      await fetchAccountTransactionsApi(
-        userData?.token ?? '',
-        params.accountId,
-        limit,
-        pageParam,
-      ),
-    getNextPageParam: (lastPage) => lastPage.next?.page ?? undefined, // Fetch the next page based on the API response
-    enabled: !!userData?.token && !!params.accountId,
-    initialPageParam: 1,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchInterval: false,
-    staleTime: Infinity,
-  });
-
-  useEffect(() => {
-    if (transactionData?.pages && transactionData.pages.length > 0) {
-      setTransactions(
-        transactionData.pages.flatMap((page: TransactionsPage) => page.docs) || [],
-      );
-    }
-  }, [transactionData]);
-
-  useEffect(() => {
-    // if (selectedBankAccount?.accountStatus === 'PROCESSING') {
-    //   setShowAccountProcessingModal(true);
-    // } else
-    if (selectedBankAccount?.reauthRequired) {
-      setShowReauthorizeAccountModal(true);
-    }
-  }, [selectedBankAccount]);
-
-  // // account processing timer
-  // const [timeLeft, setTimeLeft] = useState<number>(30);
-  // useEffect(() => {
-  //   if (showAccountProcessingModal) {
-  //     if (timeLeft <= 0) return;
-
-  //     const timer = setInterval(() => {
-  //       setTimeLeft((prevTime) => prevTime - 1);
-  //     }, 1000);
-
-  //     return () => clearInterval(timer);
-  //   } else setTimeLeft(30);
-  // }, [timeLeft, showAccountProcessingModal]);
-
+    selectedBankAccount,
+    selectedBankAccountLoading,
+    showReauthorizeAccountModal,
+    setShowReauthorizeAccountModal,
+    showSplitExapenseDrawer,
+    setShowSplitExapenseDrawer,
+    showAssignExpenseDrawer,
+    setShowAssignExpenseDrawer,
+    transactionId,
+    transactionDetails,
+    selectedCategoryForTransaction,
+    setSelectedCategoryForTransaction,
+    selectedTransactions,
+    setSelectedTransactions,
+    toggleAutoCategorize,
+    setToggleAutoCategorize,
+    showBalance,
+    setShowBalance,
+    toggleBalanceVisibility,
+    singleBudgetData,
+    handleReauthorizeAccount,
+    assignExpense,
+    handleSelectTransaction,
+    autoCategorizeTransactions,
+    showTransactionCategoryDrawer,
+    setShowTransactionCategoryDrawer,
+    autoCategorizedData,
+    setAutoCategorizedData,
+    showTransactionCategoryExpenseDrawer,
+    setShowTransactionCategoryExpenseDrawer,
+    selectedTransactionIndexToReview,
+    setSelectedTransactionIndexToReview,
+  } = useAccountPage({ budgetId: params.budgetId, accountId: params.accountId });
   return (
     <div className="w-full">
       <InnerPageHeader link="/track" title={'Transactions'} />
@@ -244,21 +130,56 @@ export default function Page({
             {transactions.length > 0 ? (
               <>
                 <div className="space-y-2">
-                  {transactions.map((transaction, index) => (
+                  {transactions?.map((transaction) => (
                     <div
                       key={transaction.uid}
-                      onClick={() => assignExpense(transaction.uid, transaction)}
-                      className="flex justify-between items-end bg-white rounded-2xl border border-gray-200 p-4 text-sm text-black-800"
+                      onClick={() =>
+                        toggleAutoCategorize
+                          ? handleSelectTransaction(transaction.uid)
+                          : assignExpense(transaction.uid, transaction)
+                      }
+                      className={cn(
+                        'relative flex justify-between items-end rounded-2xl border p-4 text-sm text-black-800',
+                        toggleAutoCategorize &&
+                          selectedTransactions.includes(transaction.uid)
+                          ? 'bg-lemonGreen-300 border-lemonGreen-600'
+                          : 'border-gray-200 bg-white',
+                      )}
                     >
                       <div>
                         <p className="font-medium ">{transaction.narration}</p>
-                        <p className="text-gray-600 text-xs">
-                          {/* {formatDateTime(transaction.date)} */}
-                          {transaction.date}
-                        </p>
+                        <p className="text-gray-600 text-xs">{transaction.date}</p>
                       </div>
-                      <div className="font-medium whitespace-nowrap">
-                        ₦ {transaction.amount.toLocaleString()}
+                      <div className="flex items-center gap-3">
+                        <div className="font-medium whitespace-nowrap">
+                          ₦ {transaction.amount.toLocaleString()}
+                        </div>
+                        {toggleAutoCategorize && (
+                          <div
+                            className={`w-4 h-4 rounded-md flex items-center justify-center absolute top-[10px] right-[10px]
+                            ${
+                              selectedTransactions.includes(transaction.uid)
+                                ? 'bg-lemonGreen-600 text-white'
+                                : 'border border-gray-200'
+                            }`}
+                          >
+                            {selectedTransactions.includes(transaction.uid) && (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -288,27 +209,6 @@ export default function Page({
           </div>
         )}
       </div>
-
-      {/* account processing modal */}
-      {/* <TrackPageModal
-        title="Account Processing"
-        text="Your account status will be available in a few seconds"
-        isOpen={showAccountProcessingModal}
-        onClose={() => setShowAccountProcessingModal(false)}
-        showFooter={timeLeft === 0}
-        onClick={() => handleSyncTransactions()}
-        footerButtonText="Sync Transactions Now"
-      >
-        <div className="w-fit mx-auto">
-          <span className="h-[22px] p-1 bg-[#eef4fd] rounded p-px text-center text-[#3172dd] text-sm font-normal leading-[14px]">
-            {format(formatTime(timeLeft), 'mm')}
-          </span>{' '}
-          :{' '}
-          <span className="h-[22px] p-1 bg-[#eef4fd] rounded p-px text-center text-[#3172dd] text-sm font-normal leading-[14px]">
-            {format(formatTime(timeLeft), 'ss')}
-          </span>
-        </div>
-      </TrackPageModal> */}
 
       {/* re authorize modal */}
       <TrackPageModal
@@ -346,15 +246,69 @@ export default function Page({
           budgetCategories={singleBudgetData?.budgetCategories || []}
         />
       )}
+
+      {showTransactionCategoryDrawer && (
+        <AutoCategorizeDrawer
+          show={showTransactionCategoryDrawer}
+          setShow={setShowTransactionCategoryDrawer}
+          autoCategorizedData={autoCategorizedData}
+          setSelectedTransactionIndexToReview={setSelectedTransactionIndexToReview}
+          setShowTransactionCategoryExpenseDrawer={
+            setShowTransactionCategoryExpenseDrawer
+          }
+          budgetId={params.budgetId}
+          accountId={params.accountId}
+        />
+      )}
+      {showTransactionCategoryExpenseDrawer && (
+        <AutoCategorizeExpensesDrawer
+          show={showTransactionCategoryExpenseDrawer}
+          setShow={setShowTransactionCategoryExpenseDrawer}
+          transactions={
+            autoCategorizedData?.[selectedTransactionIndexToReview]?.transactions
+          }
+          autoCategorizedData={autoCategorizedData}
+          setAutoCategorizedData={setAutoCategorizedData}
+          indexToReview={selectedTransactionIndexToReview}
+          name={autoCategorizedData?.[selectedTransactionIndexToReview]?.categoryName}
+        />
+      )}
+
+      <LoadingModal
+        isOpen={autoCategorizeTransactions.isPending}
+        onClose={() => {}}
+        text="Categorizing..."
+      />
+
       {/* bottom navigation */}
       <BottomButton>
-        <Button
-        // className="!bg-lemonGreen-100 !text-lemonGreen-900"
-        // onClick={() => handleTabSelection('allocations')}
-        >
-          {Icons.magicIcon}
-          Auto-Categorize with Prudy AI
-        </Button>
+        {toggleAutoCategorize ? (
+          <Button
+            // loading={autoCategorizeTransactions.isPending}
+            onClick={() => {
+              autoCategorizeTransactions.mutate(selectedTransactions);
+            }}
+          >
+            {Icons.magicIcon}
+            Auto-Categorize with Prudy AI
+          </Button>
+        ) : (
+          <Button
+            // loading={autoCategorizeTransactions.isPending}
+            onClick={() => {
+              setToggleAutoCategorize(true);
+              // Pre-select first 15 transactions
+              const transactionsToSelect = transactions?.slice(
+                0,
+                Math.min(15, transactions.length),
+              );
+              setSelectedTransactions(transactionsToSelect.map((t) => t.uid));
+            }}
+          >
+            {Icons.magicIcon}
+            Auto-Categorize with Prudy AI
+          </Button>
+        )}
       </BottomButton>
     </div>
   );

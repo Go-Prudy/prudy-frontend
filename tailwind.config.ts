@@ -12,7 +12,6 @@ const config: Config = {
     extend: {
       screens: {
         sm: '385px',
-        
       },
       animation: {
         scaleAndFadeIn: 'scale-and-fade-in 150ms cubic-bezier(.25, .75, .6, .98)',
@@ -58,6 +57,7 @@ const config: Config = {
 
         success: {
           500: '#219653',
+          900: '#089E05',
         },
         red: { 100: '#FEE7E3', 200: '#FBEDEF', 500: '#F5365C', 600: '#D2303E' },
         orange: { 100: '#F9DFD8', 600: '#E24526' },

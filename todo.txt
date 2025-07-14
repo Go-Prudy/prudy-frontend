@@ -1,3 +1,4 @@
++ auto categorize transactions
 + ⁠use skeleton for data fetching
 + get category expense
 + Analytics

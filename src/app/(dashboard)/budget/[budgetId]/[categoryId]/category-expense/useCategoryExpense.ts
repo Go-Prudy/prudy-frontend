@@ -23,7 +23,7 @@ export const useCategoryExpense = (budgetId: string, categoryId: string) => {
   });
 
   useEffect(() => {
-    console.log(data.data);
+    console.log(data?.data);
   }, [data]);
 
   return {

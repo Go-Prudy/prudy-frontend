@@ -110,6 +110,7 @@ const VerifyOtpPage = () => {
                 inputLength={6}
                 focusedInput={focusedInput}
                 setFocusedInput={setFocusedInput}
+                isPassword
               />
             </div>
             {verifyOtpMutation.data && <Success />}

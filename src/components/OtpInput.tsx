@@ -6,6 +6,7 @@ type OtpInputProps = {
   inputLength: number;
   focusedInput: number | null;
   setFocusedInput: React.Dispatch<React.SetStateAction<number | null>>;
+  isPassword?: boolean;
 };
 
 export default function OtpInput({
@@ -14,6 +15,7 @@ export default function OtpInput({
   inputLength,
   focusedInput,
   setFocusedInput,
+  isPassword = false,
 }: OtpInputProps) {
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -86,7 +88,7 @@ export default function OtpInput({
           ${isFilled ? 'bg-[#E6F8EF]' : 'bg-[#F7F7F9]'} 
           ${isFilled ? 'text-black' : 'text-slate-900'} 
           focus:border-lemonGreen-600 focus:ring-2 focus:ring-indigo-100`}
-            type="text"
+            type={isPassword ? "password" : "text"}
             inputMode="numeric"
             autoComplete="one-time-code"
             value={otpValues[index]}

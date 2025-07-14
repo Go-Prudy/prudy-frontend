@@ -37,6 +37,7 @@ const Page = () => {
             inputLength={passCodeLength}
             focusedInput={focusedPasswordInput}
             setFocusedInput={setFocusedPasswordInput}
+            isPassword
           />
           <p className="text-gray-400 text-sm">Confirm Passcode</p>
           <OtpInput
@@ -45,6 +46,7 @@ const Page = () => {
             inputLength={passCodeLength}
             focusedInput={focusedConfirmPasswordInput}
             setFocusedInput={setFocusedConfirmPasswordInput}
+            isPassword
           />
           <div className="flex items-center gap-2 justify-between"></div>
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
