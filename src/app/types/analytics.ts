@@ -8,20 +8,39 @@ export type AnalyticsResponse = {
 
 export type Analytics = {
   overall: {
-    breakdown: Breakdown;
     remark: Remark;
+    actualExpenses: number;
+    categoriesBreakdown: OverallExpenseCategory[];
+    percentage: number;
+    plannedExpenses: number;
   };
   topExpenses: {
-    categories: ExpenseCategory[];
+    expenseBreakdown: ExpenseBreakdownCategory[];
     remark: Remark;
   };
   bestPerformingCategory: {
-    breakdown: Breakdown;
+    actualAmount: number;
+    categoryId: string;
+    categoryName: string;
+    plannedAmount: number;
     remark: Remark;
   };
   worstPerformingCategory: {
-    breakdown: Breakdown;
+    actualAmount: number;
+    categoryId: string;
+    categoryName: string;
+    plannedAmount: number;
     remark: Remark;
+  };
+  subscription: {
+    totalSubscriptionAmount: number;
+    transactions: SubscriptionTransactions[];
+    remark: Remark;
+  };
+  expenseBreakdown: {
+    expenses: ExpenseBreakdownCategory[];
+    remark: Remark;
+    totalExpenses: number;
   };
 };
 
@@ -36,12 +55,23 @@ export type Remark = {
   description: string;
 };
 
-export type ExpenseCategory = {
-  uid: string;
+export type OverallExpenseCategory = {
   name: string;
   color: string;
-  amountAllocated: number;
   amountSpent: number;
   amountLeft: number;
-  percentageLeft: number;
+  percentage: number;
+  plannedAmount: number;
+};
+
+export type SubscriptionTransactions = {
+  name: string;
+  amount: number;
+};
+
+export type ExpenseBreakdownCategory = {
+  amount: number;
+  color: string;
+  name: string;
+  percentage: number;
 };

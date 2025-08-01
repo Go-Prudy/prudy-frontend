@@ -5,23 +5,20 @@ import { Breakdown, Remark } from '@/app/types/analytics';
 
 type Props = {
   analytics: {
-    breakdown: Breakdown;
+    actualAmount: number;
+    categoryId: string;
+    categoryName: string;
+    plannedAmount: number;
     remark: Remark;
   } | null;
-  isLoadingAnalytics: boolean;
 };
 
-export default function WorstPerformingCategory({
-  analytics,
-  isLoadingAnalytics,
-}: Props) {
+export default function WorstPerformingCategory({ analytics }: Props) {
   return (
     <div className="space-y-10">
       <div className="bg-white py-8 mx-auto max-w-[260px] rounded-3xl border-[10px] border-[#368EF5] text-black-800">
-        <p className="text-lg">{analytics?.breakdown.title}</p>
-        <p className="text-2xl font-bold">
-          ₦{analytics?.breakdown.actualExpenses.toLocaleString()}
-        </p>
+        <p className="text-lg"> {analytics?.categoryName}</p>
+        <p className="text-2xl font-bold">₦{analytics?.actualAmount?.toLocaleString()}</p>
       </div>
       <Image
         src={performanceImage}
@@ -31,14 +28,14 @@ export default function WorstPerformingCategory({
         className="!-mt-1 !-mb-7 mx-auto"
       />
       <div className="text-white space-y-4">
-        <h6 className="text-xl font-bold space-y-4">{analytics?.remark.title}</h6>
+        <h6 className="text-xl font-bold space-y-4">{analytics?.remark?.title}</h6>
         <p>{analytics?.remark.description}</p>
       </div>
       <Performance
-        title={analytics?.breakdown.title ?? ''}
-        plannedBudget={analytics?.breakdown.totalBudgeted ?? 0}
-        actualExpenses={analytics?.breakdown.actualExpenses ?? 0}
-      />{' '}
+        title={analytics?.categoryName ?? ''}
+        plannedBudget={analytics?.plannedAmount ?? 0}
+        actualExpenses={analytics?.actualAmount ?? 0}
+      />
     </div>
   );
 }

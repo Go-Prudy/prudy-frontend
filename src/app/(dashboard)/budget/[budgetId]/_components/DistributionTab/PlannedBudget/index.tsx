@@ -100,7 +100,7 @@ export default function PlannedBudget({ budgetId }: Props) {
             totalBudget={budgetDistributionData?.totalBudget}
             distributions={filteredDistributions}
           />
-          <div className="bg-white mt-[28px] flex flex-col gap-[16px]  w-full">
+          <div className="bg-white mt-3 flex flex-col gap-4 w-full">
             {filteredDistributions?.map((category: any, index: number) => (
               <div
                 key={category.uid}

@@ -1,10 +1,7 @@
-+ auto categorize transactions
 + ⁠use skeleton for data fetching
 + get category expense
 + Analytics
     + Line Charts
-+ Track page
-    + Auto categorize with ai
 + Code cleanup
     + Code organization
     + Code comments

@@ -61,7 +61,7 @@ const BottomDrawer: React.FC<IProps> = ({
         )}
 
         <div className="w-full flex justify-between items-center">
-          <h1 className="font-medium text-lg">{label}</h1>
+          <h1 className="font-medium text-lg text-black-800">{label}</h1>
 
           {close && (
             <button

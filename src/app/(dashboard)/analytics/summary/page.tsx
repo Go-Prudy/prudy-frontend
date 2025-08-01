@@ -15,11 +15,9 @@ import Subscriptions from './_components/subscriptions';
 import SpendingTrends from './_components/spendingTrends';
 import IncomeBreakdown from './_components/incomeBreakdown';
 import ExpenseBreakdown from './_components/expenseBreakdown';
-import api from '@/app/utils/axiosInstance';
-import { useAuthStore } from '@/app/store/useAuthStore';
-import { useQuery } from '@tanstack/react-query';
 import { useAnalyticsStore } from '@/app/store/useAnalyticsStore';
 import { Autoplay } from 'swiper/modules';
+import Loader from '@/app/_components/loader';
 
 const Header = ({ title }: { title: string }) => (
   <div className="flex justify-between items-center pb-4 text-white">
@@ -83,77 +81,73 @@ export default function Page() {
       </div>
       <div className="absolute top-[78px] left-0 right-0 w-[calc(100%-24px)] mx-auto z-50 h-1 w-full rounded-[2px] bg-white/10" />
 
-      <Swiper
-        grabCursor
-        slidesPerView={1}
-        onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-        autoplay={{
-          delay: 15000,
-          disableOnInteraction: false,
-          pauseOnMouseEnter: true,
-        }}
-        modules={[Autoplay]}
-      >
-        <SwiperSlide>
-          <SummaryWrapper title="Planned vs Actual">
-            <PlannedVsActual
-              analytics={analytics?.overall ?? null}
-              isLoadingAnalytics={isLoadingAnalytics}
-            />
-          </SummaryWrapper>
-        </SwiperSlide>
+      {isLoadingAnalytics ? (
+        <Loader className="pt-5" />
+      ) : (
+        <Swiper
+          grabCursor
+          slidesPerView={1}
+          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+          autoplay={{
+            delay: 15000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          modules={[Autoplay]}
+        >
+          <SwiperSlide>
+            <SummaryWrapper title="Planned vs Actual">
+              <PlannedVsActual analytics={analytics?.overall ?? null} />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Your Top Expenses">
-            <TopExpenses
-              analytics={analytics?.topExpenses ?? null}
-              isLoadingAnalytics={isLoadingAnalytics}
-            />
-          </SummaryWrapper>
-        </SwiperSlide>
+          <SwiperSlide>
+            <SummaryWrapper title="Your Top Expenses">
+              <TopExpenses analytics={analytics?.topExpenses ?? null} />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Best Performing Category">
-            <BestPerformingCategory
-              analytics={analytics?.bestPerformingCategory ?? null}
-              isLoadingAnalytics={isLoadingAnalytics}
-            />
-          </SummaryWrapper>
-        </SwiperSlide>
+          <SwiperSlide>
+            <SummaryWrapper title="Best Performing Category">
+              <BestPerformingCategory
+                analytics={analytics?.bestPerformingCategory ?? null}
+              />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Worst Performing Category">
-            <WorstPerformingCategory
-              analytics={analytics?.worstPerformingCategory ?? null}
-              isLoadingAnalytics={isLoadingAnalytics}
-            />
-          </SummaryWrapper>
-        </SwiperSlide>
+          <SwiperSlide>
+            <SummaryWrapper title="Worst Performing Category">
+              <WorstPerformingCategory
+                analytics={analytics?.worstPerformingCategory ?? null}
+              />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Subscriptions">
-            <Subscriptions />
-          </SummaryWrapper>
-        </SwiperSlide>
+          <SwiperSlide>
+            <SummaryWrapper title="Subscriptions">
+              <Subscriptions analytics={analytics?.subscription ?? null} />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Spending Trends">
-            <SpendingTrends />
-          </SummaryWrapper>
-        </SwiperSlide>
+          <SwiperSlide>
+            <SummaryWrapper title="Spending Trends">
+              <SpendingTrends />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Income Breakdown">
-            <IncomeBreakdown />
-          </SummaryWrapper>
-        </SwiperSlide>
+          <SwiperSlide>
+            <SummaryWrapper title="Income Breakdown">
+              <IncomeBreakdown />
+            </SummaryWrapper>
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <SummaryWrapper title="Expenses Breakdown">
-            <ExpenseBreakdown />
-          </SummaryWrapper>
-        </SwiperSlide>
-      </Swiper>
+          <SwiperSlide>
+            <SummaryWrapper title="Expenses Breakdown">
+              <ExpenseBreakdown analytics={analytics?.expenseBreakdown ?? null} />
+            </SummaryWrapper>
+          </SwiperSlide>
+        </Swiper>
+      )}
     </div>
   );
 }

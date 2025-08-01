@@ -5,15 +5,19 @@ import { BudgetDistributionCategory } from '@/app/types/budget';
 interface BudgetVisualizationProps {
   totalBudget: number;
   distributions: BudgetDistributionCategory[];
+  text?: string;
+  size?: number;
 }
 
 const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
   totalBudget,
   distributions,
+  text,
+  size,
 }) => {
   useEffect(() => {
-    const width = 280;
-    const height = 280;
+    const width = size ?? 280;
+    const height = size ?? 280;
     const radius = Math.min(width, height) / 2;
 
     const arcGenerator = d3
@@ -49,6 +53,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .style('padding', '5px 10px')
       .style('font-size', '14px')
       .style('box-shadow', '0px 2px 5px rgba(0,0,0,0.1)')
+      .style('color', '#000')
       .style('pointer-events', 'none');
 
     svg
@@ -151,7 +156,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .style('font-size', '18.85px')
       .style('font-weight', '700')
       .style('fill', '#333')
-      .text(`₦ ${totalBudget?.toLocaleString()}`);
+      .text(`₦${totalBudget?.toLocaleString()}`);
 
     svg
       .append('text')
@@ -159,12 +164,12 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .attr('y', -10)
       .style('font-size', '13.6px')
       .style('fill', '#575757')
-      .text('Total budget');
+      .text(text ?? 'Total budget');
 
     return () => {
       d3.select('#budget-chart .tooltip').remove(); // Cleanup on unmount
     };
-  }, [distributions, totalBudget]);
+  }, [distributions, totalBudget, text, size]);
 
   return (
     <div className="flex flex-col items-center">
