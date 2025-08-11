@@ -131,13 +131,13 @@ export default function Page() {
 
           <SwiperSlide>
             <SummaryWrapper title="Spending Trends">
-              <SpendingTrends />
+              <SpendingTrends analytics={analytics?.spendingTrends ?? null} />
             </SummaryWrapper>
           </SwiperSlide>
 
           <SwiperSlide>
             <SummaryWrapper title="Income Breakdown">
-              <IncomeBreakdown />
+              <IncomeBreakdown analytics={analytics?.incomeBreakdown ?? null} />
             </SummaryWrapper>
           </SwiperSlide>
 

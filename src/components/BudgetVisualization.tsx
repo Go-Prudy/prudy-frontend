@@ -7,6 +7,7 @@ interface BudgetVisualizationProps {
   distributions: BudgetDistributionCategory[];
   text?: string;
   size?: number;
+  id?: string;
 }
 
 const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
@@ -14,6 +15,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
   distributions,
   text,
   size,
+  id,
 }) => {
   useEffect(() => {
     const width = size ?? 280;
@@ -31,10 +33,12 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
 
     const pieData = pieGenerator(distributions);
 
-    d3.select('#budget-chart').select('svg').remove();
+    d3.select(id ? `#${id}` : '#budget-chart')
+      .select('svg')
+      .remove();
 
     const svg = d3
-      .select('#budget-chart')
+      .select(id ? `#${id}` : '#budget-chart')
       .append('svg')
       .attr('width', width)
       .attr('height', height)
@@ -42,7 +46,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
       .attr('transform', `translate(${width / 2},${height / 2})`);
 
     const tooltip = d3
-      .select('#budget-chart')
+      .select(id ? `#${id}` : '#budget-chart')
       .append('div')
       .attr('class', 'tooltip')
       .style('position', 'absolute')
@@ -173,7 +177,7 @@ const BudgetVisualization: React.FC<BudgetVisualizationProps> = ({
 
   return (
     <div className="flex flex-col items-center">
-      <div id="budget-chart" className="relative"></div>
+      <div id={id ?? 'budget-chart'} className="relative"></div>
     </div>
   );
 };

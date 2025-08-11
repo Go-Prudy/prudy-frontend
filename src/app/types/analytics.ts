@@ -37,6 +37,16 @@ export type Analytics = {
     transactions: SubscriptionTransactions[];
     remark: Remark;
   };
+  spendingTrends: {
+    day: string;
+    amount: number;
+  }[];
+
+  incomeBreakdown: {
+    income: ExpenseBreakdownCategory[];
+    remark: Remark;
+    totalIncome: number;
+  };
   expenseBreakdown: {
     expenses: ExpenseBreakdownCategory[];
     remark: Remark;

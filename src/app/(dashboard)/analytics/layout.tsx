@@ -2,7 +2,7 @@
 
 import api from '@/app/utils/axiosInstance';
 import { useAuthStore } from '@/app/store/useAuthStore';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useAnalyticsStore } from '@/app/store/useAnalyticsStore';
 import { AnalyticsResponse } from '@/app/types/analytics';
@@ -45,6 +45,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         enabled: !!userData?.token,
       },
       {
+        queryKey: ['getWeeklySpending', selectedBudgetId],
+        queryFn: async () =>
+          (await api.get(`analytics/budgets/${selectedBudgetId}/weekly-spending`)).data,
+        enabled: !!userData?.token,
+      },
+      {
+        queryKey: ['getIncomeBreakdown', selectedBudgetId],
+        queryFn: async () =>
+          (await api.get(`analytics/budgets/${selectedBudgetId}/income-breakdown`)).data,
+        enabled: !!userData?.token,
+      },
+      {
         queryKey: ['getExpenseBreakdown', selectedBudgetId],
         queryFn: async () =>
           (await api.get(`analytics/budgets/${selectedBudgetId}/expense-breakdown`)).data,
@@ -58,6 +70,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     topExpensesQuery,
     categoryPerformanceQuery,
     subscriptionQuery,
+    weeklySpendingQuery,
+    incomeBreakdownQuery,
+
     expenseBreakdownQuery,
   ] = queries;
 
@@ -68,7 +83,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const topExpensesQueryData = topExpensesQuery.data;
   const categoryPerformanceQueryData = categoryPerformanceQuery.data;
   const subscriptionQueryData = subscriptionQuery.data;
+  const incomeBreakdownQueryData = incomeBreakdownQuery.data;
   const expenseBreakdownQueryData = expenseBreakdownQuery.data;
+  const weeklySpendingQueryData = weeklySpendingQuery.data;
 
   useEffect(() => {
     setLoading(!allQueriesLoaded || isLoadingBudgets);
@@ -80,7 +97,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         topExpensesQueryData?.data,
         categoryPerformanceQueryData?.data,
         subscriptionQueryData?.data,
+        weeklySpendingQueryData?.data,
         expenseBreakdownQueryData?.data,
+        incomeBreakdownQueryData?.data,
       );
       setAnalytics({
         overall: plannedVsActualQueryData?.data ?? {},
@@ -88,7 +107,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         bestPerformingCategory: categoryPerformanceQueryData?.data?.best ?? {},
         worstPerformingCategory: categoryPerformanceQueryData?.data?.worst ?? {},
         subscription: subscriptionQueryData?.data ?? {},
+        spendingTrends: weeklySpendingQueryData?.data ?? {},
         expenseBreakdown: expenseBreakdownQueryData?.data ?? {},
+        incomeBreakdown: incomeBreakdownQueryData?.data ?? {},
       });
     }
   }, [allQueriesLoaded, isLoadingBudgets, anyQueryError]);
