@@ -50,7 +50,6 @@ export default function useIncomeTab({ budgetId }: { budgetId: string }) {
   });
 
   const handleEdit = (income: Income) => {
-    console.log(income);
     setSelectedIncome(income);
     setShowIncomeDrawer(true);
   };

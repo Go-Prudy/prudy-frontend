@@ -26,7 +26,6 @@ export default function useAddIncome({
     mutationFn: async (values: AddIncomeForm) =>
       await api.post(`/budgets/${budgetId}/incomes`, values),
     onSuccess: async (data) => {
-      console.log(data.data);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['getIncomes', budgetId] }),
         queryClient.invalidateQueries({ queryKey: ['getBudgetStats', budgetId] }),

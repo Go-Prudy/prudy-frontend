@@ -18,7 +18,6 @@ const Page = () => {
   const updateProfilePictureMutation = useMutation({
     mutationFn: (picture: File) => updateProfilePhotoApi(userData?.token ?? '', picture),
     onSuccess: (result) => {
-      console.log('result successfully!', result);
       updateUserProfile({
         profilePhotoUrl: result.profilePhotoUrl,
       });

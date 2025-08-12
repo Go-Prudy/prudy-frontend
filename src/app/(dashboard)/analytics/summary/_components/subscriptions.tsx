@@ -33,7 +33,7 @@ export default function Subscriptions({ analytics }: Props) {
         </div>
 
         <div className="text-white space-y-4">
-          <h6 className="text-xl font-bold space-y-4">{analytics?.remark.title}</h6>
+          <h6 className="text-xl font-bold space-y-4">{analytics?.remark?.title}</h6>
           <p>{analytics?.remark?.description}</p>
         </div>
         <CategoriesBreakdown

@@ -29,7 +29,7 @@ export default function WorstPerformingCategory({ analytics }: Props) {
       />
       <div className="text-white space-y-4">
         <h6 className="text-xl font-bold space-y-4">{analytics?.remark?.title}</h6>
-        <p>{analytics?.remark.description}</p>
+        <p>{analytics?.remark?.description}</p>
       </div>
       <Performance
         title={analytics?.categoryName ?? ''}

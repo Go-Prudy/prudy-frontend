@@ -37,7 +37,6 @@ export default function useAddManualExpense({
         values,
       ),
     onSuccess: (data) => {
-      console.log(data);
       trackProgressMutation.mutate('assign_expense');
 
       setShowSuccessModal(true);
@@ -52,10 +51,10 @@ export default function useAddManualExpense({
     amount: string;
     date: string;
   }> = async (data) => {
-    console.log('log data', {
-      ...data,
-      amount: convertAmountToNumber(data.amount),
-    });
+    // console.log('log data', {
+    //   ...data,
+    //   amount: convertAmountToNumber(data.amount),
+    // });
     addManualExpenseMutation.mutateAsync({
       ...data,
       amount: convertAmountToNumber(data.amount),

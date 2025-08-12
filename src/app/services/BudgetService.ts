@@ -10,7 +10,7 @@ export const createBudgetCategoryApi = async (data: any, token: string) => {
       },
     });
     toast.success(response.data.message);
-    console.log(response);
+    // console.log(response);
     return response.data.data;
   } catch (error: any) {
     toast.error(error?.response?.data?.message || 'An error occurred');
@@ -72,7 +72,6 @@ export const getActiveBudgetCategoriesApi = async (token: string, budgetId: stri
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data);
 
     // toast.success(response.data.message);
     return response.data.data; // Return the active categories
@@ -85,14 +84,12 @@ export const getActiveBudgetCategoriesApi = async (token: string, budgetId: stri
 // Function to get budget distribution by budget ID
 export const getBudgetDistributionApi = async (token: string, budgetId: string) => {
   try {
-    console.log(budgetId);
-
     const response = await api.get(`budgets/${budgetId}/distribution`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data);
+
     // toast.success(response.data.message);
     return response.data.data; // Return the budget distribution data
   } catch (error: any) {
@@ -104,14 +101,12 @@ export const getBudgetDistributionApi = async (token: string, budgetId: string) 
 // Function to get budget distribution by budget ID
 export const getActualExpenseApi = async (token: string, budgetId: string) => {
   try {
-    console.log(budgetId);
-
     const response = await api.get(`budgets/${budgetId}/expense/distribution`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data);
+
     // toast.success(response.data.message);
     return response.data.data; // Return the budget distribution data
   } catch (error: any) {
@@ -119,7 +114,6 @@ export const getActualExpenseApi = async (token: string, budgetId: string) => {
     console.log(error);
   }
 };
-
 
 // ----------------------------------------------------------------
 // COLLABORATION

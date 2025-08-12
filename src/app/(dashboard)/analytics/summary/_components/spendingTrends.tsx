@@ -62,18 +62,15 @@ export const options = {
 const labels = ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun'];
 
 export default function SpendingTrends({ analytics }: Props) {
-  console.log('weeklySpending:', analytics);
   const [weeklySpending, setWeeklySpending] = useState<number[]>([]);
 
   useEffect(() => {
     const mappedAmounts = Array.isArray(analytics)
       ? analytics.map((item) => item.amount)
       : [];
-    console.log('mapped amounts:', mappedAmounts);
     setWeeklySpending(mappedAmounts);
   }, [analytics]);
 
-  console.log('mapped amounts:', weeklySpending);
   return (
     <div>
       <div className="space-y-7">

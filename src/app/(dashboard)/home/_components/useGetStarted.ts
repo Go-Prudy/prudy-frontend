@@ -26,7 +26,7 @@ export default function useGetStarted() {
     },
     onSuccess: (data) => {
       toast.success(data.message);
-      console.log(data);
+      // console.log(data);
 
       if (data.data.url) {
         window.location.href = data.data.url;

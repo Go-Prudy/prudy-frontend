@@ -1,5 +1,4 @@
 import api from '@/app/utils/axiosInstance';
-import toast from 'react-hot-toast';
 
 export const getAllCurrenciesApi = async (token: string): Promise<any> => {
   try {
@@ -8,7 +7,7 @@ export const getAllCurrenciesApi = async (token: string): Promise<any> => {
         Authorization: `Bearer ${token}`, // Include the token in the Authorization header
       },
     });
-    console.log(response.data);
+    // console.log(response.data);
 
     return response.data.data; // Assuming the profile data is under `data`
   } catch (error: any) {

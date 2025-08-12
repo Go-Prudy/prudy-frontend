@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 export const scanReceiptApi = async (token: string, url: any): Promise<any> => {
   try {
-    console.log(url);
+    // console.log(url);
 
     const response = await api.post(`transactions/scan`, url, {
       headers: {
@@ -12,7 +12,7 @@ export const scanReceiptApi = async (token: string, url: any): Promise<any> => {
     });
 
     toast.success(response.data.message || 'Scanned uploaded successfully!');
-    console.log(response.data);
+    // console.log(response.data);
     return response.data.data;
   } catch (error: any) {
     toast.error(error?.response?.data?.message || 'An error occurred during file upload');

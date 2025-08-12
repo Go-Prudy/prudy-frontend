@@ -14,8 +14,7 @@ export default function useLogin() {
   const [loading, setIsLoading] = useState<boolean>(false);
   const [passcode, setPasscode] = useState<string[]>(Array(6).fill(''));
   const [focusedPasswordInput, setFocusedPasswordInput] = useState<number | null>(null);
-    const [showSignupDrawer, setShowSignupDrawer] = useState<boolean>(false);
-
+  const [showSignupDrawer, setShowSignupDrawer] = useState<boolean>(false);
 
   const { login } = useAuthStore();
 
@@ -24,15 +23,13 @@ export default function useLogin() {
     onSuccess: (data: any) => {
       if (data?.success) {
         // const { success, message, ...rest } = data;
-        console.log(data.data);
+
         login(data.data);
 
         Cookies.set('hasFreeTrial', data.data.profile.hasFreeTrial, {
           expires: 365 * 100,
           secure: true,
         });
-
-        // console.log(authenticatedUser);
       }
     },
     onError: (error: Error) => {

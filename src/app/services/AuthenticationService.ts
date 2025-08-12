@@ -7,7 +7,7 @@ import { IForgotPasswordForm, ILoginForm, ISignupForm } from '../Types';
 export const sendOtp = async (otpFormData: any) => {
   try {
     const response = await api.post('/auth/otp', otpFormData);
-    // console.log(response.data);
+
     toast.success(response.data.message);
     return response.data;
   } catch (error: any) {
@@ -20,7 +20,7 @@ export const sendOtp = async (otpFormData: any) => {
 export const validateUserEmailOnSignup = async (email: string) => {
   try {
     const response = await api.post('/auth/validate-credential', { email });
-    // console.log(response.data);
+
     // toast.success(response.data.message);
     return response.data;
   } catch (error: any) {
@@ -34,12 +34,9 @@ export const verifyOtp = async (otpFormData: any) => {
   try {
     const response = await api.post('auth/otp/verify', otpFormData);
     toast.success(response.data.message);
-    // console.log(response.data);
 
     return response.data;
   } catch (error: any) {
-    console.log(error.response.data.message);
-
     toast.error(error?.response?.data?.message);
   }
 };
@@ -50,7 +47,7 @@ export const signupUser = async (formData: ISignupForm) => {
   try {
     const response = await api.post('/auth/signup', formData);
     toast.success(response.data.message);
-    // console.log(response.data);
+
     return response.data;
   } catch (error: any) {
     console.log(error);
@@ -62,7 +59,6 @@ export const loginUser = async (formData: ILoginForm) => {
   try {
     const response = await api.post('/auth/login', formData);
     toast.success(response.data.message);
-    // console.log(response.data);
 
     return response.data;
   } catch (error: any) {
@@ -75,7 +71,7 @@ export const signUpWithGoogle = async () => {
   try {
     const response = await api.get('/auth/google');
     toast.success(response.data.message);
-    // console.log(response.data);
+
     return response.data;
   } catch (error: any) {
     console.log(error);
@@ -87,7 +83,7 @@ export const loginWithGoogle = async () => {
   try {
     const response = await api.get('/auth/google/callback');
     toast.success(response.data.message);
-    // console.log(response.data);
+
     return response.data;
   } catch (error: any) {
     console.log(error);
@@ -97,11 +93,9 @@ export const loginWithGoogle = async () => {
 
 export const forgotPassword = async (data: IForgotPasswordForm) => {
   try {
-    console.log(data);
-
     const response = await api.post('auth/forgot-pin', data);
     toast.success(response.data.message);
-    // console.log(response.data);
+
     return response.data;
   } catch (error: any) {
     console.log(error);
@@ -118,7 +112,6 @@ export const fetchUserProfile = async () => {
       },
     });
     // toast.success(response.data.message);
-    // console.log(response.data);
 
     return response.data;
   } catch (error: any) {
@@ -138,8 +131,6 @@ export const getGoogleUrl = () => {
     prompt: 'consent',
     scope: 'email profile',
   };
-
-  console.log(options);
 
   const qs = new URLSearchParams(options).toString();
   return `${rootUrl}?${qs}`;

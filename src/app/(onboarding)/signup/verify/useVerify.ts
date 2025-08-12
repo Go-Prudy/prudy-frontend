@@ -17,7 +17,6 @@ export default function useVerify() {
     mutationFn: (otpFormData: any) => verifyOtp(otpFormData),
     onSuccess: (data: IVerifyOtpResponse) => {
       if (data?.success) {
-        console.log(data);
         setTimeout(() => {
           navigate.push('/signup/set-passcode');
         }, 1000);

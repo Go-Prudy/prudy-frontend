@@ -1,3 +1,5 @@
+import { DateValue } from '../types/index';
+
 export const convertAmountToNumber = (num: string): number => {
   return Number(num.replace(/[^0-9.]/g, ''));
 };
@@ -75,4 +77,43 @@ export const getLastFourDigits = (accountNumber: string): string => {
   } else {
     return accountNumber.slice(-4);
   }
+};
+
+export const formatDateRange = (date: DateValue) => {
+  if (Array.isArray(date) && date[0] && date[1]) {
+    const start = date[0]?.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    const end = date[1]?.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    return `${start} - ${end}`;
+  }
+  return 'Select dates';
+};
+
+// Set default to last 7 days (including today)
+export const getDefaultDateRange = () => {
+  const today = new Date();
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 6);
+  return [sevenDaysAgo, today];
+};
+
+// Format dates for API
+export const formatDateForAPI = (date: Date) => {
+  return date.toISOString().split('T')[0];
+};
+
+export const getDateParams = (dateRange: DateValue) => {
+  if (Array.isArray(dateRange) && dateRange[0] && dateRange[1]) {
+    return {
+      startDate: formatDateForAPI(dateRange[0]),
+      endDate: formatDateForAPI(dateRange[1]),
+      hasDateRange: true,
+    };
+  }
+  return { startDate: '', endDate: '', hasDateRange: false };
 };

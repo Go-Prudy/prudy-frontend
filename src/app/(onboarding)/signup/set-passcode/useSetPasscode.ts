@@ -15,7 +15,7 @@ export default function useSetPasscode() {
     number | null
   >(null);
 
-  const { form, updateForm ,signup} = useSignupStore();
+  const { form, updateForm, signup } = useSignupStore();
 
   const setPasscodeMutation = useMutation({
     mutationFn: (data: ISignupForm) => {
@@ -25,8 +25,7 @@ export default function useSetPasscode() {
     onSuccess: (data: any) => {
       if (data?.success) {
         // const { success, message, ...rest } = data;
-        console.log(data.data);
-        signup(data.data)
+        signup(data.data);
 
         Cookies.set('hasFreeTrial', data.data.profile.hasFreeTrial, {
           expires: 365 * 100,

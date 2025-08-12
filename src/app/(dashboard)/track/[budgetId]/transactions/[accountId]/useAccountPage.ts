@@ -107,7 +107,6 @@ export default function useAccountPage({
         transactionIds: transactionIds,
       }),
     onSuccess: (data) => {
-      console.log(data);
       setToggleAutoCategorize(false);
       setShowTransactionCategoryDrawer(true);
       const updatedData = data.data.data.map((item: Transaction) => ({

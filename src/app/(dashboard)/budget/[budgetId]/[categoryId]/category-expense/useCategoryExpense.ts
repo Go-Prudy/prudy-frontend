@@ -22,10 +22,6 @@ export const useCategoryExpense = (budgetId: string, categoryId: string) => {
     enabled: !!budgetId && !!categoryId && !!userData?.token,
   });
 
-  useEffect(() => {
-    console.log(data?.data);
-  }, [data]);
-
   return {
     expenses: data?.data?.docs ?? [],
     isLoading,

@@ -1,66 +1,101 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import api from '@/app/utils/axiosInstance';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useQueries } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAnalyticsStore } from '@/app/store/useAnalyticsStore';
 import { AnalyticsResponse } from '@/app/types/analytics';
 import { useBudgetStore } from '@/app/store/useBudgetStore';
+import { DateValue } from '@/app/types/index';
+import { CalendarContext } from './CalendarContext';
+import { getDateParams } from '@/app/utils/functions';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { userData } = useAuthStore();
   const { budgets, isLoadingBudgets } = useBudgetStore();
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+
+  const [dateRange, setDateRange] = useState<DateValue>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   const { selectedBudgetId, setSelectedBudgetId, setAnalytics, setLoading } =
     useAnalyticsStore();
 
+  const { startDate, endDate, hasDateRange } = getDateParams(dateRange);
+
   const queries = useQueries({
     queries: [
       {
-        queryKey: ['getPlannedVsActual', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/spending-summary`)).data,
+        queryKey: ['getPlannedVsActual', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/spending-summary?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/spending-summary`;
+          return (await api.get(url)).data;
+        },
         enabled: !!userData?.token && !!selectedBudgetId,
       },
       {
-        queryKey: ['getTopExpenses', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/top-expenses`)).data,
-        enabled: !!userData?.token,
+        queryKey: ['getTopExpenses', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/top-expenses?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/top-expenses`;
+          return (await api.get(url)).data;
+        },
+        enabled: !!userData?.token && !!selectedBudgetId,
       },
       {
-        queryKey: ['getCategoryPerformance', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/category-performance`))
-            .data,
-        enabled: !!userData?.token,
+        queryKey: ['getCategoryPerformance', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/category-performance?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/category-performance`;
+          return (await api.get(url)).data;
+        },
+        enabled: !!userData?.token && !!selectedBudgetId,
       },
       {
-        queryKey: ['getSubscription', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/subscriptions`)).data,
-        enabled: !!userData?.token,
+        queryKey: ['getSubscription', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/subscriptions?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/subscriptions`;
+          return (await api.get(url)).data;
+        },
+        enabled: !!userData?.token && !!selectedBudgetId,
       },
       {
-        queryKey: ['getWeeklySpending', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/weekly-spending`)).data,
-        enabled: !!userData?.token,
+        queryKey: ['getWeeklySpending', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/weekly-spending?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/weekly-spending`;
+          return (await api.get(url)).data;
+        },
+        enabled: !!userData?.token && !!selectedBudgetId,
       },
       {
-        queryKey: ['getIncomeBreakdown', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/income-breakdown`)).data,
-        enabled: !!userData?.token,
+        queryKey: ['getIncomeBreakdown', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/income-breakdown?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/income-breakdown`;
+          return (await api.get(url)).data;
+        },
+        enabled: !!userData?.token && !!selectedBudgetId,
       },
       {
-        queryKey: ['getExpenseBreakdown', selectedBudgetId],
-        queryFn: async () =>
-          (await api.get(`analytics/budgets/${selectedBudgetId}/expense-breakdown`)).data,
-        enabled: !!userData?.token,
+        queryKey: ['getExpenseBreakdown', selectedBudgetId, startDate, endDate],
+        queryFn: async () => {
+          const url = hasDateRange
+            ? `analytics/budgets/${selectedBudgetId}/expense-breakdown?startDate=${startDate}&endDate=${endDate}`
+            : `analytics/budgets/${selectedBudgetId}/expense-breakdown`;
+          return (await api.get(url)).data;
+        },
+        enabled: !!userData?.token && !!selectedBudgetId,
       },
     ],
   });
@@ -92,15 +127,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     // Update analytics only when all queries are loaded and have data
     if (allQueriesLoaded && !anyQueryError) {
-      console.log(
-        plannedVsActualQueryData?.data,
-        topExpensesQueryData?.data,
-        categoryPerformanceQueryData?.data,
-        subscriptionQueryData?.data,
-        weeklySpendingQueryData?.data,
-        expenseBreakdownQueryData?.data,
-        incomeBreakdownQueryData?.data,
-      );
       setAnalytics({
         overall: plannedVsActualQueryData?.data ?? {},
         topExpenses: topExpensesQueryData?.data ?? {},
@@ -120,5 +146,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [budgets]);
 
-  return children;
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setShowCalendar(false);
+      }
+    };
+
+    if (showCalendar) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCalendar]);
+
+  return (
+    <CalendarContext.Provider
+      value={{
+        dateRange,
+        setDateRange,
+        showCalendar,
+        setShowCalendar,
+        calendarRef,
+      }}
+    >
+      {children}
+    </CalendarContext.Provider>
+  );
 }

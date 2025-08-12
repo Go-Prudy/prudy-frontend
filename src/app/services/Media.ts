@@ -14,7 +14,6 @@ export const uploadReceiptApi = async (token: string, file: File): Promise<any> 
     });
 
     toast.success(response.data.message || 'File uploaded successfully!');
-    console.log(response.data);
     return response.data.data;
   } catch (error: any) {
     toast.error(error?.response?.data?.message || 'An error occurred during file upload');

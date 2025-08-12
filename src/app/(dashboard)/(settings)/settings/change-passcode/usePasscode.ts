@@ -14,14 +14,12 @@ export default function usePasscode() {
   const changePasswordMutation = useMutation({
     mutationFn: (data: any) => api.post('settings/change-passcode', data),
     onSuccess: (result) => {
-      console.log(result);
       setShowSuccessfulModal(true);
     },
     onError: (error) => console.error('Error updating password', error),
   });
 
   const onSubmit: SubmitHandler<ChangePasscodeInputs> = async (data) => {
-    console.log(data);
     await changePasswordMutation.mutateAsync(data);
   };
   return {

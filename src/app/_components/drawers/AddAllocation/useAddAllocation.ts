@@ -147,7 +147,6 @@ export default function useEditCategory({
     mutationFn: (values: CreateAllocationForm) =>
       api.post(`/budgets/${budgetId}/allocations`, values),
     onSuccess: async (data) => {
-      console.log(data.data);
       await queryClient.invalidateQueries({
         queryKey: ['getAllBudgetAllocations', budgetId],
       });
@@ -163,7 +162,6 @@ export default function useEditCategory({
     mutationFn: (values: EditAllocationForm) =>
       api.patch(`/budgets/${budgetId}/allocations/${selectedAllocation?.uid}`, values),
     onSuccess: async (data) => {
-      console.log(data.data);
       await queryClient.invalidateQueries({
         queryKey: ['getAllBudgetAllocations', budgetId],
       });
@@ -178,12 +176,12 @@ export default function useEditCategory({
   const handleSubmit = async () => {
     const numericAmount = parseFloat(amount.replace(/[₦,\s]/g, ''));
 
-    console.log({
-      amount: numericAmount,
-      percentage: percentage,
-      budgetCategoryId: selectedCategory?.uid,
-      subAllocations,
-    });
+    // console.log({
+    //   amount: numericAmount,
+    //   percentage: percentage,
+    //   budgetCategoryId: selectedCategory?.uid,
+    //   subAllocations,
+    // });
 
     if (isEditing) {
       await editAllocationMutation.mutateAsync({

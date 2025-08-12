@@ -53,9 +53,9 @@ const quickActions: QuickActionType[] = [
   },
 ];
 
-type Props = {budgetId: string};
+type Props = { budgetId: string };
 
-export default function GetStarted({budgetId}: Props) {
+export default function GetStarted({ budgetId }: Props) {
   const navigate = useRouter();
   const {
     linkAccountMutation,
@@ -65,12 +65,6 @@ export default function GetStarted({budgetId}: Props) {
     setShowCreateBudgetModal,
     actionsProgress,
   } = useGetStarted();
-
-  useEffect(() => {
-    if (actionsProgress) {
-      console.log(actionsProgress);
-    }
-  }, [actionsProgress]);
 
   return (
     <div className="rounded-[36px] border border-gray-200">
