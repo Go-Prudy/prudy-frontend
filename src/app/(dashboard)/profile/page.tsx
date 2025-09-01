@@ -71,10 +71,6 @@ export default function Page() {
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    console.log(userSubscription?.data);
-  }, [userSubscription]);
-
   return (
     <motion.div
       initial={{ opacity: 0 }}

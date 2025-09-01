@@ -1,7 +1,5 @@
 + ⁠use skeleton for data fetching
-+ get category expense
-+ Analytics
-    + Line Charts
++ after selecting a date range the calendar should close
 + Code cleanup
     + Code organization
     + Code comments

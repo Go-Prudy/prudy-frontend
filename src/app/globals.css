@@ -298,3 +298,12 @@ input[type='date']::-webkit-calendar-picker-indicator:hover {
   color: #070d04 !important;
   background: transparent !important;
 }
+
+/* Radio button styles */
+.group[data-selected='true'] .group-data-\[selected\=true\]\:border-primary {
+  border-color: #33810a !important;
+}
+
+.group[data-selected='true'] .group-data-\[selected\=true\]\:opacity-100 {
+  background-color: #33810a !important;
+}

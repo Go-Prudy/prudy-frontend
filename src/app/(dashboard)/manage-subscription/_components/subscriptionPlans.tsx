@@ -74,7 +74,13 @@ export default function SubscriptionPlans({}: Props) {
       <SubscriptionPlansHeader
         title="Subscription plans"
         buttonText="Change plan"
-        onClick={() => setShowSubscriptionPlan(true)}
+        onClick={() => {
+          if (!Array.isArray(paymentMethods) || paymentMethods.length === 0) {
+            addPaymentMedthodMutation.mutate();
+          } else {
+            setShowSubscriptionPlan(true);
+          }
+        }}
       />
       {isGetUserSubscriptionLoading ? (
         <Loader />
@@ -176,6 +182,7 @@ export default function SubscriptionPlans({}: Props) {
         <SubscriptionPlansDrawer
           show={showSubscriptionPlan}
           setShow={setShowSubscriptionPlan}
+          paymentMethods={Array.isArray(paymentMethods) ? paymentMethods : []}
         />
       )}
     </div>

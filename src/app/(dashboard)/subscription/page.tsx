@@ -165,6 +165,7 @@ const Page = () => {
           setShow={setShowSubscriptionPlan}
           subscriptionPlans={subscriptionPlans as SubscriptionPlans}
           isGetAllPlansPending={isGetAllPlansPending}
+          paymentMethods={[]}
           // handleMakePayment={handleMakePayment}
         />
       )}
@@ -175,7 +176,6 @@ const Page = () => {
         onClose={() => setShowSuccessfulModal(false)}
         image={succesGif}
       />
-     
     </div>
   );
 };

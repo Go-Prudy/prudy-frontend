@@ -1,6 +1,7 @@
 'use client';
 
-import { useRadio, VisuallyHidden, cn } from '@nextui-org/react';
+import { useRadio, VisuallyHidden } from '@nextui-org/react';
+import cn from 'classnames';
 
 const SubscriptionRadio = (props: any) => {
   const {
@@ -13,7 +14,7 @@ const SubscriptionRadio = (props: any) => {
     getInputProps,
     getLabelProps,
     getControlProps,
-  } = useRadio(props);
+  } = useRadio({ ...props });
 
   const {
     duration,
@@ -42,7 +43,7 @@ const SubscriptionRadio = (props: any) => {
         'group flex flex-col p-4 rounded-lg border-1 transition-all',
         'w-full cursor-pointer flex-nowrap border border-default rounded-[20px] gap-4',
         isDefaultSelected || isSelected
-          ? 'border-lemonGreen-600 bg-[#ECFDDC]'
+          ? 'border-[#33810A] bg-[#ECFDDC]'
           : 'bg-[#F7F7F9] border-[#EFEFF0]',
       )}
     >
@@ -52,19 +53,30 @@ const SubscriptionRadio = (props: any) => {
 
       <div className=" flex w-full items-start ">
         <div className="flex flex-col w-full  ">
-          <div className={`flex justify-between  `}>
+          <div className="flex justify-between">
             <div>
               <h1 className="text-lemonGreen-600 font-bold text-sm space-x-2">
                 {header1}{' '}
                 {isCurrentPlan && (
-                  <span className="px-2 p-0.5 bg-white text-lemonGreen-600 text-[10px] rounded-xl font-normal">
+                  <span
+                    className={cn(
+                      'px-2 p-0.5 text-[10px] rounded-xl font-normal',
+                      isDefaultSelected || isSelected
+                        ? 'bg-[#33810A] text-white'
+                        : 'bg-white text-gray-600',
+                    )}
+                  >
                     Current Plan
                   </span>
                 )}{' '}
                 {label && (
                   <span
-                    className={`px-2
-                                 ${isDefaultSelected || isSelected ? 'text-white bg-lemonGreen-600 ' : 'text-black bg-white'}    py-0.5 text-[10px]  rounded-[12px] font-normal`}
+                    className={cn(
+                      'px-2 py-0.5 text-[10px] rounded-[12px] font-normal',
+                      isDefaultSelected || isSelected
+                        ? 'text-white bg-lemonGreen-600'
+                        : 'text-black bg-white',
+                    )}
                   >
                     {labelText}
                   </span>

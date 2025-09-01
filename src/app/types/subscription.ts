@@ -18,8 +18,6 @@ export type SubscriptionPlan = {
   monthlyAmount: number;
 };
 
-
-
 export type SubscriptionPlans = {
   monthly: SubscriptionPlan[];
   quaterly: SubscriptionPlan[];
@@ -55,7 +53,9 @@ export type UserSubscription = {
     };
   };
   startDate: string;
-  interval: string;
+  interval: Interval;
   isActive: boolean;
   nextBillingDate: string;
 };
+
+type Interval = 'monthly' | 'quaterly' | 'yearly';

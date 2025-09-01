@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import fireIcon from '/public/images/icons/fire.png';
 import Image from 'next/image';
 import ActionModal from '@/app/_components/modals/ActionModal';
 import Button from '@/app/_components/button';
-import { UserSubscription } from '@/app/types/subscription';
+import { PaymentMethod, UserSubscription } from '@/app/types/subscription';
 import Loader from '@/app/_components/loader';
 import { formatDate } from 'date-fns';
 import useBillingCycle from './useBillingCycle';
@@ -11,15 +11,18 @@ import emptyBudgetImage from '/public/images/empty-state/budget.png';
 import { EmptyStateDarkBg } from '@/app/_components/emptyState';
 import succesGif from '/public/images/success.gif';
 import SuccessfulModal from '@/app/_components/modals/SuccessfulModal';
+import useSubscription from '../../subscription/useSubscription';
 
 type Props = {
   userSubscription: UserSubscription;
   isGetUserSubscriptionLoading: boolean;
+  paymentMethods: PaymentMethod[];
 };
 
 export default function BillingCycle({
   userSubscription,
   isGetUserSubscriptionLoading,
+  paymentMethods,
 }: Props) {
   const {
     billingHistory,
@@ -29,6 +32,10 @@ export default function BillingCycle({
     showSuccessfulModal,
     setShowSuccessfulModal,
   } = useBillingCycle();
+  const { cancelSubscriptionMutation } = useSubscription();
+  useEffect(() => {
+    console.log(userSubscription);
+  }, [userSubscription]);
   return (
     <div className="space-y-4 text-black-800">
       <div className="px-6 space-y-4">
@@ -89,7 +96,21 @@ export default function BillingCycle({
         title="Cancel Subscription"
         text="You are about to cancel your subscription from Prudy. Are you sure you want to proceed with this action?"
       >
-        <Button className="!bg-lemonGreen-100 !text-lemonGreen-900">Yes, cancel</Button>
+        <Button
+          className="!bg-lemonGreen-100 !text-lemonGreen-900"
+          onClick={() => {
+            const defaultPaymentMethod = paymentMethods.find(
+              (method) => method?.isDefault,
+            );
+            cancelSubscriptionMutation.mutateAsync({
+              planId: '32facd09-e1e9-429d-815d-f6eb0acd9476',
+              paymentFrequency: 'monthly',
+              paymentMethodId: defaultPaymentMethod?.uid || '',
+            });
+          }}
+        >
+          Yes, cancel
+        </Button>
       </ActionModal>
       <SuccessfulModal
         title="Your subscription has been cancelled successfully"

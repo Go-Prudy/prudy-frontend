@@ -9,7 +9,8 @@ import BillingCycle from './_components/billingCycle';
 import { UserSubscription } from '@/app/types/subscription';
 
 const Page = () => {
-  const { userSubscription, isGetUserSubscriptionLoading } = useManageSubscription();
+  const { userSubscription, isGetUserSubscriptionLoading, paymentMethods } =
+    useManageSubscription();
 
   return (
     <div className="relative">
@@ -28,6 +29,7 @@ const Page = () => {
           <BillingCycle
             userSubscription={userSubscription ?? ({} as UserSubscription)}
             isGetUserSubscriptionLoading={isGetUserSubscriptionLoading}
+            paymentMethods={Array.isArray(paymentMethods) ? paymentMethods : []}
           />
         </Tab>
       </Tabs>

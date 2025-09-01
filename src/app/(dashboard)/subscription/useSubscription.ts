@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
+import { get } from 'http';
 
 export default function useSubscription() {
   const queryClient = useQueryClient();
@@ -31,6 +32,9 @@ export default function useSubscription() {
     data: getPaymentMethodData,
     isLoading: isGetPaymentMethodLoading,
     isSuccess: isGetPaymentMethodSuccess,
+    refetch: refetchGetPaymentMethods,
+    error: getPaymentMethodError,
+    isError: isGetPaymentMethodError,
   } = useQuery({
     queryKey: ['getPaymentMethods'],
     queryFn: async () =>
@@ -42,14 +46,13 @@ export default function useSubscription() {
     mutationFn: () => api.post('/billing/payment-methods/add'),
     onSuccess: (data) => {
       // store selectedPlan in local storage
-      const planData = selectedPlanItem 
-        ? getAllPlansData?.data?.[selectedPlan].find(plan => plan.uid === selectedPlanItem)
+      const planData = selectedPlanItem
+        ? getAllPlansData?.data?.[selectedPlan].find(
+            (plan) => plan.uid === selectedPlanItem,
+          )
         : getAllPlansData?.data?.[selectedPlan][2];
-        
-      localStorage.setItem(
-        'your-selected-plan',
-        JSON.stringify(planData),
-      );
+
+      localStorage.setItem('your-selected-plan', JSON.stringify(planData));
       setFetchPaymentMethods(false);
 
       console.log(data.data.data.link);
@@ -66,6 +69,7 @@ export default function useSubscription() {
       planId: string;
       paymentFrequency: keyof SubscriptionPlans;
       paymentMethodId: string;
+      // accountToKeep?:string[]
     }) => api.post('/subscriptions/checkout', data),
     onSuccess: () => {
       setShowSuccessfulModal(true);
@@ -88,10 +92,8 @@ export default function useSubscription() {
       );
 
       // Fetch the latest payment methods directly
-      const paymentMethodsResponse = await api.get<AxiosResponse<PaymentMethod[]>>(
-        '/billing/payment-methods',
-      );
-      const paymentMethods = paymentMethodsResponse.data.data;
+      const paymentMethodsResponse = await refetchGetPaymentMethods();
+      const paymentMethods = paymentMethodsResponse?.data?.data ?? [];
 
       if (paymentMethods?.length > 0 && selectedPlanData?.uid) {
         checkoutSubscriptionMutation.mutate({
@@ -104,13 +106,38 @@ export default function useSubscription() {
       }
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(
-        error.response?.data.message || 'Failed to complete payment method setup.',
-      );
+      if (error.response?.data?.message === 'card already added') {
+        navigate.push('/manage-subscription');
+      } else {
+        toast.error(
+          error.response?.data.message || 'Failed to complete payment method setup.',
+        );
+      }
+    },
+  });
+
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: (data: {
+      planId: string;
+      paymentFrequency: keyof SubscriptionPlans;
+      paymentMethodId: string;
+      // accountToKeep?:string[]
+    }) => api.post('/subscriptions/checkout', data),
+    onSuccess: (data) => {
+      console.log(data);
+
+      toast.success('Subscription cancelled successfully.');
+      queryClient.invalidateQueries({ queryKey: ['getuserSubscription'] });
+      setShowSuccessfulModal(true);
+      navigate.push('/manage-subscription');
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(error.response?.data.message || 'Failed to cancel subscription.');
     },
   });
 
   useEffect(() => {
+    // TODO: this affect should only run when a user wants to change their plan
     if (isGetPaymentMethodSuccess) {
       if (getPaymentMethodData?.data.length === 0) {
         addPaymentMedthodMutation.mutate();
@@ -136,6 +163,8 @@ export default function useSubscription() {
       const transactionId = urlParams.get('transaction_id');
 
       if (status === 'successful' && transactionId) {
+        console.log('Transaction successful:', transactionId);
+
         completeAddPaymentMethodMutation.mutate(transactionId);
       }
     }
@@ -173,5 +202,6 @@ export default function useSubscription() {
     setFetchPaymentMethods,
     completeAddPaymentMethodMutation,
     checkoutSubscriptionMutation,
+    cancelSubscriptionMutation,
   };
 }

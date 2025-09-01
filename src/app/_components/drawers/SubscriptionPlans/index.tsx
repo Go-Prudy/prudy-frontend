@@ -4,7 +4,11 @@ import Button from '../../button';
 import { planOptions } from '@/app/utils/constants';
 import Loader from '../../loader';
 import { RadioGroup } from '@nextui-org/react';
-import { SubscriptionPlan, SubscriptionPlans } from '@/app/types/subscription';
+import {
+  PaymentMethod,
+  SubscriptionPlan,
+  SubscriptionPlans,
+} from '@/app/types/subscription';
 import useSubscriptionPlans from './useSubscriptionPlans';
 import SubscriptionRadio from '../../subscriptionRadio';
 import useSubscription from '@/app/(dashboard)/subscription/useSubscription';
@@ -16,6 +20,7 @@ interface Props {
   show: boolean;
   isGetAllPlansPending?: boolean;
   subscriptionPlans?: SubscriptionPlans;
+  paymentMethods: PaymentMethod[];
   // handleMakePayment: () => void;
 }
 
@@ -24,6 +29,7 @@ export default function SubscriptionPlansDrawer({
   show,
   isGetAllPlansPending,
   subscriptionPlans,
+  paymentMethods,
   // handleMakePayment,
 }: Props) {
   const { plans, isGetAllPlansLoading } = useSubscriptionPlans({
@@ -45,9 +51,9 @@ export default function SubscriptionPlansDrawer({
     completeAddPaymentMethodMutation,
   } = useSubscription();
 
-  useEffect(() => {
-    console.log(fetchPaymentMethods);
-  }, [fetchPaymentMethods]);
+  // useEffect(() => {
+  //   console.log(fetchPaymentMethods);
+  // }, [fetchPaymentMethods]);
 
   return (
     <motion.div
@@ -65,9 +71,22 @@ export default function SubscriptionPlansDrawer({
                 const planData = plans?.[selectedPlan].find(
                   (plan) => plan.uid === selectedPlanItem,
                 );
+                // TODO:
+                // NOTE: If user is downgrading plan, and the user has more than the number of accounts for the plan, then,
+                // show the downgrade modal
+
+                const defaultPaymentMethod = paymentMethods.find(
+                  (method) => method?.isDefault,
+                );
+
+                checkoutSubscriptionMutation.mutateAsync({
+                  planId: planData?.uid || '',
+                  paymentFrequency: selectedPlan,
+                  paymentMethodId: defaultPaymentMethod?.uid || '',
+                  // accountsToKeep: [],
+                });
 
                 localStorage.setItem('your-selected-plan', JSON.stringify(planData));
-                setFetchPaymentMethods(true);
               }
             }}
             type="submit"
