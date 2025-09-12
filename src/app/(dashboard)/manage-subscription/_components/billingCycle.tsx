@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import fireIcon from '/public/images/icons/fire.png';
 import Image from 'next/image';
 import ActionModal from '@/app/_components/modals/ActionModal';
@@ -11,7 +11,6 @@ import emptyBudgetImage from '/public/images/empty-state/budget.png';
 import { EmptyStateDarkBg } from '@/app/_components/emptyState';
 import succesGif from '/public/images/success.gif';
 import SuccessfulModal from '@/app/_components/modals/SuccessfulModal';
-import useSubscription from '../../subscription/useSubscription';
 
 type Props = {
   userSubscription: UserSubscription;
@@ -31,8 +30,9 @@ export default function BillingCycle({
     setShowCancelSubscriptionModal,
     showSuccessfulModal,
     setShowSuccessfulModal,
+    cancelSubscriptionMutation,
+    cancelSuccessMessage,
   } = useBillingCycle();
-  const { cancelSubscriptionMutation } = useSubscription();
   useEffect(() => {
     console.log(userSubscription);
   }, [userSubscription]);
@@ -77,11 +77,13 @@ export default function BillingCycle({
                       <Image src={fireIcon} alt="" width={20} height={24} />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm">Next billing date</p>
-                      <p className="text-xs text-gray-400">06 July, 2024</p>
+                      <p className="text-sm">
+                        {formatDate(history?.date ?? '', 'dd MMMM yyyy')}
+                      </p>
+                      <p className="text-xs text-gray-400">{history?.planName}</p>
                     </div>
                   </div>
-                  <p>3,000</p>
+                  <p>{history?.amount}</p>
                 </div>
               ))
             ) : (
@@ -98,6 +100,7 @@ export default function BillingCycle({
       >
         <Button
           className="!bg-lemonGreen-100 !text-lemonGreen-900"
+          loading={cancelSubscriptionMutation.isPending}
           onClick={() => {
             const defaultPaymentMethod = paymentMethods.find(
               (method) => method?.isDefault,
@@ -114,6 +117,7 @@ export default function BillingCycle({
       </ActionModal>
       <SuccessfulModal
         title="Your subscription has been cancelled successfully"
+        text={cancelSuccessMessage || ''}
         isOpen={showSuccessfulModal}
         onClose={() => setShowSuccessfulModal(false)}
         image={succesGif}

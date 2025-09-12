@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
-import { get } from 'http';
 
 export default function useSubscription() {
   const queryClient = useQueryClient();
@@ -116,26 +115,6 @@ export default function useSubscription() {
     },
   });
 
-  const cancelSubscriptionMutation = useMutation({
-    mutationFn: (data: {
-      planId: string;
-      paymentFrequency: keyof SubscriptionPlans;
-      paymentMethodId: string;
-      // accountToKeep?:string[]
-    }) => api.post('/subscriptions/checkout', data),
-    onSuccess: (data) => {
-      console.log(data);
-
-      toast.success('Subscription cancelled successfully.');
-      queryClient.invalidateQueries({ queryKey: ['getuserSubscription'] });
-      setShowSuccessfulModal(true);
-      navigate.push('/manage-subscription');
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data.message || 'Failed to cancel subscription.');
-    },
-  });
-
   useEffect(() => {
     // TODO: this affect should only run when a user wants to change their plan
     if (isGetPaymentMethodSuccess) {
@@ -202,6 +181,5 @@ export default function useSubscription() {
     setFetchPaymentMethods,
     completeAddPaymentMethodMutation,
     checkoutSubscriptionMutation,
-    cancelSubscriptionMutation,
   };
 }

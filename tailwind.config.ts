@@ -60,7 +60,7 @@ const config: Config = {
           900: '#089E05',
         },
         red: { 100: '#FEE7E3', 200: '#FBEDEF', 500: '#F5365C', 600: '#D2303E' },
-        orange: { 100: '#F9DFD8', 600: '#E24526' },
+        orange: { 100: '#F9DFD8', 500: '#FB8417', 600: '#E24526' },
         purple: { 100: '#D9D9FA', 600: '#7774ED' },
       },
       fontSize: {

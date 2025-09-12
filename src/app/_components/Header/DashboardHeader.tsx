@@ -8,6 +8,7 @@ import { useAuthStore } from '@/app/store/useAuthStore';
 import userAvatarIcon from '/public/images/icons/avatar.svg';
 import { CircularProgress } from '@nextui-org/react';
 import { Budget } from '@/app/types/budget';
+import Link from 'next/link';
 
 interface DashboardHeaderProp {
   title?: string;
@@ -66,21 +67,23 @@ const DashboardHeader = ({
         )}
       >
         {type === 'home' ? (
-          <div className="text-black-970 flex gap-2 items-start">
-            <Image
-              src={userData?.profile?.profilePhotoUrl || userAvatarIcon}
-              alt="profile"
-              width={40}
-              height={40}
-              className="size-10 rounded-xl object-cover"
-            />
-            <div className="text-gray-600">
-              <p className="text-xs">Welcome 👋</p>
-              <div className="flex items-center gap">
-                <h1 className="font-bold">
-                  {userData?.profile.lastName ? userData?.profile.lastName : 'User'}
-                </h1>
-                <BsChevronDown size={20} />
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-black-970 flex gap-2 items-start">
+              <Image
+                src={userData?.profile?.profilePhotoUrl || userAvatarIcon}
+                alt="profile"
+                width={40}
+                height={40}
+                className="size-10 rounded-xl object-cover"
+              />
+              <div className="text-gray-600">
+                <p className="text-xs">Welcome 👋</p>
+                <div className="flex items-center gap">
+                  <h1 className="font-bold">
+                    {userData?.profile.lastName ? userData?.profile.lastName : 'User'}
+                  </h1>
+                  <BsChevronDown size={20} />
+                </div>
               </div>
             </div>
           </div>
@@ -111,10 +114,13 @@ const DashboardHeader = ({
           </>
         )}
 
-        {pathname === 'home' && (
-          <div className="size-12 bg-gray-100 rounded-full flex justify-center items-center">
+        {pathname === '/home' && (
+          <Link
+            href="/notifications"
+            className="size-12 bg-gray-100 rounded-full flex justify-center items-center"
+          >
             <BsBell size={24} />
-          </div>
+          </Link>
         )}
       </div>
       {type === 'profile' && (

@@ -58,4 +58,10 @@ export type UserSubscription = {
   nextBillingDate: string;
 };
 
+export type BillingHistory = {
+  amount: number;
+  date: string;
+  planName: string;
+};
+
 type Interval = 'monthly' | 'quaterly' | 'yearly';

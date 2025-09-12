@@ -2,7 +2,7 @@ import InnerPageHeader from '@/app/_components/Header/innerPageHeader';
 import Image from 'next/image';
 import React from 'react';
 import launchImage from '/public/images/Launch.png';
-const page = () => {
+const Page = () => {
   return (
     <div className="">
       <InnerPageHeader isHeaderDark link={`/profile`} title="Reports" />
@@ -26,4 +26,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
