@@ -142,10 +142,10 @@ export default function SubscriptionPlansDrawer({
                           header3={
                             period === 'monthly'
                               ? plan?.weeklyAmount && plan.weeklyAmount > 0
-                                ? `₦ ${plan.weeklyAmount.toLocaleString()}/week`
+                                ? `${plan.currency} ${plan.weeklyAmount.toLocaleString()}/week`
                                 : null
                               : plan?.monthlyAmount && plan.monthlyAmount > 0
-                                ? `₦ ${plan?.monthlyAmount.toLocaleString()}/month`
+                                ? `${plan.currency} ${plan?.monthlyAmount.toLocaleString()}/month`
                                 : null
                           }
                           className="flex w-full justify-between"
