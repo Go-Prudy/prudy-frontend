@@ -1,5 +1,9 @@
 import { useAuthStore } from '@/app/store/useAuthStore';
-import { PaymentMethod, SubscriptionPlans } from '@/app/types/subscription';
+import {
+  PaymentMethod,
+  SubscriptionPlan,
+  SubscriptionPlans,
+} from '@/app/types/subscription';
 import api from '@/app/utils/axiosInstance';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -65,13 +69,15 @@ export default function useSubscription() {
 
   const checkoutSubscriptionMutation = useMutation({
     mutationFn: (data: {
-      planId: string;
-      paymentFrequency: keyof SubscriptionPlans;
+      planPricingId: string;
       paymentMethodId: string;
       // accountToKeep?:string[]
     }) => api.post('/subscriptions/checkout', data),
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      console.log(data);
+      await queryClient.invalidateQueries({ queryKey: ['getUserSubscription'] });
       setShowSuccessfulModal(true);
+      setShowSubscriptionPlan(false);
       localStorage.removeItem('your-selected-plan');
       navigate.push('/manage-subscription');
     },
@@ -96,8 +102,7 @@ export default function useSubscription() {
 
       if (paymentMethods?.length > 0 && selectedPlanData?.uid) {
         checkoutSubscriptionMutation.mutate({
-          planId: selectedPlanData.uid,
-          paymentFrequency: selectedPlan,
+          planPricingId: selectedPlanData?.planPricingId,
           paymentMethodId: paymentMethods[0].uid,
         });
       } else {
@@ -126,8 +131,7 @@ export default function useSubscription() {
         );
         if (selectedPlanData?.uid) {
           checkoutSubscriptionMutation.mutate({
-            planId: selectedPlanData.uid,
-            paymentFrequency: selectedPlan,
+            planPricingId: selectedPlanData?.planPricingId,
             paymentMethodId: getPaymentMethodData?.data[0].uid,
           });
         }

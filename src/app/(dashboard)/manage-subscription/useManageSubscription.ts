@@ -13,7 +13,7 @@ export default function useManageSubscription() {
   const [showSubscriptionPlan, setShowSubscriptionPlan] = useState<boolean>(false);
 
   const { data: userSubscription, isLoading: isGetUserSubscriptionLoading } = useQuery({
-    queryKey: ['getuserSubscription'],
+    queryKey: ['getUserSubscription'],
     queryFn: async () =>
       (await api.get<AxiosResponse<UserSubscription>>('subscriptions/me')).data,
     enabled: !!userData?.token,

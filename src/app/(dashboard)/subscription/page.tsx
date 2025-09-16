@@ -65,7 +65,7 @@ const Page = () => {
       <div className="space-y-6 px-6">
         <div className="space-y-3 text-white">
           <h1 className="text-4xl relative text-center font-medium">
-            Activate free trial for <br /> 14 days
+            Activate free trial for <br /> 7 days
           </h1>
           <p className="px-5 py-0.5 w-fit mx-auto bg-green-600 backdrop-blur-md rounded-2xl text-xs">
             Cancel anytime
@@ -78,12 +78,19 @@ const Page = () => {
           ) : (
             <>
               <div className="items-center flex justify-between w-full">
-                <p className="text-lg font-semibold">
+                <p className="text-lg font-semibold capitalize">
                   {
                     subscriptionPlans?.[
                       selectedPlan as keyof typeof subscriptionPlans
                     ]?.[2]?.name
-                  }
+                  }{' '}
+                  {subscriptionPlans?.[
+                    selectedPlan as keyof typeof subscriptionPlans
+                  ]?.[2]?.name === 'prudy lite'
+                    ? '💫'
+                    : subscriptionPlans?.[selectedPlan]?.[2]?.name === 'money master'
+                      ? '💪🏽'
+                      : '🚀'}
                 </p>
                 <Popover
                   isOpen={popoverIsOpen}
@@ -131,14 +138,18 @@ const Page = () => {
                 <div className="bg-lemonGreen-300 text-gray-600 p-3 w-full rounded-lg text-center text-sm">
                   30 days free, then{' '}
                   <span className=" font-bold text-base">
-                    ₦{' '}
                     {
                       subscriptionPlans?.[
                         selectedPlan as keyof typeof subscriptionPlans
-                      ][2]?.monthlyAmount
+                      ][2]?.currency
+                    }{' '}
+                    {
+                      subscriptionPlans?.[
+                        selectedPlan as keyof typeof subscriptionPlans
+                      ][2]?.basePrice
                     }
-                  </span>{' '}
-                  /monthly
+                  </span>
+                  /{selectedPlan}
                 </div>
               </div>
               <Button

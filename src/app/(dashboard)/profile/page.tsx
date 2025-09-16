@@ -64,7 +64,7 @@ export default function Page() {
   const { userData } = useAuthStore();
 
   const { data: userSubscription, isLoading: isGetUserSubscriptionLoading } = useQuery({
-    queryKey: ['getuserSubscription'],
+    queryKey: ['getUserSubscription'],
     queryFn: async () =>
       (await api.get<AxiosResponse<UserSubscription>>('subscriptions/me')).data,
     enabled: !!userData?.token,
@@ -129,15 +129,12 @@ export default function Page() {
                   <button
                     onClick={() => {
                       // if returning user, show manage subscription page
-                      if (item.name === 'Subscription') {
-                        if (userSubscription?.data.isActive) {
-                          navigate.push('manage-subscription');
-                        }
-                      }
-                      // if (userData?.profile.hasFreeTrial) {
-                      //   navigate.push('manage-subscription');
-                      // }
-                      else {
+                      if (
+                        item.name === 'Subscription' &&
+                        !userData?.profile?.hasFreeTrial
+                      ) {
+                        navigate.push('manage-subscription');
+                      } else {
                         navigate.push(item.link);
                       }
                     }}

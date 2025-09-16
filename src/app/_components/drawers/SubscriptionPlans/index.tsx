@@ -51,10 +51,6 @@ export default function SubscriptionPlansDrawer({
     completeAddPaymentMethodMutation,
   } = useSubscription();
 
-  // useEffect(() => {
-  //   console.log(fetchPaymentMethods);
-  // }, [fetchPaymentMethods]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 90 }}
@@ -68,9 +64,6 @@ export default function SubscriptionPlansDrawer({
           <Button
             onClick={() => {
               if (selectedPlanItem) {
-                const planData = plans?.[selectedPlan].find(
-                  (plan) => plan.uid === selectedPlanItem,
-                );
                 // TODO:
                 // NOTE: If user is downgrading plan, and the user has more than the number of accounts for the plan, then,
                 // show the downgrade modal
@@ -79,14 +72,21 @@ export default function SubscriptionPlansDrawer({
                   (method) => method?.isDefault,
                 );
 
-                checkoutSubscriptionMutation.mutateAsync({
-                  planId: planData?.uid || '',
-                  paymentFrequency: selectedPlan,
-                  paymentMethodId: defaultPaymentMethod?.uid || '',
-                  // accountsToKeep: [],
-                });
+                if (defaultPaymentMethod) {
+                  const planData = plans?.[selectedPlan].find(
+                    (plan) => plan.uid === selectedPlanItem,
+                  );
 
-                localStorage.setItem('your-selected-plan', JSON.stringify(planData));
+                  checkoutSubscriptionMutation.mutateAsync({
+                    planPricingId: planData?.planPricingId || '',
+                    paymentMethodId: defaultPaymentMethod?.uid || '',
+                    // accountsToKeep: [],
+                  });
+
+                  localStorage.setItem('your-selected-plan', JSON.stringify(planData));
+                } else {
+                  setFetchPaymentMethods(true);
+                }
               }
             }}
             type="submit"
@@ -138,14 +138,14 @@ export default function SubscriptionPlansDrawer({
                         <SubscriptionRadio
                           key={plan?.uid}
                           header1={`${plan?.name} ${plan?.name === 'prudy lite' ? '💫' : plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
-                          header2={` ${plan?.basePrice === 0 ? 'Free' : '₦' + plan?.basePrice.toLocaleString()}`}
+                          header2={` ${plan?.basePrice === 0 ? 'Free' : (plan.currency ?? '') + plan?.basePrice.toLocaleString()}`}
                           header3={
                             period === 'monthly'
                               ? plan?.weeklyAmount && plan.weeklyAmount > 0
                                 ? `₦ ${plan.weeklyAmount.toLocaleString()}/week`
                                 : null
                               : plan?.monthlyAmount && plan.monthlyAmount > 0
-                                ? `₦ ${plan.monthlyAmount.toLocaleString()}/month`
+                                ? `₦ ${plan?.monthlyAmount.toLocaleString()}/month`
                                 : null
                           }
                           className="flex w-full justify-between"

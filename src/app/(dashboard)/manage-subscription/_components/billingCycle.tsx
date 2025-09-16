@@ -58,7 +58,10 @@ export default function BillingCycle({
                 {formatDate(userSubscription?.nextBillingDate ?? '', 'dd MMMM yyyy')}
               </p>
             </div>
-            <p>{userSubscription?.plan?.basePrice?.toLocaleString()}</p>
+            <p>
+              {userSubscription?.planPricing?.plan?.currency}
+              {userSubscription?.planPricing?.plan?.basePrice?.toLocaleString()}
+            </p>
           </div>
         )}
       </div>
@@ -106,8 +109,7 @@ export default function BillingCycle({
               (method) => method?.isDefault,
             );
             cancelSubscriptionMutation.mutateAsync({
-              planId: '32facd09-e1e9-429d-815d-f6eb0acd9476',
-              paymentFrequency: 'monthly',
+              planPricingId: 'b31a537e-8625-4a56-b9f5-28f16a3c88e8',
               paymentMethodId: defaultPaymentMethod?.uid || '',
             });
           }}

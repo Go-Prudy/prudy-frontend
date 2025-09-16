@@ -89,15 +89,15 @@ export default function SubscriptionPlans({}: Props) {
           <SubscriptionRadio
             isDefaultSelected
             isCurrentPlan
-            header1={`${userSubscription?.plan?.name} ${userSubscription?.plan?.name === 'prudy lite' ? '💫' : userSubscription?.plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
-            header2={` ${userSubscription?.plan?.basePrice === 0 ? 'Free' : '₦' + userSubscription?.plan?.basePrice.toLocaleString()}`}
+            header1={`${userSubscription?.planPricing?.plan?.name} ${userSubscription?.planPricing?.plan?.name === 'prudy lite' ? '💫' : userSubscription?.planPricing?.plan?.name === 'money master' ? '💪🏽' : '🚀'}`}
+            header2={` ${userSubscription?.planPricing?.plan?.basePrice === 0 ? 'Free' : (userSubscription?.planPricing?.plan?.currency ?? '') + userSubscription?.planPricing?.plan?.basePrice.toLocaleString()}`}
             className="flex w-full justify-between"
-            value={userSubscription?.plan?.basePrice}
+            value={userSubscription?.planPricing?.plan?.basePrice}
           >
             <ul className="flex flex-col gap-[8px] pl-[1.5rem] mt-[5px] list-disc">
-              {userSubscription?.plan?.benefits?.map((benefit: string, index: number) => (
-                <li key={index}>{benefit}</li>
-              ))}
+              {userSubscription?.planPricing?.plan?.benefits?.map(
+                (benefit: string, index: number) => <li key={index}>{benefit}</li>,
+              )}
             </ul>
           </SubscriptionRadio>
         </RadioGroup>

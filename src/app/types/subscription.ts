@@ -12,15 +12,60 @@ export type SubscriptionPlan = {
   benefits: string[];
   basePrice: number;
   currency: string;
-  features: FeatureSet;
-  discount: number;
+  rank: number;
+  features: [
+    {
+      createdAt: string;
+      updatedAt: string;
+      id: number;
+      featureKey: string;
+      maxUsage: number;
+      access: boolean;
+    },
+    {
+      createdAt: string;
+      updatedAt: string;
+      id: number;
+      featureKey: string;
+      maxUsage: number;
+      access: boolean;
+    },
+    {
+      createdAt: string;
+      updatedAt: string;
+      id: number;
+      featureKey: string;
+      maxUsage: number;
+      access: boolean;
+    },
+    {
+      createdAt: string;
+      updatedAt: string;
+      id: number;
+      featureKey: string;
+      maxUsage: number;
+      access: boolean;
+    },
+    {
+      createdAt: string;
+      updatedAt: string;
+      id: number;
+      featureKey: string;
+      maxUsage: null;
+      access: boolean;
+    },
+  ];
+  createdAt: string;
+  updatedAt: string;
   weeklyAmount?: number;
-  monthlyAmount: number;
+  monthlyAmount?: number;
+  discount: number;
+  planPricingId: string;
 };
 
 export type SubscriptionPlans = {
   monthly: SubscriptionPlan[];
-  quaterly: SubscriptionPlan[];
+  quarterly: SubscriptionPlan[];
   yearly: SubscriptionPlan[];
 };
 
@@ -37,25 +82,79 @@ export type PaymentMethod = {
 
 export type UserSubscription = {
   uid: string;
-  plan: {
-    id: 1;
-    uid: string;
-    name: string;
-    benefits: string[];
-    basePrice: number;
+  status: 'active' | 'inactive';
+  startDate: string;
+  nextBillingDate: string;
+  planPricing: {
+    createdAt: string;
+    updatedAt: string;
+    id: string;
+    price: string;
     currency: string;
-    features: {
-      maxReceiptsScanning: number;
-      maxAccountLinking: number;
-      maxTransactionSyncing: number;
-      maxCollaboratorInvites: number;
-      budgetAnalytics: boolean;
+    plan: {
+      createdAt: string;
+      updatedAt: string;
+      id: number;
+      uid: string;
+      name: string;
+      benefits: string[];
+      basePrice: number;
+      currency: string;
+      rank: number;
+      features: [
+        {
+          createdAt: string;
+          updatedAt: string;
+          id: number;
+          featureKey: string;
+          maxUsage: number;
+          access: boolean;
+        },
+        {
+          createdAt: string;
+          updatedAt: string;
+          id: number;
+          featureKey: string;
+          maxUsage: number;
+          access: boolean;
+        },
+        {
+          createdAt: string;
+          updatedAt: string;
+          id: number;
+          featureKey: string;
+          maxUsage: number;
+          access: boolean;
+        },
+        {
+          createdAt: string;
+          updatedAt: string;
+          id: number;
+          featureKey: string;
+          maxUsage: number;
+          access: boolean;
+        },
+        {
+          createdAt: string;
+          updatedAt: string;
+          id: number;
+          featureKey: string;
+          maxUsage: null;
+          access: boolean;
+        },
+      ];
+    };
+    billingCycle: {
+      createdAt: string;
+      updatedAt: string;
+      id: string;
+      name: Interval;
+      durationInMonths: number;
+      discountRate: string;
     };
   };
-  startDate: string;
-  interval: Interval;
-  isActive: boolean;
-  nextBillingDate: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type BillingHistory = {
@@ -64,4 +163,4 @@ export type BillingHistory = {
   planName: string;
 };
 
-type Interval = 'monthly' | 'quaterly' | 'yearly';
+type Interval = 'monthly' | 'quarterly' | 'yearly';

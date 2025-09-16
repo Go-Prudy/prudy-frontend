@@ -38,16 +38,13 @@ export default function useBillingCycle() {
   });
 
   const cancelSubscriptionMutation = useMutation({
-    mutationFn: (data: {
-      planId: string;
-      paymentFrequency: keyof SubscriptionPlans;
-      paymentMethodId: string;
-    }) => api.post('/subscriptions/checkout', data),
+    mutationFn: (data: { planPricingId: string; paymentMethodId: string }) =>
+      api.post('/subscriptions/checkout', data),
     onSuccess: (data) => {
       console.log(data);
 
       setCancelSuccessMessage(data.data.message);
-      queryClient.invalidateQueries({ queryKey: ['getuserSubscription'] });
+      queryClient.invalidateQueries({ queryKey: ['getUserSubscription'] });
       setShowSuccessfulModal(true);
       setShowCancelSubscriptionModal(false);
       navigate.push('/manage-subscription');

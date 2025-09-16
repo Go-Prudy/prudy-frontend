@@ -17,7 +17,7 @@ export default function useSubscriptionPlans({
     subscriptionPlans ?? {
       monthly: [],
       yearly: [],
-      quaterly: [],
+      quarterly: [],
     },
   );
 
