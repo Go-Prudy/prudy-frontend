@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   getGoogleUrl,
   loginUser,
@@ -17,12 +18,15 @@ export default function useLogin() {
   const [showSignupDrawer, setShowSignupDrawer] = useState<boolean>(false);
 
   const { login } = useAuthStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : null;
 
   const loginMutation = useMutation({
     mutationFn: (data: any) => loginUser(data),
     onSuccess: (data: any) => {
       if (data?.success) {
-        // const { success, message, ...rest } = data;
+        console.log(redirectTo);
 
         login(data.data);
 
@@ -30,6 +34,12 @@ export default function useLogin() {
           expires: 365 * 100,
           secure: true,
         });
+
+        if (redirectTo) {
+          window.location.href = redirectTo;
+        } else {
+          router.push('/home');
+        }
       }
     },
     onError: (error: Error) => {
@@ -43,8 +53,14 @@ export default function useLogin() {
     event.preventDefault();
     try {
       setIsLoading(true);
-      event.preventDefault();
-      window.location.href = getGoogleUrl();
+      const googleUrl = getGoogleUrl();
+      if (redirectTo) {
+        const url = new URL(googleUrl);
+        url.searchParams.set('state', redirectTo);
+        window.location.href = url.toString();
+      } else {
+        window.location.href = googleUrl;
+      }
     } catch (error) {
       console.log(error);
     } finally {
