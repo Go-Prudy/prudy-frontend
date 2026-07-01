@@ -12,11 +12,12 @@ function getCookie(name: string): string | null {
 
 // Create an axios instance with the base URL from the environment variable
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'https://beta-api.goprudy.com/api/v1', // Default to production API
-    // baseURL: 'http://localhost:8080/api/v1', // Default to local API
-    headers: {
-        'Content-Type': 'application/json',
-    },
+  baseURL:
+    process.env.REACT_APP_API_URL || 'https://prudy-api-staging.up.railway.app/api/v1', // Default to production API
+  // baseURL: 'http://localhost:8080/api/v1', // Default to local API
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Request interceptor
