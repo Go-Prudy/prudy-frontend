@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -13,7 +14,24 @@ import loginImage from '/public/images/onboarding/login.png';
 import useLogin from './useLogin';
 import SignupDrawer from '@/app/_components/drawers/Signup';
 
-const LoginPage = () => {
+const LoginPageFallback = () => (
+  <div className="max-w-[680px] h-[100vh] pb-6">
+    <div className="h-[298px] rounded-b-[32px] bg-gray-200 animate-pulse" />
+    <div className="space-y-8 p-6">
+      <div className="space-y-2">
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="h-5 w-full bg-gray-200 rounded animate-pulse" />
+      </div>
+      <div className="space-y-4">
+        <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
+        <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
+      </div>
+      <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
+    </div>
+  </div>
+);
+
+const LoginPageContent = () => {
   const {
     onSubmit,
     focusedPasswordInput,
@@ -125,5 +143,11 @@ const LoginPage = () => {
     </motion.div>
   );
 };
+
+const LoginPage = () => (
+  <Suspense fallback={<LoginPageFallback />}>
+    <LoginPageContent />
+  </Suspense>
+);
 
 export default LoginPage;
